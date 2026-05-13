@@ -1,0 +1,38 @@
+
+> frontend@0.1.0 build
+> next build
+
+▲ Next.js 16.2.4 (Turbopack)
+
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 1 errors:
+./src/lib/store/store.ts:12:1
+Module not found: Can't resolve 'zustand'
+  [90m10 |[0m [32m'use client'[0m;
+  [90m11 |[0m
+[31m[1m>[0m [90m12 |[0m [36mimport[0m { create } [36mfrom[0m [32m'zustand'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m13 |[0m [36mimport[0m {
+  [90m14 |[0m   [33mRootState[0m,
+  [90m15 |[0m   [33mBedState[0m,
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/store/store.ts [Client Component Browser]
+    ./src/app/monitor/page.tsx [Client Component Browser]
+    ./src/app/monitor/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/store/store.ts [Client Component SSR]
+    ./src/app/monitor/page.tsx [Client Component SSR]
+    ./src/app/monitor/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (./src/lib/store/store.ts:12:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)

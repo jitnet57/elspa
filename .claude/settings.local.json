@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \".\")",
+      "Bash(Select-Object Name)",
+      "Read(//e/kenneth-brain/SOFTWARE_DEVELOP/**)",
+      "PowerShell(Get-ChildItem -Path \"..\" -Directory | ForEach-Object { $_.Name })",
+      "PowerShell(Get-ChildItem -Path \"..\\\\health\" -Directory | ForEach-Object { $_.Name })",
+      "PowerShell(Get-ChildItem -Path \"..\\\\servio\" -Directory | ForEach-Object { $_.Name })",
+      "PowerShell(Get-ChildItem -Path \"..\\\\health\\\\pt-therapy-platform\" -File | ForEach-Object { $_.Name })",
+      "PowerShell(Get-ChildItem -Path \"..\\\\health\\\\pt-therapy-platform\" -Directory | ForEach-Object { $_.Name })",
+      "Bash(curl -s http://localhost:5173)",
+      "PowerShell(Start-Process \"http://localhost:3000\")"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\jitne\\Desktop"
+    ]
+  }
+}

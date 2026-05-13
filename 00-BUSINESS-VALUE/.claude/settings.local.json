@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//e/kenneth-brain/SOFTWARE_DEVELOP/elspa/**)"
+    ],
+    "additionalDirectories": [
+      "e:\\kenneth-brain\\SOFTWARE_DEVELOP\\elspa"
+    ]
+  }
+}

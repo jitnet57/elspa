@@ -1,0 +1,26 @@
+# ============================================================
+# 📌 requirements.txt - ElSpa Backend
+# 📋 목적: 백엔드 실행을 위한 Python 패키지 의존성 관리
+# 📅 작성일: 2026-05-06
+# ============================================================
+
+# Core API
+fastapi
+uvicorn[standard]
+
+# Database & Auth
+sqlalchemy
+psycopg2-binary
+supabase
+python-dotenv
+
+# AI & Agents
+langchain
+langchain-anthropic
+langgraph
+
+# Utils
+pydantic-settings
+httpx
+tenacity
+bull-python-client

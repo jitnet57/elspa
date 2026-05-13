@@ -1,0 +1,499 @@
+================================================================================
+ELSPA Massage Booking System - Entity Relationship Diagram (Text-based ER)
+================================================================================
+
+Overview:
+- Customers → Bookings → Therapists (many-to-many relationship)
+- Bookings → Services, Beds (one-to-many)
+- Therapists → Attendance, Settlement, Reviews (one-to-many)
+- Daily & Therapist Settlements for financial tracking
+- Matching Logs for algorithm transparency
+
+================================================================================
+TABLE RELATIONSHIPS
+================================================================================
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│                          CUSTOMERS (고객)                                │
+├──────────────────────────────────────────────────────────────────────────┤
+│ PK  id                 SERIAL                                            │
+│     name               VARCHAR(100) NOT NULL                             │
+│     email              VARCHAR(100) UNIQUE                               │
+│     phone              VARCHAR(20)                                       │
+│     total_visits       INTEGER DEFAULT 0                                 │
+│     total_spent        DECIMAL(15,2) DEFAULT 0                          │
+│     points             INTEGER DEFAULT 0  → 포인트 시스템               │
+│     preferred_therapist_id FK → therapists(id)                          │
+│     created_at         TIMESTAMPTZ                                       │
+│     updated_at         TIMESTAMPTZ                                       │
+└──────────────────────────────────────────────────────────────────────────┘
+            │
+            │ 1:N (한 고객이 여러 예약 가능)
+            │
+            ▼
+┌──────────────────────────────────────────────────────────────────────────┐
+│                          BOOKINGS (예약) ★ 핵심 테이블                   │
+├──────────────────────────────────────────────────────────────────────────┤
+│ PK  id                 SERIAL                                            │
+│ FK  customer_id        INTEGER → customers(id)                          │
+│ FK  service_id         INTEGER → services(id)                           │
+│ FK  therapist_id       INTEGER → therapists(id)  [매칭 후 채움]         │
+│ FK  bed_id             INTEGER → beds(id)  [확정 후 할당]              │
+│                                                                          │
+│ Status: requested → matched → confirmed → in_progress → completed      │
+│         └─────────────────────────────────────────────────────────┘     │
+│              또는 cancelled (언제든 가능)                                │
+│                                                                          │
+│     requested_at       TIMESTAMPTZ (예약 요청)                          │
+│     scheduled_at       TIMESTAMPTZ (예약 시간)                          │
+│     started_at         TIMESTAMPTZ (시술 시작)                          │
+│     ended_at           TIMESTAMPTZ (시술 종료)                          │
+│                                                                          │
+│     service_price      DECIMAL(10,2)                                    │
+│     discount_amount    DECIMAL(10,2)  ← 포인트 사용 시 차감            │
+│     paid_amount        DECIMAL(10,2) = service_price - discount         │
+│     therapist_commission DECIMAL(10,2) = paid_amount * commission_rate  │
+│                                                                          │
+│     created_at         TIMESTAMPTZ                                       │
+│     updated_at         TIMESTAMPTZ                                       │
+└──────────────────────────────────────────────────────────────────────────┘
+       │                 │                 │
+       │ N:1             │ N:1             │ N:1
+       │                 │                 │
+       ▼                 ▼                 ▼
+    THERAPISTS       SERVICES            BEDS
+    (테라피스트)      (서비스)             (침대)
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│                       THERAPISTS (테라피스트)                             │
+├──────────────────────────────────────────────────────────────────────────┤
+│ PK  id                 SERIAL                                            │
+│     name               VARCHAR(100) NOT NULL                             │
+│     email              VARCHAR(100) UNIQUE                               │
+│     phone              VARCHAR(20)                                       │
+│     specialty          VARCHAR(100)  [스웨디시, 타이마사지, 핫스톤 등]  │
+│     rating             DECIMAL(3,1)  [0~5.0] → reviews로부터 계산      │
+│     total_sessions     INTEGER  [누적 세션 수]                          │
+│     commission_rate    DECIMAL(3,2)  [0.40~0.50] 고정값 저장           │
+│     seniority          VARCHAR(20)  [novice|intermediate|experienced]   │
+│     status             VARCHAR(20)  [idle|in_service|resting|checked_out] │
+│     checked_in_at      TIMESTAMPTZ                                       │
+│     checked_out_at     TIMESTAMPTZ                                       │
+│     daily_sessions     INTEGER  [오늘 시술 세션 수]                     │
+│     daily_revenue      DECIMAL(15,2)  [오늘 매출]                       │
+│     created_at         TIMESTAMPTZ                                       │
+│     updated_at         TIMESTAMPTZ                                       │
+└──────────────────────────────────────────────────────────────────────────┘
+       │                              │                    │
+       │ 1:N                         │ 1:N                │ 1:N
+       │ (테라피스트-예약)            │                    │
+       │                             ▼                    ▼
+       │                    THERAPIST_ATTENDANCE    THERAPIST_SETTLEMENTS
+       │                    (근무 기록)              (정산)
+       │
+       │                             └────────────────────┘
+       │                                     │
+       │                                     │ 집계
+       │                                     ▼
+       │                            DAILY_SETTLEMENTS
+       │                            (일일 전체 정산)
+       │
+       └─────────────────────────────────────────────────────┐
+                                                              │
+┌──────────────────────────────────────────────────────────┐ │
+│              MATCHING_LOGS (매칭 이력)                   │ │
+├──────────────────────────────────────────────────────────┤ │
+│ PK  id                 SERIAL                            │ │
+│ FK  booking_id         INTEGER → bookings(id)            │ │
+│     algorithm_mode     VARCHAR(50)  [어떤 알고리즘 사용] │ │
+│     candidate_therapists JSONB  [후보 및 점수 정보]      │ │
+│ FK  selected_therapist_id INTEGER → therapists(id) ─────┘ │
+│     score_breakdown    JSONB  [점수 분석]                │
+│     created_at         TIMESTAMPTZ                        │
+└──────────────────────────────────────────────────────────┘
+
+
+┌──────────────────────────────────────────────────────────┐
+│                    SERVICES (서비스)                      │
+├──────────────────────────────────────────────────────────┤
+│ PK  id                 SERIAL                            │
+│     name               VARCHAR(100) UNIQUE               │
+│     service_type       VARCHAR(50)  [swedish|thai|...]   │
+│     duration_minutes   INTEGER  [60분, 90분 등]         │
+│     base_price         DECIMAL(10,2)                     │
+│     description        TEXT                              │
+│     active             BOOLEAN DEFAULT true              │
+│     created_at         TIMESTAMPTZ                       │
+└──────────────────────────────────────────────────────────┘
+
+
+┌──────────────────────────────────────────────────────────┐
+│                      BEDS (침대)                          │
+├──────────────────────────────────────────────────────────┤
+│ PK  id                 SERIAL                            │
+│     bed_number         INTEGER  [1~86]                  │
+│     room_zone          VARCHAR(20)  [마사지룸1|VIP룸|...]│
+│     status             VARCHAR(20)  [available|...]      │
+│     capacity           INTEGER  [1 또는 2]              │
+│     features           TEXT[]  [방음, 개인욕실 등]       │
+│     created_at         TIMESTAMPTZ                       │
+│     updated_at         TIMESTAMPTZ                       │
+└──────────────────────────────────────────────────────────┘
+
+
+┌──────────────────────────────────────────────────────────┐
+│           THERAPIST_ATTENDANCE (근무 기록)               │
+├──────────────────────────────────────────────────────────┤
+│ PK  id                 SERIAL                            │
+│ FK  therapist_id       INTEGER → therapists(id)          │
+│     attendance_date    DATE  UNIQUE(therapist_id, date)  │
+│     checked_in_at      TIMESTAMPTZ                       │
+│     checked_out_at     TIMESTAMPTZ                       │
+│     total_sessions     INTEGER  [완료 세션 수]         │
+│     total_revenue      DECIMAL(15,2)  [일일 매출]       │
+│     total_commission   DECIMAL(15,2)  [일일 커미션]     │
+│     status             VARCHAR(20)  [pending|settled]    │
+│     settled_at         TIMESTAMPTZ                       │
+│     created_at         TIMESTAMPTZ                       │
+│     updated_at         TIMESTAMPTZ                       │
+└──────────────────────────────────────────────────────────┘
+                          │
+                          │ 집계 (매일 자정)
+                          ▼
+┌──────────────────────────────────────────────────────────┐
+│          THERAPIST_SETTLEMENTS (정산)                    │
+├──────────────────────────────────────────────────────────┤
+│ PK  id                 SERIAL                            │
+│ FK  therapist_id       INTEGER → therapists(id)          │
+│     settlement_date    DATE  UNIQUE(therapist_id, date)  │
+│     session_count      INTEGER                           │
+│     total_revenue      DECIMAL(15,2)                     │
+│     commission_rate    DECIMAL(3,2)  [당시 수수료율]    │
+│     commission_earned  DECIMAL(15,2)  [지급액]          │
+│     status             VARCHAR(20)  [pending|settled]    │
+│     settled_at         TIMESTAMPTZ                       │
+│     created_at         TIMESTAMPTZ                       │
+│     updated_at         TIMESTAMPTZ                       │
+└──────────────────────────────────────────────────────────┘
+                          │
+                          │ 각 테라피스트 집계
+                          ▼
+┌──────────────────────────────────────────────────────────┐
+│         DAILY_SETTLEMENTS (일일 전체 정산) ★            │
+├──────────────────────────────────────────────────────────┤
+│ PK  id                 SERIAL                            │
+│     settlement_date    DATE  UNIQUE                      │
+│     total_revenue      DECIMAL(15,2) [전체 매출]        │
+│     total_commission   DECIMAL(15,2) [테라피스트 지급액] │
+│     net_profit         DECIMAL(15,2) [순이익]           │
+│     session_count      INTEGER                           │
+│     completed_bookings INTEGER                           │
+│     avg_transaction_value DECIMAL(10,2)                  │
+│     customer_count     INTEGER  [당일 서빙한 고객수]    │
+│     therapist_count    INTEGER  [당일 근무 테라피스트]  │
+│     status             VARCHAR(20)  [pending|settled]    │
+│     finalized_at       TIMESTAMPTZ                       │
+│     settled_at         TIMESTAMPTZ                       │
+│     created_at         TIMESTAMPTZ                       │
+│     updated_at         TIMESTAMPTZ                       │
+└──────────────────────────────────────────────────────────┘
+
+
+┌──────────────────────────────────────────────────────────┐
+│                   PAYMENTS (결제)                         │
+├──────────────────────────────────────────────────────────┤
+│ PK  id                 SERIAL                            │
+│ FK  booking_id         INTEGER → bookings(id)            │
+│ FK  customer_id        INTEGER → customers(id)           │
+│     amount             DECIMAL(10,2)                     │
+│     payment_method     VARCHAR(50)  [cash|card|point]    │
+│     status             VARCHAR(20)  [pending|completed]  │
+│     refund_amount      DECIMAL(10,2) DEFAULT 0           │
+│     refund_reason      VARCHAR(200)                      │
+│     refunded_at        TIMESTAMPTZ                       │
+│     created_at         TIMESTAMPTZ                       │
+│     updated_at         TIMESTAMPTZ                       │
+└──────────────────────────────────────────────────────────┘
+
+
+┌──────────────────────────────────────────────────────────┐
+│                    REVIEWS (리뷰)                         │
+├──────────────────────────────────────────────────────────┤
+│ PK  id                 SERIAL                            │
+│ FK  booking_id         INTEGER → bookings(id)            │
+│ FK  customer_id        INTEGER → customers(id)           │
+│ FK  therapist_id       INTEGER → therapists(id)          │
+│     rating             INTEGER [1~5]  → therapists.rating │
+│     comment            TEXT                              │
+│     created_at         TIMESTAMPTZ                       │
+│     updated_at         TIMESTAMPTZ                       │
+└──────────────────────────────────────────────────────────┘
+
+
+================================================================================
+DATA FLOW DIAGRAM
+================================================================================
+
+1. BOOKING LIFECYCLE
+═════════════════════════════════════════════════════════════════════════════
+
+   고객 예약 요청
+   ├─ status = 'requested'
+   │
+   ▼
+   매칭 알고리즘 실행
+   ├─ MATCHING_LOGS 기록
+   ├─ therapist_id 결정
+   └─ status = 'matched'
+   │
+   ▼
+   고객 확정
+   ├─ beds.id 할당
+   └─ status = 'confirmed'
+   │
+   ▼
+   시술 시작 (scheduled_at 시간에)
+   ├─ started_at 기록
+   ├─ beds.status = 'in_service'
+   └─ status = 'in_progress'
+   │
+   ▼
+   시술 완료
+   ├─ ended_at 기록
+   ├─ therapist_commission 계산
+   │  = paid_amount * commission_rate
+   ├─ beds.status = 'available'
+   ├─ customers.total_visits += 1
+   ├─ customers.total_spent += paid_amount
+   ├─ customers.points += (paid_amount * 0.05)
+   └─ status = 'completed'
+   │
+   ▼
+   정산 처리 (매일 자정 JOB)
+   ├─ therapist_attendance 자동 갱신
+   ├─ therapist_settlements 생성
+   └─ daily_settlements 생성
+
+
+2. DAILY SETTLEMENT WORKFLOW
+═════════════════════════════════════════════════════════════════════════════
+
+   매일 00:00 (자정) 정산 JOB 실행:
+
+   FOR EACH therapist:
+      ├─ 전일 완료 bookings 조회
+      │  WHERE therapist_id = ? AND DATE(ended_at) = ?
+      │
+      ├─ therapist_attendance 업데이트
+      │  ├─ total_sessions = COUNT(completed bookings)
+      │  ├─ total_revenue = SUM(paid_amount)
+      │  ├─ total_commission = total_revenue * commission_rate
+      │  └─ status = 'settled'
+      │
+      └─ therapist_settlements 생성
+         ├─ session_count, total_revenue 복사
+         ├─ commission_earned = total_revenue * commission_rate
+         └─ status = 'settled'
+
+   AGGREGATE daily_settlements:
+      ├─ total_revenue = SUM(therapist_settlements.total_revenue)
+      ├─ total_commission = SUM(therapist_settlements.commission_earned)
+      ├─ net_profit = total_revenue - total_commission
+      └─ 기타 통계 계산
+
+
+3. COMMISSION CALCULATION
+═════════════════════════════════════════════════════════════════════════════
+
+   신인 (novice): commission_rate = 50%
+      ├─ 80,000원 → 40,000원 커미션
+      └─ 플랫폼 순이익 = 40,000원 (50%)
+
+   중급 (intermediate): commission_rate = 45%
+      ├─ 80,000원 → 36,000원 커미션
+      └─ 플랫폼 순이익 = 44,000원 (55%)
+
+   경력 (experienced): commission_rate = 40%
+      ├─ 80,000원 → 32,000원 커미션
+      └─ 플랫폼 순이익 = 48,000원 (60%)
+
+
+================================================================================
+INDEX STRATEGY
+================================================================================
+
+CRITICAL INDEXES (성능 10배~100배 향상)
+═════════════════════════════════════════════════════════════════════════════
+
+BOOKINGS (쿼리 빈도: 매우 높음)
+├─ idx_bookings_customer              (customer_id)
+├─ idx_bookings_therapist             (therapist_id)
+├─ idx_bookings_status                (status)
+├─ idx_bookings_scheduled_at           (scheduled_at)
+└─ idx_bookings_status_scheduled       (status, scheduled_at)  [복합]
+
+THERAPISTS (쿼리 빈도: 높음)
+├─ idx_therapists_status              (status)
+├─ idx_therapists_rating              (rating DESC)
+└─ idx_therapists_commission_rate     (commission_rate)
+
+ATTENDANCE & SETTLEMENT (쿼리 빈도: 중간)
+├─ idx_attendance_therapist_date      (therapist_id, attendance_date DESC)
+└─ idx_settlement_date                (settlement_date DESC)
+
+BEDS (쿼리 빈도: 중간)
+├─ idx_beds_status                    (status)
+├─ idx_beds_room_zone                 (room_zone)
+└─ idx_beds_status_capacity            (status, capacity)  [복합]
+
+
+================================================================================
+UNIQUE CONSTRAINTS
+================================================================================
+
+therapist_attendance   → UNIQUE(therapist_id, attendance_date)
+                        한 테라피스트의 하루 기록 1개만 존재
+
+therapist_settlements  → UNIQUE(therapist_id, settlement_date)
+                        한 테라피스트의 하루 정산 1개만 존재
+
+daily_settlements      → UNIQUE(settlement_date)
+                        한 날짜의 전체 정산 1개만 존재
+
+services               → UNIQUE(name)
+                        서비스명 중복 방지
+
+customers             → UNIQUE(email)
+                        이메일로 고객 구분
+
+therapists            → UNIQUE(email)
+                        이메일로 테라피스트 구분
+
+
+================================================================================
+FOREIGN KEY RELATIONSHIPS
+================================================================================
+
+bookings
+├─ customer_id FK → customers(id) [ON DELETE CASCADE]
+│  고객 삭제 시 해당 예약도 삭제
+│
+├─ service_id FK → services(id) [ON DELETE RESTRICT]
+│  서비스 삭제 불가 (예약이 참조 중)
+│
+├─ therapist_id FK → therapists(id) [ON DELETE SET NULL]
+│  테라피스트 삭제 시 예약은 유지, therapist_id만 NULL
+│
+└─ bed_id FK → beds(id) [ON DELETE SET NULL]
+   침대 삭제 시 예약은 유지, bed_id만 NULL
+
+customers
+└─ preferred_therapist_id FK → therapists(id) [ON DELETE SET NULL]
+
+therapist_attendance
+└─ therapist_id FK → therapists(id) [ON DELETE CASCADE]
+
+therapist_settlements
+└─ therapist_id FK → therapists(id) [ON DELETE CASCADE]
+
+payments
+├─ booking_id FK → bookings(id) [ON DELETE CASCADE]
+└─ customer_id FK → customers(id) [ON DELETE CASCADE]
+
+reviews
+├─ booking_id FK → bookings(id) [ON DELETE CASCADE]
+├─ customer_id FK → customers(id) [ON DELETE CASCADE]
+└─ therapist_id FK → therapists(id) [ON DELETE CASCADE]
+
+matching_logs
+├─ booking_id FK → bookings(id) [ON DELETE CASCADE]
+└─ selected_therapist_id FK → therapists(id) [ON DELETE SET NULL]
+
+
+================================================================================
+EXAMPLE QUERIES
+================================================================================
+
+-- 실시간 예약 매칭: 현재 이용 가능한 테라피스트
+SELECT id, name, rating, commission_rate
+FROM therapists
+WHERE status IN ('idle', 'resting')
+  AND specialty LIKE '%스웨디시%'
+ORDER BY rating DESC, total_sessions ASC
+LIMIT 5;
+
+
+-- 특정 테라피스트의 하루 매출
+SELECT
+  t.name,
+  COUNT(b.id) as sessions,
+  SUM(b.paid_amount) as total_revenue,
+  SUM(b.therapist_commission) as commission
+FROM therapists t
+LEFT JOIN bookings b ON t.id = b.therapist_id
+  AND b.status = 'completed'
+  AND DATE(b.ended_at) = CURRENT_DATE
+WHERE t.id = 1
+GROUP BY t.id, t.name;
+
+
+-- 플랫폼 전체 일일 정산 (INSERT로 daily_settlements 생성)
+INSERT INTO daily_settlements (settlement_date, total_revenue, total_commission, net_profit)
+SELECT
+  CURRENT_DATE - INTERVAL '1 day',
+  SUM(b.paid_amount),
+  SUM(b.therapist_commission),
+  SUM(b.paid_amount) - SUM(b.therapist_commission)
+FROM bookings b
+WHERE DATE(b.ended_at) = CURRENT_DATE - INTERVAL '1 day'
+  AND b.status = 'completed';
+
+
+-- 현재 마사지룸1의 가용 침대
+SELECT bed_number, capacity, features
+FROM beds
+WHERE room_zone = '마사지룸1' AND status = 'available'
+ORDER BY bed_number;
+
+
+-- VIP 고객 (총 방문 10회 이상, 내림차순)
+SELECT id, name, total_visits, total_spent, points
+FROM customers
+WHERE total_visits >= 10
+ORDER BY total_spent DESC;
+
+
+================================================================================
+DESIGN NOTES
+================================================================================
+
+1. TEMPORAL CONSISTENCY
+   - created_at, updated_at 모든 테이블에 자동 추가
+   - `updated_at` = NOW() 트리거로 자동 갱신
+   - 시간대: TIMESTAMPTZ (시간대 독립적)
+
+2. SOFT DELETES (논리적 삭제)
+   - 데이터 무결성 유지
+   - 감시 기록 보존
+   - status='deleted' 또는 deleted_at 추가 권장
+
+3. AUDIT LOGGING
+   - 정산 관련 변경 사항은 별도 로그 테이블
+   - commission 변경, status 변경 등 추적
+
+4. SCALABILITY
+   - 파티셔닝: bookings, daily_settlements를 날짜로 파티셔닝 가능
+   - 읽기 복제본: SELECT 쿼리 성능 개선
+   - 캐싱: Redis로 실시간 상태 캐싱
+
+5. DATA INTEGRITY
+   - NOT NULL 제약으로 필수값 보장
+   - CHECK 제약으로 값의 범위 확인 (rating 1~5 등)
+   - UNIQUE 제약으로 중복 방지
+
+================================================================================
+DATE: 2026-05-13
+TEAM: Team E (Database Design)
+STATUS: Complete Schema Design ✓
+================================================================================
