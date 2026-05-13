@@ -96,7 +96,7 @@ export const useMonitorPolling = (): MonitorData => {
 
   // Node 3, 4: StatsCalculation + PredictionEngine
   const { stats: bedStats, isLoading: bedStatsLoading } = useBedStats();
-  const { stats: therapistStats, isLoading: therapistStatsLoading } = useTherapistStats();
+  const therapistStatsResult = useTherapistStats();
   const { data: prediction } = usePredictedWaitTime();
 
   // 메타데이터 (UI 디버깅용)
@@ -131,12 +131,12 @@ export const useMonitorPolling = (): MonitorData => {
       total: bedStats.total,
     },
     therapistStats: {
-      idle: therapistStats.stats.idle,
-      in_service: therapistStats.stats.in_service,
-      resting: therapistStats.stats.resting,
-      checked_out: therapistStats.stats.checked_out,
-      checkedIn: therapistStats.checkedIn,
-      total: therapistStats.total,
+      idle: therapistStatsResult.stats?.idle || 0,
+      in_service: therapistStatsResult.stats?.in_service || 0,
+      resting: therapistStatsResult.stats?.resting || 0,
+      checked_out: therapistStatsResult.stats?.checked_out || 0,
+      checkedIn: therapistStatsResult.checkedIn || 0,
+      total: therapistStatsResult.total || 0,
     },
 
     // 예측

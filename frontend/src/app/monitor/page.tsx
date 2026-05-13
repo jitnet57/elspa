@@ -5,6 +5,8 @@ import { useMonitorPolling, classifyBedsByRoom } from '@/hooks/useMonitorPolling
 import { useFullStoreSync } from '@/hooks/useStoreSync';
 import { useStore } from '@/lib/store/store';
 import { NotificationCenter } from '@/components/NotificationCenter';
+import { WalkInBookingModal, type WalkInBookingRequest } from '@/components/WalkInBookingModal';
+import { useWalkInMatching, getServiceDuration } from '@/hooks/useWalkInMatching';
 
 interface Bed {
   id: number;
@@ -175,6 +177,12 @@ export default function MonitorPage() {
     refetchCount,
     lastRefetch,
   } = useMonitorPolling();
+
+  // 📌 워크인 손님 매칭 훅
+  const { walkInBookings, createWalkInBooking } = useWalkInMatching();
+
+  // 📌 워크인 모달 상태
+  const [isWalkInModalOpen, setIsWalkInModalOpen] = useState(false);
 
   // Zustand store에서 데이터 읽기
   const {
@@ -348,9 +356,36 @@ export default function MonitorPage() {
     );
   }
 
+  // ============================================================
+  // 📌 워크인 모달 제출 핸들러
+  // ============================================================
+  const handleWalkInSubmit = (data: WalkInBookingRequest) => {
+    const duration = getServiceDuration(data.serviceType);
+    const bookingId = createWalkInBooking({
+      count: data.count,
+      serviceType: data.serviceType,
+      bedIds: data.suggestedBeds,
+      therapistIds: data.suggestedTherapists,
+      estimatedDuration: duration,
+    });
+
+    // 성공 알림
+    console.log(`✅ 워크인 손님 예약 완료: ${bookingId}`);
+    alert(`✅ 워크인 손님 ${data.count}명이 예약되었습니다.\n베드: ${data.suggestedBeds.join(', ')}`);
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white p-4">
       <NotificationCenter />
+
+      {/* 📌 워크인 모달 */}
+      <WalkInBookingModal
+        isOpen={isWalkInModalOpen}
+        onClose={() => setIsWalkInModalOpen(false)}
+        onSubmit={handleWalkInSubmit}
+        availableBeds={pollingBeds.filter(b => b.status === 'available')}
+        therapists={pollingTherapists}
+      />
       <div className="mb-6 bg-gray-800 p-4 rounded-lg">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold">✨ ELSPA 실시간 모니터</h1>
@@ -358,6 +393,13 @@ export default function MonitorPage() {
             <div className="text-sm text-gray-400">
               🔄 폴링: {refetchCount}회 | ⏱️ {lastRefetch?.toLocaleTimeString('ko-KR', { hour12: false })}
             </div>
+            {/* 📌 워크인 추가 버튼 */}
+            <button
+              onClick={() => setIsWalkInModalOpen(true)}
+              className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-lg transition-all hover:shadow-lg"
+            >
+              + 워크인 추가
+            </button>
             <div className="text-2xl font-mono">{currentTime}</div>
           </div>
         </div>
@@ -410,10 +452,12 @@ export default function MonitorPage() {
           {predictions && (
             <div className="mb-4 bg-blue-900/30 p-3 rounded border-l-4 border-blue-500">
               <div className="text-xs text-gray-400 mb-1">⏳ 평균 대기시간</div>
-              <div className="text-lg font-bold text-blue-400">{predictions.average_wait_minutes}분</div>
-              <div className="text-xs text-gray-400 mt-2">
-                다음 가용: <span className="text-green-400 font-bold">{predictions.next_available_therapist.name}</span>
-              </div>
+              <div className="text-lg font-bold text-blue-400">{predictions.average_wait_minutes || 0}분</div>
+              {predictions.next_available_therapist && (
+                <div className="text-xs text-gray-400 mt-2">
+                  다음 가용: <span className="text-green-400 font-bold">{predictions.next_available_therapist.name}</span>
+                </div>
+              )}
             </div>
           )}
 
