@@ -392,6 +392,57 @@ const createMonthlySettlementSlice = (set: any): MonthlySettlementState => ({
       monthlySettlements: state.monthlySettlements.filter((s: MonthlySettlement) => s.id !== id),
     }));
   },
+
+  calculateMonthlySettlements: (month: string) => {
+    set((state: any) => {
+      const { therapistSettlements, guides, companies } = state;
+
+      // 이미 계산된 월정산이 있으면 제거
+      const filteredSettlements = state.monthlySettlements.filter(
+        (s: MonthlySettlement) => s.settlement_month !== month
+      );
+
+      // 각 가이드별로 월정산 계산
+      const newSettlements: MonthlySettlement[] = guides.map((guide: Guide) => {
+        const company = companies.find((c: Company) => c.id === guide.company_id);
+        if (!company) return null;
+
+        // 같은 이름의 therapist 찾기 (therapist.name == guide.name)
+        const therapistSettlement = therapistSettlements.find(
+          (ts: TherapistSettlement) => ts.name === guide.name
+        );
+
+        if (!therapistSettlement) return null;
+
+        // 수수료율 결정 (가이드 개별 설정 or 회사 기본값)
+        const commissionRate = guide.commission_rate || company.commission_rate;
+        const totalRevenue = therapistSettlement.totalRevenue || 0;
+        const commissionAmount = Math.floor(totalRevenue * (commissionRate / 100));
+        const paymentAmount = totalRevenue - commissionAmount;
+
+        return {
+          id: Math.random() * 1000000,
+          company_id: company.id,
+          guide_id: guide.id,
+          settlement_month: month,
+          settlement_date: new Date().toISOString().split('T')[0],
+          total_sessions: therapistSettlement.sessionCount || 0,
+          total_revenue: totalRevenue,
+          commission_rate: commissionRate,
+          commission_amount: commissionAmount,
+          payment_amount: paymentAmount,
+          service_breakdown: {},
+          status: 'pending' as const,
+          notes: `${month} 월정산 자동 계산`,
+          created_at: new Date().toISOString().split('T')[0],
+        };
+      }).filter((s: MonthlySettlement | null) => s !== null) as MonthlySettlement[];
+
+      return {
+        monthlySettlements: [...filteredSettlements, ...newSettlements],
+      };
+    });
+  },
 });
 
 // ============================================================

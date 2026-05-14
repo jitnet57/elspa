@@ -342,6 +342,9 @@ export interface MonthlySettlementState {
   updateMonthlySettlement: (id: number, settlement: Partial<MonthlySettlement>) => void;
   updateSettlementStatus: (id: number, status: 'pending' | 'confirmed' | 'paid') => void;
   deleteMonthlySettlement: (id: number) => void;
+
+  // 월정산 자동 계산
+  calculateMonthlySettlements: (month: string) => void;
 }
 
 // ============================================================

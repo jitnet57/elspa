@@ -292,6 +292,59 @@ export default function TherapistManagementPage() {
             </div>
           </div>
         </div>
+
+        {/* 월정산 미리보기 */}
+        <div className="mt-8 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-8 border-2 border-indigo-200 shadow-sm">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">📅 월정산 미리보기</h2>
+            <a
+              href="/admin/monthly-settlement"
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors text-sm"
+            >
+              상세 보기 →
+            </a>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg p-4 border border-indigo-200">
+              <div className="text-sm text-gray-600 mb-2">현재월 누적 수익</div>
+              <div className="text-3xl font-bold text-indigo-600">₩{totalRevenue.toLocaleString()}</div>
+              <div className="text-xs text-gray-500 mt-2">
+                {therapists.filter(t => t.status !== 'checked_out').length}명 활동 중
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg p-4 border border-indigo-200">
+              <div className="text-sm text-gray-600 mb-2">월정산 예상 지급액</div>
+              <div className="text-3xl font-bold text-green-600">₩{(totalRevenue * 0.7).toLocaleString()}</div>
+              <div className="text-xs text-gray-500 mt-2">
+                평균 30% 수수료 기준
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg p-4 border border-indigo-200">
+              <div className="text-sm text-gray-600 mb-2">월정산 예상 수수료</div>
+              <div className="text-3xl font-bold text-red-600">₩{(totalRevenue * 0.3).toLocaleString()}</div>
+              <div className="text-xs text-gray-500 mt-2">
+                총 수익의 30%
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg p-4 border border-indigo-200">
+              <div className="text-sm text-gray-600 mb-2">정산 상태</div>
+              <div className="text-2xl font-bold text-yellow-600">미확정</div>
+              <div className="text-xs text-gray-500 mt-2">
+                월정산 페이지에서 확정 처리
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+            <p className="text-xs text-blue-900">
+              💡 월정산은 매월 정산일에 자동으로 계산됩니다. 업체관리에서 각 업체의 정산일과 수수료율을 설정하세요.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
