@@ -20,6 +20,9 @@ import {
   UIState,
   SettlementState,
   WalkInQueueState,
+  CompanyState,
+  GuideState,
+  MonthlySettlementState,
   Bed,
   Therapist,
   Booking,
@@ -31,6 +34,9 @@ import {
   ServiceBreakdown,
   HourlySales,
   WalkInGuest,
+  Company,
+  Guide,
+  MonthlySettlement,
 } from './types';
 
 // ============================================================
@@ -291,6 +297,104 @@ const createWalkInQueueSlice = (set: any): WalkInQueueState => ({
 });
 
 // ============================================================
+// Company Slice
+// ============================================================
+
+const createCompanySlice = (set: any): CompanyState => ({
+  companies: [],
+
+  setCompanies: (companies: Company[]) => set({ companies }),
+
+  addCompany: (company: Company) => {
+    set((state: any) => ({
+      companies: [...state.companies, company],
+    }));
+  },
+
+  updateCompany: (id: number, company: Partial<Company>) => {
+    set((state: any) => ({
+      companies: state.companies.map((c: Company) =>
+        c.id === id ? { ...c, ...company } : c
+      ),
+    }));
+  },
+
+  deleteCompany: (id: number) => {
+    set((state: any) => ({
+      companies: state.companies.filter((c: Company) => c.id !== id),
+    }));
+  },
+});
+
+// ============================================================
+// Guide Slice
+// ============================================================
+
+const createGuideSlice = (set: any): GuideState => ({
+  guides: [],
+
+  setGuides: (guides: Guide[]) => set({ guides }),
+
+  addGuide: (guide: Guide) => {
+    set((state: any) => ({
+      guides: [...state.guides, guide],
+    }));
+  },
+
+  updateGuide: (id: number, guide: Partial<Guide>) => {
+    set((state: any) => ({
+      guides: state.guides.map((g: Guide) =>
+        g.id === id ? { ...g, ...guide } : g
+      ),
+    }));
+  },
+
+  deleteGuide: (id: number) => {
+    set((state: any) => ({
+      guides: state.guides.filter((g: Guide) => g.id !== id),
+    }));
+  },
+});
+
+// ============================================================
+// Monthly Settlement Slice
+// ============================================================
+
+const createMonthlySettlementSlice = (set: any): MonthlySettlementState => ({
+  monthlySettlements: [],
+
+  setMonthlySettlements: (settlements: MonthlySettlement[]) => set({ monthlySettlements: settlements }),
+
+  addMonthlySettlement: (settlement: MonthlySettlement) => {
+    set((state: any) => ({
+      monthlySettlements: [...state.monthlySettlements, settlement],
+    }));
+  },
+
+  updateMonthlySettlement: (id: number, settlement: Partial<MonthlySettlement>) => {
+    set((state: any) => ({
+      monthlySettlements: state.monthlySettlements.map((s: MonthlySettlement) =>
+        s.id === id ? { ...s, ...settlement } : s
+      ),
+    }));
+  },
+
+  updateSettlementStatus: (id: number, status: 'pending' | 'confirmed' | 'paid') => {
+    set((state: any) => ({
+      monthlySettlements: state.monthlySettlements.map((s: MonthlySettlement) =>
+        s.id === id ? { ...s, status } : s
+      ),
+    }));
+  },
+
+  deleteMonthlySettlement: (id: number) => {
+    set((state: any) => ({
+      monthlySettlements: state.monthlySettlements.filter((s: MonthlySettlement) => s.id !== id),
+    }));
+  },
+});
+
+// ============================================================
 // Root Store
 // ============================================================
 
@@ -303,6 +407,9 @@ export const useStore = create<RootState>((set) => ({
   ...createUISlice(set),
   ...createSettlementSlice(set),
   ...createWalkInQueueSlice(set),
+  ...createCompanySlice(set),
+  ...createGuideSlice(set),
+  ...createMonthlySettlementSlice(set),
 }));
 
 // ============================================================

@@ -70,6 +70,9 @@ export default function Dashboard() {
           {[
             { id: 'dashboard', label: '📈 대시보드', href: '/' },
             { id: 'therapist', label: '💼 테라피스트 관리', href: '/admin/matching' },
+            { id: 'companies', label: '🏢 업체 관리', href: '/admin/companies' },
+            { id: 'guides', label: '👤 가이드 관리', href: '/admin/guides' },
+            { id: 'settlement', label: '📊 월정산', href: '/admin/monthly-settlement' },
             { id: 'simulation', label: '🎯 시뮬레이션', href: '/admin/simulation' },
             { id: 'monitor', label: '🖥️ 카운터 모니터', href: '/monitor' },
           ].map((item) => (

@@ -847,6 +847,239 @@ export const mockApiAdapter = {
 };
 
 // ============================================================
+// Mock Data: Company, Guide, MonthlySettlement
+// ============================================================
+
+interface Company {
+  id: number;
+  name: string;
+  representative: string;
+  phone: string;
+  address: string;
+  settlement_day: number;
+  commission_rate: number;
+  status: 'active' | 'inactive';
+  created_at: string;
+}
+
+interface Guide {
+  id: number;
+  company_id: number;
+  name: string;
+  specialty: string;
+  phone: string;
+  bank_name: string;
+  bank_account: string;
+  commission_rate?: number;
+  status: 'active' | 'inactive';
+  created_at: string;
+}
+
+interface MonthlySettlement {
+  id: number;
+  company_id: number;
+  guide_id: number;
+  settlement_month: string;
+  settlement_date: string;
+  total_sessions: number;
+  total_revenue: number;
+  commission_rate: number;
+  commission_amount: number;
+  payment_amount: number;
+  service_breakdown: Record<string, { sessions: number; revenue: number }>;
+  status: 'pending' | 'confirmed' | 'paid';
+  notes?: string;
+  created_at: string;
+}
+
+const mockCompanies: Company[] = [
+  {
+    id: 1,
+    name: 'ABC여행사',
+    representative: '김철수',
+    phone: '02-1234-5678',
+    address: '서울시 강남구 테헤란로 123',
+    settlement_day: 20,
+    commission_rate: 30,
+    status: 'active',
+    created_at: '2026-01-01',
+  },
+  {
+    id: 2,
+    name: 'XYZ여행사',
+    representative: '이영희',
+    phone: '02-9876-5432',
+    address: '서울시 서초구 서초대로 456',
+    settlement_day: 5,
+    commission_rate: 25,
+    status: 'active',
+    created_at: '2026-01-15',
+  },
+  {
+    id: 3,
+    name: '글로벌투어',
+    representative: '박민수',
+    phone: '02-5555-6666',
+    address: '서울시 마포구 중앙로 789',
+    settlement_day: 15,
+    commission_rate: 28,
+    status: 'active',
+    created_at: '2026-02-01',
+  },
+];
+
+const mockGuides: Guide[] = [
+  {
+    id: 1,
+    company_id: 1,
+    name: 'Sarah',
+    specialty: 'Swedish Massage',
+    phone: '010-1111-1111',
+    bank_name: '국민은행',
+    bank_account: '123-456-789',
+    commission_rate: 30,
+    status: 'active',
+    created_at: '2026-01-05',
+  },
+  {
+    id: 2,
+    company_id: 1,
+    name: 'Emma',
+    specialty: 'Thai Massage',
+    phone: '010-2222-2222',
+    bank_name: '우리은행',
+    bank_account: '987-654-321',
+    commission_rate: undefined,
+    status: 'active',
+    created_at: '2026-01-10',
+  },
+  {
+    id: 3,
+    company_id: 1,
+    name: 'Jessica',
+    specialty: 'Hot Stone',
+    phone: '010-3333-3333',
+    bank_name: '하나은행',
+    bank_account: '111-222-333',
+    commission_rate: 30,
+    status: 'active',
+    created_at: '2026-01-15',
+  },
+  {
+    id: 4,
+    company_id: 2,
+    name: 'Amanda',
+    specialty: 'Foot Massage',
+    phone: '010-4444-4444',
+    bank_name: '국민은행',
+    bank_account: '444-555-666',
+    commission_rate: 25,
+    status: 'active',
+    created_at: '2026-01-20',
+  },
+  {
+    id: 5,
+    company_id: 2,
+    name: 'Catherine',
+    specialty: 'Aromatherapy',
+    phone: '010-5555-5555',
+    bank_name: '신한은행',
+    bank_account: '777-888-999',
+    commission_rate: undefined,
+    status: 'active',
+    created_at: '2026-02-01',
+  },
+  {
+    id: 6,
+    company_id: 3,
+    name: 'Rachel',
+    specialty: 'General',
+    phone: '010-6666-6666',
+    bank_name: '국민은행',
+    bank_account: '101-202-303',
+    commission_rate: 28,
+    status: 'active',
+    created_at: '2026-02-05',
+  },
+];
+
+const mockMonthlySettlements: MonthlySettlement[] = [
+  {
+    id: 1,
+    company_id: 1,
+    guide_id: 1,
+    settlement_month: '2026-05',
+    settlement_date: '2026-05-20',
+    total_sessions: 5,
+    total_revenue: 400000,
+    commission_rate: 30,
+    commission_amount: 120000,
+    payment_amount: 280000,
+    service_breakdown: {
+      swedish: { sessions: 3, revenue: 240000 },
+      thai: { sessions: 2, revenue: 160000 },
+    },
+    status: 'pending',
+    notes: '',
+    created_at: '2026-05-20',
+  },
+  {
+    id: 2,
+    company_id: 1,
+    guide_id: 2,
+    settlement_month: '2026-05',
+    settlement_date: '2026-05-20',
+    total_sessions: 4,
+    total_revenue: 360000,
+    commission_rate: 30,
+    commission_amount: 108000,
+    payment_amount: 252000,
+    service_breakdown: {
+      thai: { sessions: 4, revenue: 360000 },
+    },
+    status: 'confirmed',
+    notes: '확정 완료',
+    created_at: '2026-05-20',
+  },
+  {
+    id: 3,
+    company_id: 1,
+    guide_id: 3,
+    settlement_month: '2026-05',
+    settlement_date: '2026-05-20',
+    total_sessions: 3,
+    total_revenue: 280000,
+    commission_rate: 30,
+    commission_amount: 84000,
+    payment_amount: 196000,
+    service_breakdown: {
+      hotstone: { sessions: 3, revenue: 280000 },
+    },
+    status: 'paid',
+    notes: '지급 완료',
+    created_at: '2026-05-20',
+  },
+  {
+    id: 4,
+    company_id: 2,
+    guide_id: 4,
+    settlement_month: '2026-05',
+    settlement_date: '2026-05-05',
+    total_sessions: 6,
+    total_revenue: 300000,
+    commission_rate: 25,
+    commission_amount: 75000,
+    payment_amount: 225000,
+    service_breakdown: {
+      foot: { sessions: 6, revenue: 300000 },
+    },
+    status: 'confirmed',
+    notes: '',
+    created_at: '2026-05-05',
+  },
+];
+
+// ============================================================
 // 환경 기반 API 클라이언트 선택 헬퍼
 // ============================================================
 

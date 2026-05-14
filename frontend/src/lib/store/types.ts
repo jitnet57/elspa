@@ -268,6 +268,83 @@ export interface SettlementState {
 }
 
 // ============================================================
+// Company & Guide Related (월정산 시스템)
+// ============================================================
+
+export interface Company {
+  id: number;
+  name: string; // 여행사명
+  representative: string; // 대표명
+  phone: string;
+  address: string;
+  settlement_day: number; // 정산일 (5 = 5일, 20 = 20일)
+  commission_rate: number; // 기본 수수료율 (30 = 30%)
+  status: 'active' | 'inactive';
+  created_at: string;
+}
+
+export interface Guide {
+  id: number;
+  company_id: number; // 소속 업체
+  name: string; // 가이드명 (therapist 이름과 동일)
+  specialty: string; // 전문분야
+  phone: string;
+  bank_name: string; // 은행명
+  bank_account: string; // 계좌번호
+  commission_rate?: number; // 개별 수수료율 (null = company 기본값 사용)
+  status: 'active' | 'inactive';
+  created_at: string;
+}
+
+export interface MonthlySettlement {
+  id: number;
+  company_id: number;
+  guide_id: number;
+  settlement_month: string; // "2026-05"
+  settlement_date: string; // "2026-05-20" (실제 정산 날짜)
+  total_sessions: number; // 총 세션 수
+  total_revenue: number; // 총 매출
+  commission_rate: number; // 적용된 수수료율
+  commission_amount: number; // 차감액
+  payment_amount: number; // 최종 지급액
+  service_breakdown: Record<string, { sessions: number; revenue: number }>; // 서비스별 상세
+  status: 'pending' | 'confirmed' | 'paid';
+  notes?: string;
+  created_at: string;
+}
+
+export interface CompanyState {
+  companies: Company[];
+
+  // Actions
+  setCompanies: (companies: Company[]) => void;
+  addCompany: (company: Company) => void;
+  updateCompany: (id: number, company: Partial<Company>) => void;
+  deleteCompany: (id: number) => void;
+}
+
+export interface GuideState {
+  guides: Guide[];
+
+  // Actions
+  setGuides: (guides: Guide[]) => void;
+  addGuide: (guide: Guide) => void;
+  updateGuide: (id: number, guide: Partial<Guide>) => void;
+  deleteGuide: (id: number) => void;
+}
+
+export interface MonthlySettlementState {
+  monthlySettlements: MonthlySettlement[];
+
+  // Actions
+  setMonthlySettlements: (settlements: MonthlySettlement[]) => void;
+  addMonthlySettlement: (settlement: MonthlySettlement) => void;
+  updateMonthlySettlement: (id: number, settlement: Partial<MonthlySettlement>) => void;
+  updateSettlementStatus: (id: number, status: 'pending' | 'confirmed' | 'paid') => void;
+  deleteMonthlySettlement: (id: number) => void;
+}
+
+// ============================================================
 // Root Store State
 // ============================================================
 
@@ -279,6 +356,9 @@ export interface RootState
     NotificationState,
     UIState,
     WalkInQueueState,
-    SettlementState {
+    SettlementState,
+    CompanyState,
+    GuideState,
+    MonthlySettlementState {
   // Combined state
 }
