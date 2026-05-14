@@ -577,6 +577,7 @@ export default function MonitorPage() {
   const {
     beds: storeBeds,
     therapists: storeTherapists,
+    bookings,
   } = useStore();
 
   // Store가 최신이면 store 사용, 아니면 polling 데이터 사용
