@@ -6,6 +6,7 @@ import { useFullStoreSync } from '@/hooks/useStoreSync';
 import { useStore } from '@/lib/store/store';
 import { NotificationCenter } from '@/components/NotificationCenter';
 import { WalkInBookingModal, type WalkInBookingRequest } from '@/components/WalkInBookingModal';
+import { TherapistReservationPanel } from '@/components/TherapistReservationPanel';
 import { useWalkInMatching, getServiceDuration } from '@/hooks/useWalkInMatching';
 
 interface Bed {
@@ -552,12 +553,15 @@ export default function MonitorPage() {
   // 📌 뷰 모드 토글 상태
   const [viewMode, setViewMode] = useState<'beds' | 'therapists'>('beds');
 
+  // 📌 선택된 테라피스트 (우측 패널용)
+  const [selectedTherapistId, setSelectedTherapistId] = useState<number | null>(null);
+
   // 📌 베드/테라피스트 매칭 모달 상태
   const [assigningBedId, setAssigningBedId] = useState<number | null>(null);
   const [assigningTherapistId, setAssigningTherapistId] = useState<number | null>(null);
   const [assignStep, setAssignStep] = useState<'input' | 'matching'>('input');
   const [selectedServiceType, setSelectedServiceType] = useState('');
-  const [selectedTherapistId, setSelectedTherapistId] = useState<number | null>(null);
+  const [selectedTherapistId_assign, setSelectedTherapistId_assign] = useState<number | null>(null);
   const [selectedBedId_assign, setSelectedBedId_assign] = useState<number | null>(null);
   const [customerName, setCustomerName] = useState('');
 
@@ -1040,9 +1044,9 @@ export default function MonitorPage() {
       : null;
 
     const handleAssign = () => {
-      if (!selectedTherapistId) return;
+      if (!selectedTherapistId_assign) return;
 
-      const therapist = therapists.find(t => t.id === selectedTherapistId);
+      const therapist = therapists.find(t => t.id === selectedTherapistId_assign);
       if (!therapist) return;
 
       // 베드 및 테라피스트 상태 업데이트
@@ -1061,7 +1065,7 @@ export default function MonitorPage() {
       );
 
       const updatedTherapists = therapists.map(t =>
-        t.id === selectedTherapistId
+        t.id === selectedTherapistId_assign
           ? {
               ...t,
               status: 'in_service' as const,
@@ -1220,9 +1224,9 @@ export default function MonitorPage() {
                     .map(therapist => (
                       <button
                         key={therapist.id}
-                        onClick={() => setSelectedTherapistId(therapist.id)}
+                        onClick={() => setSelectedTherapistId_assign(therapist.id)}
                         className={`p-2 rounded text-sm transition-colors ${
-                          selectedTherapistId === therapist.id
+                          selectedTherapistId_assign === therapist.id
                             ? 'bg-blue-600 text-white border-2 border-blue-400'
                             : 'bg-gray-700 text-gray-300 hover:bg-gray-600 border-2 border-transparent'
                         }`}
@@ -1243,9 +1247,9 @@ export default function MonitorPage() {
                 </button>
                 <button
                   onClick={handleAssign}
-                  disabled={!selectedTherapistId}
+                  disabled={!selectedTherapistId_assign}
                   className={`flex-1 font-bold py-2 rounded transition-colors ${
-                    selectedTherapistId
+                    selectedTherapistId_assign
                       ? 'bg-green-600 hover:bg-green-700 text-white'
                       : 'bg-gray-700 text-gray-500 cursor-not-allowed'
                   }`}
@@ -1260,29 +1264,32 @@ export default function MonitorPage() {
     );
   };
 
-  // 로딩 상태 표시
-  if (isLoading) {
+  // 데이터가 없고 로딩 중이면
+  if (isLoading && beds.length === 0) {
     return (
       <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
         <div className="text-center">
-          <div className="text-2xl font-bold mb-4">🔄 실시간 데이터 로드 중...</div>
-          <div className="text-gray-400">5초 폴링으로 침대 상태를 조회하고 있습니다.</div>
+          <div className="text-2xl font-bold mb-4">🔄 데이터 로드 중...</div>
+          <div className="text-gray-400">첫 로드 중입니다.</div>
         </div>
       </div>
     );
   }
 
-  // 오류 상태 표시
-  if (error) {
+  // 오류 상태이지만 로컬 데이터가 있으면 계속 표시
+  if (error && beds.length === 0) {
     return (
       <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
         <div className="text-center">
-          <div className="text-2xl font-bold mb-4 text-red-400">❌ 데이터 조회 오류</div>
-          <div className="text-gray-400">{error.message}</div>
+          <div className="text-2xl font-bold mb-4 text-red-400">❌ 연결 오류</div>
+          <div className="text-gray-400">저장된 데이터가 없습니다. 네트워크를 확인해주세요.</div>
         </div>
       </div>
     );
   }
+
+  // 오류가 있으면 상단에 경고 배너 표시
+  const isUsingStaleData = error && beds.length > 0;
 
   // ============================================================
   // 📌 워크인 모달 제출 핸들러
@@ -1456,12 +1463,24 @@ export default function MonitorPage() {
           </div>
         </div>
       ) : (
-        // 테라피스트별 스케줄 보기
-        <TherapistScheduleView
-          therapists={therapists}
-          schedules={schedules}
-          onTherapistClick={therapistId => setAssigningTherapistId(therapistId)}
-        />
+        // 테라피스트별 스케줄 보기 + 예약자 리스트 패널
+        <div className="flex gap-0 overflow-hidden">
+          <div className="flex-1">
+            <TherapistScheduleView
+              therapists={therapists}
+              schedules={schedules}
+              onTherapistClick={therapistId => {
+                setSelectedTherapistId(therapistId);
+                setAssigningTherapistId(therapistId);
+              }}
+            />
+          </div>
+          <TherapistReservationPanel
+            selectedTherapistId={selectedTherapistId}
+            therapists={therapists}
+            bookings={bookings}
+          />
+        </div>
       )}
 
       {/* 📌 범례 (베드별 보기에서만 표시) */}

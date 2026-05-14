@@ -3,6 +3,7 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useSettlementScheduler } from '@/hooks/useSettlementScheduler';
+import { OfflineBanner } from '@/components/OfflineBanner';
 
 const createQueryClient = () => {
     return new QueryClient({
@@ -38,6 +39,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
     return (
         <QueryClientProvider client={queryClient}>
+            <OfflineBanner />
             <SettlementSchedulerMount />
             {children}
         </QueryClientProvider>

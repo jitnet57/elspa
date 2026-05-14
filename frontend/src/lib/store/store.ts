@@ -10,6 +10,7 @@
 'use client';
 
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import {
   RootState,
   BedState,
@@ -555,20 +556,42 @@ const createInvoiceSlice = (set: any): InvoiceState => ({
 // Root Store
 // ============================================================
 
-export const useStore = create<RootState>((set) => ({
-  ...createBedSlice(set),
-  ...createTherapistSlice(set),
-  ...createBookingSlice(set),
-  ...createMatchingSlice(set),
-  ...createInvoiceSlice(set),
-  ...createNotificationSlice(set),
-  ...createUISlice(set),
-  ...createSettlementSlice(set),
-  ...createWalkInQueueSlice(set),
-  ...createCompanySlice(set),
-  ...createGuideSlice(set),
-  ...createMonthlySettlementSlice(set),
-}));
+export const useStore = create<RootState>()(
+  persist(
+    (set) => ({
+      ...createBedSlice(set),
+      ...createTherapistSlice(set),
+      ...createBookingSlice(set),
+      ...createMatchingSlice(set),
+      ...createInvoiceSlice(set),
+      ...createNotificationSlice(set),
+      ...createUISlice(set),
+      ...createSettlementSlice(set),
+      ...createWalkInQueueSlice(set),
+      ...createCompanySlice(set),
+      ...createGuideSlice(set),
+      ...createMonthlySettlementSlice(set),
+    }),
+    {
+      name: 'elspa-store',
+      storage: createJSONStorage(() => {
+        if (typeof window === 'undefined') {
+          return { getItem: () => null, setItem: () => {}, removeItem: () => {} };
+        }
+        return localStorage;
+      }),
+      partialize: (state) => ({
+        beds: state.beds,
+        therapists: state.therapists,
+        bookings: state.bookings,
+        walkInQueue: state.walkInQueue,
+        companies: state.companies,
+        guides: state.guides,
+        monthlySettlements: state.monthlySettlements,
+      }),
+    }
+  )
+);
 
 // ============================================================
 // Convenience Selectors

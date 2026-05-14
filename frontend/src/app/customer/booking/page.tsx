@@ -38,7 +38,7 @@ function BookingContent() {
   const timeSlots = ['10:00', '10:30', '11:00', '11:30', '12:00', '14:00', '14:30', '15:00', '15:30', '16:00', '17:00', '17:30', '18:00', '18:30', '19:00'];
 
   const handleNext = () => {
-    if (step < 4) setStep(step + 1);
+    if (step < 3) setStep(step + 1);
   };
 
   const handlePrev = () => {
@@ -117,10 +117,10 @@ function BookingContent() {
 
       {/* Progress Bar */}
       <div className="flex gap-4 mb-8">
-        {[1, 2, 3, 4].map((s) => (
+        {[1, 2, 3].map((s) => (
           <div key={s} className="flex-1">
             <div className={`h-2 rounded-full transition-all ${s <= step ? 'bg-orange-500' : 'bg-stone-200'}`}></div>
-            <p className="text-xs text-gray-600 mt-2 text-center font-light">{['서비스선택', '날짜&시간', '테라피스트', '확인'][s - 1]}</p>
+            <p className="text-xs text-gray-600 mt-2 text-center font-light">{['서비스선택', '날짜&시간', '개인정보'][s - 1]}</p>
           </div>
         ))}
       </div>
@@ -173,29 +173,10 @@ function BookingContent() {
         </div>
       )}
 
-      {/* Step 3: Therapist Selection */}
+      {/* Step 3: Confirmation & Personal Info */}
       {step === 3 && (
-        <div className="bg-white rounded-xl p-8 shadow-sm border border-stone-100">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">3단계: 테라피스트 선택</h2>
-          <div className="space-y-4">
-            {therapists.map((therapist) => (
-              <label key={therapist.id} className={`flex items-center p-6 border rounded-lg cursor-pointer transition-all ${formData.therapist === therapist.id.toString() ? 'bg-orange-50 border-orange-500' : 'bg-white border-stone-200 hover:border-orange-300'}`}>
-                <input type="radio" name="therapist" value={therapist.id} checked={formData.therapist === therapist.id.toString()} onChange={handleChange} className="mr-4" />
-                <div className="flex-1">
-                  <p className="font-bold text-gray-900 text-lg">{therapist.name}</p>
-                  <p className="text-sm text-gray-600 font-light">{therapist.specialty}</p>
-                </div>
-                <span className="text-3xl">💆</span>
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Step 4: Confirmation */}
-      {step === 4 && (
         <div className="bg-white rounded-xl p-8 shadow-sm border border-stone-100 space-y-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">4단계: 개인정보 입력</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">3단계: 개인정보 입력</h2>
           <div>
             <label className="block text-sm font-bold text-gray-900 mb-2">이름 *</label>
             <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="성함을 입력해주세요" className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:outline-none focus:border-orange-500 font-light" />
@@ -248,11 +229,11 @@ function BookingContent() {
           ← 이전
         </button>
         <button
-          onClick={step === 4 ? handleBookingSubmit : handleNext}
-          disabled={step === 4 && isSubmitting}
+          onClick={step === 3 ? handleBookingSubmit : handleNext}
+          disabled={step === 3 && isSubmitting}
           className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all shadow-md"
         >
-          {step === 4 ? (isSubmitting ? '처리 중...' : '예약 완료') : '다음 →'}
+          {step === 3 ? (isSubmitting ? '처리 중...' : '예약 완료') : '다음 →'}
         </button>
       </div>
     </div>
