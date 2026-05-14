@@ -22,10 +22,10 @@ export default function BookingPage() {
   ];
 
   const therapists = [
-    { id: 1, name: '박유진', specialty: '스웨디시 전문', rating: 4.9 },
-    { id: 2, name: '최정은', specialty: '타이 마사지', rating: 4.7 },
-    { id: 3, name: '이소영', specialty: '핫스톤 테라피', rating: 4.8 },
-    { id: 4, name: '김태희', specialty: '발 마사지', rating: 4.6 },
+    { id: 1, name: 'Sarah', specialty: 'Swedish Massage', rating: 4.9 },
+    { id: 2, name: 'Emma', specialty: 'Thai Massage', rating: 4.7 },
+    { id: 3, name: 'Jessica', specialty: 'Hot Stone Therapy', rating: 4.8 },
+    { id: 4, name: 'Amanda', specialty: 'Foot Massage', rating: 4.6 },
   ];
 
   const timeSlots = ['10:00', '10:30', '11:00', '11:30', '12:00', '14:00', '14:30', '15:00', '15:30', '16:00', '17:00', '17:30', '18:00', '18:30', '19:00'];

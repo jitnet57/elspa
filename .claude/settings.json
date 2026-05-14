@@ -11,7 +11,8 @@
       "Bash(python test_simulation_1000.py)",
       "PowerShell(Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | ForEach-Object { taskkill /PID $_.OwningProcess /F 2>&1 } ; Write-Host \"✅ 포트 3000 정리 완료\")",
       "PowerShell(taskkill /PID 19956 /F 2>&1)",
-      "Bash(git remote *)"
+      "Bash(git remote *)",
+      "PowerShell(taskkill /PID 14988 /F)"
     ]
   }
 }

@@ -19,6 +19,7 @@ import {
   NotificationState,
   UIState,
   SettlementState,
+  WalkInQueueState,
   Bed,
   Therapist,
   Booking,
@@ -29,6 +30,7 @@ import {
   TherapistSettlement,
   ServiceBreakdown,
   HourlySales,
+  WalkInGuest,
 } from './types';
 
 // ============================================================
@@ -234,6 +236,61 @@ const createSettlementSlice = (set: any): SettlementState => ({
 });
 
 // ============================================================
+// Walk-In Queue Slice
+// ============================================================
+
+const createWalkInQueueSlice = (set: any): WalkInQueueState => ({
+  walkInQueue: [],
+
+  addToQueue: (guest: Omit<WalkInGuest, 'id' | 'queue_number' | 'created_at' | 'status'>) => {
+    const id = `walk_in_${Date.now()}_${Math.random()}`;
+    const newGuest: WalkInGuest = {
+      ...guest,
+      id,
+      queue_number: 0, // 실제로는 현재 큐 길이 + 1로 설정될 예정
+      created_at: new Date().toISOString(),
+      status: 'waiting',
+    };
+
+    set((state: any) => {
+      const newQueue = [...state.walkInQueue, newGuest];
+      // 큐 번호 재계산
+      const updatedQueue = newQueue.map((g: WalkInGuest, idx: number) => ({
+        ...g,
+        queue_number: idx + 1,
+      }));
+      return { walkInQueue: updatedQueue };
+    });
+
+    return id;
+  },
+
+  removeFromQueue: (guestId: string) => {
+    set((state: any) => {
+      const newQueue = state.walkInQueue.filter((g: WalkInGuest) => g.id !== guestId);
+      // 큐 번호 재계산
+      const updatedQueue = newQueue.map((g: WalkInGuest, idx: number) => ({
+        ...g,
+        queue_number: idx + 1,
+      }));
+      return { walkInQueue: updatedQueue };
+    });
+  },
+
+  assignGuest: (guestId: string, therapistId: number, bedId: number) => {
+    set((state: any) => ({
+      walkInQueue: state.walkInQueue.map((g: WalkInGuest) =>
+        g.id === guestId
+          ? { ...g, assigned_therapist_id: therapistId, assigned_bed_id: bedId, status: 'assigned' }
+          : g
+      ),
+    }));
+  },
+
+  clearQueue: () => set({ walkInQueue: [] }),
+});
+
+// ============================================================
 // Root Store
 // ============================================================
 
@@ -245,6 +302,7 @@ export const useStore = create<RootState>((set) => ({
   ...createNotificationSlice(set),
   ...createUISlice(set),
   ...createSettlementSlice(set),
+  ...createWalkInQueueSlice(set),
 }));
 
 // ============================================================

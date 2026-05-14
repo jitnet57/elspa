@@ -10,8 +10,103 @@ export default function FlowchartPage() {
           <p className="text-slate-400 text-lg">드라이버 + 마사지사 자동 매칭 시스템</p>
         </div>
 
+        {/* 예약 vs 워크인 비교 */}
+        <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-8 backdrop-blur mb-12">
+          <h2 className="text-2xl font-bold text-amber-400 mb-6">📅 예약 vs 워크인 플로우</h2>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Booking Flow */}
+            <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-6">
+              <h3 className="text-xl font-bold text-amber-300 mb-4 flex items-center gap-2">
+                📅 사전 예약 플로우
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">1</div>
+                  <div>
+                    <div className="font-bold text-white">날짜/시간 선택</div>
+                    <div className="text-xs text-slate-400">미래 날짜에서 예약</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">2</div>
+                  <div>
+                    <div className="font-bold text-white">서비스/테라피스트 선택</div>
+                    <div className="text-xs text-slate-400">특정 테라피스트 지정 가능</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">3</div>
+                  <div>
+                    <div className="font-bold text-white">결제</div>
+                    <div className="text-xs text-slate-400">사전 결제 또는 당일 결제</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">4</div>
+                  <div>
+                    <div className="font-bold text-white">확정 대기</div>
+                    <div className="text-xs text-slate-400">예약 시간 1시간 전 재확인</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">5</div>
+                  <div>
+                    <div className="font-bold text-white">자동 배정</div>
+                    <div className="text-xs text-slate-400">예약 시간에 베드/테라피스트 자동 할당</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Walk-in Flow */}
+            <div className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-6">
+              <h3 className="text-xl font-bold text-purple-300 mb-4 flex items-center gap-2">
+                🚶 워크인 손님 플로우
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">1</div>
+                  <div>
+                    <div className="font-bold text-white">즉시 서비스 요청</div>
+                    <div className="text-xs text-slate-400">지금 바로 마사지 받고 싶은 고객</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">2</div>
+                  <div>
+                    <div className="font-bold text-white">서비스 종류 선택</div>
+                    <div className="text-xs text-slate-400">마사지 종류만 선택 (시간/테라피스트는 선택 사항)</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">3</div>
+                  <div>
+                    <div className="font-bold text-white">출근 순번 기반 자동 매칭</div>
+                    <div className="text-xs text-slate-400">가장 먼저 출근한 idle 테라피스트 추천</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">4</div>
+                  <div>
+                    <div className="font-bold text-white">수동 조정 가능</div>
+                    <div className="text-xs text-slate-400">테라피스트/베드 수동 선택 가능</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">5</div>
+                  <div>
+                    <div className="font-bold text-white">즉시 배정</div>
+                    <div className="text-xs text-slate-400">확정 시 바로 서비스 시작</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Main Flowchart */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* Customer Flow */}
           <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-8 backdrop-blur">
             <h2 className="text-2xl font-bold text-cyan-400 mb-8 flex items-center gap-2">
@@ -252,6 +347,106 @@ export default function FlowchartPage() {
                 <p className="text-sm text-slate-300 ml-11">
                   고객 평가 받음<br/>
                   보상금 정산
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Admin Flow */}
+          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-8 backdrop-blur">
+            <h2 className="text-2xl font-bold text-red-400 mb-8 flex items-center gap-2">
+              ⚙️ 어드민 플로우
+            </h2>
+
+            <div className="space-y-4">
+              {/* Dashboard */}
+              <div className="bg-slate-700/50 rounded-lg p-4 border border-red-500/30">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    ⓐ
+                  </div>
+                  <h3 className="text-white font-bold">실시간 모니터링</h3>
+                </div>
+                <p className="text-sm text-slate-300 ml-11">
+                  베드 상태 관리<br/>
+                  테라피스트 스케줄<br/>
+                  서비스 타이머
+                </p>
+              </div>
+
+              <div className="flex justify-center">
+                <div className="w-1 h-8 bg-gradient-to-b from-red-500 to-red-600"></div>
+              </div>
+
+              {/* Booking Management */}
+              <div className="bg-slate-700/50 rounded-lg p-4 border border-red-500/30">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    ⓑ
+                  </div>
+                  <h3 className="text-white font-bold">예약 관리</h3>
+                </div>
+                <p className="text-sm text-slate-300 ml-11">
+                  예약 확정/취소<br/>
+                  시간 변경<br/>
+                  노쇼 관리
+                </p>
+              </div>
+
+              <div className="flex justify-center">
+                <div className="w-1 h-8 bg-gradient-to-b from-red-500 to-red-600"></div>
+              </div>
+
+              {/* Walk-in Management */}
+              <div className="bg-slate-700/50 rounded-lg p-4 border border-red-500/30">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    ⓒ
+                  </div>
+                  <h3 className="text-white font-bold">워크인 배정</h3>
+                </div>
+                <p className="text-sm text-slate-300 ml-11">
+                  워크인 큐 관리<br/>
+                  출근 순번 기반 매칭<br/>
+                  수동 조정
+                </p>
+              </div>
+
+              <div className="flex justify-center">
+                <div className="w-1 h-8 bg-gradient-to-b from-red-500 to-red-600"></div>
+              </div>
+
+              {/* Therapist Check-in */}
+              <div className="bg-slate-700/50 rounded-lg p-4 border border-red-500/30">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    ⓓ
+                  </div>
+                  <h3 className="text-white font-bold">테라피스트 관리</h3>
+                </div>
+                <p className="text-sm text-slate-300 ml-11">
+                  출근/퇴근 처리<br/>
+                  출근 순번 관리<br/>
+                  휴식 시간 배정
+                </p>
+              </div>
+
+              <div className="flex justify-center">
+                <div className="w-1 h-8 bg-gradient-to-b from-red-500 to-red-600"></div>
+              </div>
+
+              {/* Settlement */}
+              <div className="bg-green-700/30 rounded-lg p-4 border border-green-500/50">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    ⓔ
+                  </div>
+                  <h3 className="text-white font-bold">정산 & 리포트</h3>
+                </div>
+                <p className="text-sm text-slate-300 ml-11">
+                  일일 매출 집계<br/>
+                  테라피스트 수익 정산<br/>
+                  통계 리포트
                 </p>
               </div>
             </div>

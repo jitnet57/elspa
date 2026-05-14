@@ -49,17 +49,17 @@ const MATCHING_MODES: MatchingMode[] = [
     color: 'bg-blue-50 border-blue-200',
     example: [
       {
-        candidate: '이소영',
+        candidate: 'Jessica',
         scores: { expertise: 66.5, distance: 17, rating: 8.8 },
         total: 92.3,
       },
       {
-        candidate: '박유진',
+        candidate: 'Sarah',
         scores: { expertise: 63, distance: 12, rating: 9.2 },
         total: 84.2,
       },
       {
-        candidate: '최정은',
+        candidate: 'Emma',
         scores: { expertise: 59.5, distance: 14, rating: 8.5 },
         total: 82.0,
       },
@@ -94,12 +94,12 @@ const MATCHING_MODES: MatchingMode[] = [
     color: 'bg-green-50 border-green-200',
     example: [
       {
-        candidate: '최정은 (1건만 받음)',
+        candidate: 'Emma (1건만 받음)',
         scores: { expertise: 34, distance: 15, rating: 8.5, fairness: 28.5 },
         total: 86.0,
       },
       {
-        candidate: '이소영 (4건 받음)',
+        candidate: 'Jessica (4건 받음)',
         scores: { expertise: 38, distance: 17, rating: 8.8, fairness: 6 },
         total: 69.8,
       },

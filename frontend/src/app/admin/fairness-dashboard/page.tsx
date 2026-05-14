@@ -19,7 +19,7 @@ interface TherapistFairnessData {
 
 const THERAPIST_FAIRNESS: TherapistFairnessData[] = [
   {
-    name: '이소영',
+    name: 'Jessica',
     rating: 4.9,
     bookingsToday: 4,
     bookingsWeek: 18,
@@ -33,7 +33,7 @@ const THERAPIST_FAIRNESS: TherapistFairnessData[] = [
     status: 'overloaded',
   },
   {
-    name: '박유진',
+    name: 'Sarah',
     rating: 4.8,
     bookingsToday: 2,
     bookingsWeek: 10,
@@ -47,7 +47,7 @@ const THERAPIST_FAIRNESS: TherapistFairnessData[] = [
     status: 'ideal',
   },
   {
-    name: '최정은',
+    name: 'Emma',
     rating: 4.6,
     bookingsToday: 1,
     bookingsWeek: 5,
@@ -75,7 +75,7 @@ const THERAPIST_FAIRNESS: TherapistFairnessData[] = [
     status: 'new',
   },
   {
-    name: '김태희',
+    name: 'Amanda',
     rating: 4.7,
     bookingsToday: 3,
     bookingsWeek: 12,

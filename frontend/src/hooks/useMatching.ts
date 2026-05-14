@@ -171,7 +171,7 @@ export const useCheckOutTherapist = () => {
  *   bed_id: 5,
  *   status: 'in_service',
  *   customer_name: '김민준',
- *   therapist_name: '박유진'
+ *   therapist_name: 'Sarah'
  * });
  * ```
  */

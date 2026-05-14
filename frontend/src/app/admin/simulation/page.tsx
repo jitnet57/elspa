@@ -32,10 +32,10 @@ const SERVICES = [
 ];
 
 const THERAPISTS = [
-  { id: 1, name: '박유진', specialty: '스웨디시 전문' },
-  { id: 2, name: '최정은', specialty: '타이 마사지' },
-  { id: 3, name: '이소영', specialty: '핫스톤 테라피' },
-  { id: 4, name: '김태희', specialty: '발 마사지' },
+  { id: 1, name: 'Sarah', specialty: '스웨디시 전문' },
+  { id: 2, name: 'Emma', specialty: '타이 마사지' },
+  { id: 3, name: 'Jessica', specialty: '핫스톤 테라피' },
+  { id: 4, name: 'Amanda', specialty: '발 마사지' },
   { id: 5, name: '강지연', specialty: '아로마테라피' },
   { id: 6, name: '박민경', specialty: '종합' },
 ];
@@ -63,7 +63,7 @@ export default function SimulationPage() {
     const candidates: MatchingCandidate[] = [
       {
         id: 3,
-        name: '이소영',
+        name: 'Jessica',
         score: 92,
         expertise: 95,
         distance: 85,
@@ -73,7 +73,7 @@ export default function SimulationPage() {
       },
       {
         id: 2,
-        name: '최정은',
+        name: 'Emma',
         score: 87,
         expertise: 88,
         distance: 78,
@@ -83,7 +83,7 @@ export default function SimulationPage() {
       },
       {
         id: 1,
-        name: '박유진',
+        name: 'Sarah',
         score: 81,
         expertise: 90,
         distance: 72,
@@ -99,7 +99,7 @@ export default function SimulationPage() {
       estimatedEndTime: formatTime(endTime),
       selectedBed: 'B' + String(Math.floor(Math.random() * 40) + 1).padStart(2, '0'),
       waitingTime: `${waitMinutes}분`,
-      message: `이소영 테라피스트가 현재 대기 중입니다. 즉시 매칭 가능합니다.`,
+      message: `Jessica 테라피스트가 현재 대기 중입니다. 즉시 매칭 가능합니다.`,
     };
   };
 

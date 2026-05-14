@@ -149,10 +149,10 @@ const THERAPIST_POOL_90: Array<{
   { id: 30, name: '조성훈', specialty: '종합', rating: 4.3, commissionRate: 0.4 },
 
   // 중급 (31-65, 45% 수수료)
-  { id: 31, name: '박유진', specialty: '스웨디시', rating: 4.5, commissionRate: 0.45 },
-  { id: 32, name: '최정은', specialty: '타이마사지', rating: 4.6, commissionRate: 0.45 },
-  { id: 33, name: '이소영', specialty: '핫스톤', rating: 4.4, commissionRate: 0.45 },
-  { id: 34, name: '김태희', specialty: '발마사지', rating: 4.5, commissionRate: 0.45 },
+  { id: 31, name: 'Sarah', specialty: '스웨디시', rating: 4.5, commissionRate: 0.45 },
+  { id: 32, name: 'Emma', specialty: '타이마사지', rating: 4.6, commissionRate: 0.45 },
+  { id: 33, name: 'Jessica', specialty: '핫스톤', rating: 4.4, commissionRate: 0.45 },
+  { id: 34, name: 'Amanda', specialty: '발마사지', rating: 4.5, commissionRate: 0.45 },
   { id: 35, name: '강지연', specialty: '아로마테라피', rating: 4.3, commissionRate: 0.45 },
   { id: 36, name: '박민경', specialty: '종합', rating: 4.6, commissionRate: 0.45 },
   { id: 37, name: '임다현', specialty: '스웨디시', rating: 4.4, commissionRate: 0.45 },
@@ -356,7 +356,7 @@ const generateMockBeds = (): Bed[] => {
 
   // 침대 상태 조회 시, THERAPIST_POOL_90에서 랜덤 선택 (성능상 8명 표시, 실제는 90명)
   const displayTherapistNames = [
-    '박유진', '최정은', '이소영', '김태희', '강지연',
+    'Sarah', 'Emma', 'Jessica', 'Amanda', '강지연',
     '박민경', '임다현', '유지원'
   ];
 
@@ -426,7 +426,7 @@ const generateMockTherapists = (): Therapist[] => {
   return [
     {
       id: 31,
-      name: '박유진',
+      name: 'Sarah',
       status: 'in_service',
       current_bed: 5,
       remaining_minutes: 17,
@@ -434,7 +434,7 @@ const generateMockTherapists = (): Therapist[] => {
     },
     {
       id: 32,
-      name: '최정은',
+      name: 'Emma',
       status: 'in_service',
       current_bed: 12,
       remaining_minutes: 32,
@@ -442,13 +442,13 @@ const generateMockTherapists = (): Therapist[] => {
     },
     {
       id: 33,
-      name: '이소영',
+      name: 'Jessica',
       status: 'idle',
       specialty: '핫스톤'
     },
     {
       id: 34,
-      name: '김태희',
+      name: 'Amanda',
       status: 'in_service',
       current_bed: 18,
       remaining_minutes: 5,

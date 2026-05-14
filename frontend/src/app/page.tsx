@@ -13,18 +13,18 @@ export default function Dashboard() {
   ];
 
   const recentBookings = [
-    { id: 1, customer: '김민준', therapist: '박유진', service: '스웨디시 60분', time: '10:00 AM', status: 'confirmed', revenue: '₩80,000' },
-    { id: 2, customer: '이수연', therapist: '최정은', service: '타이 마사지 90분', time: '11:30 AM', status: 'confirmed', revenue: '₩120,000' },
-    { id: 3, customer: '정현준', therapist: '이소영', service: '핫스톤 60분', time: '02:00 PM', status: 'in_progress', revenue: '₩100,000' },
-    { id: 4, customer: '박지은', therapist: '김태희', service: '커플 마사지 120분', time: '03:00 PM', status: 'pending', revenue: '₩180,000' },
-    { id: 5, customer: '최준호', therapist: '박유진', service: '발 마사지 30분', time: '04:30 PM', status: 'completed', revenue: '₩50,000' },
+    { id: 1, customer: '김민준', therapist: 'Sarah', service: '스웨디시 60분', time: '10:00 AM', status: 'confirmed', revenue: '₩80,000' },
+    { id: 2, customer: '이수연', therapist: 'Emma', service: '타이 마사지 90분', time: '11:30 AM', status: 'confirmed', revenue: '₩120,000' },
+    { id: 3, customer: '정현준', therapist: 'Jessica', service: '핫스톤 60분', time: '02:00 PM', status: 'in_progress', revenue: '₩100,000' },
+    { id: 4, customer: '박지은', therapist: 'Amanda', service: '커플 마사지 120분', time: '03:00 PM', status: 'pending', revenue: '₩180,000' },
+    { id: 5, customer: '최준호', therapist: 'Sarah', service: '발 마사지 30분', time: '04:30 PM', status: 'completed', revenue: '₩50,000' },
   ];
 
   const therapists = [
-    { name: '박유진', bookings: 8, rating: 4.9, revenue: '₩640K', availability: '95%', imageColor: 'from-orange-100 to-amber-100' },
-    { name: '최정은', bookings: 6, rating: 4.7, revenue: '₩480K', availability: '87%', imageColor: 'from-pink-100 to-orange-100' },
-    { name: '이소영', bookings: 7, rating: 4.8, revenue: '₩560K', availability: '92%', imageColor: 'from-amber-100 to-yellow-100' },
-    { name: '김태희', bookings: 5, rating: 4.6, revenue: '₩400K', availability: '80%', imageColor: 'from-yellow-100 to-orange-100' },
+    { name: 'Sarah', bookings: 8, rating: 4.9, revenue: '₩640K', availability: '95%', imageColor: 'from-orange-100 to-amber-100' },
+    { name: 'Emma', bookings: 6, rating: 4.7, revenue: '₩480K', availability: '87%', imageColor: 'from-pink-100 to-orange-100' },
+    { name: 'Jessica', bookings: 7, rating: 4.8, revenue: '₩560K', availability: '92%', imageColor: 'from-amber-100 to-yellow-100' },
+    { name: 'Amanda', bookings: 5, rating: 4.6, revenue: '₩400K', availability: '80%', imageColor: 'from-yellow-100 to-orange-100' },
   ];
 
   const weeklyData = [65, 45, 72, 58, 85, 92, 78];
@@ -69,8 +69,7 @@ export default function Dashboard() {
           <p className="text-xs font-bold text-gray-600 px-4 mb-3">📊 어드민</p>
           {[
             { id: 'dashboard', label: '📈 대시보드', href: '/' },
-            { id: 'matching', label: '⚡ 실시간 매칭', href: '/admin/matching' },
-            { id: 'reservation', label: '🔍 예약 검색', href: '/admin/reservation' },
+            { id: 'therapist', label: '💼 테라피스트 관리', href: '/admin/matching' },
             { id: 'simulation', label: '🎯 시뮬레이션', href: '/admin/simulation' },
             { id: 'monitor', label: '🖥️ 카운터 모니터', href: '/monitor' },
           ].map((item) => (

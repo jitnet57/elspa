@@ -11,10 +11,10 @@ export default function CustomerHome() {
   ];
 
   const therapists = [
-    { name: '박유진', specialty: '스웨디시 전문', experience: '7년', rating: 4.9, bookings: 156 },
-    { name: '최정은', specialty: '타이 마사지', experience: '5년', rating: 4.7, bookings: 128 },
-    { name: '이소영', specialty: '핫스톤 테라피', experience: '8년', rating: 4.8, bookings: 167 },
-    { name: '김태희', specialty: '발 마사지', experience: '6년', rating: 4.6, bookings: 145 },
+    { name: 'Sarah', specialty: '스웨디시 전문', experience: '7년', rating: 4.9, bookings: 156 },
+    { name: 'Emma', specialty: '타이 마사지', experience: '5년', rating: 4.7, bookings: 128 },
+    { name: 'Jessica', specialty: '핫스톤 테라피', experience: '8년', rating: 4.8, bookings: 167 },
+    { name: 'Amanda', specialty: '발 마사지', experience: '6년', rating: 4.6, bookings: 145 },
   ];
 
   const testimonials = [

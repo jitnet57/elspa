@@ -37,7 +37,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '확인 문자/이메일 수신',
       status: 'completed',
       icon: '✅',
-      details: ['예약번호: #12345', '서비스: 스웨디시 60분', '테라피스트: 이소영']
+      details: ['예약번호: #12345', '서비스: 스웨디시 60분', '테라피스트: Jessica']
     },
     {
       time: '14:00',
@@ -50,7 +50,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
     {
       time: '14:30',
       title: '서비스 시작',
-      description: 'B05 침대에서 이소영과 함께',
+      description: 'B05 침대에서 Jessica과 함께',
       status: 'pending',
       icon: '💆',
       details: ['침대 안내', '타올 제공', '서비스 시작']
@@ -69,7 +69,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '앱에서 평점과 코멘트 작성',
       status: 'pending',
       icon: '⭐',
-      details: ['별점: 5개', '코멘트: "매우 만족합니다"', '이소영 평점 올림']
+      details: ['별점: 5개', '코멘트: "매우 만족합니다"', 'Jessica 평점 올림']
     }
   ],
   admin: [
@@ -95,11 +95,11 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: 'AI가 자동으로 점수 계산',
       status: 'completed',
       icon: '🤖',
-      details: ['이소영 92점 (1위)', '박유진 87점 (2위)', '최정은 81점 (3위)']
+      details: ['Jessica 92점 (1위)', 'Sarah 87점 (2위)', 'Emma 81점 (3위)']
     },
     {
       time: '08:37',
-      title: '[✓ 이소영 배정] 클릭',
+      title: '[✓ Jessica 배정] 클릭',
       description: '테라피스트 배정 확정',
       status: 'completed',
       icon: '✅',
@@ -111,7 +111,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '배정이 카운터 모니터에 반영됨',
       status: 'active',
       icon: '📺',
-      details: ['B05 침대: 파란색으로 변경', '타이머: 60:00 시작', '이소영 상태: in_service']
+      details: ['B05 침대: 파란색으로 변경', '타이머: 60:00 시작', 'Jessica 상태: in_service']
     },
     {
       time: '14:30',
@@ -127,7 +127,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '서비스 종료 처리',
       status: 'pending',
       icon: '✔️',
-      details: ['침대 상태: cleaning (회색)', '다음 예약 자동 매칭', '이소영 상태: resting']
+      details: ['침대 상태: cleaning (회색)', '다음 예약 자동 매칭', 'Jessica 상태: resting']
     },
     {
       time: '16:00',
@@ -135,7 +135,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '/admin/fairness 대시보드',
       status: 'pending',
       icon: '📈',
-      details: ['공정성 지수: 72점', '이소영 일감: 92%', '최정은 일감: 38%']
+      details: ['공정성 지수: 72점', 'Jessica 일감: 92%', 'Emma 일감: 38%']
     }
   ],
   therapist: [
@@ -322,10 +322,10 @@ const workflows: Record<UserType, WorkflowStep[]> = {
     {
       time: '14:25',
       title: '/monitor에서 확인',
-      description: '이소영이 B05 침대에 배정됨을 확인',
+      description: 'Jessica이 B05 침대에 배정됨을 확인',
       status: 'completed',
       icon: '✅',
-      details: ['B05가 파란색 (마사지중)', '이소영 상태 확인', '예약 정보 맞음']
+      details: ['B05가 파란색 (마사지중)', 'Jessica 상태 확인', '예약 정보 맞음']
     },
     {
       time: '14:28',
@@ -333,7 +333,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '"B05 침대로 가세요"',
       status: 'active',
       icon: '🗺️',
-      details: ['"이소영 테라피스트입니다"', '"60분 서비스입니다"', '"편히 쉬세요"']
+      details: ['"Jessica 테라피스트입니다"', '"60분 서비스입니다"', '"편히 쉬세요"']
     },
     {
       time: '14:30',

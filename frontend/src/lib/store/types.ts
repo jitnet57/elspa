@@ -47,6 +47,7 @@ export interface Therapist {
   remaining_minutes?: number;
   specialty?: string;
   rating?: number;
+  checked_in_at?: string; // "HH:MM" 형식 (출근 시간)
 }
 
 export interface TherapistState {
@@ -181,6 +182,32 @@ export interface UIState {
 }
 
 // ============================================================
+// Walk-In Queue Related
+// ============================================================
+
+export interface WalkInGuest {
+  id: string;
+  queue_number: number; // 대기 번호 (1, 2, 3...)
+  service_type: string; // 마사지 종류 (swedish, thai, hotstone, foot, aroma)
+  requested_therapist_id?: number; // 특정 테라피스트 지정 (없으면 순번 배정)
+  customer_name?: string;
+  created_at: string; // ISO 형식 시각
+  status: 'waiting' | 'assigned' | 'cancelled';
+  assigned_therapist_id?: number;
+  assigned_bed_id?: number;
+}
+
+export interface WalkInQueueState {
+  walkInQueue: WalkInGuest[];
+
+  // Actions
+  addToQueue: (guest: Omit<WalkInGuest, 'id' | 'queue_number' | 'created_at' | 'status'>) => string;
+  removeFromQueue: (guestId: string) => void;
+  assignGuest: (guestId: string, therapistId: number, bedId: number) => void;
+  clearQueue: () => void;
+}
+
+// ============================================================
 // Settlement Related
 // ============================================================
 
@@ -251,6 +278,7 @@ export interface RootState
     MatchingState,
     NotificationState,
     UIState,
+    WalkInQueueState,
     SettlementState {
   // Combined state
 }

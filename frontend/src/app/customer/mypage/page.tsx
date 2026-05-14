@@ -15,7 +15,7 @@ export default function MyPagePage() {
     points: 3500,
     nextBooking: {
       service: '스웨디시 마사지 60분',
-      therapist: '박유진',
+      therapist: 'Sarah',
       date: '2026-05-15',
       time: '14:00',
     },
@@ -25,7 +25,7 @@ export default function MyPagePage() {
     {
       id: 1,
       service: '스웨디시 마사지',
-      therapist: '박유진',
+      therapist: 'Sarah',
       date: '2026-05-08',
       time: '10:00',
       price: '₩80,000',
@@ -34,7 +34,7 @@ export default function MyPagePage() {
     {
       id: 2,
       service: '발 마사지',
-      therapist: '김태희',
+      therapist: 'Amanda',
       date: '2026-05-01',
       time: '15:00',
       price: '₩50,000',
@@ -43,7 +43,7 @@ export default function MyPagePage() {
     {
       id: 3,
       service: '타이 마사지',
-      therapist: '최정은',
+      therapist: 'Emma',
       date: '2026-04-24',
       time: '11:30',
       price: '₩120,000',

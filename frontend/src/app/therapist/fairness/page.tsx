@@ -19,7 +19,7 @@ interface TherapistMetrics {
 const THERAPIST_DATA: TherapistMetrics[] = [
   {
     id: 1,
-    name: '이소영',
+    name: 'Jessica',
     rating: 4.9,
     bookingsThisMonth: 45,
     avgBookingsPerDay: 1.5,
@@ -32,7 +32,7 @@ const THERAPIST_DATA: TherapistMetrics[] = [
   },
   {
     id: 2,
-    name: '박유진',
+    name: 'Sarah',
     rating: 4.8,
     bookingsThisMonth: 32,
     avgBookingsPerDay: 1.1,
@@ -45,7 +45,7 @@ const THERAPIST_DATA: TherapistMetrics[] = [
   },
   {
     id: 3,
-    name: '최정은',
+    name: 'Emma',
     rating: 4.6,
     bookingsThisMonth: 18,
     avgBookingsPerDay: 0.6,
@@ -71,7 +71,7 @@ const THERAPIST_DATA: TherapistMetrics[] = [
   },
   {
     id: 5,
-    name: '김태희',
+    name: 'Amanda',
     rating: 4.7,
     bookingsThisMonth: 25,
     avgBookingsPerDay: 0.8,
