@@ -73,6 +73,8 @@ export interface Booking {
   requested_at: string;
   scheduled_at: string;
   notes?: string;
+  source?: 'web' | 'kakao_channel' | 'facebook_messenger' | 'whatsapp' | 'other';
+  phone?: string;
 }
 
 export interface BookingState {
@@ -83,6 +85,7 @@ export interface BookingState {
   setBookings: (bookings: Booking[]) => void;
   selectBooking: (bookingId: number | null) => void;
   updateBookingStatus: (bookingId: number, status: Booking['status']) => void;
+  addBooking: (booking: Omit<Booking, 'id' | 'requested_at' | 'status'>) => Promise<void>;
 }
 
 // ============================================================
@@ -148,7 +151,7 @@ export interface MatchingState {
 
 export interface Notification {
   id: string;
-  type: 'session_ending' | 'match_ready' | 'wait_alert' | 'check_in' | 'settlement_ready' | 'settlement_confirmed' | 'settlement_paid' | 'error';
+  type: 'session_ending' | 'match_ready' | 'wait_alert' | 'check_in' | 'settlement_ready' | 'settlement_confirmed' | 'settlement_paid' | 'error' | 'success' | 'booking_created';
   message: string;
   severity: 'info' | 'warning' | 'error' | 'success';
   timestamp: Date;
@@ -349,6 +352,96 @@ export interface MonthlySettlementState {
 }
 
 // ============================================================
+// Invoice & Receipt Related (정산/영수증 시스템)
+// ============================================================
+
+export interface Invoice {
+  id: string;
+  guide_id: number;
+  company_id: number;
+  settlement_month: string; // "2026-05"
+  invoice_number: string; // INV-202605-001
+  total_amount: number;
+  commission_rate: number;
+  commission_amount: number;
+  tax_amount: number;
+  net_amount: number;
+  issued_at: string;
+  due_date: string;
+  status: 'draft' | 'issued' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+  payment_method?: string;
+  notes?: string;
+}
+
+export interface Receipt {
+  id: string;
+  invoice_id: string;
+  receipt_number: string; // REC-202605-001
+  amount: number;
+  payment_method: 'card' | 'bank_transfer' | 'cash';
+  paid_at: string;
+  received_at?: string;
+  status: 'issued' | 'sent' | 'received' | 'cancelled';
+  file_path?: string; // PDF 파일 경로
+  digital_signature?: string; // 디지털 서명
+}
+
+export interface Message {
+  id: string;
+  invoice_id: string;
+  recipient_phone: string;
+  recipient_email?: string;
+  channel: 'kakao' | 'sms' | 'email' | 'memo';
+  content: string;
+  status: 'pending' | 'sent' | 'failed' | 'read';
+  sent_at?: string;
+  error_message?: string;
+  retry_count: number;
+}
+
+export interface ExpenseRecord {
+  id: string;
+  date: string; // "2026-05-15"
+  category: string; // 임차료, 인건비, 광고, 등
+  amount: number;
+  description: string;
+  receipt_image_path?: string;
+  ocr_text?: string; // OCR로 추출된 텍스트
+  ai_category?: string; // AI로 분류된 카테고리
+  verified: boolean;
+  tags: string[];
+  google_sheet_id?: string; // Google Sheets row ID
+}
+
+export interface BudgetAnalysis {
+  month: string;
+  category: string;
+  budgeted: number;
+  actual: number;
+  variance: number;
+  percentage: number;
+}
+
+export interface InvoiceState {
+  invoices: Invoice[];
+  receipts: Receipt[];
+  messages: Message[];
+  expenseRecords: ExpenseRecord[];
+  budgetAnalysis: BudgetAnalysis[];
+
+  // Actions
+  addInvoice: (invoice: Omit<Invoice, 'id'>) => Promise<string>;
+  updateInvoice: (id: string, data: Partial<Invoice>) => void;
+  addReceipt: (receipt: Omit<Receipt, 'id'>) => Promise<string>;
+  addMessage: (message: Omit<Message, 'id'>) => Promise<string>;
+  updateMessageStatus: (messageId: string, status: Message['status']) => void;
+  addExpenseRecord: (record: Omit<ExpenseRecord, 'id'>) => Promise<string>;
+  updateExpenseRecord: (id: string, data: Partial<ExpenseRecord>) => void;
+  generateInvoicePDF: (invoiceId: string) => Promise<Blob>;
+  generateReceiptPDF: (receiptId: string) => Promise<Blob>;
+}
+
+// ============================================================
 // Root Store State
 // ============================================================
 
@@ -363,6 +456,7 @@ export interface RootState
     SettlementState,
     CompanyState,
     GuideState,
-    MonthlySettlementState {
+    MonthlySettlementState,
+    InvoiceState {
   // Combined state
 }

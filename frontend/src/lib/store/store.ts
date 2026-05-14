@@ -23,6 +23,7 @@ import {
   CompanyState,
   GuideState,
   MonthlySettlementState,
+  InvoiceState,
   Bed,
   Therapist,
   Booking,
@@ -37,6 +38,11 @@ import {
   Company,
   Guide,
   MonthlySettlement,
+  Invoice,
+  Receipt,
+  Message,
+  ExpenseRecord,
+  BudgetAnalysis,
 } from './types';
 
 // ============================================================
@@ -86,6 +92,18 @@ const createBookingSlice = (set: any): BookingState => ({
       bookings: state.bookings.map((booking: Booking) =>
         booking.id === bookingId ? { ...booking, status } : booking
       ),
+    }));
+  },
+
+  addBooking: async (booking: Omit<Booking, 'id' | 'requested_at' | 'status'>) => {
+    const newBooking: Booking = {
+      id: Math.max(0, ...useStore.getState().bookings.map(b => b.id), 0) + 1,
+      ...booking,
+      requested_at: new Date().toISOString(),
+      status: 'requested',
+    };
+    set((state: any) => ({
+      bookings: [...state.bookings, newBooking],
     }));
   },
 });
@@ -456,6 +474,84 @@ const createMonthlySettlementSlice = (set: any): MonthlySettlementState => ({
 });
 
 // ============================================================
+// Invoice Slice (정산/영수증 시스템)
+// ============================================================
+
+const createInvoiceSlice = (set: any): InvoiceState => ({
+  invoices: [],
+  receipts: [],
+  messages: [],
+  expenseRecords: [],
+  budgetAnalysis: [],
+
+  addInvoice: async (invoice: Omit<Invoice, 'id'>) => {
+    const id = `INV-${Date.now()}`;
+    set((state: any) => ({
+      invoices: [...state.invoices, { id, ...invoice }],
+    }));
+    return id;
+  },
+
+  updateInvoice: (id: string, data: Partial<Invoice>) => {
+    set((state: any) => ({
+      invoices: state.invoices.map((inv: Invoice) =>
+        inv.id === id ? { ...inv, ...data } : inv
+      ),
+    }));
+  },
+
+  addReceipt: async (receipt: Omit<Receipt, 'id'>) => {
+    const id = `REC-${Date.now()}`;
+    set((state: any) => ({
+      receipts: [...state.receipts, { id, ...receipt }],
+    }));
+    return id;
+  },
+
+  addMessage: async (message: Omit<Message, 'id'>) => {
+    const id = `MSG-${Date.now()}`;
+    set((state: any) => ({
+      messages: [...state.messages, { id, ...message, retry_count: 0 }],
+    }));
+    return id;
+  },
+
+  updateMessageStatus: (messageId: string, status: Message['status']) => {
+    set((state: any) => ({
+      messages: state.messages.map((msg: Message) =>
+        msg.id === messageId ? { ...msg, status } : msg
+      ),
+    }));
+  },
+
+  addExpenseRecord: async (record: Omit<ExpenseRecord, 'id'>) => {
+    const id = `EXP-${Date.now()}`;
+    set((state: any) => ({
+      expenseRecords: [...state.expenseRecords, { id, ...record }],
+    }));
+    return id;
+  },
+
+  updateExpenseRecord: (id: string, data: Partial<ExpenseRecord>) => {
+    set((state: any) => ({
+      expenseRecords: state.expenseRecords.map((rec: ExpenseRecord) =>
+        rec.id === id ? { ...rec, ...data } : rec
+      ),
+    }));
+  },
+
+  generateInvoicePDF: async (invoiceId: string) => {
+    // 임시 구현 - Track 1에서 실제 PDF 생성
+    return new Blob(['PDF content'], { type: 'application/pdf' });
+  },
+
+  generateReceiptPDF: async (receiptId: string) => {
+    // 임시 구현 - Track 1에서 실제 PDF 생성
+    return new Blob(['PDF content'], { type: 'application/pdf' });
+  },
+});
+
+// ============================================================
 // Root Store
 // ============================================================
 
@@ -464,6 +560,7 @@ export const useStore = create<RootState>((set) => ({
   ...createTherapistSlice(set),
   ...createBookingSlice(set),
   ...createMatchingSlice(set),
+  ...createInvoiceSlice(set),
   ...createNotificationSlice(set),
   ...createUISlice(set),
   ...createSettlementSlice(set),

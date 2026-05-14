@@ -1,9 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useStore } from '@/lib/store/store';
 
-export default function BookingPage() {
+function BookingContent() {
+  const searchParams = useSearchParams();
+  const source = (searchParams.get('source') || 'web') as 'web' | 'kakao_channel' | 'facebook_messenger' | 'whatsapp' | 'other';
+  const { addBooking, addNotification } = useStore();
+
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     service: '',
     date: '',
@@ -44,6 +51,61 @@ export default function BookingPage() {
   };
 
   const selectedService = services.find((s) => s.id === formData.service);
+  const selectedTherapist = therapists.find((t) => t.id.toString() === formData.therapist);
+
+  const sourceLabels = {
+    web: '웹사이트',
+    kakao_channel: '카카오톡 채널',
+    facebook_messenger: 'Facebook Messenger',
+    whatsapp: 'WhatsApp',
+    other: '기타',
+  };
+
+  const handleBookingSubmit = async () => {
+    if (!formData.name || !formData.phone || !formData.service || !formData.date || !formData.time) {
+      addNotification({
+        type: 'error',
+        message: '모든 필수 정보를 입력해주세요.',
+        severity: 'error',
+        isRead: false,
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await addBooking({
+        customer_name: formData.name,
+        phone: formData.phone,
+        service_type: formData.service,
+        service_minutes: parseInt(selectedService?.duration || '60'),
+        scheduled_at: `${formData.date}T${formData.time}`,
+        notes: formData.memo,
+        source: source,
+      });
+
+      addNotification({
+        type: 'success',
+        message: `예약이 완료되었습니다! (예약번호: #${Math.random().toString(36).substr(2, 9).toUpperCase()})`,
+        severity: 'success',
+        isRead: false,
+        action_url: '/customer/mypage',
+      });
+
+      setTimeout(() => {
+        window.location.href = '/customer/mypage';
+      }, 2000);
+    } catch (error) {
+      addNotification({
+        type: 'error',
+        message: '예약 처리 중 오류가 발생했습니다.',
+        severity: 'error',
+        isRead: false,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
@@ -163,7 +225,11 @@ export default function BookingPage() {
               </p>
               <p>
                 <span className="text-gray-600 font-light">테라피스트:</span>
-                <span className="font-semibold text-gray-900 ml-2">{therapists.find((t) => t.id.toString() === formData.therapist)?.name}</span>
+                <span className="font-semibold text-gray-900 ml-2">{selectedTherapist?.name}</span>
+              </p>
+              <p>
+                <span className="text-gray-600 font-light">예약 출처:</span>
+                <span className="font-semibold text-gray-900 ml-2">{sourceLabels[source]}</span>
               </p>
               <div className="border-t border-stone-300 pt-3 mt-3">
                 <p className="flex justify-between font-bold text-gray-900">
@@ -181,10 +247,22 @@ export default function BookingPage() {
         <button onClick={handlePrev} disabled={step === 1} className="px-6 py-3 bg-stone-200 text-gray-900 rounded-lg hover:bg-stone-300 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-colors">
           ← 이전
         </button>
-        <button onClick={handleNext} disabled={step === 4} className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all shadow-md">
-          {step === 4 ? '예약 완료' : '다음 →'}
+        <button
+          onClick={step === 4 ? handleBookingSubmit : handleNext}
+          disabled={step === 4 && isSubmitting}
+          className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all shadow-md"
+        >
+          {step === 4 ? (isSubmitting ? '처리 중...' : '예약 완료') : '다음 →'}
         </button>
       </div>
     </div>
+  );
+}
+
+export default function BookingPage() {
+  return (
+    <Suspense fallback={<div className="max-w-3xl mx-auto py-8">예약 페이지를 로딩하는 중입니다...</div>}>
+      <BookingContent />
+    </Suspense>
   );
 }
