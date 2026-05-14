@@ -274,6 +274,50 @@ export default function TherapistManagementPage() {
           </div>
         </div>
 
+        {/* 출근 순번 관리 */}
+        <div className="mt-8 bg-white rounded-xl p-8 shadow-sm border border-gray-200">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">⏱️ 워크인 배정 순번</h2>
+          <div className="space-y-2">
+            {therapists
+              .filter(t => t.status !== 'checked_out' && t.checked_in_at)
+              .sort((a, b) => (a.checked_in_at || '').localeCompare(b.checked_in_at || ''))
+              .map((therapist, idx) => (
+                <div key={therapist.id} className="flex items-center gap-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                  <div className="flex-shrink-0">
+                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${therapist.avatar_color} flex items-center justify-center text-white font-bold text-sm`}>
+                      {idx + 1}
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-gray-900">{therapist.name}</span>
+                      <span className="text-xs px-2 py-1 rounded-full bg-white border border-gray-300 text-gray-600">
+                        {therapist.checked_in_at} 출근
+                      </span>
+                      <span className="text-xs px-2 py-1 rounded-full bg-white text-gray-600">
+                        {therapist.specialty}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {therapist.status === 'idle' && '✅ 즉시 배정 가능'}
+                      {therapist.status === 'in_service' && `🔵 서비스 중 (${therapist.sessions_today}회 완료)`}
+                      {therapist.status === 'resting' && '☕ 휴식 중'}
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0 text-right">
+                    <div className="text-xs text-gray-500">수익</div>
+                    <div className="font-bold text-green-600">₩{(therapist.revenue_today / 1000).toFixed(0)}K</div>
+                  </div>
+                </div>
+              ))}
+          </div>
+          <div className="mt-4 p-3 bg-amber-50 rounded-lg border-l-4 border-amber-500">
+            <p className="text-xs text-amber-900">
+              💡 워크인 손님은 위 순서대로 자동 배정됩니다. 특정 테라피스트를 지정할 수도 있습니다.
+            </p>
+          </div>
+        </div>
+
         {/* 일일 정산 요약 */}
         <div className="mt-8 bg-white rounded-xl p-8 shadow-sm border border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">📊 일일 정산 요약</h2>

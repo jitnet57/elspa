@@ -13,7 +13,9 @@
       "PowerShell(taskkill /PID 19956 /F 2>&1)",
       "Bash(git remote *)",
       "PowerShell(taskkill /PID 14988 /F)",
-      "PowerShell(Get-Content \"e:\\\\elspa\\\\frontend\\\\.next\\\\dev\\\\logs\\\\next-development.log\" -Tail 100 -ErrorAction SilentlyContinue | Where-Object {$_ -match \"error|Error|warning\" })"
+      "PowerShell(Get-Content \"e:\\\\elspa\\\\frontend\\\\.next\\\\dev\\\\logs\\\\next-development.log\" -Tail 100 -ErrorAction SilentlyContinue | Where-Object {$_ -match \"error|Error|warning\" })",
+      "PowerShell(taskkill /PID 13412 /F 2>&1)",
+      "Bash(timeout 30 tail -f C:\\\\Users\\\\jitne\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--elspa\\\\5860e1d7-f50a-4a4c-85d8-4196b755c15f\\\\tasks\\\\bo0cls4wf.output)"
     ]
   }
 }

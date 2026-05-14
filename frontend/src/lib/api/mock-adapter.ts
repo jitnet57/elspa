@@ -39,6 +39,7 @@ interface Therapist {
   current_bed?: number;
   remaining_minutes?: number;
   specialty?: string;
+  checked_in_at?: string; // "HH:MM" 형식
 }
 
 interface TherapistSettlement {
@@ -430,7 +431,8 @@ const generateMockTherapists = (): Therapist[] => {
       status: 'in_service',
       current_bed: 5,
       remaining_minutes: 17,
-      specialty: '스웨디시'
+      specialty: '스웨디시',
+      checked_in_at: '09:05'
     },
     {
       id: 32,
@@ -438,13 +440,15 @@ const generateMockTherapists = (): Therapist[] => {
       status: 'in_service',
       current_bed: 12,
       remaining_minutes: 32,
-      specialty: '타이마사지'
+      specialty: '타이마사지',
+      checked_in_at: '09:15'
     },
     {
       id: 33,
       name: 'Jessica',
       status: 'idle',
-      specialty: '핫스톤'
+      specialty: '핫스톤',
+      checked_in_at: '09:30'
     },
     {
       id: 34,
@@ -452,26 +456,30 @@ const generateMockTherapists = (): Therapist[] => {
       status: 'in_service',
       current_bed: 18,
       remaining_minutes: 5,
-      specialty: '발마사지'
+      specialty: '발마사지',
+      checked_in_at: '09:45'
     },
     {
       id: 35,
       name: '강지연',
       status: 'resting',
       remaining_minutes: 10,
-      specialty: '아로마테라피'
+      specialty: '아로마테라피',
+      checked_in_at: '10:00'
     },
     {
       id: 36,
       name: '박민경',
       status: 'idle',
-      specialty: '종합'
+      specialty: '종합',
+      checked_in_at: '10:10'
     },
     {
       id: 37,
       name: '임다현',
       status: 'idle',
-      specialty: '스웨디시'
+      specialty: '스웨디시',
+      checked_in_at: '10:20'
     },
     {
       id: 38,
@@ -479,7 +487,8 @@ const generateMockTherapists = (): Therapist[] => {
       status: 'in_service',
       current_bed: 28,
       remaining_minutes: 22,
-      specialty: '타이마사지'
+      specialty: '타이마사지',
+      checked_in_at: '10:30'
     }
   ];
 };
