@@ -108,8 +108,16 @@ const mockMonthlySettlements: MonthlySettlement[] = [
 ];
 
 export default function MonthlySettlementPage() {
-  const { monthlySettlements, setMonthlySettlements, updateSettlementStatus, companies, setCompanies, guides, setGuides } =
-    useStore();
+  const {
+    monthlySettlements,
+    setMonthlySettlements,
+    updateSettlementStatus,
+    companies,
+    setCompanies,
+    guides,
+    setGuides,
+    addNotification,
+  } = useStore();
   const [selectedMonth, setSelectedMonth] = useState('2026-05');
   const [filterCompanyId, setFilterCompanyId] = useState<number | null>(null);
   const [selectedSettlement, setSelectedSettlement] = useState<MonthlySettlement | null>(null);
@@ -314,7 +322,12 @@ export default function MonthlySettlementPage() {
                                 <button
                                   onClick={() => {
                                     updateSettlementStatus(settlement.id, 'confirmed');
-                                    alert('정산이 확정되었습니다');
+                                    addNotification({
+                                      type: 'settlement_confirmed',
+                                      message: `${getGuideName(settlement.guide_id)}의 ${settlement.settlement_month} 정산이 확정되었습니다. (₩${(settlement.payment_amount / 1000).toFixed(0)}K)`,
+                                      severity: 'success',
+                                      action_url: `/admin/monthly-settlement`,
+                                    });
                                   }}
                                   className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded transition-colors"
                                 >
@@ -326,7 +339,12 @@ export default function MonthlySettlementPage() {
                               <button
                                 onClick={() => {
                                   updateSettlementStatus(settlement.id, 'paid');
-                                  alert('지급 완료로 처리되었습니다');
+                                  addNotification({
+                                    type: 'settlement_paid',
+                                    message: `${getGuideName(settlement.guide_id)}에게 ₩${(settlement.payment_amount / 1000).toFixed(0)}K 지급을 완료했습니다.`,
+                                    severity: 'success',
+                                    action_url: `/admin/monthly-settlement`,
+                                  });
                                 }}
                                 className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white font-semibold text-sm rounded transition-colors"
                               >

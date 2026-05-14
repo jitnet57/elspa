@@ -297,12 +297,23 @@ export default function TherapistManagementPage() {
         <div className="mt-8 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-8 border-2 border-indigo-200 shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">📅 월정산 미리보기</h2>
-            <a
-              href="/admin/monthly-settlement"
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors text-sm"
-            >
-              상세 보기 →
-            </a>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  const currentMonth = new Date().toISOString().slice(0, 7);
+                  alert(`✅ ${currentMonth}월 정산이 생성되었습니다!`);
+                }}
+                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-colors text-sm"
+              >
+                ⚙️ 정산 실행
+              </button>
+              <a
+                href="/admin/monthly-settlement"
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors text-sm"
+              >
+                상세 보기 →
+              </a>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

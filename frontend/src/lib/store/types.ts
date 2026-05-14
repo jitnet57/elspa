@@ -148,11 +148,12 @@ export interface MatchingState {
 
 export interface Notification {
   id: string;
-  type: 'session_ending' | 'match_ready' | 'wait_alert' | 'check_in' | 'error';
+  type: 'session_ending' | 'match_ready' | 'wait_alert' | 'check_in' | 'settlement_ready' | 'settlement_confirmed' | 'settlement_paid' | 'error';
   message: string;
   severity: 'info' | 'warning' | 'error' | 'success';
   timestamp: Date;
   isRead: boolean;
+  action_url?: string; // 알림 클릭 시 이동할 URL
 }
 
 export interface NotificationState {
