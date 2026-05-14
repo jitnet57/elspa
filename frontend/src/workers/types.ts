@@ -24,12 +24,12 @@ export interface Env {
   NEXT_PUBLIC_API_URL: string;
 
   // KV Storage (선택사항)
-  SETTLEMENTS?: KVNamespace;
-  INVOICES?: KVNamespace;
-  REPORTS?: KVNamespace;
+  SETTLEMENTS?: any;
+  INVOICES?: any;
+  REPORTS?: any;
 
   // D1 Database (선택사항)
-  DB?: D1Database;
+  DB?: any;
 }
 
 export interface ScheduledEvent {

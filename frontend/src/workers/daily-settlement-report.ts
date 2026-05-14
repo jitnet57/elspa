@@ -3,7 +3,7 @@
  * 매일 00:00 (아침) / 12:00 (저녁) 실행
  */
 
-import { Env } from './types';
+import { Env, ScheduledEvent, ExecutionContext } from './types';
 
 interface SettlementReport {
   period: 'morning' | 'evening';
