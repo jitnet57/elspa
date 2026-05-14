@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useStore } from '@/lib/store/store';
 
 interface Therapist {
   id: number;
@@ -47,6 +48,7 @@ export default function TherapistManagementPage() {
   const [therapists, setTherapists] = useState<Therapist[]>(mockTherapists);
   const [waitingGuests, setWaitingGuests] = useState<WaitingGuest[]>(mockWaitingGuests);
   const [selectedTherapist, setSelectedTherapist] = useState<Therapist | null>(null);
+  const { calculateMonthlySettlements, addNotification } = useStore();
 
   const handleCheckIn = (therapistId: number) => {
     const now = new Date().toLocaleTimeString('ko-KR', { hour12: false, hour: '2-digit', minute: '2-digit' });
@@ -345,7 +347,15 @@ export default function TherapistManagementPage() {
               <button
                 onClick={() => {
                   const currentMonth = new Date().toISOString().slice(0, 7);
-                  alert(`✅ ${currentMonth}월 정산이 생성되었습니다!`);
+                  calculateMonthlySettlements(currentMonth);
+                  addNotification({
+                    type: 'settlement_ready',
+                    message: `${currentMonth} 월정산이 수동으로 생성되었습니다.`,
+                    severity: 'success',
+                    isRead: false,
+                    action_url: '/admin/monthly-settlement',
+                  });
+                  window.location.href = '/admin/monthly-settlement';
                 }}
                 className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-colors text-sm"
               >

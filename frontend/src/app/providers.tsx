@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useSettlementScheduler } from '@/hooks/useSettlementScheduler';
 
 const createQueryClient = () => {
     return new QueryClient({
@@ -24,11 +25,20 @@ function getQueryClient() {
     return clientQueryClient;
 }
 
+/**
+ * 월정산 자동 스케줄링 hook 마운트용 컴포넌트
+ */
+function SettlementSchedulerMount() {
+    useSettlementScheduler();
+    return null;
+}
+
 export function Providers({ children }: { children: React.ReactNode }) {
     const queryClient = getQueryClient();
 
     return (
         <QueryClientProvider client={queryClient}>
+            <SettlementSchedulerMount />
             {children}
         </QueryClientProvider>
     );

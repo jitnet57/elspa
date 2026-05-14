@@ -160,6 +160,22 @@ export default function MonthlySettlementPage() {
     return (guides as Guide[]).find(g => g.id === guideId)?.name || '알 수 없음';
   };
 
+  const getNextSettlementDate = (companyId: number): string => {
+    const company = (companies as any[]).find(c => c.id === companyId);
+    if (!company || !company.settlement_day) return '정산일 미설정';
+
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    let nextDate = new Date(year, month, company.settlement_day);
+
+    if (nextDate <= today) {
+      nextDate = new Date(year, month + 1, company.settlement_day);
+    }
+
+    return nextDate.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+  };
+
   const groupedByCompany = filteredSettlements.reduce(
     (acc, settlement) => {
       const companyId = settlement.company_id;
@@ -269,8 +285,11 @@ export default function MonthlySettlementPage() {
               {Object.entries(groupedByCompany).map(([companyId, settlements]) => (
                 <div key={companyId} className="border border-gray-200 rounded-lg overflow-hidden">
                   {/* 업체 헤더 */}
-                  <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                  <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                     <h3 className="text-lg font-bold text-gray-900">{getCompanyName(parseInt(companyId))}</h3>
+                    <span className="text-xs px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-semibold">
+                      다음 정산: {getNextSettlementDate(parseInt(companyId))}
+                    </span>
                   </div>
 
                   {/* 가이드별 정산 */}

@@ -395,12 +395,18 @@ const createMonthlySettlementSlice = (set: any): MonthlySettlementState => ({
 
   calculateMonthlySettlements: (month: string) => {
     set((state: any) => {
-      const { therapistSettlements, guides, companies } = state;
+      const { therapistSettlements, guides, companies, monthlySettlements: existingSettlements } = state;
 
-      // 이미 계산된 월정산이 있으면 제거
-      const filteredSettlements = state.monthlySettlements.filter(
-        (s: MonthlySettlement) => s.settlement_month !== month
+      // 중복 방지: 해당 월 정산이 이미 있으면 기존 것 유지
+      const monthSettlementsExist = guides.some((guide: Guide) =>
+        existingSettlements.some(
+          (s: MonthlySettlement) => s.guide_id === guide.id && s.settlement_month === month
+        )
       );
+
+      if (monthSettlementsExist) {
+        return { monthlySettlements: existingSettlements };
+      }
 
       // 각 가이드별로 월정산 계산
       const newSettlements: MonthlySettlement[] = guides.map((guide: Guide) => {
@@ -412,7 +418,7 @@ const createMonthlySettlementSlice = (set: any): MonthlySettlementState => ({
           (ts: TherapistSettlement) => ts.name === guide.name
         );
 
-        if (!therapistSettlement) return null;
+        if (!therapistSettlement || therapistSettlement.totalRevenue === 0) return null;
 
         // 수수료율 결정 (가이드 개별 설정 or 회사 기본값)
         const commissionRate = guide.commission_rate || company.commission_rate;
@@ -420,12 +426,16 @@ const createMonthlySettlementSlice = (set: any): MonthlySettlementState => ({
         const commissionAmount = Math.floor(totalRevenue * (commissionRate / 100));
         const paymentAmount = totalRevenue - commissionAmount;
 
+        // settlement_date: 회사의 settlement_day를 기반으로 계산
+        const [year, monthNum] = month.split('-').map(Number);
+        const settlementDate = `${year}-${String(monthNum).padStart(2, '0')}-${String(company.settlement_day).padStart(2, '0')}`;
+
         return {
           id: Math.random() * 1000000,
           company_id: company.id,
           guide_id: guide.id,
           settlement_month: month,
-          settlement_date: new Date().toISOString().split('T')[0],
+          settlement_date: settlementDate,
           total_sessions: therapistSettlement.sessionCount || 0,
           total_revenue: totalRevenue,
           commission_rate: commissionRate,
@@ -439,7 +449,7 @@ const createMonthlySettlementSlice = (set: any): MonthlySettlementState => ({
       }).filter((s: MonthlySettlement | null) => s !== null) as MonthlySettlement[];
 
       return {
-        monthlySettlements: [...filteredSettlements, ...newSettlements],
+        monthlySettlements: [...existingSettlements, ...newSettlements],
       };
     });
   },
