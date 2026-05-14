@@ -584,14 +584,14 @@ export const mockApiAdapter = {
       .filter(t => t.status === 'idle' || t.status === 'in_service')
       .map(t => {
         // 70% 전문성, 20% 시간, 10% 평점
-        const expertiseMatch = t.specialty.includes(serviceType) ? 70 : Math.random() * 70;
+        const expertiseMatch = t.specialty && t.specialty.includes(serviceType) ? 70 : Math.random() * 70;
         const timeAvailability = t.status === 'idle' ? 20 : Math.random() * 20;
         const rating = Math.random() * 10;
 
         return {
           therapist_id: t.id,
           therapist_name: t.name,
-          specialty: t.specialty,
+          specialty: t.specialty || '일반',
           score: Math.round(expertiseMatch + timeAvailability + rating),
           availability: t.status === 'idle' ? '즉시 가용' : `${t.remaining_minutes}분 후`
         };
@@ -612,8 +612,8 @@ export const mockApiAdapter = {
     if (Math.random() < 0.95) {
       return {
         bed_id: Math.floor(Math.random() * 86) + 1,
-        therapist_id,
-        booking_id,
+        therapist_id: therapistId,
+        booking_id: bookingId,
         confirmed_at: new Date().toISOString()
       };
     } else {

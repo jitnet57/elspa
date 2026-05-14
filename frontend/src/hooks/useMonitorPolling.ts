@@ -128,7 +128,7 @@ export const useMonitorPolling = (): MonitorData => {
       reserved: bedStats.reserved,
       in_service: bedStats.in_service,
       cleaning: bedStats.cleaning,
-      total: bedStats.total,
+      total: bedStats.available + bedStats.reserved + bedStats.in_service + bedStats.cleaning,
     },
     therapistStats: {
       idle: therapistStatsResult.stats?.idle || 0,
@@ -140,7 +140,16 @@ export const useMonitorPolling = (): MonitorData => {
     },
 
     // 예측
-    predictions: prediction || null,
+    predictions: prediction ? {
+      average_wait_minutes: (prediction as any).minutes || 0,
+      next_available_therapist: {
+        id: (prediction as any).next_therapist?.id || 0,
+        name: (prediction as any).next_therapist?.name || 'N/A',
+        availability: (prediction as any).next_therapist?.availability || '예측 불가',
+      },
+      idle_therapists_count: therapistStatsResult.stats?.idle || 0,
+      in_service_therapists_count: therapistStatsResult.stats?.in_service || 0,
+    } : null,
 
     // 상태
     isLoading,

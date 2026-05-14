@@ -339,6 +339,7 @@ export default function MonthlySettlementPage() {
                                       type: 'settlement_confirmed',
                                       message: `${getGuideName(settlement.guide_id)}의 ${settlement.settlement_month} 정산이 확정되었습니다. (₩${(settlement.payment_amount / 1000).toFixed(0)}K)`,
                                       severity: 'success',
+                                      isRead: false,
                                       action_url: `/admin/monthly-settlement`,
                                     });
                                   }}
@@ -356,6 +357,7 @@ export default function MonthlySettlementPage() {
                                     type: 'settlement_paid',
                                     message: `${getGuideName(settlement.guide_id)}에게 ₩${(settlement.payment_amount / 1000).toFixed(0)}K 지급을 완료했습니다.`,
                                     severity: 'success',
+                                    isRead: false,
                                     action_url: `/admin/monthly-settlement`,
                                   });
                                 }}

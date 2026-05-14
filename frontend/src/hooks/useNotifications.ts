@@ -46,6 +46,7 @@ export const useAddNotification = () => {
           type: 'match_ready',
           message,
           severity: 'success',
+          isRead: false,
         });
       },
       [addNotification]
@@ -57,6 +58,7 @@ export const useAddNotification = () => {
           type: 'error',
           message,
           severity: 'error',
+          isRead: false,
         });
       },
       [addNotification]
@@ -68,6 +70,7 @@ export const useAddNotification = () => {
           type: 'session_ending',
           message,
           severity: 'warning',
+          isRead: false,
         });
       },
       [addNotification]
@@ -79,6 +82,7 @@ export const useAddNotification = () => {
           type: 'wait_alert',
           message,
           severity: 'info',
+          isRead: false,
         });
       },
       [addNotification]
@@ -90,6 +94,7 @@ export const useAddNotification = () => {
           type: 'session_ending',
           message: `침대 ${bedNumber} 세션이 ${remainingMinutes}분 후 종료됩니다.`,
           severity: 'warning',
+          isRead: false,
         });
       },
       [addNotification]
@@ -101,6 +106,7 @@ export const useAddNotification = () => {
           type: 'match_ready',
           message: `${therapistName}님이 침대 ${bedNumber}에 준비되었습니다.`,
           severity: 'success',
+          isRead: false,
         });
       },
       [addNotification]
@@ -112,6 +118,7 @@ export const useAddNotification = () => {
           type: 'check_in',
           message: `${therapistName}님이 체크인했습니다.`,
           severity: 'info',
+          isRead: false,
         });
       },
       [addNotification]
@@ -123,6 +130,7 @@ export const useAddNotification = () => {
           type: 'wait_alert',
           message: `${customerName}님 예상 대기시간: ${estimatedMinutes}분`,
           severity: 'info',
+          isRead: false,
         });
       },
       [addNotification]
