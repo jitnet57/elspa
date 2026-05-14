@@ -1,36 +1,12 @@
-# Cloudflare Workers + Pages 설정
+# Cloudflare Pages + Workers 설정
 name = "elspa-frontend"
 type = "javascript"
-account_id = "your-account-id"
-workers_dev = true
-route = "https://elspa.pages.dev/api/*"
-zone_id = "your-zone-id"
 
-# Pages 설정
+# 환경변수 (Cloudflare Pages 대시보드에서 설정해주세요)
 [env.production]
-name = "elspa"
-routes = [
-  { pattern = "elspa.pages.dev", zone_name = "elspa.com" }
-]
-
-# 환경변수
-[env.production.vars]
-NEXT_PUBLIC_API_URL = "https://elspa.pages.dev"
-NEXT_PUBLIC_KAKAO_API_KEY = "your-kakao-api-key"
-NEXT_PUBLIC_SMS_API_KEY = "your-sms-api-key"
-NEXT_PUBLIC_GOOGLE_API_KEY = "your-google-api-key"
-NEXT_PUBLIC_GOOGLE_SHEET_ID = "your-spreadsheet-id"
-
-# Cloudflare Workers Cron Triggers
-[triggers]
-crons = [
-  "0 0 * * *",   # 매일 00:00 (아침 정산 보고서)
-  "0 12 * * *"   # 매일 12:00 (저녁 정산 보고서)
-]
+vars = { NEXT_PUBLIC_API_URL = "https://elspa.pages.dev", NEXT_PUBLIC_USE_MOCK_API = "true" }
 
 # 빌드 설정
 [build]
 command = "npm run build"
 cwd = "."
-watch_paths = ["src/**/*.ts", "src/**/*.tsx"]
-build_watch_paths = ["src/**/*.ts", "src/**/*.tsx"]
