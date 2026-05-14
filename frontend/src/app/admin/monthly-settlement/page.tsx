@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useStore } from '@/lib/store/store';
+import { exportMonthlySettlementCSV, downloadCSV } from '@/lib/utils/csv-export';
 
 interface MonthlySettlement {
   id: number;
@@ -220,8 +221,20 @@ export default function MonthlySettlementPage() {
               ))}
             </select>
           </div>
-          <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
-            엑셀 내보내기
+          <button
+            onClick={() => {
+              const csv = exportMonthlySettlementCSV(
+                filteredSettlements,
+                mockCompanies as any,
+                mockGuides as any,
+                selectedMonth
+              );
+              downloadCSV(`월정산_${selectedMonth}.csv`, csv);
+              alert('정산 데이터가 다운로드되었습니다!');
+            }}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+          >
+            📥 CSV 내보내기
           </button>
         </div>
 
