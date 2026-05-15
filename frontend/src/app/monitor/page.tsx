@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useStore } from '@/lib/store/store';
 import { NotificationCenter } from '@/components/NotificationCenter';
 
 interface ScheduleItem {
@@ -51,18 +50,20 @@ const mockSchedules: ScheduleItem[] = [
 ];
 
 const massageTypes = [
-  { name: 'Swedish Massage', icon: '💆', type: 'swedish' },
-  { name: 'Thai Massage', icon: '🧘', type: 'thai' },
-  { name: 'Aromatherapy Massage', icon: '🌸', type: 'aroma' },
-  { name: 'Hot Stone Massage', icon: '🔥', type: 'hotstone' },
-  { name: 'Foot Massage', icon: '🦶', type: 'foot' },
-  { name: 'Others (Custom)', icon: '•••', type: 'custom' },
+  { name: 'Swedish', icon: '💆', type: 'swedish' },
+  { name: 'Thai', icon: '🧘', type: 'thai' },
+  { name: 'Aromatherapy', icon: '🌸', type: 'aroma' },
+  { name: 'Hot Stone', icon: '🔥', type: 'hotstone' },
+  { name: 'Foot', icon: '🦶', type: 'foot' },
 ];
 
 export default function MonitorPage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTherapist, setSelectedTherapist] = useState<Therapist | null>(null);
   const [selectedSession, setSelectedSession] = useState<ScheduleItem | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'home' | 'schedule' | 'therapists' | 'sessions'>('home');
+  const [showSessionModal, setShowSessionModal] = useState(false);
 
   const hours = Array.from({ length: 13 }, (_, i) => i + 9);
   const therapistCount = mockTherapists.length;
@@ -128,27 +129,17 @@ export default function MonitorPage() {
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   };
 
   const getTherapistSchedules = (therapistId: number) => {
     return mockSchedules.filter(s => s.therapistId === therapistId).sort((a, b) => a.startTime.localeCompare(b.startTime));
   };
 
-  const getSchedulePosition = (startTime: string): { left: number; width: number } => {
-    const [hours, mins] = startTime.split(':').map(Number);
-    const startHour = hours - 9;
-    const leftPercent = (startHour + mins / 60) * (100 / 13);
-    return {
-      left: leftPercent,
-      width: (100 / 13),
-    };
-  };
-
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <div className="w-56 bg-blue-900 text-white flex flex-col">
+    <div className="flex flex-col lg:flex-row h-screen bg-gray-100">
+      {/* 사이드바 (데스크톱만) */}
+      <div className="hidden lg:flex lg:flex-col w-56 bg-blue-900 text-white flex-shrink-0">
         <div className="p-6 border-b border-blue-800 flex items-center gap-3">
           <span className="text-3xl">💆</span>
           <h1 className="text-xl font-bold">Therapist Schedule</h1>
@@ -171,68 +162,105 @@ export default function MonitorPage() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200 p-6">
+      {/* 모바일 슬라이드 드로어 */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} />
+          <div className="absolute left-0 top-0 bottom-0 w-56 bg-blue-900 text-white flex flex-col">
+            <div className="p-4 flex items-center justify-between border-b border-blue-800">
+              <h1 className="text-lg font-bold">Menu</h1>
+              <button onClick={() => setSidebarOpen(false)} className="text-2xl hover:bg-blue-800 rounded p-1">
+                ✕
+              </button>
+            </div>
+            <nav className="flex-1 p-4 space-y-2">
+              <NavItem icon="📊" label="Dashboard" active={true} />
+              <NavItem icon="📅" label="Schedule" active={false} />
+              <NavItem icon="👥" label="Therapists" active={false} />
+              <NavItem icon="👤" label="Clients" active={false} />
+              <NavItem icon="💇" label="Massage Types" active={false} />
+            </nav>
+            <div className="p-4 border-t border-blue-800">
+              <button className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 rounded font-semibold text-sm">
+                🚪 Log Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 메인 콘텐츠 */}
+      <div className="flex-1 flex flex-col overflow-hidden pb-16 lg:pb-0">
+        {/* 모바일 상단 헤더 */}
+        <div className="lg:hidden bg-blue-900 text-white p-4 flex items-center justify-between">
+          <button onClick={() => setSidebarOpen(true)} className="text-2xl">☰</button>
+          <h1 className="text-lg font-bold">💆 Schedule</h1>
+          <div className="w-8" />
+        </div>
+
+        {/* 데스크톱 헤더 */}
+        <div className="hidden lg:block bg-white border-b border-gray-200 p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Daily Therapist Schedule</h2>
+            <h2 className="text-2xl md:text-4xl font-bold text-gray-900">Daily Therapist Schedule</h2>
             <div className="flex items-center gap-4">
-              <select className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 font-medium hover:border-gray-400">
+              <select className="hidden md:block px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 font-medium">
                 <option>English</option>
               </select>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+              <button className="hidden md:block px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
                 👤 Receptionist
               </button>
             </div>
           </div>
 
-          {/* Step Indicators */}
+          {/* 스텝 인디케이터 */}
           <div className="grid grid-cols-3 gap-6">
             <StepIndicator number={1} title="Select Date" description="View daily schedule by date." />
-            <StepIndicator number={2} title="Daily Therapist Schedule" description="See who is working, their schedule, time, and massage type at a glance." />
-            <StepIndicator number={3} title="Start New Massage" description="Select therapist, client and massage type to start a new session." />
+            <StepIndicator number={2} title="Daily Schedule" description="See therapist schedule, time, and massage type." />
+            <StepIndicator number={3} title="Start Massage" description="Select therapist, client and massage type." />
           </div>
         </div>
 
-        {/* Content Area */}
-        <div className="flex-1 overflow-hidden flex gap-6 p-6">
-          {/* Left: Date and Therapist List */}
-          <div className="w-96 bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex flex-col">
-            {/* Date Picker */}
-            <div className="mb-6">
-              <div className="flex items-center justify-center gap-4">
+        {/* 콘텐츠 영역 */}
+        <div className="flex-1 overflow-hidden flex flex-col lg:flex-row gap-4 p-4 lg:p-6">
+          {/* 좌측: 날짜 + 테라피스트 목록 */}
+          <div className="w-full lg:w-96 bg-white rounded-lg shadow-sm border border-gray-200 p-4 lg:p-6 flex flex-col max-h-full">
+            {/* 날짜 선택 */}
+            <div className="mb-4 lg:mb-6">
+              <div className="flex items-center justify-center gap-2 lg:gap-4">
                 <button className="p-2 hover:bg-gray-100 rounded">←</button>
-                <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg border border-gray-300">
+                <div className="flex items-center gap-2 px-3 lg:px-4 py-2 bg-gray-50 rounded-lg border border-gray-300">
                   <span>📅</span>
-                  <span className="font-semibold text-gray-700">{formatDate(selectedDate)} (Fri)</span>
+                  <span className="font-semibold text-sm lg:text-base text-gray-700">{formatDate(selectedDate)}</span>
                 </div>
                 <button className="p-2 hover:bg-gray-100 rounded">→</button>
               </div>
             </div>
 
-            {/* Therapist List */}
+            {/* 테라피스트 목록 */}
             <div className="flex-1 overflow-y-auto">
-              <div className="text-sm font-semibold text-gray-700 mb-4">
+              <div className="text-xs lg:text-sm font-semibold text-gray-700 mb-3 lg:mb-4">
                 Therapists ({therapistCount})
               </div>
               <div className="space-y-2">
                 {mockTherapists.map(therapist => (
                   <div
                     key={therapist.id}
-                    onClick={() => setSelectedTherapist(therapist)}
+                    onClick={() => {
+                      setSelectedTherapist(therapist);
+                      setActiveTab('therapists');
+                    }}
                     className={`p-3 rounded-lg cursor-pointer border-2 transition-all ${
                       selectedTherapist?.id === therapist.id
                         ? 'border-blue-500 bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-white font-bold text-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-gray-300 flex items-center justify-center text-white font-bold text-xs lg:text-sm">
                         {therapist.name[0]}
                       </div>
                       <div className="flex-1">
-                        <div className="font-semibold text-sm text-gray-900">{therapist.name}</div>
+                        <div className="font-semibold text-xs lg:text-sm text-gray-900">{therapist.name}</div>
                         <div className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${getStatusColor(therapist.status)}`}>
                           {getStatusBadge(therapist.status)}
                         </div>
@@ -244,9 +272,9 @@ export default function MonitorPage() {
             </div>
           </div>
 
-          {/* Center: Schedule Grid */}
-          <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex flex-col overflow-hidden">
-            {/* Time Header */}
+          {/* 중앙: 데스크톱 타임 그리드 (lg 이상만) */}
+          <div className="hidden lg:flex flex-1 bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex-col overflow-hidden">
+            {/* 시간 헤더 */}
             <div className="mb-4">
               <div className="flex">
                 <div className="w-32 flex-shrink-0" />
@@ -260,25 +288,22 @@ export default function MonitorPage() {
               </div>
             </div>
 
-            {/* Schedule Rows */}
+            {/* 스케줄 행 */}
             <div className="flex-1 overflow-y-auto border-t border-gray-200">
               {mockTherapists.map(therapist => {
                 const schedules = getTherapistSchedules(therapist.id);
                 return (
                   <div key={therapist.id} className="flex border-b border-gray-200 relative min-h-24">
-                    {/* Therapist Name */}
                     <div className="w-32 flex-shrink-0 p-3 border-r border-gray-200 bg-gray-50">
                       <div className="font-semibold text-sm text-gray-900">{therapist.name}</div>
                       <div className="text-xs text-gray-500">{therapist.specialty}</div>
                     </div>
 
-                    {/* Time Slots */}
                     <div className="flex-1 relative grid" style={{ gridTemplateColumns: `repeat(13, minmax(0, 1fr))` }}>
                       {hours.map(hour => (
                         <div key={hour} className="border-r border-gray-100 relative" />
                       ))}
 
-                      {/* Schedule Items */}
                       {schedules.map((schedule, idx) => {
                         const [startHour, startMin] = schedule.startTime.split(':').map(Number);
                         const [endHour, endMin] = schedule.endTime.split(':').map(Number);
@@ -289,7 +314,10 @@ export default function MonitorPage() {
                         return (
                           <div
                             key={idx}
-                            onClick={() => setSelectedSession(schedule)}
+                            onClick={() => {
+                              setSelectedSession(schedule);
+                              setShowSessionModal(true);
+                            }}
                             className={`absolute top-1 bottom-1 mx-1 rounded border-2 p-2 cursor-pointer hover:shadow-md transition-shadow ${getScheduleColor(schedule.serviceType)}`}
                             style={{
                               left: `${(startOffset / 13) * 100}%`,
@@ -310,23 +338,18 @@ export default function MonitorPage() {
             </div>
           </div>
 
-          {/* Right: Details Panel */}
-          <div className="w-80 flex flex-col gap-6">
-            {/* Start New Massage Button */}
+          {/* 우측: 데스크톱 패널 (xl 이상만) */}
+          <div className="hidden xl:flex flex-col w-80 gap-4">
+            {/* 새 마사지 버튼 */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <button className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg flex items-center justify-center gap-2 transition-colors">
-                + Start New Massage
+                + Start Massage
               </button>
             </div>
 
-            {/* Massage Types */}
+            {/* 마사지 타입 */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex-1 overflow-y-auto">
-              <div className="text-lg font-bold text-gray-900 mb-4">
-                ④ Massage Types
-              </div>
-              <div className="text-xs text-gray-600 mb-4">
-                Select massage type when starting a new session.
-              </div>
+              <div className="text-lg font-bold text-gray-900 mb-3">④ Massage Types</div>
               <div className="grid grid-cols-2 gap-3">
                 {massageTypes.map(type => (
                   <button
@@ -340,15 +363,9 @@ export default function MonitorPage() {
               </div>
             </div>
 
-            {/* Session Details */}
+            {/* 세션 상세 */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex-1 overflow-y-auto">
-              <div className="text-lg font-bold text-gray-900 mb-4">
-                ⑤ Session Details
-              </div>
-              <div className="text-xs text-gray-600 mb-4">
-                Track ongoing or completed sessions with details.
-              </div>
-
+              <div className="text-lg font-bold text-gray-900 mb-3">⑤ Session Details</div>
               {selectedSession ? (
                 <div className="space-y-3">
                   <div className="bg-blue-50 p-3 rounded-lg">
@@ -363,53 +380,65 @@ export default function MonitorPage() {
                     <div className="text-xs text-gray-600 mb-1">Client</div>
                     <div className="font-semibold text-gray-900">{selectedSession.customerName || 'N/A'}</div>
                   </div>
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <div className="text-xs text-gray-600 mb-1">Status</div>
-                    <div className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
-                      selectedSession.status === 'in_service' ? 'bg-blue-100 text-blue-800' :
-                      selectedSession.status === 'reserved' ? 'bg-gray-200 text-gray-800' :
-                      'bg-orange-100 text-orange-800'
-                    }`}>
-                      {selectedSession.status === 'in_service' ? 'In Session' : selectedSession.status === 'reserved' ? 'Reserved' : 'Break'}
-                    </div>
-                  </div>
                 </div>
               ) : (
                 <div className="text-center text-gray-400 py-8">
                   <p className="text-sm">Select a session to view details</p>
                 </div>
               )}
-
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <div className="text-sm font-semibold text-gray-700 mb-3">Current / Recent Sessions</div>
-                <div className="space-y-2">
-                  {mockSchedules.slice(0, 3).map((schedule, idx) => (
-                    <div
-                      key={idx}
-                      onClick={() => setSelectedSession(schedule)}
-                      className="p-3 rounded border border-gray-200 hover:border-blue-400 hover:bg-blue-50 cursor-pointer transition-colors"
-                    >
-                      <div className="flex items-start gap-2">
-                        <span className="text-lg">{getServiceIcon(schedule.serviceType)}</span>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-sm text-gray-900 truncate">{schedule.customerName}</div>
-                          <div className="text-xs text-gray-500 truncate">{schedule.serviceName}</div>
-                          <div className="text-xs text-blue-600 font-medium">{schedule.startTime} - {schedule.endTime}</div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  <button className="w-full text-center text-blue-600 hover:text-blue-700 font-semibold text-sm py-2">
-                    View All
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Notification Center */}
+      {/* 모바일 탭 바 */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex">
+        <TabItem icon="🏠" label="Home" active={activeTab === 'home'} onClick={() => setActiveTab('home')} />
+        <TabItem icon="📅" label="Schedule" active={activeTab === 'schedule'} onClick={() => setActiveTab('schedule')} />
+        <TabItem icon="👥" label="Therapists" active={activeTab === 'therapists'} onClick={() => setActiveTab('therapists')} />
+        <TabItem icon="📋" label="Sessions" active={activeTab === 'sessions'} onClick={() => setActiveTab('sessions')} />
+      </div>
+
+      {/* 모바일 세션 모달 */}
+      {showSessionModal && selectedSession && (
+        <div className="fixed inset-0 z-50 lg:hidden flex items-end">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowSessionModal(false)} />
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 max-h-96 overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-900">Session Details</h3>
+              <button onClick={() => setShowSessionModal(false)} className="text-2xl hover:text-gray-600">✕</button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="text-sm text-gray-600 mb-1">Service</div>
+                <div className="font-semibold text-gray-900">{selectedSession.serviceName} {getServiceIcon(selectedSession.serviceType)}</div>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="text-sm text-gray-600 mb-1">Therapist</div>
+                <div className="font-semibold text-gray-900">{selectedSession.therapistName}</div>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="text-sm text-gray-600 mb-1">Time</div>
+                <div className="font-semibold text-gray-900">{selectedSession.startTime} - {selectedSession.endTime}</div>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="text-sm text-gray-600 mb-1">Client</div>
+                <div className="font-semibold text-gray-900">{selectedSession.customerName || 'Walk-in'}</div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowSessionModal(false)}
+              className="w-full mt-6 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 알림 센터 */}
       <NotificationCenter />
     </div>
   );
@@ -419,9 +448,7 @@ function NavItem({ icon, label, active }: { icon: string; label: string; active:
   return (
     <button
       className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-        active
-          ? 'bg-blue-700 text-white'
-          : 'text-blue-100 hover:bg-blue-800'
+        active ? 'bg-blue-700 text-white' : 'text-blue-100 hover:bg-blue-800'
       }`}
     >
       <span className="text-lg">{icon}</span>
@@ -437,9 +464,25 @@ function StepIndicator({ number, title, description }: { number: number; title: 
         {number}
       </div>
       <div>
-        <div className="font-semibold text-gray-900">{title}</div>
-        <div className="text-sm text-gray-600">{description}</div>
+        <div className="font-semibold text-gray-900 text-sm lg:text-base">{title}</div>
+        <div className="text-xs lg:text-sm text-gray-600">{description}</div>
       </div>
     </div>
+  );
+}
+
+function TabItem({ icon, label, active, onClick }: { icon: string; label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex-1 flex flex-col items-center gap-1 py-3 px-2 border-t-2 transition-colors ${
+        active
+          ? 'border-blue-600 text-blue-600 bg-blue-50'
+          : 'border-transparent text-gray-600 hover:bg-gray-50'
+      }`}
+    >
+      <span className="text-xl">{icon}</span>
+      <span className="text-xs font-semibold">{label}</span>
+    </button>
   );
 }

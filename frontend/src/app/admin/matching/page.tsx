@@ -168,17 +168,17 @@ export default function TherapistManagementPage() {
   const totalCommission = therapists.reduce((sum, t) => sum + t.total_commission, 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* 헤더 */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-4xl font-bold text-gray-900 tracking-tight">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <h1 className="text-2xl md:text-4xl font-bold text-gray-900 tracking-tight">
               💼 테라피스트 관리
             </h1>
             <button
               onClick={downloadExcel}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-colors"
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-colors text-sm md:text-base whitespace-nowrap"
             >
               📊 엑셀 다운로드
             </button>

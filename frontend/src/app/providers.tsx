@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useSettlementScheduler } from '@/hooks/useSettlementScheduler';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { OfflineBanner } from '@/components/OfflineBanner';
+import { InAppBrowserBanner } from '@/components/InAppBrowserBanner';
 
 const createQueryClient = () => {
     return new QueryClient({
@@ -48,6 +49,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
     return (
         <QueryClientProvider client={queryClient}>
+            <InAppBrowserBanner />
             <OfflineBanner />
             <SettlementSchedulerMount />
             <ExchangeRateMount />

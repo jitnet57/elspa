@@ -139,14 +139,14 @@ export default function CompaniesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         {/* 헤더 */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2 tracking-tight">
+          <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2 tracking-tight">
             🏢 업체 관리
           </h1>
-          <p className="text-lg text-gray-600 font-light">
+          <p className="text-base md:text-lg text-gray-600 font-light">
             여행사/마사지샵 정보 및 정산 설정
           </p>
         </div>
@@ -235,8 +235,8 @@ export default function CompaniesPage() {
 
         {/* 모달 */}
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="bg-white rounded-xl p-8 w-full max-w-md max-h-96 overflow-y-auto border-2 border-blue-500 shadow-2xl">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="bg-white rounded-xl p-4 md:p-8 w-full max-w-md max-h-[80vh] overflow-y-auto border-2 border-blue-500 shadow-2xl">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">
                   {selectedCompany ? '업체 수정' : '새 업체 등록'}
