@@ -106,13 +106,13 @@ export const WalkInBookingModal = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
-      <div className="relative bg-gray-800 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-blue-500 shadow-2xl">
+      <div className="relative bg-gray-800 rounded-xl p-4 sm:p-6 w-full mx-2 sm:mx-4 max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-blue-500 shadow-2xl">
         {/* 헤더 */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-blue-400">
+          <h2 className="text-xl sm:text-2xl font-bold text-blue-400">
             ✨ 워크인 손님 추가
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">
+          <button onClick={onClose} className="text-gray-400 hover:text-white text-xl sm:text-2xl flex-shrink-0">
             ✕
           </button>
         </div>
@@ -123,7 +123,7 @@ export const WalkInBookingModal = ({
             {/* 서비스 종류 선택 */}
             <div>
               <label className="text-gray-300 font-bold mb-2 block">💆 서비스 종류</label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {SERVICE_TYPES.map(svc => (
                   <button
                     key={svc.id}
@@ -241,7 +241,7 @@ export const WalkInBookingModal = ({
             {/* 침대 선택 */}
             <div>
               <label className="text-gray-300 font-bold mb-2 block">🛏️ 침대 선택</label>
-              <div className="grid grid-cols-4 gap-2 max-h-40 overflow-y-auto">
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-40 overflow-y-auto">
                 {availableBeds.map(bed => (
                   <button
                     key={bed.id}
