@@ -63,7 +63,6 @@ export default function MonitorPage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTherapist, setSelectedTherapist] = useState<Therapist | null>(null);
   const [selectedSession, setSelectedSession] = useState<ScheduleItem | null>(null);
-  const { notifications } = useStore();
 
   const hours = Array.from({ length: 13 }, (_, i) => i + 9);
   const therapistCount = mockTherapists.length;
@@ -411,7 +410,7 @@ export default function MonitorPage() {
       </div>
 
       {/* Notification Center */}
-      <NotificationCenter notifications={notifications} />
+      <NotificationCenter />
     </div>
   );
 }
