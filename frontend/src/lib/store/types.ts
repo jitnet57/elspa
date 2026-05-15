@@ -285,6 +285,11 @@ export interface Company {
   commission_rate: number; // 기본 수수료율 (30 = 30%)
   status: 'active' | 'inactive';
   created_at: string;
+  // 결제정보
+  gcash_number?: string; // Gcash 계정 번호
+  bank_name?: string; // 은행명
+  bank_account?: string; // 계좌번호
+  bank_holder?: string; // 예금주명
 }
 
 export interface Guide {

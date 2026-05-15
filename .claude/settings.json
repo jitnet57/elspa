@@ -19,7 +19,28 @@
       "Bash(Get-ChildItem \"e:\\\\elspa\\\\frontend\\\\src\\\\lib\\\\store\\\\\" -Name)",
       "Bash(timeout 60 tail -f C:\\\\Users\\\\jitne\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\e--elspa\\\\5860e1d7-f50a-4a4c-85d8-4196b755c15f\\\\tasks\\\\bhmtca3mw.output)",
       "PowerShell(taskkill /PID 26584 /F)",
-      "Bash(tee dev-output.log)"
+      "Bash(tee dev-output.log)",
+      "PowerShell(npm install -g vercel@latest)",
+      "PowerShell(vercel --version)",
+      "Bash(Get-ChildItem -Path \"e:\\\\elspa\\\\frontend\\\\src\\\\app\" -Recurse -Name -Include \"page.tsx\")",
+      "Bash(Select-Object -First 20)",
+      "Bash(npx vercel *)",
+      "Bash(curl -s http://localhost:3000/customer/booking)",
+      "Bash(grep -o \"priceUSD\\\\|PriceDisplay\\\\|\\\\$\\\\|₱\")",
+      "Bash(grep -E \"\\(\\\\$|₱|priceUSD\\)\")",
+      "Bash(xargs grep -l \"therapist\\\\|테라피스트\")",
+      "WebFetch(domain:localhost)",
+      "Bash(curl -s http://localhost:3000/admin/matching)",
+      "PowerShell(curl.exe -I http://localhost:3000/admin/matching 2>&1)",
+      "Bash(curl -I http://localhost:3000/admin/matching)",
+      "PowerShell(curl.exe -s http://localhost:3000/admin/matching 2>&1)",
+      "PowerShell(head -3)",
+      "PowerShell(Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 2; $null = Start-Job -ScriptBlock { cd e:\\\\elspa\\\\frontend; npm run dev } -Name DevServer; Start-Sleep -Seconds 6; \"Dev server started\")",
+      "PowerShell(Get-Process node)",
+      "PowerShell(Head -5)",
+      "PowerShell(Get-Process node -ErrorAction SilentlyContinue)",
+      "PowerShell(curl.exe -s http://localhost:3000/admin/matching -I)",
+      "Bash(curl -s -I https://elspa-vercel.app/admin/matching)"
     ]
   }
 }

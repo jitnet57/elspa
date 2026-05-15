@@ -13,6 +13,10 @@ interface Company {
   commission_rate: number;
   status: 'active' | 'inactive';
   created_at: string;
+  gcash_number?: string;
+  bank_name?: string;
+  bank_account?: string;
+  bank_holder?: string;
 }
 
 const mockCompanies: Company[] = [
@@ -26,6 +30,10 @@ const mockCompanies: Company[] = [
     commission_rate: 30,
     status: 'active',
     created_at: '2026-01-01',
+    gcash_number: '09123456789',
+    bank_name: '신한은행',
+    bank_account: '110-123-456789',
+    bank_holder: '김철수',
   },
   {
     id: 2,
@@ -37,6 +45,10 @@ const mockCompanies: Company[] = [
     commission_rate: 25,
     status: 'active',
     created_at: '2026-01-15',
+    gcash_number: '09987654321',
+    bank_name: '우리은행',
+    bank_account: '220-456-789012',
+    bank_holder: '이영희',
   },
   {
     id: 3,
@@ -48,6 +60,10 @@ const mockCompanies: Company[] = [
     commission_rate: 28,
     status: 'active',
     created_at: '2026-02-01',
+    gcash_number: '09555666777',
+    bank_name: '국민은행',
+    bank_account: '330-789-012345',
+    bank_holder: '박민수',
   },
 ];
 
@@ -99,6 +115,10 @@ export default function CompaniesPage() {
         commission_rate: formData.commission_rate || 30,
         status: 'active',
         created_at: new Date().toISOString().split('T')[0],
+        gcash_number: formData.gcash_number,
+        bank_name: formData.bank_name,
+        bank_account: formData.bank_account,
+        bank_holder: formData.bank_holder,
       };
       addCompany(newCompany);
       alert('새로운 업체가 등록되었습니다');
@@ -178,6 +198,21 @@ export default function CompaniesPage() {
                     </span>
                   </div>
                 </div>
+
+                {(company.gcash_number || company.bank_account) && (
+                  <div className="bg-blue-50 rounded p-3 mb-4 border border-blue-200">
+                    <p className="text-xs font-semibold text-blue-900 mb-2">💳 결제 정보</p>
+                    <div className="space-y-1 text-xs text-blue-800">
+                      {company.gcash_number && <div>Gcash: {company.gcash_number}</div>}
+                      {company.bank_name && (
+                        <div>
+                          {company.bank_name} {company.bank_account && `(${company.bank_account})`}
+                        </div>
+                      )}
+                      {company.bank_holder && <div className="text-gray-700">예금주: {company.bank_holder}</div>}
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex gap-2">
                   <button
@@ -263,6 +298,38 @@ export default function CompaniesPage() {
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                     />
                   </div>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <p className="text-sm font-semibold text-gray-700 mb-3">💳 결제 정보</p>
+                  <input
+                    type="text"
+                    placeholder="Gcash 계정번호"
+                    value={formData.gcash_number || ''}
+                    onChange={e => setFormData({ ...formData, gcash_number: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none mb-2"
+                  />
+                  <input
+                    type="text"
+                    placeholder="은행명"
+                    value={formData.bank_name || ''}
+                    onChange={e => setFormData({ ...formData, bank_name: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none mb-2"
+                  />
+                  <input
+                    type="text"
+                    placeholder="계좌번호"
+                    value={formData.bank_account || ''}
+                    onChange={e => setFormData({ ...formData, bank_account: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none mb-2"
+                  />
+                  <input
+                    type="text"
+                    placeholder="예금주명"
+                    value={formData.bank_holder || ''}
+                    onChange={e => setFormData({ ...formData, bank_holder: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                  />
                 </div>
 
                 <div className="flex gap-2 pt-4 border-t">
