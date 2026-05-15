@@ -14,8 +14,12 @@
 /coverage
 
 # next.js
-/.next/
+# /.next/  # Cloudflare 배포를 위해 주석 처리
 /out/
+
+# .next 내의 개발 캐시만 제외
+.next/dev/
+.next/.cache/
 
 # production
 /build
