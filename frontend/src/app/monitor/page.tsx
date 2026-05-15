@@ -11,6 +11,7 @@ import { MobileDrawer } from '@/components/MobileDrawer';
 import { MobileHeader } from '@/components/MobileHeader';
 import { MobileBedCard } from '@/components/MobileBedCard';
 import { MobileBottomTabBar } from '@/components/MobileBottomTabBar';
+import { WalkInQueuePanel } from '@/components/WalkInQueuePanel';
 
 interface Bed {
   id: number;
@@ -604,6 +605,9 @@ export default function MonitorPage() {
             </div>
           </div>
         </div>
+
+        {/* 워크인 대기 패널 */}
+        <WalkInQueuePanel />
         </div>
 
         {/* 모바일 레이아웃 */}
