@@ -10,43 +10,41 @@ export default {
     const url = new URL(request.url);
     let pathname = url.pathname;
 
-    // Handle root path
+    // 루트 경로 처리
     if (pathname === "/") {
       pathname = "/index.html";
     }
 
-    // Try to serve static assets from .next/static
-    if (pathname.startsWith("/_next/")) {
-      const staticResponse = await env.ASSETS.fetch(
-        new Request(new URL(pathname, request.url), request)
-      );
+    try {
+      // 정적 자산에서 파일 가져오기
+      const staticResponse = await env.ASSETS.fetch(new Request(new URL(pathname, request.url), request));
+
       if (staticResponse.status === 200) {
-        return staticResponse;
+        const response = new Response(staticResponse.body, staticResponse);
+
+        // 캐싱 헤더 설정
+        if (pathname.includes("/_next/")) {
+          response.headers.set("Cache-Control", "public, max-age=31536000, immutable");
+        } else if (pathname.endsWith(".html")) {
+          response.headers.set("Cache-Control", "public, max-age=3600");
+        }
+
+        return response;
       }
-    }
 
-    // Try to serve from public directory
-    if (!pathname.startsWith("/_") && !pathname.includes(".")) {
-      // This might be a page route - try the HTML version
-      const htmlPath = `${pathname}.html`;
-      const htmlResponse = await env.ASSETS.fetch(
-        new Request(new URL(htmlPath, request.url), request)
-      );
-      if (htmlResponse.status === 200) {
-        return htmlResponse;
+      // 파일 없음 시 index.html로 폴백 (SPA 라우팅)
+      if (!pathname.includes(".")) {
+        const indexResponse = await env.ASSETS.fetch(new Request(new URL("/index.html", request.url), request));
+        return new Response(indexResponse.body, {
+          status: 200,
+          headers: indexResponse.headers,
+        });
       }
+
+      return new Response("404 Not Found", { status: 404 });
+    } catch (error) {
+      console.error("Worker error:", error);
+      return new Response("500 Internal Server Error", { status: 500 });
     }
-
-    // Try the exact path
-    const response = await env.ASSETS.fetch(request);
-
-    // If not found, try index.html (for SPA routing)
-    if (response.status === 404) {
-      return await env.ASSETS.fetch(
-        new Request(new URL("/index.html", request.url), request)
-      );
-    }
-
-    return response;
   },
 };

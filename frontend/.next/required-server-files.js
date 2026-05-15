@@ -104,7 +104,7 @@ self.__SERVER_FILES_MANIFEST={
         "transform": "lodash/{{member}}"
       }
     },
-    "outputFileTracingRoot": "E:\\elspa\\frontend",
+    "outputFileTracingRoot": "e:\\elspa\\frontend",
     "cacheComponents": false,
     "cacheLife": {
       "default": {
@@ -304,11 +304,11 @@ self.__SERVER_FILES_MANIFEST={
     "bundlePagesRouterDependencies": false,
     "configFileName": "next.config.ts",
     "turbopack": {
-      "root": "E:\\elspa\\frontend"
+      "root": "e:\\elspa\\frontend"
     },
     "distDirRoot": ".next"
   },
-  "appDir": "E:\\elspa\\frontend",
+  "appDir": "e:\\elspa\\frontend",
   "relativeAppDir": "",
   "files": [
     ".next\\routes-manifest.json",
