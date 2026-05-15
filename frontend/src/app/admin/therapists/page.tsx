@@ -174,6 +174,12 @@ export default function TherapistsPage() {
             👨‍⚕️ 테라피스트 관리
           </a>
           <a
+            href="/admin/therapist-schedule"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-gray-600 hover:bg-white/50"
+          >
+            📅 일일 스케줄
+          </a>
+          <a
             href="/admin/matching"
             className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-gray-600 hover:bg-white/50"
           >

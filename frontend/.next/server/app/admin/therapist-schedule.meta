@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/admin/layout,_N_T_/admin/therapist-schedule/layout,_N_T_/admin/therapist-schedule/page,_N_T_/admin/therapist-schedule"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/admin/therapist-schedule/__PAGE__",
+    "/admin/therapist-schedule",
+    "/admin",
+    "/_index",
+    "/_head"
+  ]
+}

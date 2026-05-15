@@ -10,6 +10,7 @@
   "/admin/policies/page": "/admin/policies",
   "/admin/settlement-report/page": "/admin/settlement-report",
   "/admin/simulation/page": "/admin/simulation",
+  "/admin/therapist-schedule/page": "/admin/therapist-schedule",
   "/admin/therapists/page": "/admin/therapists",
   "/customer/about-matching/page": "/customer/about-matching",
   "/customer/booking/page": "/customer/booking",
