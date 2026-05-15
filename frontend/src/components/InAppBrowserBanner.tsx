@@ -22,14 +22,14 @@ export function InAppBrowserBanner() {
     const url = window.location.href;
 
     if (isAndroid) {
-      // Android: Chrome Intent로 크롬에서 열기
-      const intentUrl = `intent://${url.replace(/https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`;
+      // Android: 새 탭에서 크롬으로 열기
+      const intentUrl = `intent://${url.replace(/https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;S.Browser_ACTION_CREATE_NEW_TAB=true;end`;
       window.location.href = intentUrl;
     } else {
-      // iOS: 클립보드에 복사하고 사용자에게 안내
+      // iOS: Safari 앱으로 열기 (클립보드 복사 + 사용자 안내)
       navigator.clipboard.writeText(url).then(() => {
         setShowCopyHint(true);
-        setTimeout(() => setShowCopyHint(false), 3000);
+        setTimeout(() => setShowCopyHint(false), 4000);
       });
     }
   };

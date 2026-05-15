@@ -1,0 +1,201 @@
+{
+  "version": 3,
+  "pages404": true,
+  "appType": "app",
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "priority": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    }
+  ],
+  "headers": [],
+  "onMatchHeaders": [],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [],
+    "fallback": []
+  },
+  "dynamicRoutes": [],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_global-error",
+      "regex": "^/_global\\-error(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_global\\-error(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/admin/billing",
+      "regex": "^/admin/billing(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/billing(?:/)?$"
+    },
+    {
+      "page": "/admin/companies",
+      "regex": "^/admin/companies(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/companies(?:/)?$"
+    },
+    {
+      "page": "/admin/fairness-dashboard",
+      "regex": "^/admin/fairness\\-dashboard(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/fairness\\-dashboard(?:/)?$"
+    },
+    {
+      "page": "/admin/guides",
+      "regex": "^/admin/guides(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/guides(?:/)?$"
+    },
+    {
+      "page": "/admin/matching",
+      "regex": "^/admin/matching(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/matching(?:/)?$"
+    },
+    {
+      "page": "/admin/monthly-settlement",
+      "regex": "^/admin/monthly\\-settlement(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/monthly\\-settlement(?:/)?$"
+    },
+    {
+      "page": "/admin/policies",
+      "regex": "^/admin/policies(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/policies(?:/)?$"
+    },
+    {
+      "page": "/admin/settlement-report",
+      "regex": "^/admin/settlement\\-report(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/settlement\\-report(?:/)?$"
+    },
+    {
+      "page": "/admin/simulation",
+      "regex": "^/admin/simulation(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/simulation(?:/)?$"
+    },
+    {
+      "page": "/api/health",
+      "regex": "^/api/health(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/health(?:/)?$"
+    },
+    {
+      "page": "/api/scheduler/daily-settlement-report",
+      "regex": "^/api/scheduler/daily\\-settlement\\-report(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/scheduler/daily\\-settlement\\-report(?:/)?$"
+    },
+    {
+      "page": "/customer",
+      "regex": "^/customer(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/customer(?:/)?$"
+    },
+    {
+      "page": "/customer/about-matching",
+      "regex": "^/customer/about\\-matching(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/customer/about\\-matching(?:/)?$"
+    },
+    {
+      "page": "/customer/booking",
+      "regex": "^/customer/booking(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/customer/booking(?:/)?$"
+    },
+    {
+      "page": "/customer/mypage",
+      "regex": "^/customer/mypage(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/customer/mypage(?:/)?$"
+    },
+    {
+      "page": "/customer/reviews",
+      "regex": "^/customer/reviews(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/customer/reviews(?:/)?$"
+    },
+    {
+      "page": "/customer/services",
+      "regex": "^/customer/services(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/customer/services(?:/)?$"
+    },
+    {
+      "page": "/favicon.ico",
+      "regex": "^/favicon\\.ico(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/favicon\\.ico(?:/)?$"
+    },
+    {
+      "page": "/flowchart",
+      "regex": "^/flowchart(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/flowchart(?:/)?$"
+    },
+    {
+      "page": "/monitor",
+      "regex": "^/monitor(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/monitor(?:/)?$"
+    },
+    {
+      "page": "/requirements",
+      "regex": "^/requirements(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/requirements(?:/)?$"
+    },
+    {
+      "page": "/therapist/fairness",
+      "regex": "^/therapist/fairness(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/therapist/fairness(?:/)?$"
+    },
+    {
+      "page": "/workflow",
+      "regex": "^/workflow(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/workflow(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "rsc",
+    "varyHeader": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+    "prefetchHeader": "next-router-prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSegmentHeader": "next-router-segment-prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments",
+    "clientParamParsing": false,
+    "dynamicRSCPrerender": false
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}

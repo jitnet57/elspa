@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/customer/layout,_N_T_/customer/about-matching/layout,_N_T_/customer/about-matching/page,_N_T_/customer/about-matching"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/customer/about-matching/__PAGE__",
+    "/customer/about-matching",
+    "/customer",
+    "/_index",
+    "/_head"
+  ]
+}

@@ -44,6 +44,33 @@ function ExchangeRateMount() {
     return null;
 }
 
+/**
+ * 외부 링크 자동으로 새 탭에서 열기
+ */
+function ExternalLinkHandler() {
+    React.useEffect(() => {
+        const processLinks = () => {
+            const links = document.querySelectorAll('a[href^="http"], a[href^="//"]');
+            links.forEach(link => {
+                if (!link.getAttribute('target')) {
+                    link.setAttribute('target', '_blank');
+                    link.setAttribute('rel', 'noopener noreferrer');
+                }
+            });
+        };
+
+        processLinks();
+
+        // 동적으로 추가되는 링크도 감지
+        const observer = new MutationObserver(processLinks);
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        return () => observer.disconnect();
+    }, []);
+
+    return null;
+}
+
 export function Providers({ children }: { children: React.ReactNode }) {
     const queryClient = getQueryClient();
 
@@ -53,6 +80,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <OfflineBanner />
             <SettlementSchedulerMount />
             <ExchangeRateMount />
+            <ExternalLinkHandler />
             {children}
         </QueryClientProvider>
     );

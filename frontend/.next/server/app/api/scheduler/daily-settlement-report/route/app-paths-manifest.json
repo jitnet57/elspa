@@ -1,0 +1,3 @@
+{
+  "/api/scheduler/daily-settlement-report/route": "app/api/scheduler/daily-settlement-report/route.js"
+}
