@@ -27,12 +27,12 @@ interface Therapist {
 }
 
 const mockTherapists: Therapist[] = [
-  { id: 1, name: 'Anna', status: 'available', specialty: 'Swedish', rating: 4.9, checked_in_at: '09:00' },
+  { id: 1, name: 'Anna', status: 'idle', specialty: 'Swedish', rating: 4.9, checked_in_at: '09:00' },
   { id: 2, name: 'Bella', status: 'in_service', specialty: 'Thai', rating: 4.8, current_bed: 2 },
   { id: 3, name: 'Cathy', status: 'in_service', specialty: 'Foot', rating: 4.7 },
   { id: 4, name: 'Daisy', status: 'resting', specialty: 'Hot Stone', rating: 4.6 },
   { id: 5, name: 'Ella', status: 'in_service', specialty: 'Aroma', rating: 4.8 },
-  { id: 6, name: 'Fatima', status: 'available', specialty: 'Swedish', rating: 4.9 },
+  { id: 6, name: 'Fatima', status: 'idle', specialty: 'Swedish', rating: 4.9 },
   { id: 7, name: 'Gina', status: 'checked_out', specialty: 'General', rating: 4.5 },
   { id: 8, name: 'Hana', status: 'in_service', specialty: 'Thai', rating: 4.9 },
 ];
@@ -70,7 +70,7 @@ export default function MonitorPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'available':
+      case 'idle':
         return 'bg-green-100 text-green-800';
       case 'in_service':
         return 'bg-blue-100 text-blue-800';
@@ -85,7 +85,7 @@ export default function MonitorPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'available':
+      case 'idle':
         return '● Available';
       case 'in_service':
         return '◆ In Session';
