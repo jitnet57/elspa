@@ -1,600 +1,526 @@
-'use client';
+﻿'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useMonitorPolling, classifyBedsByRoom } from '@/hooks/useMonitorPolling';
+import { useFullStoreSync } from '@/hooks/useStoreSync';
+import { useStore } from '@/lib/store/store';
 import { NotificationCenter } from '@/components/NotificationCenter';
+import { WalkInBookingModal, type WalkInBookingRequest } from '@/components/WalkInBookingModal';
+import { useWalkInMatching, getServiceDuration } from '@/hooks/useWalkInMatching';
 
-interface ScheduleItem {
-  therapistId: number;
-  therapistName: string;
-  startTime: string;
-  endTime: string;
-  serviceName: string;
-  customerName?: string;
-  serviceType: string;
-  status: 'in_service' | 'reserved' | 'break';
+interface Bed {
+  id: number;
+  bed_number: number;
+  room_zone: string;
+  status: 'available' | 'reserved' | 'in_service' | 'cleaning';
+  customer_name?: string;
+  therapist_name?: string;
+  service_name?: string;
+  starts_at?: string;
+  ends_at?: string;
 }
 
 interface Therapist {
   id: number;
   name: string;
   status: 'idle' | 'in_service' | 'resting' | 'checked_out';
-  specialty?: string;
-  rating?: number;
   current_bed?: number;
   remaining_minutes?: number;
-  checked_in_at?: string;
+  specialty?: string;
 }
 
+interface Stats {
+  available: number;
+  reserved: number;
+  in_service: number;
+  cleaning: number;
+}
+
+// 더 이상 필요 없음 (Mock API에서 제공)
+const generateMockBeds = (): Bed[] => {
+  const beds: Bed[] = [];
+  let bedId = 1;
+  const customerNames = ['김민준', '이수연', '정현준', '박지은', '최준호', '강지은', '이준영', '김수현', '박민수', '이영희'];
+  const therapistNames = ['박유진', '최정은', '이소영', '김태희', '강지연', '박민경', '임다현', '유지원'];
+  const serviceNames = ['스웨디시 60분', '타이마사지 90분', '핫스톤 60분', '발마사지 30분', '아로마테라피 45분'];
+
+  for (let i = 1; i <= 30; i++) {
+    const status = ['available', 'reserved', 'in_service', 'cleaning'][Math.floor(Math.random() * 4)] as any;
+    beds.push({
+      id: bedId,
+      bed_number: i,
+      room_zone: '마사지룸1',
+      status: status,
+      customer_name: (status === 'in_service' || status === 'reserved') ? customerNames[Math.floor(Math.random() * customerNames.length)] : undefined,
+      therapist_name: (status === 'in_service' || status === 'reserved') ? therapistNames[Math.floor(Math.random() * therapistNames.length)] : undefined,
+      service_name: serviceNames[Math.floor(Math.random() * serviceNames.length)],
+      starts_at: status === 'in_service' ? new Date(Date.now() - 10 * 60000).toLocaleTimeString('ko-KR', {hour12: false}) : undefined,
+      ends_at: status === 'in_service' ? new Date(Date.now() + 30 * 60000).toLocaleTimeString('ko-KR', {hour12: false}) : undefined,
+    });
+    bedId++;
+  }
+
+  for (let i = 1; i <= 30; i++) {
+    const status = ['available', 'reserved', 'in_service', 'cleaning'][Math.floor(Math.random() * 4)] as any;
+    beds.push({
+      id: bedId,
+      bed_number: i,
+      room_zone: '마사지룸2',
+      status: status,
+      customer_name: (status === 'in_service' || status === 'reserved') ? customerNames[Math.floor(Math.random() * customerNames.length)] : undefined,
+      therapist_name: (status === 'in_service' || status === 'reserved') ? therapistNames[Math.floor(Math.random() * therapistNames.length)] : undefined,
+      service_name: serviceNames[Math.floor(Math.random() * serviceNames.length)],
+      starts_at: status === 'in_service' ? new Date(Date.now() - 10 * 60000).toLocaleTimeString('ko-KR', {hour12: false}) : undefined,
+      ends_at: status === 'in_service' ? new Date(Date.now() + 30 * 60000).toLocaleTimeString('ko-KR', {hour12: false}) : undefined,
+    });
+    bedId++;
+  }
+
+  for (let i = 1; i <= 16; i++) {
+    const status = ['available', 'reserved', 'in_service', 'cleaning'][Math.floor(Math.random() * 4)] as any;
+    beds.push({
+      id: bedId,
+      bed_number: i,
+      room_zone: 'VIP룸',
+      status: status,
+      customer_name: (status === 'in_service' || status === 'reserved') ? customerNames[Math.floor(Math.random() * customerNames.length)] : undefined,
+      therapist_name: (status === 'in_service' || status === 'reserved') ? therapistNames[Math.floor(Math.random() * therapistNames.length)] : undefined,
+      service_name: serviceNames[Math.floor(Math.random() * serviceNames.length)],
+      starts_at: status === 'in_service' ? new Date(Date.now() - 10 * 60000).toLocaleTimeString('ko-KR', {hour12: false}) : undefined,
+      ends_at: status === 'in_service' ? new Date(Date.now() + 30 * 60000).toLocaleTimeString('ko-KR', {hour12: false}) : undefined,
+    });
+    bedId++;
+  }
+
+  for (let i = 1; i <= 10; i++) {
+    const status = ['available', 'reserved', 'in_service', 'cleaning'][Math.floor(Math.random() * 4)] as any;
+    beds.push({
+      id: bedId,
+      bed_number: i,
+      room_zone: '커플룸',
+      status: status,
+      customer_name: (status === 'in_service' || status === 'reserved') ? customerNames[Math.floor(Math.random() * customerNames.length)] : undefined,
+      therapist_name: (status === 'in_service' || status === 'reserved') ? therapistNames[Math.floor(Math.random() * therapistNames.length)] : undefined,
+      service_name: serviceNames[Math.floor(Math.random() * serviceNames.length)],
+      starts_at: status === 'in_service' ? new Date(Date.now() - 10 * 60000).toLocaleTimeString('ko-KR', {hour12: false}) : undefined,
+      ends_at: status === 'in_service' ? new Date(Date.now() + 30 * 60000).toLocaleTimeString('ko-KR', {hour12: false}) : undefined,
+    });
+    bedId++;
+  }
+
+  return beds;
+};
+
 const mockTherapists: Therapist[] = [
-  { id: 1, name: 'Anna', status: 'idle', specialty: 'Swedish', rating: 4.9, checked_in_at: '09:00' },
-  { id: 2, name: 'Bella', status: 'in_service', specialty: 'Thai', rating: 4.8, current_bed: 2 },
-  { id: 3, name: 'Cathy', status: 'in_service', specialty: 'Foot', rating: 4.7 },
-  { id: 4, name: 'Daisy', status: 'resting', specialty: 'Hot Stone', rating: 4.6 },
-  { id: 5, name: 'Ella', status: 'in_service', specialty: 'Aroma', rating: 4.8 },
-  { id: 6, name: 'Fatima', status: 'idle', specialty: 'Swedish', rating: 4.9 },
-  { id: 7, name: 'Gina', status: 'checked_out', specialty: 'General', rating: 4.5 },
-  { id: 8, name: 'Hana', status: 'in_service', specialty: 'Thai', rating: 4.9 },
+  { id: 1, name: '박유진', status: 'in_service', current_bed: 5, remaining_minutes: 17, specialty: '스웨디시' },
+  { id: 2, name: '최정은', status: 'in_service', current_bed: 12, remaining_minutes: 32, specialty: '타이마사지' },
+  { id: 3, name: '이소영', status: 'idle', specialty: '핫스톤' },
+  { id: 4, name: '김태희', status: 'in_service', current_bed: 18, remaining_minutes: 5, specialty: '발마사지' },
+  { id: 5, name: '강지연', status: 'resting', remaining_minutes: 10, specialty: '아로마테라피' },
+  { id: 6, name: '박민경', status: 'idle', specialty: '종합' },
+  { id: 7, name: '임다현', status: 'idle', specialty: '스톤 마사지' },
+  { id: 8, name: '유지원', status: 'in_service', current_bed: 28, remaining_minutes: 22, specialty: '타이마사지' },
 ];
 
-const mockSchedules: ScheduleItem[] = [
-  { therapistId: 2, therapistName: 'Bella', startTime: '10:00', endTime: '12:00', serviceName: 'Swedish Massage', customerName: 'John', serviceType: 'swedish', status: 'in_service' },
-  { therapistId: 3, therapistName: 'Cathy', startTime: '09:30', endTime: '11:30', serviceName: 'Foot Massage', customerName: 'Jane', serviceType: 'foot', status: 'in_service' },
-  { therapistId: 2, therapistName: 'Bella', startTime: '12:30', endTime: '14:30', serviceName: 'Aromatherapy', customerName: 'Mike', serviceType: 'aroma', status: 'reserved' },
-  { therapistId: 5, therapistName: 'Ella', startTime: '11:00', endTime: '13:00', serviceName: 'Thai Massage', customerName: 'Sarah', serviceType: 'thai', status: 'in_service' },
-  { therapistId: 3, therapistName: 'Cathy', startTime: '12:00', endTime: '14:00', serviceName: 'Thai Massage', customerName: 'Tom', serviceType: 'thai', status: 'reserved' },
-  { therapistId: 4, therapistName: 'Daisy', startTime: '09:00', endTime: '10:00', serviceName: 'Break', customerName: '', serviceType: 'break', status: 'break' },
-  { therapistId: 5, therapistName: 'Ella', startTime: '13:30', endTime: '15:30', serviceName: 'Swedish Massage', customerName: 'Emma', serviceType: 'swedish', status: 'reserved' },
-  { therapistId: 2, therapistName: 'Bella', startTime: '15:00', endTime: '17:00', serviceName: 'Hot Stone', customerName: 'David', serviceType: 'hotstone', status: 'reserved' },
-  { therapistId: 8, therapistName: 'Hana', startTime: '13:00', endTime: '15:00', serviceName: 'Thai Massage', customerName: 'Lisa', serviceType: 'thai', status: 'reserved' },
-  { therapistId: 8, therapistName: 'Hana', startTime: '15:30', endTime: '17:30', serviceName: 'Hot Stone', customerName: 'Mark', serviceType: 'hotstone', status: 'reserved' },
-];
+const getStatusColor = (status: string): string => {
+  switch (status) {
+    case 'available':
+      return 'bg-green-500';
+    case 'reserved':
+      return 'bg-orange-500 animate-pulse';
+    case 'in_service':
+      return 'bg-blue-500';
+    case 'cleaning':
+      return 'bg-gray-500';
+    default:
+      return 'bg-gray-300';
+  }
+};
 
-const massageTypes = [
-  { name: 'Swedish', icon: '💆', type: 'swedish' },
-  { name: 'Thai', icon: '🧘', type: 'thai' },
-  { name: 'Aromatherapy', icon: '🌸', type: 'aroma' },
-  { name: 'Hot Stone', icon: '🔥', type: 'hotstone' },
-  { name: 'Foot', icon: '🦶', type: 'foot' },
-];
+const getStatusLabel = (status: string): string => {
+  switch (status) {
+    case 'available':
+      return '사용가능';
+    case 'reserved':
+      return '예약됨';
+    case 'in_service':
+      return '서비스중';
+    case 'cleaning':
+      return '정리중';
+    default:
+      return '상태불명';
+  }
+};
+
+const calculateStats = (beds: Bed[]): Stats => {
+  return {
+    available: beds.filter(b => b.status === 'available').length,
+    reserved: beds.filter(b => b.status === 'reserved').length,
+    in_service: beds.filter(b => b.status === 'in_service').length,
+    cleaning: beds.filter(b => b.status === 'cleaning').length,
+  };
+};
 
 export default function MonitorPage() {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedTherapist, setSelectedTherapist] = useState<Therapist | null>(null);
-  const [selectedSession, setSelectedSession] = useState<ScheduleItem | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'home' | 'schedule' | 'therapists' | 'sessions'>('home');
-  const [showSessionModal, setShowSessionModal] = useState(false);
-  const [viewMode, setViewMode] = useState<'beds' | 'therapist-detail'>('beds');
+  // React Query 폴링 + Zustand store 동기화
+  useFullStoreSync();
 
-  const hours = Array.from({ length: 13 }, (_, i) => i + 9);
-  const therapistCount = mockTherapists.length;
+  // LANGGRAPH Node 1-4: BedsPolling + TherapistsPolling + Stats + Predictions
+  const {
+    beds: pollingBeds,
+    therapists: pollingTherapists,
+    bedStats,
+    therapistStats,
+    predictions,
+    isLoading,
+    error,
+    refetchCount,
+    lastRefetch,
+  } = useMonitorPolling();
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'idle':
-        return 'bg-green-100 text-green-800';
-      case 'in_service':
-        return 'bg-blue-100 text-blue-800';
-      case 'resting':
-        return 'bg-orange-100 text-orange-800';
-      case 'checked_out':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+  // 📌 워크인 손님 매칭 훅
+  const { walkInBookings, createWalkInBooking } = useWalkInMatching();
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'idle':
-        return '● Available';
-      case 'in_service':
-        return '◆ In Session';
-      case 'resting':
-        return '☕ Break';
-      case 'checked_out':
-        return '○ Off Duty';
-      default:
-        return status;
-    }
-  };
+  // 📌 워크인 모달 상태
+  const [isWalkInModalOpen, setIsWalkInModalOpen] = useState(false);
 
-  const getScheduleColor = (serviceType: string) => {
-    switch (serviceType) {
-      case 'swedish':
-        return 'bg-blue-200 border-blue-400';
-      case 'thai':
-        return 'bg-indigo-200 border-indigo-400';
-      case 'aroma':
-        return 'bg-pink-200 border-pink-400';
-      case 'hotstone':
-        return 'bg-orange-200 border-orange-400';
-      case 'foot':
-        return 'bg-sky-200 border-sky-400';
-      case 'break':
-        return 'bg-orange-100 border-orange-300';
-      default:
-        return 'bg-gray-200 border-gray-400';
-    }
-  };
+  // Zustand store에서 데이터 읽기
+  const {
+    beds: storeBeds,
+    therapists: storeTherapists,
+    selectedBedId,
+    isDetailModalOpen,
+    openDetailModal,
+    closeDetailModal,
+  } = useStore();
 
-  const getServiceIcon = (serviceType: string) => {
-    const icons: Record<string, string> = {
-      swedish: '💆',
-      thai: '🧘',
-      hotstone: '🔥',
-      foot: '🦶',
-      aroma: '🌸',
+  // Store가 최신이면 store 사용, 아니면 polling 데이터 사용
+  const beds = storeBeds.length > 0 ? storeBeds : pollingBeds;
+  const therapists = storeTherapists.length > 0 ? storeTherapists : pollingTherapists;
+
+  const [currentTime, setCurrentTime] = useState<string>('');
+
+  // 현재 시각 매초 갱신
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentTime(now.toLocaleTimeString('ko-KR', { hour12: false }));
     };
-    return icons[serviceType] || '✋';
-  };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-  };
+  // Room별 침대 분류
+  const bedsByRoom = classifyBedsByRoom(beds);
 
-  const getTherapistSchedules = (therapistId: number) => {
-    return mockSchedules.filter(s => s.therapistId === therapistId).sort((a, b) => a.startTime.localeCompare(b.startTime));
-  };
-
-  return (
-    <div className="flex flex-col lg:flex-row h-screen bg-gray-100">
-      {/* 사이드바 (데스크톱만) */}
-      <div className="hidden lg:flex lg:flex-col w-56 bg-blue-900 text-white flex-shrink-0">
-        <div className="p-6 border-b border-blue-800 flex items-center gap-3">
-          <span className="text-3xl">💆</span>
-          <h1 className="text-xl font-bold">Therapist Schedule</h1>
+  const BedGrid = ({ roomBeds }: { roomBeds: Bed[] }) => (
+    <div className="grid grid-cols-10 gap-1">
+      {roomBeds.map(bed => (
+        <div key={bed.id} className="relative">
+          <button
+            onClick={() => openDetailModal(bed.id)}
+            className={`w-full h-16 ${getStatusColor(bed.status)} rounded-lg text-white text-xs font-bold hover:opacity-80 hover:scale-105 transition-all flex flex-col items-center justify-center p-1 border-2 ${
+              selectedBedId === bed.id ? 'border-yellow-400' : 'border-gray-700'
+            } cursor-pointer`}
+            title={`클릭하여 상세 정보 보기`}
+          >
+            <div className="font-bold">{bed.bed_number}번</div>
+            {bed.status === 'in_service' && bed.customer_name && (
+              <div className="text-xs truncate w-full text-center">{bed.customer_name}</div>
+            )}
+            {bed.status === 'reserved' && bed.customer_name && (
+              <div className="text-xs truncate w-full text-center">{bed.customer_name}</div>
+            )}
+          </button>
         </div>
+      ))}
+    </div>
+  );
 
-        <nav className="flex-1 p-4 space-y-2">
-          <NavItem icon="📊" label="Dashboard" active={true} />
-          <NavItem icon="📅" label="Schedule" active={false} />
-          <NavItem icon="👥" label="Therapists" active={false} />
-          <NavItem icon="👤" label="Clients" active={false} />
-          <NavItem icon="💇" label="Massage Types" active={false} />
-          <NavItem icon="📋" label="Reports" active={false} />
-          <NavItem icon="⚙️" label="Settings" active={false} />
-        </nav>
+  // 모달 컴포넌트
+  const DetailModal = () => {
+    if (!isDetailModalOpen || !selectedBedId) return null;
 
-        <div className="p-4 border-t border-blue-800">
-          <button className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 rounded font-semibold text-sm transition-colors">
-            🚪 Log Out
+    const selectedBed = beds.find(b => b.id === selectedBedId);
+    if (!selectedBed) return null;
+
+    const remainingTime = selectedBed.ends_at
+      ? Math.max(0, Math.floor((new Date(selectedBed.ends_at).getTime() - Date.now()) / 60000))
+      : 0;
+
+    return (
+      <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div className="bg-gray-800 rounded-xl p-6 max-w-md w-full border-2 border-blue-500 shadow-2xl">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold text-blue-400">침대 {selectedBed.bed_number}번</h2>
+            <button
+              onClick={() => closeDetailModal()}
+              className="text-gray-400 hover:text-white text-2xl"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="space-y-3 mb-6">
+            <div className="bg-gray-700 p-3 rounded">
+              <div className="text-gray-400 text-sm">위치</div>
+              <div className="text-lg font-bold text-white">{selectedBed.room_zone}</div>
+            </div>
+
+            <div className="bg-gray-700 p-3 rounded">
+              <div className="text-gray-400 text-sm">상태</div>
+              <div className="text-lg font-bold">
+                {selectedBed.status === 'in_service' && <span className="text-blue-400">🔵 서비스중</span>}
+                {selectedBed.status === 'reserved' && <span className="text-orange-400">🟠 예약됨</span>}
+                {selectedBed.status === 'available' && <span className="text-green-400">🟢 사용가능</span>}
+                {selectedBed.status === 'cleaning' && <span className="text-gray-400">⚫ 정리중</span>}
+              </div>
+            </div>
+
+            {selectedBed.customer_name && (
+              <div className="bg-gray-700 p-3 rounded">
+                <div className="text-gray-400 text-sm">👤 고객</div>
+                <div className="text-lg font-bold text-white">{selectedBed.customer_name}</div>
+              </div>
+            )}
+
+            {selectedBed.therapist_name && (
+              <div className="bg-gray-700 p-3 rounded">
+                <div className="text-gray-400 text-sm">💆 테라피스트</div>
+                <div className="text-lg font-bold text-white">{selectedBed.therapist_name}</div>
+              </div>
+            )}
+
+            {selectedBed.service_name && (
+              <div className="bg-gray-700 p-3 rounded">
+                <div className="text-gray-400 text-sm">💆‍♀️ 서비스</div>
+                <div className="text-lg font-bold text-white">{selectedBed.service_name}</div>
+              </div>
+            )}
+
+            {selectedBed.starts_at && (
+              <div className="bg-gray-700 p-3 rounded">
+                <div className="text-gray-400 text-sm">⏰ 시작 시간</div>
+                <div className="text-lg font-bold text-white">{selectedBed.starts_at}</div>
+              </div>
+            )}
+
+            {selectedBed.ends_at && (
+              <div className="bg-gray-700 p-3 rounded">
+                <div className="text-gray-400 text-sm">⏱️ 종료 예정</div>
+                <div className="text-lg font-bold text-white">{selectedBed.ends_at}</div>
+              </div>
+            )}
+
+            {selectedBed.status === 'in_service' && (
+              <div className="bg-blue-900/50 p-3 rounded border-l-4 border-blue-500">
+                <div className="text-gray-400 text-sm">⏳ 남은 시간</div>
+                <div className="text-2xl font-bold text-blue-400">{remainingTime}분</div>
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={() => closeDetailModal()}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition-colors"
+          >
+            닫기
           </button>
         </div>
       </div>
+    );
+  };
 
-      {/* 모바일 슬라이드 드로어 */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} />
-          <div className="absolute left-0 top-0 bottom-0 w-56 bg-blue-900 text-white flex flex-col">
-            <div className="p-4 flex items-center justify-between border-b border-blue-800">
-              <h1 className="text-lg font-bold">Menu</h1>
-              <button onClick={() => setSidebarOpen(false)} className="text-2xl hover:bg-blue-800 rounded p-1">
-                ✕
-              </button>
+  // 로딩 상태 표시
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-2xl font-bold mb-4">🔄 실시간 데이터 로드 중...</div>
+          <div className="text-gray-400">5초 폴링으로 침대 상태를 조회하고 있습니다.</div>
+        </div>
+      </div>
+    );
+  }
+
+  // 오류 상태 표시
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-2xl font-bold mb-4 text-red-400">❌ 데이터 조회 오류</div>
+          <div className="text-gray-400">{error.message}</div>
+        </div>
+      </div>
+    );
+  }
+
+  // ============================================================
+  // 📌 워크인 모달 제출 핸들러
+  // ============================================================
+  const handleWalkInSubmit = (data: WalkInBookingRequest) => {
+    const duration = getServiceDuration(data.serviceType);
+    const bookingId = createWalkInBooking({
+      count: data.suggestedBeds.length,
+      serviceType: data.serviceType,
+      bedIds: data.suggestedBeds,
+      therapistIds: data.suggestedTherapists,
+      estimatedDuration: duration,
+    });
+
+    // 성공 알림
+    console.log(`✅ 워크인 손님 예약 완료: ${bookingId}`);
+    alert(`✅ 워크인 손님이 예약되었습니다.\n베드: ${data.suggestedBeds.join(', ')}`);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-white p-4">
+      <NotificationCenter />
+
+      {/* 📌 워크인 모달 */}
+      <WalkInBookingModal
+        isOpen={isWalkInModalOpen}
+        onClose={() => setIsWalkInModalOpen(false)}
+        onSubmit={handleWalkInSubmit}
+        availableBeds={pollingBeds.filter(b => b.status === 'available')}
+        therapists={pollingTherapists}
+      />
+      <div className="mb-6 bg-gray-800 p-4 rounded-lg">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-3xl font-bold">✨ ELSPA 실시간 모니터</h1>
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-gray-400">
+              🔄 폴링: {refetchCount}회 | ⏱️ {lastRefetch?.toLocaleTimeString('ko-KR', { hour12: false })}
             </div>
-            <nav className="flex-1 p-4 space-y-2">
-              <NavItem icon="📊" label="Dashboard" active={true} />
-              <NavItem icon="📅" label="Schedule" active={false} />
-              <NavItem icon="👥" label="Therapists" active={false} />
-              <NavItem icon="👤" label="Clients" active={false} />
-              <NavItem icon="💇" label="Massage Types" active={false} />
-            </nav>
-            <div className="p-4 border-t border-blue-800">
-              <button className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 rounded font-semibold text-sm">
-                🚪 Log Out
-              </button>
-            </div>
+            {/* 📌 워크인 추가 버튼 */}
+            <button
+              onClick={() => setIsWalkInModalOpen(true)}
+              className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-lg transition-all hover:shadow-lg"
+            >
+              + 워크인 추가
+            </button>
+            <div className="text-2xl font-mono">{currentTime}</div>
           </div>
         </div>
-      )}
-
-      {/* 메인 콘텐츠 */}
-      <div className="flex-1 flex flex-col overflow-hidden pb-16 lg:pb-0">
-        {/* 모바일 상단 헤더 */}
-        <div className="lg:hidden bg-blue-900 text-white p-4 flex items-center justify-between">
-          <button onClick={() => setSidebarOpen(true)} className="text-2xl">☰</button>
-          <h1 className="text-lg font-bold">💆 Schedule</h1>
-          <div className="w-8" />
-        </div>
-
-        {/* 데스크톱 헤더 */}
-        <div className="hidden lg:block bg-white border-b border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl md:text-4xl font-bold text-gray-900">Daily Therapist Schedule</h2>
-            <div className="flex items-center gap-4">
-              <select className="hidden md:block px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 font-medium">
-                <option>English</option>
-              </select>
-              <button className="hidden md:block px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
-                👤 Receptionist
-              </button>
-            </div>
+        <div className="grid grid-cols-4 gap-4 text-lg">
+          <div className="bg-green-600/30 p-3 rounded text-center">
+            <div className="text-green-400 font-bold">비어있음</div>
+            <div className="text-2xl font-bold">{bedStats.available}</div>
           </div>
-
-          {/* 스텝 인디케이터 */}
-          <div className="grid grid-cols-3 gap-6">
-            <StepIndicator number={1} title="Select Date" description="View daily schedule by date." />
-            <StepIndicator number={2} title="Daily Schedule" description="See therapist schedule, time, and massage type." />
-            <StepIndicator number={3} title="Start Massage" description="Select therapist, client and massage type." />
+          <div className="bg-blue-600/30 p-3 rounded text-center">
+            <div className="text-blue-400 font-bold">서비스중</div>
+            <div className="text-2xl font-bold">{bedStats.in_service}</div>
+          </div>
+          <div className="bg-orange-600/30 p-3 rounded text-center">
+            <div className="text-orange-400 font-bold">예약됨</div>
+            <div className="text-2xl font-bold">{bedStats.reserved}</div>
+          </div>
+          <div className="bg-gray-600/30 p-3 rounded text-center">
+            <div className="text-gray-400 font-bold">정리중</div>
+            <div className="text-2xl font-bold">{bedStats.cleaning}</div>
           </div>
         </div>
+      </div>
 
-        {/* 콘텐츠 영역 */}
-        <div className="flex-1 overflow-hidden flex flex-col lg:flex-row gap-4 p-4 lg:p-6">
-          {/* 좌측: 날짜 + 테라피스트 목록 */}
-          <div className="w-full lg:w-96 bg-white rounded-lg shadow-sm border border-gray-200 p-4 lg:p-6 flex flex-col max-h-full">
-            {/* 날짜 선택 */}
-            <div className="mb-4 lg:mb-6">
-              <div className="flex items-center justify-center gap-2 lg:gap-4">
-                <button className="p-2 hover:bg-gray-100 rounded">←</button>
-                <div className="flex items-center gap-2 px-3 lg:px-4 py-2 bg-gray-50 rounded-lg border border-gray-300">
-                  <span>📅</span>
-                  <span className="font-semibold text-sm lg:text-base text-gray-700">{formatDate(selectedDate)}</span>
-                </div>
-                <button className="p-2 hover:bg-gray-100 rounded">→</button>
+      <div className="grid grid-cols-4 gap-6">
+        <div className="col-span-3 space-y-6">
+          {Object.entries(bedsByRoom).map(([roomName, roomBeds]) =>
+            roomBeds.length > 0 ? (
+              <div key={roomName} className="bg-gray-800 p-4 rounded-lg">
+                <h2 className="text-xl font-bold mb-3 text-blue-400">{roomName} ({roomBeds.length}개)</h2>
+                <BedGrid roomBeds={roomBeds} />
               </div>
+            ) : null
+          )}
+        </div>
+
+        <div className="bg-gray-800 p-4 rounded-lg h-fit sticky top-4">
+          <h2 className="text-xl font-bold mb-4 text-blue-400">테라피스트 현황</h2>
+
+          <div className="space-y-2 mb-6 pb-4 border-b border-gray-700">
+            <div className="flex justify-between text-sm">
+              <span>출근: {therapistStats.checkedIn}명 / 총 {therapistStats.total}명</span>
+              <span className="text-green-400 font-bold">대기: {therapistStats.idle}명</span>
             </div>
-
-            {/* 테라피스트 목록 */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="text-xs lg:text-sm font-semibold text-gray-700 mb-3 lg:mb-4">
-                Therapists ({therapistCount})
-              </div>
-              <div className="space-y-2">
-                {mockTherapists.map(therapist => (
-                  <div
-                    key={therapist.id}
-                    onClick={() => {
-                      setSelectedTherapist(therapist);
-                      setViewMode('therapist-detail');
-                      setActiveTab('therapists');
-                    }}
-                    className={`p-3 rounded-lg cursor-pointer border-2 transition-all ${
-                      selectedTherapist?.id === therapist.id && viewMode === 'therapist-detail'
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-gray-300 flex items-center justify-center text-white font-bold text-xs lg:text-sm">
-                        {therapist.name[0]}
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-semibold text-xs lg:text-sm text-gray-900">{therapist.name}</div>
-                        <div className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${getStatusColor(therapist.status)}`}>
-                          {getStatusBadge(therapist.status)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <div className="text-sm text-gray-400">
+              서비스중: {therapistStats.in_service}명 | 휴식: {therapistStats.resting}명
             </div>
           </div>
 
-          {/* 중앙: 데스크톱 뷰 (lg 이상만) */}
-          <div className="hidden lg:flex flex-1 bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex-col overflow-hidden">
-            {/* 뷰 모드 전환 버튼 */}
-            <div className="flex gap-2 mb-4">
-              <button
-                onClick={() => setViewMode('beds')}
-                className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${
-                  viewMode === 'beds'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                🛏️ Beds View
-              </button>
-              <button
-                onClick={() => {
-                  if (selectedTherapist) {
-                    setViewMode('therapist-detail');
-                  }
-                }}
-                disabled={!selectedTherapist}
-                className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${
-                  viewMode === 'therapist-detail'
-                    ? 'bg-blue-600 text-white'
-                    : selectedTherapist
-                    ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                👥 {selectedTherapist?.name || 'Therapist'} Schedule
-              </button>
-            </div>
-
-            {/* 베드 뷰 (타임 그리드) */}
-            {viewMode === 'beds' && (
-              <>
-                {/* 시간 헤더 */}
-                <div className="mb-4">
-              <div className="flex">
-                <div className="w-32 flex-shrink-0" />
-                <div className="flex-1 grid" style={{ gridTemplateColumns: `repeat(13, minmax(0, 1fr))` }}>
-                  {hours.map(hour => (
-                    <div key={hour} className="text-xs font-semibold text-gray-600 text-center border-r border-gray-200">
-                      {hour < 12 ? hour : hour === 12 ? '12' : hour - 12}:00
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* 스케줄 행 */}
-            <div className="flex-1 overflow-y-auto border-t border-gray-200">
-              {mockTherapists.map(therapist => {
-                const schedules = getTherapistSchedules(therapist.id);
-                return (
-                  <div key={therapist.id} className="flex border-b border-gray-200 relative min-h-24">
-                    <div className="w-32 flex-shrink-0 p-3 border-r border-gray-200 bg-gray-50">
-                      <div className="font-semibold text-sm text-gray-900">{therapist.name}</div>
-                      <div className="text-xs text-gray-500">{therapist.specialty}</div>
-                    </div>
-
-                    <div className="flex-1 relative grid" style={{ gridTemplateColumns: `repeat(13, minmax(0, 1fr))` }}>
-                      {hours.map(hour => (
-                        <div key={hour} className="border-r border-gray-100 relative" />
-                      ))}
-
-                      {schedules.map((schedule, idx) => {
-                        const [startHour, startMin] = schedule.startTime.split(':').map(Number);
-                        const [endHour, endMin] = schedule.endTime.split(':').map(Number);
-                        const startOffset = (startHour - 9) * 100 + (startMin / 60) * 100;
-                        const duration = ((endHour - startHour) * 60 + (endMin - startMin)) / 60;
-                        const width = (duration / 13) * 100;
-
-                        return (
-                          <div
-                            key={idx}
-                            onClick={() => {
-                              setSelectedSession(schedule);
-                              setShowSessionModal(true);
-                            }}
-                            className={`absolute top-1 bottom-1 mx-1 rounded border-2 p-2 cursor-pointer hover:shadow-md transition-shadow ${getScheduleColor(schedule.serviceType)}`}
-                            style={{
-                              left: `${(startOffset / 13) * 100}%`,
-                              width: `${width}%`,
-                            }}
-                          >
-                            <div className="text-xs font-semibold text-gray-900 truncate">
-                              {schedule.startTime} - {schedule.endTime}
-                            </div>
-                            <div className="text-xs text-gray-700 truncate">{schedule.serviceName}</div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-              </>
-            )}
-
-            {/* 테라피스트 상세 뷰 */}
-            {viewMode === 'therapist-detail' && selectedTherapist && (
-              <div className="flex flex-col">
-                {/* 헤더 */}
-                <div className="mb-6 pb-4 border-b border-gray-200">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-lg font-bold">
-                      {selectedTherapist.name[0]}
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">{selectedTherapist.name}</h3>
-                      <p className="text-sm text-gray-600">
-                        Specialty: {selectedTherapist.specialty} · Rating: {selectedTherapist.rating}★
-                      </p>
-                    </div>
-                    <div className="ml-auto">
-                      <div className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(selectedTherapist.status)}`}>
-                        {getStatusBadge(selectedTherapist.status)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 일일 일정 */}
-                <div className="flex-1 overflow-y-auto">
-                  <div className="text-sm font-semibold text-gray-700 mb-4">
-                    Daily Schedule - {formatDate(selectedDate)}
-                  </div>
-                  {getTherapistSchedules(selectedTherapist.id).length > 0 ? (
-                    <div className="space-y-3">
-                      {getTherapistSchedules(selectedTherapist.id).map((schedule, idx) => (
-                        <div
-                          key={idx}
-                          onClick={() => {
-                            setSelectedSession(schedule);
-                            setShowSessionModal(true);
-                          }}
-                          className={`p-4 rounded-lg border-l-4 cursor-pointer hover:shadow-md transition-all ${getScheduleColor(schedule.serviceType)}`}
-                        >
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-lg">{getServiceIcon(schedule.serviceType)}</span>
-                              <div>
-                                <p className="font-semibold text-sm text-gray-900">{schedule.serviceName}</p>
-                                <p className="text-xs text-gray-600">
-                                  {schedule.startTime} - {schedule.endTime}
-                                </p>
-                              </div>
-                            </div>
-                            <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                              schedule.status === 'in_service'
-                                ? 'bg-blue-100 text-blue-800'
-                                : schedule.status === 'reserved'
-                                ? 'bg-gray-100 text-gray-800'
-                                : 'bg-orange-100 text-orange-800'
-                            }`}>
-                              {schedule.status === 'in_service' ? '진행중' : schedule.status === 'reserved' ? '예약됨' : '휴식'}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-700 mt-2">
-                            👤 {schedule.customerName || 'Walk-in Guest'}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-400">
-                      <p className="text-sm">오늘 예약된 세션이 없습니다</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* 우측: 데스크톱 패널 (xl 이상만) */}
-          <div className="hidden xl:flex flex-col w-80 gap-4">
-            {/* 새 마사지 버튼 */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <button className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg flex items-center justify-center gap-2 transition-colors">
-                + Start Massage
-              </button>
-            </div>
-
-            {/* 마사지 타입 */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex-1 overflow-y-auto">
-              <div className="text-lg font-bold text-gray-900 mb-3">④ Massage Types</div>
-              <div className="grid grid-cols-2 gap-3">
-                {massageTypes.map(type => (
-                  <button
-                    key={type.type}
-                    className="p-3 border-2 border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors text-center"
-                  >
-                    <div className="text-2xl mb-1">{type.icon}</div>
-                    <div className="text-xs font-semibold text-gray-700">{type.name}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 세션 상세 */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex-1 overflow-y-auto">
-              <div className="text-lg font-bold text-gray-900 mb-3">⑤ Session Details</div>
-              {selectedSession ? (
-                <div className="space-y-3">
-                  <div className="bg-blue-50 p-3 rounded-lg">
-                    <div className="text-xs text-gray-600 mb-1">Service</div>
-                    <div className="font-semibold text-gray-900">{selectedSession.serviceName}</div>
-                  </div>
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <div className="text-xs text-gray-600 mb-1">Time</div>
-                    <div className="font-semibold text-gray-900">{selectedSession.startTime} - {selectedSession.endTime}</div>
-                  </div>
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <div className="text-xs text-gray-600 mb-1">Client</div>
-                    <div className="font-semibold text-gray-900">{selectedSession.customerName || 'N/A'}</div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center text-gray-400 py-8">
-                  <p className="text-sm">Select a session to view details</p>
+          {/* 예측 정보 표시 */}
+          {predictions && (
+            <div className="mb-4 bg-blue-900/30 p-3 rounded border-l-4 border-blue-500">
+              <div className="text-xs text-gray-400 mb-1">⏳ 평균 대기시간</div>
+              <div className="text-lg font-bold text-blue-400">{predictions.average_wait_minutes || 0}분</div>
+              {predictions.next_available_therapist && (
+                <div className="text-xs text-gray-400 mt-2">
+                  다음 가용: <span className="text-green-400 font-bold">{predictions.next_available_therapist.name}</span>
                 </div>
               )}
             </div>
+          )}
+
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {therapists.map(therapist => (
+              <div key={therapist.id} className="bg-gray-700 p-2 rounded text-xs hover:bg-gray-600 transition">
+                <div className="flex items-center justify-between">
+                  <div>
+                    {therapist.status === 'idle' && '●'}
+                    {therapist.status === 'in_service' && '◆'}
+                    {therapist.status === 'resting' && '○'}
+                    {therapist.status === 'checked_out' && '✕'}
+                    {' '}
+                    <span className="font-bold">{therapist.name}</span>
+                  </div>
+                  <span className={
+                    therapist.status === 'idle' ? 'text-green-400' :
+                    therapist.status === 'in_service' ? 'text-blue-400' :
+                    therapist.status === 'resting' ? 'text-yellow-400' :
+                    'text-gray-500'
+                  }>
+                    {therapist.status === 'idle' ? '[즉시가용]' : ''}
+                    {therapist.status === 'in_service' && `B${therapist.current_bed} | ${therapist.remaining_minutes}분↓`}
+                    {therapist.status === 'resting' && '[휴식중]'}
+                  </span>
+                </div>
+                <div className="text-gray-400 mt-1">{therapist.specialty}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 pt-4 border-t border-gray-700">
+            <div className="bg-blue-900/30 p-3 rounded text-sm">
+              <div className="font-bold text-blue-300">다음 배정 대상</div>
+              <div className="mt-1">이소영 (즉시 가능)</div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 모바일 탭 바 */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex">
-        <TabItem icon="🏠" label="Home" active={activeTab === 'home'} onClick={() => setActiveTab('home')} />
-        <TabItem icon="📅" label="Schedule" active={activeTab === 'schedule'} onClick={() => setActiveTab('schedule')} />
-        <TabItem icon="👥" label="Therapists" active={activeTab === 'therapists'} onClick={() => setActiveTab('therapists')} />
-        <TabItem icon="📋" label="Sessions" active={activeTab === 'sessions'} onClick={() => setActiveTab('sessions')} />
-      </div>
-
-      {/* 모바일 세션 모달 */}
-      {showSessionModal && selectedSession && (
-        <div className="fixed inset-0 z-50 lg:hidden flex items-end">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setShowSessionModal(false)} />
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 max-h-96 overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-gray-900">Session Details</h3>
-              <button onClick={() => setShowSessionModal(false)} className="text-2xl hover:text-gray-600">✕</button>
-            </div>
-
-            <div className="space-y-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <div className="text-sm text-gray-600 mb-1">Service</div>
-                <div className="font-semibold text-gray-900">{selectedSession.serviceName} {getServiceIcon(selectedSession.serviceType)}</div>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="text-sm text-gray-600 mb-1">Therapist</div>
-                <div className="font-semibold text-gray-900">{selectedSession.therapistName}</div>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="text-sm text-gray-600 mb-1">Time</div>
-                <div className="font-semibold text-gray-900">{selectedSession.startTime} - {selectedSession.endTime}</div>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="text-sm text-gray-600 mb-1">Client</div>
-                <div className="font-semibold text-gray-900">{selectedSession.customerName || 'Walk-in'}</div>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setShowSessionModal(false)}
-              className="w-full mt-6 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors"
-            >
-              Close
-            </button>
+      <div className="mt-8 p-4 bg-gray-800 rounded-lg text-sm">
+        <div className="grid grid-cols-4 gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-green-500 rounded"></div>
+            <span>비어있음 (사용 가능)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-blue-500 rounded"></div>
+            <span>서비스중 (타이머)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-orange-500 rounded animate-pulse"></div>
+            <span>예약됨 (고객 곧 도착)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-gray-500 rounded"></div>
+            <span>정리중 (청소/정리)</span>
           </div>
         </div>
-      )}
-
-      {/* 알림 센터 */}
-      <NotificationCenter />
-    </div>
-  );
-}
-
-function NavItem({ icon, label, active }: { icon: string; label: string; active: boolean }) {
-  return (
-    <button
-      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-        active ? 'bg-blue-700 text-white' : 'text-blue-100 hover:bg-blue-800'
-      }`}
-    >
-      <span className="text-lg">{icon}</span>
-      <span>{label}</span>
-    </button>
-  );
-}
-
-function StepIndicator({ number, title, description }: { number: number; title: string; description: string }) {
-  return (
-    <div className="flex items-start gap-4">
-      <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold flex-shrink-0">
-        {number}
       </div>
-      <div>
-        <div className="font-semibold text-gray-900 text-sm lg:text-base">{title}</div>
-        <div className="text-xs lg:text-sm text-gray-600">{description}</div>
-      </div>
-    </div>
-  );
-}
 
-function TabItem({ icon, label, active, onClick }: { icon: string; label: string; active: boolean; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex-1 flex flex-col items-center gap-1 py-3 px-2 border-t-2 transition-colors ${
-        active
-          ? 'border-blue-600 text-blue-600 bg-blue-50'
-          : 'border-transparent text-gray-600 hover:bg-gray-50'
-      }`}
-    >
-      <span className="text-xl">{icon}</span>
-      <span className="text-xs font-semibold">{label}</span>
-    </button>
+      {/* 상세 정보 모달 */}
+      <DetailModal />
+    </div>
   );
 }
