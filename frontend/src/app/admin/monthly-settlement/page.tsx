@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useStore } from '@/lib/store/store';
+import { useExchangeRate } from '@/hooks/useExchangeRate';
+import { PriceDisplay } from '@/components/PriceDisplay';
 import { exportMonthlySettlementCSV, downloadCSV } from '@/lib/utils/csv-export';
 
 interface MonthlySettlement {
@@ -117,8 +119,10 @@ export default function MonthlySettlementPage() {
     setCompanies,
     guides,
     setGuides,
+    rates,
     addNotification,
   } = useStore();
+  const exchangeRates = useExchangeRate();
   const [selectedMonth, setSelectedMonth] = useState('2026-05');
   const [filterCompanyId, setFilterCompanyId] = useState<number | null>(null);
   const [selectedSettlement, setSelectedSettlement] = useState<MonthlySettlement | null>(null);
@@ -258,15 +262,21 @@ export default function MonthlySettlementPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-lg p-6 border border-blue-200 shadow-sm">
             <div className="text-sm text-gray-600 font-medium mb-1">총 거래액</div>
-            <div className="text-3xl font-bold text-blue-600">₩{(totals.revenue / 1000000).toFixed(1)}M</div>
+            <div className="text-lg font-bold text-blue-600">
+              <PriceDisplay amountUSD={totals.revenue / rates.PHP / 1000000} rates={rates} compact={true} className="text-lg" />
+            </div>
           </div>
           <div className="bg-white rounded-lg p-6 border border-red-200 shadow-sm">
             <div className="text-sm text-gray-600 font-medium mb-1">총 수수료</div>
-            <div className="text-3xl font-bold text-red-600">₩{(totals.commission / 1000000).toFixed(1)}M</div>
+            <div className="text-lg font-bold text-red-600">
+              <PriceDisplay amountUSD={totals.commission / rates.PHP / 1000000} rates={rates} compact={true} className="text-lg" />
+            </div>
           </div>
           <div className="bg-white rounded-lg p-6 border border-green-200 shadow-sm">
             <div className="text-sm text-gray-600 font-medium mb-1">최종 지급액</div>
-            <div className="text-3xl font-bold text-green-600">₩{(totals.payment / 1000000).toFixed(1)}M</div>
+            <div className="text-lg font-bold text-green-600">
+              <PriceDisplay amountUSD={totals.payment / rates.PHP / 1000000} rates={rates} compact={true} className="text-lg" />
+            </div>
           </div>
           <div className="bg-white rounded-lg p-6 border border-purple-200 shadow-sm">
             <div className="text-sm text-gray-600 font-medium mb-1">지급 건수</div>
@@ -309,7 +319,9 @@ export default function MonthlySettlementPage() {
                           <div className="grid grid-cols-4 gap-4 text-right mr-6">
                             <div>
                               <div className="text-xs text-gray-600">수익</div>
-                              <div className="font-bold text-gray-900">₩{(settlement.total_revenue / 1000).toFixed(0)}K</div>
+                              <div className="font-bold text-gray-900 text-sm">
+                                <PriceDisplay amountUSD={settlement.total_revenue / rates.PHP / 1000} rates={rates} compact={true} />
+                              </div>
                             </div>
                             <div>
                               <div className="text-xs text-gray-600">수수료</div>
@@ -317,7 +329,9 @@ export default function MonthlySettlementPage() {
                             </div>
                             <div>
                               <div className="text-xs text-gray-600">지급</div>
-                              <div className="font-bold text-green-600">₩{(settlement.payment_amount / 1000).toFixed(0)}K</div>
+                              <div className="font-bold text-green-600 text-sm">
+                                <PriceDisplay amountUSD={settlement.payment_amount / rates.PHP / 1000} rates={rates} compact={true} />
+                              </div>
                             </div>
                             <div>
                               <div className="text-xs text-gray-600">상태</div>

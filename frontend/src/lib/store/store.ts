@@ -25,6 +25,7 @@ import {
   GuideState,
   MonthlySettlementState,
   InvoiceState,
+  ExchangeRateState,
   Bed,
   Therapist,
   Booking,
@@ -553,6 +554,26 @@ const createInvoiceSlice = (set: any): InvoiceState => ({
 });
 
 // ============================================================
+// Exchange Rate Slice
+// ============================================================
+
+const createExchangeRateSlice = (set: any) => ({
+  rates: {
+    USD: 1,
+    PHP: 56.5,
+    lastUpdated: new Date().toISOString(),
+  },
+  updateExchangeRate: (rates: { USD: number; PHP: number }) => {
+    set((state: any) => ({
+      rates: {
+        ...rates,
+        lastUpdated: new Date().toISOString(),
+      },
+    }));
+  },
+});
+
+// ============================================================
 // Root Store
 // ============================================================
 
@@ -571,6 +592,7 @@ export const useStore = create<RootState>()(
       ...createCompanySlice(set),
       ...createGuideSlice(set),
       ...createMonthlySettlementSlice(set),
+      ...createExchangeRateSlice(set),
     }),
     {
       name: 'elspa-store',
@@ -588,6 +610,7 @@ export const useStore = create<RootState>()(
         companies: state.companies,
         guides: state.guides,
         monthlySettlements: state.monthlySettlements,
+        rates: state.rates,
       }),
     }
   )

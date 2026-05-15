@@ -14,16 +14,28 @@ interface Booking {
   therapist_name?: string;
 }
 
+interface WalkInGuest {
+  id: string;
+  queue_number: number;
+  service_type: string;
+  customer_name?: string;
+  created_at: string;
+  status: 'waiting' | 'assigned' | 'cancelled';
+  assigned_therapist_id?: number;
+}
+
 interface ReservationPanelProps {
   selectedTherapistId: number | null;
   therapists: Therapist[];
   bookings: Booking[];
+  walkInQueue?: WalkInGuest[];
 }
 
 export function TherapistReservationPanel({
   selectedTherapistId,
   therapists,
   bookings,
+  walkInQueue = [],
 }: ReservationPanelProps) {
   const selectedTherapist = therapists.find(t => t.id === selectedTherapistId);
 
@@ -123,8 +135,10 @@ export function TherapistReservationPanel({
         </div>
 
         {/* 예약 수 */}
-        <div className="mt-2 text-sm text-gray-400">
-          <span className="font-bold text-white">{sortedBookings.length}</span>건의 예약
+        <div className="mt-2 space-y-1 text-sm text-gray-400">
+          <div>
+            <span className="font-bold text-white">{sortedBookings.length}</span>건의 예약
+          </div>
         </div>
       </div>
 

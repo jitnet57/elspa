@@ -442,6 +442,19 @@ export interface InvoiceState {
 }
 
 // ============================================================
+// Exchange Rate
+// ============================================================
+
+export interface ExchangeRateState {
+  rates: {
+    USD: number;
+    PHP: number;
+    lastUpdated: string;
+  };
+  updateExchangeRate: (rates: { USD: number; PHP: number }) => void;
+}
+
+// ============================================================
 // Root Store State
 // ============================================================
 
@@ -457,6 +470,7 @@ export interface RootState
     CompanyState,
     GuideState,
     MonthlySettlementState,
-    InvoiceState {
+    InvoiceState,
+    ExchangeRateState {
   // Combined state
 }

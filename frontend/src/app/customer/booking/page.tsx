@@ -3,11 +3,14 @@
 import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useStore } from '@/lib/store/store';
+import { useExchangeRate } from '@/hooks/useExchangeRate';
+import { PriceDisplay } from '@/components/PriceDisplay';
 
 function BookingContent() {
   const searchParams = useSearchParams();
   const source = (searchParams.get('source') || 'web') as 'web' | 'kakao_channel' | 'facebook_messenger' | 'whatsapp' | 'other';
-  const { addBooking, addNotification } = useStore();
+  const { addBooking, addNotification, rates } = useStore();
+  useExchangeRate(); // 5분마다 환율 갱신 시작
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,10 +25,10 @@ function BookingContent() {
   });
 
   const services = [
-    { id: 'swedish', name: '스웨디시 마사지', duration: '60분', price: '80,000', icon: '💆‍♀️' },
-    { id: 'thai', name: '타이 마사지', duration: '90분', price: '120,000', icon: '🧘' },
-    { id: 'hotstone', name: '핫스톤 테라피', duration: '60분', price: '100,000', icon: '🔥' },
-    { id: 'foot', name: '발 마사지', duration: '30분', price: '50,000', icon: '🦶' },
+    { id: 'swedish', name: '스웨디시 마사지', duration: '60분', priceUSD: 80, icon: '💆‍♀️' },
+    { id: 'thai', name: '타이 마사지', duration: '90분', priceUSD: 120, icon: '🧘' },
+    { id: 'hotstone', name: '핫스톤 테라피', duration: '60분', priceUSD: 100, icon: '🔥' },
+    { id: 'foot', name: '발 마사지', duration: '30분', priceUSD: 50, icon: '🦶' },
   ];
 
   const therapists = [
@@ -74,11 +77,16 @@ function BookingContent() {
 
     setIsSubmitting(true);
     try {
+      // Extract minutes from duration string (e.g., "60분" → 60)
+      const durationMinutes = selectedService?.duration
+        ? parseInt(selectedService.duration.replace('분', ''))
+        : 60;
+
       await addBooking({
         customer_name: formData.name,
         phone: formData.phone,
         service_type: formData.service,
-        service_minutes: parseInt(selectedService?.duration || '60'),
+        service_minutes: durationMinutes,
         scheduled_at: `${formData.date}T${formData.time}`,
         notes: formData.memo,
         source: source,
@@ -145,7 +153,7 @@ function BookingContent() {
                   <p className="font-bold text-gray-900">{service.name}</p>
                   <p className="text-sm text-gray-600 font-light">{service.duration}</p>
                 </div>
-                <p className="text-xl font-bold text-orange-600">₩{service.price}</p>
+                <PriceDisplay amountUSD={service.priceUSD} rates={rates} compact={true} className="text-lg" />
               </label>
             ))}
           </div>
@@ -213,9 +221,9 @@ function BookingContent() {
                 <span className="font-semibold text-gray-900 ml-2">{sourceLabels[source]}</span>
               </p>
               <div className="border-t border-stone-300 pt-3 mt-3">
-                <p className="flex justify-between font-bold text-gray-900">
-                  <span>예약금:</span>
-                  <span className="text-orange-600">₩{selectedService?.price}</span>
+                <p className="flex justify-between items-center font-bold text-gray-900">
+                  <span>가격:</span>
+                  <PriceDisplay amountUSD={selectedService?.priceUSD || 0} rates={rates} compact={true} className="text-lg" />
                 </p>
               </div>
             </div>

@@ -7,6 +7,7 @@ import { useStore } from '@/lib/store/store';
 import { NotificationCenter } from '@/components/NotificationCenter';
 import { WalkInBookingModal, type WalkInBookingRequest } from '@/components/WalkInBookingModal';
 import { TherapistReservationPanel } from '@/components/TherapistReservationPanel';
+import { WaitingGuestsList } from '@/components/WaitingGuestsList';
 import { useWalkInMatching, getServiceDuration } from '@/hooks/useWalkInMatching';
 
 interface Bed {
@@ -578,6 +579,7 @@ export default function MonitorPage() {
     beds: storeBeds,
     therapists: storeTherapists,
     bookings,
+    walkInQueue,
   } = useStore();
 
   // Store가 최신이면 store 사용, 아니면 polling 데이터 사용
@@ -1464,8 +1466,39 @@ export default function MonitorPage() {
           </div>
         </div>
       ) : (
-        // 테라피스트별 스케줄 보기 + 예약자 리스트 패널
+        // 테라피스트별 스케줄 보기 + 대기자 리스트 + 예약자 리스트 패널
         <div className="flex gap-0 overflow-hidden">
+          {/* 좌측: 대기자 목록 */}
+          <WaitingGuestsList
+            walkInQueue={walkInQueue}
+            therapists={therapists}
+            onAssign={(guestId) => {
+              const guest = walkInQueue.find(g => g.id === guestId);
+              if (!guest) return;
+              const result = autoAssignByQueue(guest.requested_therapist_id, therapists, beds);
+              if (!result) {
+                alert('가용 테라피스트 또는 베드가 없습니다.');
+                return;
+              }
+              useStore.getState().assignGuest(guestId, result.therapist.id, result.bed.id);
+              alert(`✅ ${guest.customer_name}님을 ${result.therapist.name}에게 배정했습니다.`);
+            }}
+            onCancel={(guestId) => {
+              useStore.setState(state => ({
+                walkInQueue: state.walkInQueue.map(g =>
+                  g.id === guestId ? { ...g, status: 'cancelled' as const } : g
+                )
+              }));
+              alert('✅ 대기자가 취소되었습니다.');
+            }}
+            onDelete={(guestId) => {
+              const { removeFromQueue } = useStore.getState();
+              removeFromQueue(guestId);
+              alert('✅ 대기자가 삭제되었습니다.');
+            }}
+          />
+
+          {/* 중앙: 테라피스트 스케줄 */}
           <div className="flex-1">
             <TherapistScheduleView
               therapists={therapists}
@@ -1476,10 +1509,13 @@ export default function MonitorPage() {
               }}
             />
           </div>
+
+          {/* 우측: 선택된 테라피스트 예약 + 대기자 */}
           <TherapistReservationPanel
             selectedTherapistId={selectedTherapistId}
             therapists={therapists}
             bookings={bookings}
+            walkInQueue={walkInQueue}
           />
         </div>
       )}

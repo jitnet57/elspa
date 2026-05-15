@@ -3,6 +3,7 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useSettlementScheduler } from '@/hooks/useSettlementScheduler';
+import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { OfflineBanner } from '@/components/OfflineBanner';
 
 const createQueryClient = () => {
@@ -34,6 +35,14 @@ function SettlementSchedulerMount() {
     return null;
 }
 
+/**
+ * 환율 자동 갱신 hook 마운트용 컴포넌트 (5분마다 갱신)
+ */
+function ExchangeRateMount() {
+    useExchangeRate();
+    return null;
+}
+
 export function Providers({ children }: { children: React.ReactNode }) {
     const queryClient = getQueryClient();
 
@@ -41,6 +50,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <QueryClientProvider client={queryClient}>
             <OfflineBanner />
             <SettlementSchedulerMount />
+            <ExchangeRateMount />
             {children}
         </QueryClientProvider>
     );

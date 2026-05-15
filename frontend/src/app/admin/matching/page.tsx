@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useStore } from '@/lib/store/store';
+import * as XLSX from 'xlsx';
 
 interface Therapist {
   id: number;
@@ -19,14 +20,6 @@ interface Therapist {
   avatar_color: string;
 }
 
-interface WaitingGuest {
-  id: number;
-  customer_name: string;
-  service_type: string;
-  reserved_time: string;
-  status: 'waiting' | 'assigned';
-}
-
 const mockTherapists: Therapist[] = [
   { id: 1, name: 'Sarah', status: 'in_service', checked_in_at: '09:05', rating: 4.9, specialty: 'Swedish Massage', sessions_today: 4, revenue_today: 320000, commission_rate: 30, total_commission: 96000, avatar_color: 'from-orange-400 to-orange-600' },
   { id: 2, name: 'Emma', status: 'in_service', checked_in_at: '09:15', rating: 4.7, specialty: 'Thai Massage', sessions_today: 3, revenue_today: 360000, commission_rate: 30, total_commission: 108000, avatar_color: 'from-pink-400 to-pink-600' },
@@ -36,19 +29,48 @@ const mockTherapists: Therapist[] = [
   { id: 6, name: 'Rachel', status: 'checked_out', rating: 4.8, specialty: 'General', sessions_today: 0, revenue_today: 0, commission_rate: 30, total_commission: 0, avatar_color: 'from-blue-400 to-blue-600' },
 ];
 
-const mockWaitingGuests: WaitingGuest[] = [
-  { id: 1, customer_name: '김민준', service_type: 'Swedish', reserved_time: '14:30', status: 'waiting' },
-  { id: 2, customer_name: '이수연', service_type: 'Thai', reserved_time: '15:00', status: 'waiting' },
-  { id: 3, customer_name: '정현준', service_type: 'Foot', reserved_time: '15:30', status: 'waiting' },
-  { id: 4, customer_name: '박지은', service_type: 'Hot Stone', reserved_time: '16:00', status: 'waiting' },
-  { id: 5, customer_name: '최준호', service_type: 'Swedish', reserved_time: '16:30', status: 'assigned' },
-];
-
 export default function TherapistManagementPage() {
+  const [activeTab, setActiveTab] = useState<'manage' | 'register'>('manage');
   const [therapists, setTherapists] = useState<Therapist[]>(mockTherapists);
-  const [waitingGuests, setWaitingGuests] = useState<WaitingGuest[]>(mockWaitingGuests);
   const [selectedTherapist, setSelectedTherapist] = useState<Therapist | null>(null);
+  const [newTherapist, setNewTherapist] = useState({
+    name: '',
+    specialty: '',
+    rating: 4.5,
+    avatar_color: 'from-blue-400 to-blue-600',
+  });
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingTherapist, setEditingTherapist] = useState<Therapist | null>(null);
   const { calculateMonthlySettlements, addNotification } = useStore();
+
+  const handleRegisterTherapist = () => {
+    if (!newTherapist.name || !newTherapist.specialty) {
+      alert('이름과 전문분야를 입력해주세요');
+      return;
+    }
+    const therapistId = Math.max(...therapists.map(t => t.id)) + 1;
+    const newTherp: Therapist = {
+      id: therapistId,
+      name: newTherapist.name,
+      specialty: newTherapist.specialty,
+      rating: newTherapist.rating,
+      status: 'checked_out',
+      sessions_today: 0,
+      revenue_today: 0,
+      commission_rate: 30,
+      total_commission: 0,
+      avatar_color: newTherapist.avatar_color,
+    };
+    setTherapists([...therapists, newTherp]);
+    addNotification({
+      type: 'success',
+      message: `${newTherapist.name} 테라피스트가 등록되었습니다.`,
+      severity: 'success',
+      isRead: false,
+    });
+    setNewTherapist({ name: '', specialty: '', rating: 4.5, avatar_color: 'from-blue-400 to-blue-600' });
+    setActiveTab('manage');
+  };
 
   const handleCheckIn = (therapistId: number) => {
     const now = new Date().toLocaleTimeString('ko-KR', { hour12: false, hour: '2-digit', minute: '2-digit' });
@@ -70,27 +92,125 @@ export default function TherapistManagementPage() {
     ));
   };
 
+  const handleDeleteTherapist = (therapistId: number) => {
+    if (confirm('정말 삭제하시겠습니까?')) {
+      setTherapists(prev => prev.filter(t => t.id !== therapistId));
+      if (selectedTherapist?.id === therapistId) {
+        setSelectedTherapist(null);
+      }
+      addNotification({
+        type: 'success',
+        message: '테라피스트가 삭제되었습니다.',
+        severity: 'success',
+        isRead: false,
+      });
+    }
+  };
+
+  const handleUpdateTherapist = () => {
+    if (!editingTherapist || !editingTherapist.name || !editingTherapist.specialty) {
+      alert('이름과 전문분야를 입력해주세요');
+      return;
+    }
+    setTherapists(prev => prev.map(t =>
+      t.id === editingTherapist.id ? editingTherapist : t
+    ));
+    setSelectedTherapist(editingTherapist);
+    setIsEditModalOpen(false);
+    addNotification({
+      type: 'success',
+      message: '테라피스트 정보가 업데이트되었습니다.',
+      severity: 'success',
+      isRead: false,
+    });
+  };
+
+  const downloadExcel = () => {
+    const data = therapists.map(t => ({
+      ID: t.id,
+      이름: t.name,
+      상태: t.status,
+      출근시간: t.checked_in_at || '-',
+      퇴근시간: t.checked_out_at || '-',
+      평점: t.rating,
+      전문분야: t.specialty,
+      세션수: t.sessions_today,
+      일일수익: `₩${t.revenue_today.toLocaleString()}`,
+      수수료율: `${t.commission_rate}%`,
+      지급액: `₩${t.total_commission.toLocaleString()}`,
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '테라피스트');
+
+    ws['!cols'] = [
+      { wch: 5 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 10 },
+      { wch: 10 },
+      { wch: 6 },
+      { wch: 15 },
+      { wch: 8 },
+      { wch: 12 },
+      { wch: 8 },
+      { wch: 12 },
+    ];
+
+    XLSX.writeFile(wb, `테라피스트_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
   const checkedInCount = therapists.filter(t => t.status !== 'checked_out').length;
   const idleCount = therapists.filter(t => t.status === 'idle').length;
   const inServiceCount = therapists.filter(t => t.status === 'in_service').length;
   const totalRevenue = therapists.reduce((sum, t) => sum + t.revenue_today, 0);
   const totalCommission = therapists.reduce((sum, t) => sum + t.total_commission, 0);
-  const waitingCount = waitingGuests.filter(g => g.status === 'waiting').length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-8">
       <div className="max-w-7xl mx-auto">
         {/* 헤더 */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2 tracking-tight">
-            💼 테라피스트 관리
-          </h1>
-          <p className="text-lg text-gray-600 font-light">
-            출근 관리, 수익 정산, 대기 손님 현황
-          </p>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-4xl font-bold text-gray-900 tracking-tight">
+              💼 테라피스트 관리
+            </h1>
+            <button
+              onClick={downloadExcel}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-colors"
+            >
+              📊 엑셀 다운로드
+            </button>
+          </div>
+
+          {/* 탭 */}
+          <div className="flex gap-4 border-b border-gray-200">
+            <button
+              onClick={() => setActiveTab('manage')}
+              className={`px-4 py-3 font-semibold transition-colors ${
+                activeTab === 'manage'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              👥 출근 관리
+            </button>
+            <button
+              onClick={() => setActiveTab('register')}
+              className={`px-4 py-3 font-semibold transition-colors ${
+                activeTab === 'register'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              ➕ 테라피스트 등록
+            </button>
+          </div>
         </div>
 
-        {/* 주요 통계 */}
+        {/* 주요 통계 (관리 탭에서만) */}
+        {activeTab === 'manage' && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-lg p-6 border border-blue-200 shadow-sm">
             <div className="text-sm text-gray-600 font-medium mb-1">출근 테라피스트</div>
@@ -107,14 +227,11 @@ export default function TherapistManagementPage() {
             <div className="text-3xl font-bold text-purple-600">{inServiceCount}</div>
             <div className="text-xs text-gray-500 mt-2">진행 중인 세션</div>
           </div>
-          <div className="bg-white rounded-lg p-6 border border-amber-200 shadow-sm">
-            <div className="text-sm text-gray-600 font-medium mb-1">대기 손님</div>
-            <div className="text-3xl font-bold text-amber-600">{waitingCount}</div>
-            <div className="text-xs text-gray-500 mt-2">예약 대기</div>
-          </div>
         </div>
+        )}
 
-        {/* 메인 콘텐츠 */}
+        {/* 메인 콘텐츠 - 관리 탭 */}
+        {activeTab === 'manage' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* 좌측: 테라피스트 목록 */}
           <div className="lg:col-span-2">
@@ -186,6 +303,25 @@ export default function TherapistManagementPage() {
                             </button>
                           </>
                         )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingTherapist(therapist);
+                            setIsEditModalOpen(true);
+                          }}
+                          className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded font-bold"
+                        >
+                          수정
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteTherapist(therapist.id);
+                          }}
+                          className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded font-bold"
+                        >
+                          삭제
+                        </button>
                       </div>
                     </div>
 
@@ -250,33 +386,86 @@ export default function TherapistManagementPage() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+        )}
 
-            {/* 대기 손님 */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">⏳ 대기 손님 ({waitingCount})</h3>
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {waitingGuests
-                  .filter(g => g.status === 'waiting')
-                  .map(guest => (
-                    <div key={guest.id} className="p-3 bg-amber-50 rounded border-l-4 border-amber-500">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="font-bold text-gray-900">{guest.customer_name}</span>
-                        <span className="text-xs bg-amber-600 text-white px-2 py-1 rounded">{guest.reserved_time}</span>
-                      </div>
-                      <div className="text-sm text-gray-600">{guest.service_type}</div>
-                    </div>
-                  ))}
-                {waitingCount === 0 && (
-                  <div className="text-center py-6 text-gray-500">
-                    대기 중인 손님이 없습니다
-                  </div>
-                )}
+        {/* 테라피스트 등록 탭 */}
+        {activeTab === 'register' && (
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">➕ 새 테라피스트 등록</h2>
+
+            <div className="space-y-6">
+              {/* 이름 */}
+              <div>
+                <label className="block text-sm font-bold text-gray-900 mb-2">테라피스트 이름 *</label>
+                <input
+                  type="text"
+                  value={newTherapist.name}
+                  onChange={(e) => setNewTherapist({ ...newTherapist, name: e.target.value })}
+                  placeholder="예: Sarah, Emma, Jessica"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 font-light"
+                />
+              </div>
+
+              {/* 전문분야 */}
+              <div>
+                <label className="block text-sm font-bold text-gray-900 mb-2">전문분야 *</label>
+                <select
+                  value={newTherapist.specialty}
+                  onChange={(e) => setNewTherapist({ ...newTherapist, specialty: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 font-light"
+                >
+                  <option value="">선택해주세요</option>
+                  <option value="Swedish Massage">스웨디시 마사지</option>
+                  <option value="Thai Massage">타이 마사지</option>
+                  <option value="Hot Stone">핫스톤 테라피</option>
+                  <option value="Foot Massage">발 마사지</option>
+                  <option value="Aromatherapy">아로마테라피</option>
+                  <option value="General">일반</option>
+                </select>
+              </div>
+
+              {/* 평점 */}
+              <div>
+                <label className="block text-sm font-bold text-gray-900 mb-2">초기 평점</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="5"
+                  step="0.1"
+                  value={newTherapist.rating}
+                  onChange={(e) => setNewTherapist({ ...newTherapist, rating: parseFloat(e.target.value) })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 font-light"
+                />
+              </div>
+
+              {/* 버튼 */}
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => {
+                    setNewTherapist({ name: '', specialty: '', rating: 4.5, avatar_color: 'from-blue-400 to-blue-600' });
+                    setActiveTab('manage');
+                  }}
+                  className="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-lg font-semibold transition-colors"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleRegisterTherapist}
+                  className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors"
+                >
+                  등록
+                </button>
               </div>
             </div>
           </div>
         </div>
+        )}
 
-        {/* 출근 순번 관리 */}
+        {/* 출근 순번 관리 (관리 탭에서만) */}
+        {activeTab === 'manage' && (
         <div className="mt-8 bg-white rounded-xl p-8 shadow-sm border border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">⏱️ 워크인 배정 순번</h2>
           <div className="space-y-2">
@@ -319,9 +508,11 @@ export default function TherapistManagementPage() {
             </p>
           </div>
         </div>
+        )}
 
-        {/* 일일 정산 요약 */}
+        {activeTab === 'manage' && (
         <div className="mt-8 bg-white rounded-xl p-8 shadow-sm border border-gray-200">
+          {/* 일일 정산 요약 */}
           <h2 className="text-2xl font-bold text-gray-900 mb-6">📊 일일 정산 요약</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
@@ -338,8 +529,10 @@ export default function TherapistManagementPage() {
             </div>
           </div>
         </div>
+        )}
 
-        {/* 월정산 미리보기 */}
+        {/* 월정산 미리보기 (관리 탭에서만) */}
+        {activeTab === 'manage' && (
         <div className="mt-8 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-8 border-2 border-indigo-200 shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">📅 월정산 미리보기</h2>
@@ -410,6 +603,90 @@ export default function TherapistManagementPage() {
             </p>
           </div>
         </div>
+        )}
+
+        {/* 수정 모달 */}
+        {isEditModalOpen && editingTherapist && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">테라피스트 수정</h2>
+
+              <div className="space-y-4">
+                {/* 이름 */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">이름</label>
+                  <input
+                    type="text"
+                    value={editingTherapist.name}
+                    onChange={(e) => setEditingTherapist({ ...editingTherapist, name: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                {/* 전문분야 */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">전문분야</label>
+                  <select
+                    value={editingTherapist.specialty}
+                    onChange={(e) => setEditingTherapist({ ...editingTherapist, specialty: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="">선택해주세요</option>
+                    <option value="Swedish Massage">스웨디시 마사지</option>
+                    <option value="Thai Massage">타이 마사지</option>
+                    <option value="Hot Stone">핫스톤 테라피</option>
+                    <option value="Foot Massage">발 마사지</option>
+                    <option value="Aromatherapy">아로마테라피</option>
+                    <option value="General">일반</option>
+                  </select>
+                </div>
+
+                {/* 평점 */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">평점</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="5"
+                    step="0.1"
+                    value={editingTherapist.rating}
+                    onChange={(e) => setEditingTherapist({ ...editingTherapist, rating: parseFloat(e.target.value) })}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                {/* 수수료율 */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">수수료율 (%)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={editingTherapist.commission_rate}
+                    onChange={(e) => setEditingTherapist({ ...editingTherapist, commission_rate: parseInt(e.target.value) })}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                {/* 버튼 */}
+                <div className="flex gap-3 pt-4 border-t border-gray-200">
+                  <button
+                    onClick={() => setIsEditModalOpen(false)}
+                    className="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-lg font-semibold transition-colors"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={handleUpdateTherapist}
+                    className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors"
+                  >
+                    저장
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

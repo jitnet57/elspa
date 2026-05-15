@@ -2,11 +2,14 @@
 
 import { useState, useMemo } from 'react';
 import { useStore } from '@/lib/store/store';
+import { useExchangeRate } from '@/hooks/useExchangeRate';
+import { PriceDisplay } from '@/components/PriceDisplay';
 import { PDFGenerator } from '@/lib/services/pdf-generator';
 import { MessagingService } from '@/lib/services/messaging';
 
 export default function BillingPage() {
-  const { invoices, receipts, messages, addMessage, updateMessageStatus, addNotification } = useStore();
+  const { invoices, receipts, messages, rates, addMessage, updateMessageStatus, addNotification } = useStore();
+  const exchangeRates = useExchangeRate();
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterMonth, setFilterMonth] = useState<string>(new Date().toISOString().slice(0, 7));
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
@@ -182,7 +185,12 @@ export default function BillingPage() {
                   <div className="text-sm text-gray-600 font-light">{invoice.settlement_month}</div>
                 </td>
                 <td className="px-6 py-4 font-semibold text-gray-900">
-                  ₩{invoice.net_amount.toLocaleString()}
+                  <PriceDisplay
+                    amountUSD={invoice.net_amount / rates.PHP}
+                    rates={rates}
+                    compact={true}
+                    className="text-sm"
+                  />
                 </td>
                 <td className="px-6 py-4 text-gray-700">
                   {new Date(invoice.due_date).toLocaleDateString('ko-KR')}
