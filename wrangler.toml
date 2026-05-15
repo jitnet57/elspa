@@ -1,39 +1,6 @@
-# Cloudflare Pages 설정
 name = "elspa-manager"
-
-# Pages 배포 설정
 pages_build_output_dir = "frontend/.next"
 
 [build]
 command = "npm install --prefix frontend && npm run build --prefix frontend"
 cwd = "."
-watch_paths = ["frontend/src/**/*.tsx", "frontend/src/**/*.ts"]
-
-# 환경 변수
-[env.production]
-name = "elspa-manager-prod"
-vars = { ENVIRONMENT = "production" }
-
-[env.preview]
-name = "elspa-manager-preview"
-vars = { ENVIRONMENT = "preview" }
-
-# 라우팅 설정
-[[routes]]
-pattern = "elspa-manager.pages.dev/*"
-zone_id = ""
-
-# 캐싱 정책
-[rules]
-[[rules.routes]]
-path = "/_next/static/*"
-cache_on_cookie = { SESSION_ID = "session_value" }
-cache_ttl = 31536000
-
-[[rules.routes]]
-path = "/api/*"
-cache_ttl = 0
-
-[[rules.routes]]
-path = "/*"
-cache_ttl = 3600
