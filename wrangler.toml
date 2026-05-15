@@ -1,5 +1,0 @@
-name = "elspa-manager"
-pages_build_output_dir = "frontend/out"
-
-[build]
-command = "npm install --prefix frontend && npm run build --prefix frontend"

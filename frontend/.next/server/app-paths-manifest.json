@@ -10,8 +10,6 @@
   "/admin/policies/page": "app/admin/policies/page.js",
   "/admin/settlement-report/page": "app/admin/settlement-report/page.js",
   "/admin/simulation/page": "app/admin/simulation/page.js",
-  "/api/health/route": "app-edge-has-no-entrypoint",
-  "/api/scheduler/daily-settlement-report/route": "app/api/scheduler/daily-settlement-report/route.js",
   "/customer/about-matching/page": "app/customer/about-matching/page.js",
   "/customer/booking/page": "app/customer/booking/page.js",
   "/customer/mypage/page": "app/customer/mypage/page.js",

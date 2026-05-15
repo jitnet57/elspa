@@ -96,18 +96,6 @@
       "namedRegex": "^/admin/simulation(?:/)?$"
     },
     {
-      "page": "/api/health",
-      "regex": "^/api/health(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/api/health(?:/)?$"
-    },
-    {
-      "page": "/api/scheduler/daily-settlement-report",
-      "regex": "^/api/scheduler/daily\\-settlement\\-report(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/api/scheduler/daily\\-settlement\\-report(?:/)?$"
-    },
-    {
       "page": "/customer",
       "regex": "^/customer(?:/)?$",
       "routeKeys": {},

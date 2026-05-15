@@ -67,7 +67,7 @@ self.__SERVER_FILES_MANIFEST={
       "qualities": [
         75
       ],
-      "unoptimized": false,
+      "unoptimized": true,
       "customCacheHandler": false
     },
     "devIndicators": {
@@ -96,6 +96,7 @@ self.__SERVER_FILES_MANIFEST={
     "compiler": {},
     "expireTime": 31536000,
     "staticPageGenerationTimeout": 60,
+    "output": "export",
     "modularizeImports": {
       "@mui/icons-material": {
         "transform": "@mui/icons-material/{{member}}"
@@ -104,7 +105,7 @@ self.__SERVER_FILES_MANIFEST={
         "transform": "lodash/{{member}}"
       }
     },
-    "outputFileTracingRoot": "e:\\elspa\\frontend",
+    "outputFileTracingRoot": "E:\\elspa\\frontend",
     "cacheComponents": false,
     "cacheLife": {
       "default": {
@@ -304,11 +305,11 @@ self.__SERVER_FILES_MANIFEST={
     "bundlePagesRouterDependencies": false,
     "configFileName": "next.config.ts",
     "turbopack": {
-      "root": "e:\\elspa\\frontend"
+      "root": "E:\\elspa\\frontend"
     },
     "distDirRoot": ".next"
   },
-  "appDir": "e:\\elspa\\frontend",
+  "appDir": "E:\\elspa\\frontend",
   "relativeAppDir": "",
   "files": [
     ".next\\routes-manifest.json",

@@ -10,8 +10,6 @@
   "/admin/policies/page": "/admin/policies",
   "/admin/settlement-report/page": "/admin/settlement-report",
   "/admin/simulation/page": "/admin/simulation",
-  "/api/health/route": "/api/health",
-  "/api/scheduler/daily-settlement-report/route": "/api/scheduler/daily-settlement-report",
   "/customer/about-matching/page": "/customer/about-matching",
   "/customer/booking/page": "/customer/booking",
   "/customer/mypage/page": "/customer/mypage",
