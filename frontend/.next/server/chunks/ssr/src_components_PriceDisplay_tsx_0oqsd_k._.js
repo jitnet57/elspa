@@ -1,3 +1,0 @@
-module.exports=[2269,a=>{"use strict";var b=a.i(87924),c=a.i(29677);a.s(["PriceDisplay",0,({amountUSD:a,rates:d,showPHP:e=!0,className:f="",compact:g=!1})=>{let h=Math.round(a*d.PHP),i=(0,c.formatPrice)(a,"USD"),j=(0,c.formatPrice)(h,"PHP");return g?(0,b.jsxs)("span",{className:`inline-flex items-center gap-1 ${f}`,children:[(0,b.jsx)("span",{className:"font-semibold",children:i}),e&&(0,b.jsxs)("span",{className:"text-sm text-gray-600",children:["(",j,")"]})]}):(0,b.jsxs)("div",{className:`text-center ${f}`,children:[(0,b.jsx)("div",{className:"text-lg font-bold text-blue-600",children:i}),e&&(0,b.jsx)("div",{className:"text-sm text-gray-600",children:j})]})}])}];
-
-//# sourceMappingURL=src_components_PriceDisplay_tsx_0oqsd_k._.js.map

@@ -96,6 +96,12 @@
       "namedRegex": "^/admin/simulation(?:/)?$"
     },
     {
+      "page": "/admin/therapists",
+      "regex": "^/admin/therapists(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/therapists(?:/)?$"
+    },
+    {
       "page": "/customer",
       "regex": "^/customer(?:/)?$",
       "routeKeys": {},

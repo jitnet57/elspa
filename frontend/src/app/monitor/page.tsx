@@ -7,6 +7,10 @@ import { useStore } from '@/lib/store/store';
 import { NotificationCenter } from '@/components/NotificationCenter';
 import { WalkInBookingModal, type WalkInBookingRequest } from '@/components/WalkInBookingModal';
 import { useWalkInMatching, getServiceDuration } from '@/hooks/useWalkInMatching';
+import { MobileDrawer } from '@/components/MobileDrawer';
+import { MobileHeader } from '@/components/MobileHeader';
+import { MobileBedCard } from '@/components/MobileBedCard';
+import { MobileBottomTabBar } from '@/components/MobileBottomTabBar';
 
 interface Bed {
   id: number;
@@ -183,6 +187,9 @@ export default function MonitorPage() {
 
   // 📌 워크인 모달 상태
   const [isWalkInModalOpen, setIsWalkInModalOpen] = useState(false);
+
+  // 📌 모바일 드로어 상태
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   // Zustand store에서 데이터 읽기
   const {
@@ -375,8 +382,82 @@ export default function MonitorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4">
+    <div className="min-h-screen bg-gray-900 text-white">
       <NotificationCenter />
+
+      {/* 📌 모바일 헤더 */}
+      <MobileHeader
+        onMenuClick={() => setIsMobileDrawerOpen(true)}
+        title="✨ ELSPA 모니터"
+        rightContent={<div className="text-xl font-mono">{currentTime}</div>}
+      />
+
+      {/* 📌 모바일 드로어 (테라피스트 현황) */}
+      <MobileDrawer
+        isOpen={isMobileDrawerOpen}
+        onClose={() => setIsMobileDrawerOpen(false)}
+      >
+        <div className="space-y-4">
+          <h3 className="text-lg font-bold text-blue-400 border-b border-gray-700 pb-2">
+            테라피스트 현황
+          </h3>
+
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span>출근: {therapistStats.checkedIn}명 / 총 {therapistStats.total}명</span>
+              <span className="text-green-400 font-bold">대기: {therapistStats.idle}명</span>
+            </div>
+            <div className="text-gray-400 text-xs">
+              서비스중: {therapistStats.in_service}명 | 휴식: {therapistStats.resting}명
+            </div>
+          </div>
+
+          {/* 예측 정보 */}
+          {predictions && (
+            <div className="bg-blue-900/30 p-3 rounded border-l-4 border-blue-500">
+              <div className="text-xs text-gray-400 mb-1">⏳ 평균 대기시간</div>
+              <div className="text-lg font-bold text-blue-400">{predictions.average_wait_minutes || 0}분</div>
+              {predictions.next_available_therapist && (
+                <div className="text-xs text-gray-400 mt-2">
+                  다음 가용: <span className="text-green-400 font-bold">{predictions.next_available_therapist.name}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 테라피스트 목록 */}
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            <div className="text-xs font-bold text-gray-300 border-b border-gray-700 pb-2">
+              전체 테라피스트
+            </div>
+            {therapists.map(therapist => (
+              <div key={therapist.id} className="bg-gray-700 p-2 rounded text-xs hover:bg-gray-600 transition">
+                <div className="flex items-center justify-between">
+                  <div>
+                    {therapist.status === 'idle' && '●'}
+                    {therapist.status === 'in_service' && '◆'}
+                    {therapist.status === 'resting' && '○'}
+                    {therapist.status === 'checked_out' && '✕'}
+                    {' '}
+                    <span className="font-bold">{therapist.name}</span>
+                  </div>
+                  <span className={
+                    therapist.status === 'idle' ? 'text-green-400' :
+                    therapist.status === 'in_service' ? 'text-blue-400' :
+                    therapist.status === 'resting' ? 'text-yellow-400' :
+                    'text-gray-500'
+                  }>
+                    {therapist.status === 'idle' ? '[즉시]' : ''}
+                    {therapist.status === 'in_service' && `${therapist.remaining_minutes}분↓`}
+                    {therapist.status === 'resting' && '[휴식]'}
+                  </span>
+                </div>
+                <div className="text-gray-400 mt-0.5">{therapist.specialty}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </MobileDrawer>
 
       {/* 📌 워크인 모달 */}
       <WalkInBookingModal
@@ -386,56 +467,83 @@ export default function MonitorPage() {
         availableBeds={pollingBeds.filter(b => b.status === 'available')}
         therapists={pollingTherapists}
       />
-      <div className="mb-6 bg-gray-800 p-4 rounded-lg">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold">✨ ELSPA 실시간 모니터</h1>
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-gray-400">
-              🔄 폴링: {refetchCount}회 | ⏱️ {lastRefetch?.toLocaleTimeString('ko-KR', { hour12: false })}
-            </div>
-            {/* 📌 워크인 추가 버튼 */}
-            <button
-              onClick={() => setIsWalkInModalOpen(true)}
-              className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-lg transition-all hover:shadow-lg"
-            >
-              + 워크인 추가
-            </button>
-            <div className="text-2xl font-mono">{currentTime}</div>
-          </div>
-        </div>
-        <div className="grid grid-cols-4 gap-4 text-lg">
-          <div className="bg-green-600/30 p-3 rounded text-center">
-            <div className="text-green-400 font-bold">비어있음</div>
-            <div className="text-2xl font-bold">{bedStats.available}</div>
-          </div>
-          <div className="bg-blue-600/30 p-3 rounded text-center">
-            <div className="text-blue-400 font-bold">서비스중</div>
-            <div className="text-2xl font-bold">{bedStats.in_service}</div>
-          </div>
-          <div className="bg-orange-600/30 p-3 rounded text-center">
-            <div className="text-orange-400 font-bold">예약됨</div>
-            <div className="text-2xl font-bold">{bedStats.reserved}</div>
-          </div>
-          <div className="bg-gray-600/30 p-3 rounded text-center">
-            <div className="text-gray-400 font-bold">정리중</div>
-            <div className="text-2xl font-bold">{bedStats.cleaning}</div>
-          </div>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-4 gap-6">
-        <div className="col-span-3 space-y-6">
-          {Object.entries(bedsByRoom).map(([roomName, roomBeds]) =>
-            roomBeds.length > 0 ? (
-              <div key={roomName} className="bg-gray-800 p-4 rounded-lg">
-                <h2 className="text-xl font-bold mb-3 text-blue-400">{roomName} ({roomBeds.length}개)</h2>
-                <BedGrid roomBeds={roomBeds} />
+      {/* 📌 메인 콘텐츠 */}
+      <div className="lg:p-4 p-0">
+        {/* 데스크톱용 헤더 */}
+        <div className="hidden lg:block mb-6 bg-gray-800 p-4 rounded-lg">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-3xl font-bold">✨ ELSPA 실시간 모니터</h1>
+            <div className="flex items-center gap-4">
+              <div className="text-sm text-gray-400">
+                🔄 폴링: {refetchCount}회 | ⏱️ {lastRefetch?.toLocaleTimeString('ko-KR', { hour12: false })}
               </div>
-            ) : null
-          )}
+              {/* 📌 워크인 추가 버튼 */}
+              <button
+                onClick={() => setIsWalkInModalOpen(true)}
+                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-lg transition-all hover:shadow-lg"
+              >
+                + 워크인 추가
+              </button>
+              <div className="text-2xl font-mono">{currentTime}</div>
+            </div>
+          </div>
+          <div className="grid grid-cols-4 gap-4 text-lg">
+            <div className="bg-green-600/30 p-3 rounded text-center">
+              <div className="text-green-400 font-bold">비어있음</div>
+              <div className="text-2xl font-bold">{bedStats.available}</div>
+            </div>
+            <div className="bg-blue-600/30 p-3 rounded text-center">
+              <div className="text-blue-400 font-bold">서비스중</div>
+              <div className="text-2xl font-bold">{bedStats.in_service}</div>
+            </div>
+            <div className="bg-orange-600/30 p-3 rounded text-center">
+              <div className="text-orange-400 font-bold">예약됨</div>
+              <div className="text-2xl font-bold">{bedStats.reserved}</div>
+            </div>
+            <div className="bg-gray-600/30 p-3 rounded text-center">
+              <div className="text-gray-400 font-bold">정리중</div>
+              <div className="text-2xl font-bold">{bedStats.cleaning}</div>
+            </div>
+          </div>
         </div>
 
-        <div className="bg-gray-800 p-4 rounded-lg h-fit sticky top-4">
+        {/* 모바일용 헤더 */}
+        <div className="lg:hidden mb-4 bg-gray-800 p-4 rounded-lg mx-4 mt-4">
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="bg-green-600/30 p-2 rounded text-center">
+              <div className="text-green-400 font-bold text-xs">비어있음</div>
+              <div className="text-xl font-bold">{bedStats.available}</div>
+            </div>
+            <div className="bg-blue-600/30 p-2 rounded text-center">
+              <div className="text-blue-400 font-bold text-xs">서비스중</div>
+              <div className="text-xl font-bold">{bedStats.in_service}</div>
+            </div>
+            <div className="bg-orange-600/30 p-2 rounded text-center">
+              <div className="text-orange-400 font-bold text-xs">예약됨</div>
+              <div className="text-xl font-bold">{bedStats.reserved}</div>
+            </div>
+            <div className="bg-gray-600/30 p-2 rounded text-center">
+              <div className="text-gray-400 font-bold text-xs">정리중</div>
+              <div className="text-xl font-bold">{bedStats.cleaning}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* 데스크톱 레이아웃 */}
+        <div className="hidden lg:grid grid-cols-4 gap-6">
+          <div className="col-span-3 space-y-6">
+            {Object.entries(bedsByRoom).map(([roomName, roomBeds]) =>
+              roomBeds.length > 0 ? (
+                <div key={roomName} className="bg-gray-800 p-4 rounded-lg">
+                  <h2 className="text-xl font-bold mb-3 text-blue-400">{roomName} ({roomBeds.length}개)</h2>
+                  <BedGrid roomBeds={roomBeds} />
+                </div>
+              ) : null
+            )}
+          </div>
+
+          <div className="bg-gray-800 p-4 rounded-lg h-fit sticky top-4">
           <h2 className="text-xl font-bold mb-4 text-blue-400">테라피스트 현황</h2>
 
           <div className="space-y-2 mb-6 pb-4 border-b border-gray-700">
@@ -496,28 +604,64 @@ export default function MonitorPage() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
 
-      <div className="mt-8 p-4 bg-gray-800 rounded-lg text-sm">
-        <div className="grid grid-cols-4 gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-green-500 rounded"></div>
-            <span>비어있음 (사용 가능)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-blue-500 rounded"></div>
-            <span>서비스중 (타이머)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-orange-500 rounded animate-pulse"></div>
-            <span>예약됨 (고객 곧 도착)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-gray-500 rounded"></div>
-            <span>정리중 (청소/정리)</span>
+        {/* 모바일 레이아웃 */}
+        <div className="lg:hidden px-4 pb-32 space-y-4 mt-4">
+          {Object.entries(bedsByRoom).map(([roomName, roomBeds]) =>
+            roomBeds.length > 0 ? (
+              <div key={roomName}>
+                <h2 className="text-lg font-bold mb-3 text-blue-400 sticky top-0 bg-gray-900 py-2">
+                  {roomName} ({roomBeds.length}개)
+                </h2>
+                <div className="space-y-2">
+                  {roomBeds.map(bed => (
+                    <div
+                      key={bed.id}
+                      onClick={() => openDetailModal(bed.id)}
+                      className="cursor-pointer"
+                    >
+                      <MobileBedCard bed={bed} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null
+          )}
+        </div>
+
+        {/* 범례 - 데스크톱만 */}
+        <div className="hidden lg:block mt-8 p-4 bg-gray-800 rounded-lg text-sm">
+          <div className="grid grid-cols-4 gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-green-500 rounded"></div>
+              <span>비어있음 (사용 가능)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-blue-500 rounded"></div>
+              <span>서비스중 (타이머)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-orange-500 rounded animate-pulse"></div>
+              <span>예약됨 (고객 곧 도착)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-gray-500 rounded"></div>
+              <span>정리중 (청소/정리)</span>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* 모바일 하단 탭 바 */}
+      <MobileBottomTabBar
+        tabs={[
+          { label: '모니터', icon: '📊', href: '/monitor', active: true },
+          { label: '테라피스트', icon: '👥', href: '/admin/therapists' },
+          { label: '배정', icon: '⚙️', href: '/admin/matching' },
+        ]}
+        onWalkInAdd={() => setIsWalkInModalOpen(true)}
+      />
 
       {/* 상세 정보 모달 */}
       <DetailModal />
