@@ -64,6 +64,7 @@ export default function MonitorPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'home' | 'schedule' | 'therapists' | 'sessions'>('home');
   const [showSessionModal, setShowSessionModal] = useState(false);
+  const [viewMode, setViewMode] = useState<'beds' | 'therapist-detail'>('beds');
 
   const hours = Array.from({ length: 13 }, (_, i) => i + 9);
   const therapistCount = mockTherapists.length;
@@ -247,10 +248,11 @@ export default function MonitorPage() {
                     key={therapist.id}
                     onClick={() => {
                       setSelectedTherapist(therapist);
+                      setViewMode('therapist-detail');
                       setActiveTab('therapists');
                     }}
                     className={`p-3 rounded-lg cursor-pointer border-2 transition-all ${
-                      selectedTherapist?.id === therapist.id
+                      selectedTherapist?.id === therapist.id && viewMode === 'therapist-detail'
                         ? 'border-blue-500 bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
@@ -272,10 +274,44 @@ export default function MonitorPage() {
             </div>
           </div>
 
-          {/* 중앙: 데스크톱 타임 그리드 (lg 이상만) */}
+          {/* 중앙: 데스크톱 뷰 (lg 이상만) */}
           <div className="hidden lg:flex flex-1 bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex-col overflow-hidden">
-            {/* 시간 헤더 */}
-            <div className="mb-4">
+            {/* 뷰 모드 전환 버튼 */}
+            <div className="flex gap-2 mb-4">
+              <button
+                onClick={() => setViewMode('beds')}
+                className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${
+                  viewMode === 'beds'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                🛏️ Beds View
+              </button>
+              <button
+                onClick={() => {
+                  if (selectedTherapist) {
+                    setViewMode('therapist-detail');
+                  }
+                }}
+                disabled={!selectedTherapist}
+                className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${
+                  viewMode === 'therapist-detail'
+                    ? 'bg-blue-600 text-white'
+                    : selectedTherapist
+                    ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                👥 {selectedTherapist?.name || 'Therapist'} Schedule
+              </button>
+            </div>
+
+            {/* 베드 뷰 (타임 그리드) */}
+            {viewMode === 'beds' && (
+              <>
+                {/* 시간 헤더 */}
+                <div className="mb-4">
               <div className="flex">
                 <div className="w-32 flex-shrink-0" />
                 <div className="flex-1 grid" style={{ gridTemplateColumns: `repeat(13, minmax(0, 1fr))` }}>
@@ -336,6 +372,82 @@ export default function MonitorPage() {
                 );
               })}
             </div>
+              </>
+            )}
+
+            {/* 테라피스트 상세 뷰 */}
+            {viewMode === 'therapist-detail' && selectedTherapist && (
+              <div className="flex flex-col">
+                {/* 헤더 */}
+                <div className="mb-6 pb-4 border-b border-gray-200">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-lg font-bold">
+                      {selectedTherapist.name[0]}
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">{selectedTherapist.name}</h3>
+                      <p className="text-sm text-gray-600">
+                        Specialty: {selectedTherapist.specialty} · Rating: {selectedTherapist.rating}★
+                      </p>
+                    </div>
+                    <div className="ml-auto">
+                      <div className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(selectedTherapist.status)}`}>
+                        {getStatusBadge(selectedTherapist.status)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 일일 일정 */}
+                <div className="flex-1 overflow-y-auto">
+                  <div className="text-sm font-semibold text-gray-700 mb-4">
+                    Daily Schedule - {formatDate(selectedDate)}
+                  </div>
+                  {getTherapistSchedules(selectedTherapist.id).length > 0 ? (
+                    <div className="space-y-3">
+                      {getTherapistSchedules(selectedTherapist.id).map((schedule, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => {
+                            setSelectedSession(schedule);
+                            setShowSessionModal(true);
+                          }}
+                          className={`p-4 rounded-lg border-l-4 cursor-pointer hover:shadow-md transition-all ${getScheduleColor(schedule.serviceType)}`}
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">{getServiceIcon(schedule.serviceType)}</span>
+                              <div>
+                                <p className="font-semibold text-sm text-gray-900">{schedule.serviceName}</p>
+                                <p className="text-xs text-gray-600">
+                                  {schedule.startTime} - {schedule.endTime}
+                                </p>
+                              </div>
+                            </div>
+                            <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                              schedule.status === 'in_service'
+                                ? 'bg-blue-100 text-blue-800'
+                                : schedule.status === 'reserved'
+                                ? 'bg-gray-100 text-gray-800'
+                                : 'bg-orange-100 text-orange-800'
+                            }`}>
+                              {schedule.status === 'in_service' ? '진행중' : schedule.status === 'reserved' ? '예약됨' : '휴식'}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-700 mt-2">
+                            👤 {schedule.customerName || 'Walk-in Guest'}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-400">
+                      <p className="text-sm">오늘 예약된 세션이 없습니다</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 우측: 데스크톱 패널 (xl 이상만) */}
