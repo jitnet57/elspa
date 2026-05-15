@@ -23,4 +23,3 @@ langgraph
 pydantic-settings
 httpx
 tenacity
-bull-python-client
