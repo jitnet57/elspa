@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "include": ["/*"],
+  "exclude": [
+    "/sitemap.xml",
+    "/robots.txt",
+    "/_next/static/*",
+    "/_next/image*",
+    "/favicon.ico"
+  ],
+  "rules": [
+    {
+      "type": "static",
+      "include": ["/_next/static/*"],
+      "cache": {
+        "default_ttl": 86400,
+        "browser_ttl": 3600
+      }
+    },
+    {
+      "type": "static",
+      "include": ["/*.html"],
+      "cache": {
+        "default_ttl": 3600
+      }
+    },
+    {
+      "type": "rewrite",
+      "include": ["/*"],
+      "exclude": ["/_next/*", "/static/*"],
+      "targets": {
+        "index": "/index.html"
+      }
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+name = "elspa-manager"
+pages_build_output_dir = "frontend/.next"
+compatibility_date = "2024-12-16"
+
+# Build configuration
+[build]
+command = "npm install --prefix frontend && npm run build --prefix frontend"
+cwd = "."
+watch_paths = ["frontend/src/**/*.tsx", "frontend/src/**/*.ts"]
+
+# Production environment
+[env.production]
+name = "elspa-manager-prod"
+routes = [
+  { pattern = "elspa-workers.pages.dev/*" }
+]
+
+# Observability
+[observability]
+enabled = true
