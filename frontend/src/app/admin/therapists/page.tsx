@@ -186,10 +186,10 @@ export default function TherapistsPage() {
             🎯 매칭 제어판
           </a>
           <a
-            href="/monitor"
+            href="/therapist-settlement"
             className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-gray-600 hover:bg-white/50"
           >
-            📊 카운터 모니터
+            💰 테라피스트 정산
           </a>
         </nav>
 
