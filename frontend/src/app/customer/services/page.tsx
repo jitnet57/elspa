@@ -90,52 +90,52 @@ export default function ServicesPage() {
   ];
 
   return (
-    <div className="space-y-10">
-      {/* Header */}
+    <div className="space-y-6 sm:space-y-10">
+      {/* Header - 모바일 최적화 */}
       <div>
-        <h1 className="text-4xl font-bold text-gray-900 mb-2 tracking-tight">서비스</h1>
-        <p className="text-lg text-gray-600 font-light">ElSpa의 프리미엄 서비스를 만나보세요</p>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 tracking-tight">서비스</h1>
+        <p className="text-base sm:text-lg text-gray-600 font-light">ElSpa의 프리미엄 서비스</p>
       </div>
 
-      {/* Category Filter */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
+      {/* Category Filter - 모바일 최적화 */}
+      <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-3">
         {categories.map((category) => (
           <button
             key={category.id}
             onClick={() => setSelectedCategory(category.id)}
-            className={`px-6 py-2 rounded-full whitespace-nowrap font-medium text-sm transition-all ${
+            className={`px-4 sm:px-6 py-2 rounded-full whitespace-nowrap font-medium text-xs sm:text-sm transition-all hover:scale-105 active:scale-95 ${
               selectedCategory === category.id
                 ? 'bg-orange-500 text-white shadow-md'
                 : 'bg-white text-gray-900 border border-stone-200 hover:border-orange-300'
             }`}
           >
             {category.label}
-            <span className="ml-2 text-xs font-light">({category.count})</span>
+            <span className="ml-1 sm:ml-2 text-xs font-light">({category.count})</span>
           </button>
         ))}
       </div>
 
-      {/* Services Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Services Grid - 모바일 최적화 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {filteredServices.map((service) => (
           <div
             key={service.id}
-            className="bg-white rounded-xl overflow-hidden shadow-sm border border-stone-100 hover:shadow-md hover:border-orange-200 transition-all"
+            className="bg-white rounded-lg sm:rounded-xl overflow-hidden shadow-sm border border-stone-100 hover:shadow-lg hover:border-orange-200 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
           >
             {/* Service Image */}
-            <div className="bg-gradient-to-br from-orange-50 to-amber-50 h-36 flex items-center justify-center text-5xl">
+            <div className="bg-gradient-to-br from-orange-50 to-amber-50 h-24 sm:h-32 md:h-36 flex items-center justify-center text-4xl sm:text-5xl">
               {service.icon}
             </div>
 
             {/* Service Content */}
-            <div className="p-6">
-              <h3 className="text-lg font-bold text-gray-900">{service.name}</h3>
-              <p className="text-sm text-gray-500 mt-1 font-light">{service.duration}</p>
+            <div className="p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900">{service.name}</h3>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1 font-light">{service.duration}</p>
 
-              <p className="text-sm text-gray-600 mb-4 mt-3 leading-relaxed font-light">{service.description}</p>
+              <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 mt-2 sm:mt-3 leading-relaxed font-light">{service.description}</p>
 
               {/* Benefits */}
-              <div className="mb-4 space-y-1">
+              <div className="mb-3 sm:mb-4 space-y-1">
                 {service.benefits.map((benefit, idx) => (
                   <p key={idx} className="text-xs text-gray-600 flex items-center gap-2 font-light">
                     <span className="text-orange-500 font-bold">✓</span>
@@ -145,15 +145,15 @@ export default function ServicesPage() {
               </div>
 
               {/* Rating and Button */}
-              <div className="flex items-center justify-between pt-4 border-t border-stone-100">
+              <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-stone-100">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-gray-900">⭐ {service.rating}</span>
+                  <span className="text-xs sm:text-sm font-bold text-gray-900">⭐ {service.rating}</span>
                   <span className="text-xs text-gray-500 font-light">({service.reviews})</span>
                 </div>
-                <p className="text-xl font-bold text-orange-600">{service.price}</p>
+                <p className="text-lg sm:text-xl font-bold text-orange-600">{service.price}</p>
               </div>
 
-              <button className="w-full mt-4 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all text-sm font-semibold">
+              <button className="w-full mt-3 sm:mt-4 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 active:bg-orange-700 transition-all text-xs sm:text-sm font-semibold hover:shadow-md">
                 예약하기
               </button>
             </div>
@@ -161,24 +161,24 @@ export default function ServicesPage() {
         ))}
       </div>
 
-      {/* Info Section */}
-      <div className="bg-white rounded-xl p-8 shadow-sm border border-stone-100">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">서비스 이용 안내</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="border border-stone-200 rounded-lg p-6 hover:border-orange-300 transition-colors">
-            <p className="text-sm font-bold text-gray-900 mb-3">⏰ 영업시간</p>
-            <p className="text-sm text-gray-600 font-light">평일 10:00 ~ 22:00</p>
-            <p className="text-sm text-gray-600 font-light">주말 09:00 ~ 23:00</p>
+      {/* Info Section - 모바일 최적화 */}
+      <div className="bg-white rounded-2xl sm:rounded-xl p-6 sm:p-8 shadow-sm border border-stone-100">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">서비스 이용 안내</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="border border-stone-200 rounded-lg p-4 sm:p-6 hover:border-orange-300 hover:bg-orange-50 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer">
+            <p className="text-xs sm:text-sm font-bold text-gray-900 mb-2 sm:mb-3">⏰ 영업시간</p>
+            <p className="text-xs sm:text-sm text-gray-600 font-light">평일 10:00 ~ 22:00</p>
+            <p className="text-xs sm:text-sm text-gray-600 font-light">주말 09:00 ~ 23:00</p>
           </div>
-          <div className="border border-stone-200 rounded-lg p-6 hover:border-orange-300 transition-colors">
-            <p className="text-sm font-bold text-gray-900 mb-3">📍 위치</p>
-            <p className="text-sm text-gray-600 font-light">서울시 강남구 테헤란로 123</p>
-            <p className="text-sm text-gray-600 font-light">지하철 2호선 역삼역 5번 출구</p>
+          <div className="border border-stone-200 rounded-lg p-4 sm:p-6 hover:border-orange-300 hover:bg-orange-50 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer">
+            <p className="text-xs sm:text-sm font-bold text-gray-900 mb-2 sm:mb-3">📍 위치</p>
+            <p className="text-xs sm:text-sm text-gray-600 font-light">서울시 강남구 테헤란로 123</p>
+            <p className="text-xs sm:text-sm text-gray-600 font-light">지하철 2호선 역삼역 5번 출구</p>
           </div>
-          <div className="border border-stone-200 rounded-lg p-6 hover:border-orange-300 transition-colors">
-            <p className="text-sm font-bold text-gray-900 mb-3">💳 결제수단</p>
-            <p className="text-sm text-gray-600 font-light">현금, 카드, 모바일</p>
-            <p className="text-sm text-gray-600 font-light">회원 포인트 사용 가능</p>
+          <div className="border border-stone-200 rounded-lg p-4 sm:p-6 hover:border-orange-300 hover:bg-orange-50 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer">
+            <p className="text-xs sm:text-sm font-bold text-gray-900 mb-2 sm:mb-3">💳 결제수단</p>
+            <p className="text-xs sm:text-sm text-gray-600 font-light">현금, 카드, 모바일</p>
+            <p className="text-xs sm:text-sm text-gray-600 font-light">회원 포인트 사용 가능</p>
           </div>
         </div>
       </div>

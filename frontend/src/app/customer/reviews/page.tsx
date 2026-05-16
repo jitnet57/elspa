@@ -94,34 +94,34 @@ export default function ReviewsPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      {/* Header */}
+    <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
+      {/* Header - 모바일 최적화 */}
       <div>
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">고객 후기</h1>
-        <p className="text-lg text-gray-600">
-          ElSpa를 경험한 고객들의 솔직한 후기입니다
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">고객 후기</h1>
+        <p className="text-sm sm:text-lg text-gray-600">
+          ElSpa 경험담들을 만나보세요
         </p>
       </div>
 
-      {/* Rating Summary */}
-      <div className="bg-white rounded-xl p-8 shadow-sm border border-stone-100">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {/* Rating Summary - 모바일 최적화 */}
+      <div className="bg-white rounded-2xl sm:rounded-xl p-6 sm:p-8 shadow-sm border border-stone-100">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
           <div>
             <div className="flex items-baseline gap-2 mb-2">
-              <span className="text-5xl font-bold text-gray-900">
+              <span className="text-4xl sm:text-5xl font-bold text-gray-900">
                 {averageRating}
               </span>
-              <span className="text-2xl">⭐</span>
+              <span className="text-xl sm:text-2xl">⭐</span>
             </div>
-            <p className="text-gray-600">
+            <p className="text-xs sm:text-base text-gray-600">
               {reviews.length}명의 고객 평가 기반
             </p>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {[5, 4, 3, 2, 1].map((rating) => (
-              <div key={rating} className="flex items-center gap-3">
-                <span className="text-sm font-medium text-gray-700 w-8">
+              <div key={rating} className="flex items-center gap-2 sm:gap-3">
+                <span className="text-xs sm:text-sm font-medium text-gray-700 w-8">
                   {rating}★
                 </span>
                 <div className="flex-1 h-2 bg-stone-200 rounded-full overflow-hidden">
@@ -136,7 +136,7 @@ export default function ReviewsPage() {
                     }}
                   ></div>
                 </div>
-                <span className="text-sm text-gray-600 w-8">
+                <span className="text-xs sm:text-sm text-gray-600 w-8">
                   {ratingCounts[rating as keyof typeof ratingCounts]}
                 </span>
               </div>
@@ -145,12 +145,12 @@ export default function ReviewsPage() {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between bg-stone-50 rounded-lg p-4">
-        <div className="flex gap-3">
+      {/* Filters - 모바일 최적화 */}
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center justify-between bg-stone-50 rounded-lg p-3 sm:p-4">
+        <div className="flex gap-2 sm:gap-3 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
           <button
             onClick={() => setFilterRating('all')}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+            className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap hover:scale-105 active:scale-95 ${
               filterRating === 'all'
                 ? 'bg-orange-500 text-white'
                 : 'bg-white text-gray-900 border border-stone-200 hover:border-orange-300'
@@ -162,7 +162,7 @@ export default function ReviewsPage() {
             <button
               key={rating}
               onClick={() => setFilterRating(rating.toString())}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap hover:scale-105 active:scale-95 ${
                 filterRating === rating.toString()
                   ? 'bg-orange-500 text-white'
                   : 'bg-white text-gray-900 border border-stone-200 hover:border-orange-300'
@@ -176,7 +176,7 @@ export default function ReviewsPage() {
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          className="px-4 py-2 border border-stone-200 rounded-lg text-gray-900 focus:outline-none focus:border-orange-500"
+          className="w-full sm:w-auto px-3 sm:px-4 py-2 border border-stone-200 rounded-lg text-xs sm:text-sm text-gray-900 focus:outline-none focus:border-orange-500"
         >
           <option value="recent">최신순</option>
           <option value="helpful">도움이 되는 순</option>
@@ -184,72 +184,71 @@ export default function ReviewsPage() {
         </select>
       </div>
 
-      {/* Reviews List */}
-      <div className="space-y-6">
+      {/* Reviews List - 모바일 최적화 */}
+      <div className="space-y-4 sm:space-y-6">
         {sortedReviews.map((review) => (
           <div
             key={review.id}
-            className="bg-white rounded-xl p-6 shadow-sm border border-stone-100 hover:shadow-md transition-all"
+            className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-stone-100 hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-300"
           >
             {/* Review Header */}
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex items-start justify-between mb-3 sm:mb-4 gap-2">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-1 mb-2">
                   {[...Array(5)].map((_, i) => (
                     <span
                       key={i}
-                      className={i < review.rating ? 'text-lg' : 'text-gray-300'}
+                      className={i < review.rating ? 'text-base sm:text-lg' : 'text-gray-300'}
                     >
                       ⭐
                     </span>
                   ))}
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">
+                <h3 className="text-base sm:text-lg font-bold text-gray-900">
                   {review.title}
                 </h3>
               </div>
-              <span className="text-xs text-gray-500">{review.date}</span>
+              <span className="text-xs text-gray-500 whitespace-nowrap">{review.date}</span>
             </div>
 
             {/* Service Info */}
-            <div className="flex gap-4 mb-4 text-sm">
-              <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full font-medium">
+            <div className="flex gap-2 mb-3 sm:mb-4 text-xs sm:text-sm flex-wrap">
+              <span className="px-2 sm:px-3 py-1 bg-orange-100 text-orange-700 rounded-full font-medium">
                 {review.service}
               </span>
-              <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full">
+              <span className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs sm:text-sm">
                 {review.therapist}
               </span>
             </div>
 
             {/* Review Content */}
-            <p className="text-gray-700 mb-4 leading-relaxed">
+            <p className="text-xs sm:text-base text-gray-700 mb-3 sm:mb-4 leading-relaxed">
               {review.content}
             </p>
 
             {/* Review Footer */}
-            <div className="flex items-center justify-between pt-4 border-t border-stone-200">
-              <p className="text-sm text-gray-600">
-                <span className="font-semibold">{review.author}</span>님의 후기
+            <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-stone-200">
+              <p className="text-xs sm:text-sm text-gray-600">
+                <span className="font-semibold">{review.author}</span>님
               </p>
-              <button className="flex items-center gap-2 px-3 py-1 text-sm text-gray-600 hover:text-orange-600 transition-colors">
+              <button className="flex items-center gap-1 px-2 sm:px-3 py-1 text-xs sm:text-sm text-gray-600 hover:text-orange-600 transition-colors hover:scale-105 active:scale-95">
                 <span>👍</span>
                 <span className="font-medium">{review.helpful}</span>
-                <span className="text-xs">도움됨</span>
               </button>
             </div>
           </div>
         ))}
       </div>
 
-      {/* CTA */}
-      <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-8 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+      {/* CTA - 모바일 최적화 */}
+      <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-2xl sm:rounded-xl p-6 sm:p-8 text-center">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
           ElSpa를 경험해보세요!
         </h2>
-        <p className="text-gray-600 mb-6">
-          지금 바로 예약하고 프리미엄 서비스를 받아보세요.
+        <p className="text-xs sm:text-base text-gray-600 mb-4 sm:mb-6">
+          지금 바로 예약하세요.
         </p>
-        <button className="px-8 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-semibold">
+        <button className="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 active:bg-orange-700 transition-all font-semibold text-sm sm:text-base hover:scale-105 active:scale-95">
           지금 예약하기
         </button>
       </div>
