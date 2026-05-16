@@ -40,7 +40,7 @@ export default function AdminPortal() {
 
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors text-sm sm:text-base"
+              className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3 rounded-lg transition-all text-sm sm:text-base hover:shadow-lg hover:scale-105 active:scale-95 duration-300"
             >
               로그인
             </button>
@@ -117,16 +117,16 @@ export default function AdminPortal() {
                   <a
                     key={item.href}
                     href={item.href}
-                    className="bg-white border border-gray-200 hover:border-blue-300 rounded-lg p-4 sm:p-6 transition-all hover:shadow-md group hover:bg-blue-50"
+                    className="bg-white border border-gray-200 hover:border-blue-300 rounded-lg p-4 sm:p-6 transition-all hover:shadow-lg hover:scale-105 active:scale-95 group hover:bg-blue-50 duration-300"
                   >
                     <div className="flex items-start justify-between">
                       <div>
-                        <div className="text-2xl sm:text-3xl mb-2">{item.icon}</div>
-                        <h3 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                        <div className="text-2xl sm:text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">{item.icon}</div>
+                        <h3 className="text-sm sm:text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
                           {item.name}
                         </h3>
                       </div>
-                      <div className="text-xl sm:text-2xl opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2 text-gray-400">
+                      <div className="text-xl sm:text-2xl opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2 text-gray-400 group-hover:translate-x-1 transition-transform">
                         →
                       </div>
                     </div>
@@ -143,13 +143,13 @@ export default function AdminPortal() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
             <a
               href="/monitor"
-              className="bg-blue-500 hover:bg-blue-600 text-white p-3 sm:p-4 rounded-lg text-center text-xs sm:text-sm font-bold transition-colors"
+              className="bg-blue-500 hover:bg-blue-600 text-white p-3 sm:p-4 rounded-lg text-center text-xs sm:text-sm font-bold transition-all hover:shadow-md hover:scale-105 active:scale-95 duration-300"
             >
               📊 카운터
             </a>
             <a
               href="/"
-              className="bg-gray-400 hover:bg-gray-500 text-white p-3 sm:p-4 rounded-lg text-center text-xs sm:text-sm font-bold transition-colors"
+              className="bg-gray-400 hover:bg-gray-500 text-white p-3 sm:p-4 rounded-lg text-center text-xs sm:text-sm font-bold transition-all hover:shadow-md hover:scale-105 active:scale-95 duration-300"
             >
               🏠 홈
             </a>

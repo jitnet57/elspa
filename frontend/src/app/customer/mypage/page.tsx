@@ -52,104 +52,104 @@ export default function MyPagePage() {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      {/* Header */}
+    <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
+      {/* Header - 모바일 최적화 */}
       <div>
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">마이페이지</h1>
-        <p className="text-lg text-gray-600">나의 정보와 예약 내역을 관리하세요</p>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">마이페이지</h1>
+        <p className="text-sm sm:text-lg text-gray-600">나의 정보와 예약 내역</p>
       </div>
 
-      {/* User Info Card */}
-      <div className="bg-white rounded-xl p-8 shadow-sm border border-stone-100">
-        <div className="flex items-start justify-between mb-6">
-          <div className="flex items-start gap-6">
-            <div className="w-24 h-24 bg-gradient-to-br from-orange-100 to-amber-100 rounded-full flex items-center justify-center text-4xl">
+      {/* User Info Card - 모바일 최적화 */}
+      <div className="bg-white rounded-2xl sm:rounded-xl p-6 sm:p-8 shadow-sm border border-stone-100">
+        <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-6 mb-4 sm:mb-6">
+          <div className="flex items-start gap-4 sm:gap-6 w-full">
+            <div className="w-16 sm:w-24 h-16 sm:h-24 bg-gradient-to-br from-orange-100 to-amber-100 rounded-full flex items-center justify-center text-2xl sm:text-4xl flex-shrink-0">
               👤
             </div>
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900">{userProfile.name}</h2>
-              <p className="text-gray-600 mt-1">{userProfile.email}</p>
-              <div className="flex gap-4 mt-4">
-                <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-semibold">
+            <div className="flex-1">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{userProfile.name}</h2>
+              <p className="text-xs sm:text-base text-gray-600 mt-1 truncate">{userProfile.email}</p>
+              <div className="flex gap-2 sm:gap-4 mt-3 sm:mt-4 flex-wrap">
+                <span className="px-2 sm:px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs sm:text-sm font-semibold">
                   {userProfile.membershipLevel} 회원
                 </span>
-                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
+                <span className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs sm:text-sm font-semibold">
                   {userProfile.totalVisits}회 방문
                 </span>
               </div>
             </div>
           </div>
-          <button className="px-4 py-2 border border-stone-200 text-gray-900 rounded-lg hover:bg-stone-50 transition-colors font-medium">
+          <button className="w-full sm:w-auto px-4 py-2 border border-stone-200 text-gray-900 rounded-lg hover:bg-stone-50 hover:scale-105 active:scale-95 transition-all font-medium text-sm sm:text-base">
             프로필 수정
           </button>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-100">
-          <p className="text-sm text-gray-600 mb-2">적립 포인트</p>
-          <p className="text-4xl font-bold text-orange-600">{userProfile.points.toLocaleString()}</p>
-          <p className="text-xs text-gray-500 mt-2">다음 충전: ₩1,000 = 100P</p>
+      {/* Stats Cards - 모바일 최적화 */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+        <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-stone-100 hover:shadow-md hover:scale-105 transition-all duration-300">
+          <p className="text-xs sm:text-sm text-gray-600 mb-2">적립 포인트</p>
+          <p className="text-3xl sm:text-4xl font-bold text-orange-600">{userProfile.points.toLocaleString()}</p>
+          <p className="text-xs text-gray-500 mt-2">₩1,000 = 100P</p>
         </div>
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-100">
-          <p className="text-sm text-gray-600 mb-2">총 방문 횟수</p>
-          <p className="text-4xl font-bold text-green-600">{userProfile.totalVisits}회</p>
-          <p className="text-xs text-gray-500 mt-2">회원가입: {userProfile.joinDate}</p>
+        <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-stone-100 hover:shadow-md hover:scale-105 transition-all duration-300">
+          <p className="text-xs sm:text-sm text-gray-600 mb-2">총 방문 횟수</p>
+          <p className="text-3xl sm:text-4xl font-bold text-green-600">{userProfile.totalVisits}회</p>
+          <p className="text-xs text-gray-500 mt-2">가입: {userProfile.joinDate}</p>
         </div>
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-100">
-          <p className="text-sm text-gray-600 mb-2">혜택 요약</p>
-          <p className="text-lg font-bold text-purple-600">15% 할인</p>
-          <p className="text-xs text-gray-500 mt-2">매달 1회 무료 예약</p>
+        <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-stone-100 hover:shadow-md hover:scale-105 transition-all duration-300">
+          <p className="text-xs sm:text-sm text-gray-600 mb-2">혜택 요약</p>
+          <p className="text-2xl sm:text-lg font-bold text-purple-600">15% 할인</p>
+          <p className="text-xs text-gray-500 mt-2">월 1회 무료</p>
         </div>
       </div>
 
-      {/* Next Booking */}
+      {/* Next Booking - 모바일 최적화 */}
       {userProfile.nextBooking && (
-        <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-8">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">다음 예약</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-2xl sm:rounded-xl p-6 sm:p-8">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">다음 예약</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6">
             <div>
               <p className="text-xs text-gray-600 mb-1">서비스</p>
-              <p className="text-sm font-bold text-gray-900">
+              <p className="text-xs sm:text-sm font-bold text-gray-900">
                 {userProfile.nextBooking.service}
               </p>
             </div>
             <div>
               <p className="text-xs text-gray-600 mb-1">테라피스트</p>
-              <p className="text-sm font-bold text-gray-900">
+              <p className="text-xs sm:text-sm font-bold text-gray-900">
                 {userProfile.nextBooking.therapist}
               </p>
             </div>
             <div>
               <p className="text-xs text-gray-600 mb-1">날짜</p>
-              <p className="text-sm font-bold text-gray-900">
+              <p className="text-xs sm:text-sm font-bold text-gray-900">
                 {userProfile.nextBooking.date}
               </p>
             </div>
             <div>
               <p className="text-xs text-gray-600 mb-1">시간</p>
-              <p className="text-sm font-bold text-gray-900">
+              <p className="text-xs sm:text-sm font-bold text-gray-900">
                 {userProfile.nextBooking.time}
               </p>
             </div>
           </div>
-          <div className="mt-4 flex gap-3">
-            <button className="px-4 py-2 bg-white text-gray-900 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium border border-stone-200">
+          <div className="mt-4 flex gap-2 sm:gap-3">
+            <button className="flex-1 sm:flex-initial px-4 py-2 bg-white text-gray-900 rounded-lg hover:bg-gray-100 hover:scale-105 active:scale-95 transition-all text-xs sm:text-sm font-medium border border-stone-200">
               수정
             </button>
-            <button className="px-4 py-2 bg-white text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium border border-red-200">
+            <button className="flex-1 sm:flex-initial px-4 py-2 bg-white text-red-600 rounded-lg hover:bg-red-50 hover:scale-105 active:scale-95 transition-all text-xs sm:text-sm font-medium border border-red-200">
               취소
             </button>
           </div>
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="flex gap-4 border-b border-stone-200">
+      {/* Tabs - 모바일 최적화 */}
+      <div className="flex gap-2 sm:gap-4 border-b border-stone-200 overflow-x-auto">
         <button
           onClick={() => setActiveTab('history')}
-          className={`px-6 py-3 font-medium transition-colors ${
+          className={`px-4 sm:px-6 py-2 sm:py-3 font-medium text-xs sm:text-base transition-all whitespace-nowrap ${
             activeTab === 'history'
               ? 'text-orange-600 border-b-2 border-orange-600'
               : 'text-gray-600 hover:text-gray-900'
@@ -159,7 +159,7 @@ export default function MyPagePage() {
         </button>
         <button
           onClick={() => setActiveTab('payment')}
-          className={`px-6 py-3 font-medium transition-colors ${
+          className={`px-4 sm:px-6 py-2 sm:py-3 font-medium text-xs sm:text-base transition-all whitespace-nowrap ${
             activeTab === 'payment'
               ? 'text-orange-600 border-b-2 border-orange-600'
               : 'text-gray-600 hover:text-gray-900'
@@ -169,7 +169,7 @@ export default function MyPagePage() {
         </button>
         <button
           onClick={() => setActiveTab('settings')}
-          className={`px-6 py-3 font-medium transition-colors ${
+          className={`px-4 sm:px-6 py-2 sm:py-3 font-medium text-xs sm:text-base transition-all whitespace-nowrap ${
             activeTab === 'settings'
               ? 'text-orange-600 border-b-2 border-orange-600'
               : 'text-gray-600 hover:text-gray-900'
@@ -179,23 +179,23 @@ export default function MyPagePage() {
         </button>
       </div>
 
-      {/* Tab Content */}
+      {/* Tab Content - 모바일 최적화 */}
       {activeTab === 'history' && (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {bookingHistory.map((booking) => (
             <div
               key={booking.id}
-              className="bg-white rounded-lg p-6 shadow-sm border border-stone-100 flex items-center justify-between"
+              className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-stone-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:shadow-md hover:scale-105 transition-all duration-300"
             >
               <div>
-                <h4 className="font-bold text-gray-900">{booking.service}</h4>
-                <p className="text-sm text-gray-600 mt-1">
+                <h4 className="text-sm sm:text-base font-bold text-gray-900">{booking.service}</h4>
+                <p className="text-xs sm:text-sm text-gray-600 mt-1">
                   {booking.therapist} • {booking.date} {booking.time}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-lg font-bold text-orange-600">{booking.price}</p>
-                <span className="inline-block mt-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                <p className="text-base sm:text-lg font-bold text-orange-600">{booking.price}</p>
+                <span className="inline-block mt-1 sm:mt-2 px-2 sm:px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
                   ✓ 완료
                 </span>
               </div>
