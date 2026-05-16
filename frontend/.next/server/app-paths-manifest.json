@@ -2,6 +2,7 @@
   "/_global-error/page": "app/_global-error/page.js",
   "/_not-found/page": "app/_not-found/page.js",
   "/admin/billing/page": "app/admin/billing/page.js",
+  "/admin/change-logs/page": "app/admin/change-logs/page.js",
   "/admin/companies/page": "app/admin/companies/page.js",
   "/admin/fairness-dashboard/page": "app/admin/fairness-dashboard/page.js",
   "/admin/guides/page": "app/admin/guides/page.js",

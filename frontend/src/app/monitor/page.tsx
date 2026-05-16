@@ -1,18 +1,37 @@
 ﻿'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import dynamic from 'next/dynamic';
+import type { WalkInBookingRequest } from '@/components/WalkInBookingModal';
 import { useMonitorPolling, classifyBedsByRoom } from '@/hooks/useMonitorPolling';
 import { useFullStoreSync } from '@/hooks/useStoreSync';
 import { useStore } from '@/lib/store/store';
 import { getTranslations } from '@/lib/translations';
 import { NotificationCenter } from '@/components/NotificationCenter';
-import { WalkInBookingModal, type WalkInBookingRequest } from '@/components/WalkInBookingModal';
 import { useWalkInMatching, getServiceDuration } from '@/hooks/useWalkInMatching';
-import { MobileDrawer } from '@/components/MobileDrawer';
 import { MobileHeader } from '@/components/MobileHeader';
-import { MobileBedCard } from '@/components/MobileBedCard';
-import { MobileBottomTabBar } from '@/components/MobileBottomTabBar';
-import { WalkInQueuePanel } from '@/components/WalkInQueuePanel';
+
+// 동적 로드할 컴포넌트들
+const WalkInBookingModal = dynamic(
+  () => import('@/components/WalkInBookingModal').then(mod => ({ default: mod.WalkInBookingModal })),
+  { loading: () => null }
+);
+
+const MobileDrawer = dynamic(() => import('@/components/MobileDrawer').then(mod => ({ default: mod.MobileDrawer })), {
+  loading: () => null,
+});
+
+const MobileBedCard = dynamic(() => import('@/components/MobileBedCard').then(mod => ({ default: mod.MobileBedCard })), {
+  loading: () => null,
+});
+
+const MobileBottomTabBar = dynamic(() => import('@/components/MobileBottomTabBar').then(mod => ({ default: mod.MobileBottomTabBar })), {
+  loading: () => null,
+});
+
+const WalkInQueuePanel = dynamic(() => import('@/components/WalkInQueuePanel').then(mod => ({ default: mod.WalkInQueuePanel })), {
+  loading: () => null,
+});
 
 interface ScheduleSession {
   id: string;
@@ -1018,7 +1037,7 @@ export default function MonitorPage() {
             <div className="inline-block min-w-full">
               {/* 헤더 */}
               <div className="flex border-b border-gray-200">
-                <div className="w-40 flex-shrink-0 px-4 py-3 font-bold text-gray-700 bg-gray-50 sticky left-0 z-10">Therapists (8)</div>
+                <div className="w-40 flex-shrink-0 px-4 py-3 font-bold text-gray-700 bg-gray-50 sticky left-0 z-10">{t.scheduleLabels.therapists}</div>
                 <div className="flex bg-white">
                   {Array.from({ length: SCHEDULE_END_HOUR - SCHEDULE_START_HOUR }).map((_, i) => (
                     <div

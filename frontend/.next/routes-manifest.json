@@ -54,6 +54,12 @@
       "namedRegex": "^/admin/billing(?:/)?$"
     },
     {
+      "page": "/admin/change-logs",
+      "regex": "^/admin/change\\-logs(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/change\\-logs(?:/)?$"
+    },
+    {
       "page": "/admin/companies",
       "regex": "^/admin/companies(?:/)?$",
       "routeKeys": {},

@@ -74,7 +74,7 @@ self.__SERVER_FILES_MANIFEST={
       "position": "bottom-left"
     },
     "onDemandEntries": {
-      "maxInactiveAge": 60000,
+      "maxInactiveAge": 25000,
       "pagesBufferLength": 5
     },
     "basePath": "",

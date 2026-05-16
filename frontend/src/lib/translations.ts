@@ -111,6 +111,33 @@ export const translations = {
       save: 'Save',
       edit: 'Edit',
     },
+
+    // Schedule Labels
+    scheduleLabels: {
+      therapists: 'Therapists (8)',
+      checkedIn: 'Checked In',
+      available: 'Available',
+      inSession: 'In Session',
+      resting: 'Resting',
+      offDuty: 'Off Duty',
+      sessions: 'Sessions',
+      avgWaitTime: '⏳ Avg Wait Time',
+      nextAvailable: 'Next Available',
+    },
+
+    // Dashboard Labels
+    dashboard: {
+      realTimeMonitor: 'Real-time Bed Monitor',
+      bedStatus: 'Bed Status',
+      therapistStatus: 'Therapist Status',
+      walkInQueue: 'Walk-in Queue',
+      avgRevenue: 'Avg Revenue',
+      completedSessions: 'Completed Sessions',
+      currentlyActive: 'Currently Active',
+      nextAppointment: 'Next Appointment',
+      returnTime: 'Return Time',
+      loading: 'Loading real-time data...',
+    },
   },
 
   ko: {
@@ -217,6 +244,33 @@ export const translations = {
       cancel: '취소',
       save: '저장',
       edit: '편집',
+    },
+
+    // Schedule Labels
+    scheduleLabels: {
+      therapists: '테라피스트 (8)',
+      checkedIn: '출근',
+      available: '가능',
+      inSession: '세션중',
+      resting: '휴식',
+      offDuty: '퇴근',
+      sessions: '세션',
+      avgWaitTime: '⏳ 평균 대기시간',
+      nextAvailable: '다음 가용',
+    },
+
+    // Dashboard Labels
+    dashboard: {
+      realTimeMonitor: '실시간 침대 모니터',
+      bedStatus: '침대 상태',
+      therapistStatus: '테라피스트 현황',
+      walkInQueue: '워크인 대기열',
+      avgRevenue: '평균 매출',
+      completedSessions: '완료된 세션',
+      currentlyActive: '진행 중',
+      nextAppointment: '다음 일정',
+      returnTime: '복귀 예정',
+      loading: '실시간 데이터 로드 중...',
     },
   },
 };
