@@ -29,92 +29,90 @@ export default function CustomerAboutMatchingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-orange-50 to-red-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-orange-50 to-red-50 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
-        {/* 헤더 */}
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-3 tracking-tight">
-            🤖 AI 매칭 시스템에 대해 알아보세요
+        {/* 헤더 - 모바일 최적화 */}
+        <div className="mb-8 sm:mb-12">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 sm:mb-3 tracking-tight">
+            🤖 AI 매칭 시스템
           </h1>
-          <p className="text-lg text-gray-600 font-light">
-            엘스파의 테라피스트 자동 매칭이 어떻게 작동하고,
-            <br />
-            왜 모든 고객과 테라피스트에게 공평한지 설명합니다.
+          <p className="text-sm sm:text-base md:text-lg text-gray-600 font-light leading-relaxed">
+            엘스파의 테라피스트 자동 매칭이 어떻게 작동하고, 왜 공평한지 설명합니다.
           </p>
         </div>
 
-        {/* 핵심 개념 */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
-          <div className="bg-white rounded-xl p-8 shadow-sm border border-stone-100">
-            <div className="text-4xl mb-4">🎯</div>
-            <h3 className="font-bold text-gray-900 mb-3">고객 만족도</h3>
-            <p className="text-sm text-gray-700 font-light">
-              당신의 요청 서비스에 가장 잘 맞는 테라피스트를 찾습니다. 전문성이 가장 중요합니다.
+        {/* 핵심 개념 - 모바일 최적화 */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
+          <div className="bg-white rounded-lg sm:rounded-xl p-6 sm:p-8 shadow-sm border border-stone-100 hover:shadow-md hover:scale-105 transition-all duration-300">
+            <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">🎯</div>
+            <h3 className="font-bold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">고객 만족도</h3>
+            <p className="text-xs sm:text-sm text-gray-700 font-light">
+              당신의 요청 서비스에 가장 잘 맞는 테라피스트를 찾습니다.
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-8 shadow-sm border border-stone-100">
-            <div className="text-4xl mb-4">⚖️</div>
-            <h3 className="font-bold text-gray-900 mb-3">공정한 분배</h3>
-            <p className="text-sm text-gray-700 font-light">
-              인기 있는 테라피스트가 과로하지 않도록, 모든 팀원에게 일감을 공평하게 나눕니다.
+          <div className="bg-white rounded-lg sm:rounded-xl p-6 sm:p-8 shadow-sm border border-stone-100 hover:shadow-md hover:scale-105 transition-all duration-300">
+            <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">⚖️</div>
+            <h3 className="font-bold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">공정한 분배</h3>
+            <p className="text-xs sm:text-sm text-gray-700 font-light">
+              모든 팀원에게 일감을 공평하게 나눕니다.
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-8 shadow-sm border border-stone-100">
-            <div className="text-4xl mb-4">🌟</div>
-            <h3 className="font-bold text-gray-900 mb-3">품질 보증</h3>
-            <p className="text-sm text-gray-700 font-light">
-              모든 테라피스트는 높은 교육 수준을 유지하며, 당신의 경험은 항상 훌륭합니다.
+          <div className="bg-white rounded-lg sm:rounded-xl p-6 sm:p-8 shadow-sm border border-stone-100 hover:shadow-md hover:scale-105 transition-all duration-300">
+            <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">🌟</div>
+            <h3 className="font-bold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">품질 보증</h3>
+            <p className="text-xs sm:text-sm text-gray-700 font-light">
+              높은 교육 수준을 유지합니다.
             </p>
           </div>
         </div>
 
-        {/* 매칭 프로세스 */}
-        <div className="bg-white rounded-xl p-8 shadow-sm border border-stone-100 mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">
-            📋 당신의 예약이 어떻게 처리되는지 알아보세요
+        {/* 매칭 프로세스 - 모바일 최적화 */}
+        <div className="bg-white rounded-2xl sm:rounded-xl p-6 sm:p-8 shadow-sm border border-stone-100 mb-8 sm:mb-12">
+          <h2 className="text-lg sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
+            📋 예약 처리 과정
           </h2>
 
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {[
               {
                 step: 1,
                 title: '예약 요청',
-                description: '당신이 원하는 서비스, 시간, 테라피스트 선호도를 입력합니다.',
+                description: '서비스, 시간, 선호도를 입력합니다.',
               },
               {
                 step: 2,
                 title: 'AI 분석',
                 description:
-                  '시스템이 가능한 모든 테라피스트를 평가합니다. 전문성, 가용성, 평점, 공정한 일감 분배를 고려합니다.',
+                  '전문성, 가용성, 평점을 평가합니다.',
               },
               {
                 step: 3,
                 title: '상위 3명 추천',
                 description:
-                  '매니저가 당신의 예약에 가장 잘 맞는 3명의 테라피스트를 볼 수 있습니다. 각자의 점수와 이유가 표시됩니다.',
+                  '점수가 높은 3명의 후보를 봅니다.',
               },
               {
                 step: 4,
                 title: '최적 배정',
                 description:
-                  '매니저가 가장 좋은 후보를 클릭하거나, 시스템이 자동으로 최고 점수를 가진 테라피스트를 배정합니다.',
+                  '최고 점수를 가진 테라피스트를 배정합니다.',
               },
               {
                 step: 5,
                 title: '확정 & 알림',
                 description:
-                  '당신이 예약을 확정하면, 테라피스트에게 알림이 전달되고, 당신은 예상 시작 시간을 확인할 수 있습니다.',
+                  '예약 확정 후 알림이 전달됩니다.',
               },
             ].map((item, idx) => (
-              <div key={idx} className="flex gap-6">
-                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center">
-                  <span className="font-bold text-white">{item.step}</span>
+              <div key={idx} className="flex gap-3 sm:gap-6">
+                <div className="flex-shrink-0 w-10 sm:w-12 h-10 sm:h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center">
+                  <span className="font-bold text-white text-sm sm:text-base">{item.step}</span>
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-gray-900 mb-1">{item.title}</h3>
-                  <p className="text-sm text-gray-700 font-light">{item.description}</p>
+                  <h3 className="font-bold text-gray-900 text-sm sm:text-base mb-1">{item.title}</h3>
+                  <p className="text-xs sm:text-sm text-gray-700 font-light">{item.description}</p>
                 </div>
               </div>
             ))}
@@ -258,23 +256,23 @@ export default function CustomerAboutMatchingPage() {
           </div>
         </div>
 
-        {/* FAQ */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+        {/* FAQ - 모바일 최적화 */}
+        <div className="mb-8 sm:mb-12">
+          <h2 className="text-lg sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
             ❓ 자주 묻는 질문
           </h2>
 
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {faqs.map((faq, idx) => (
               <div
                 key={idx}
-                className="bg-white rounded-lg border border-stone-200 overflow-hidden"
+                className="bg-white rounded-lg border border-stone-200 overflow-hidden hover:shadow-md transition-all"
               >
                 <button
                   onClick={() => setExpandedFaq(expandedFaq === idx ? null : idx)}
-                  className="w-full p-6 text-left hover:bg-stone-50 transition-colors flex items-start justify-between gap-4"
+                  className="w-full p-4 sm:p-6 text-left hover:bg-stone-50 transition-colors flex items-start justify-between gap-3 sm:gap-4"
                 >
-                  <p className="font-semibold text-gray-900 text-sm">{faq.q}</p>
+                  <p className="font-semibold text-gray-900 text-xs sm:text-sm">{faq.q}</p>
                   <span className={`text-lg flex-shrink-0 transition-transform ${
                     expandedFaq === idx ? 'rotate-180' : ''
                   }`}>
@@ -283,8 +281,8 @@ export default function CustomerAboutMatchingPage() {
                 </button>
 
                 {expandedFaq === idx && (
-                  <div className="px-6 py-4 bg-stone-50 border-t border-stone-200">
-                    <p className="text-sm text-gray-700 font-light leading-relaxed">
+                  <div className="px-4 sm:px-6 py-3 sm:py-4 bg-stone-50 border-t border-stone-200">
+                    <p className="text-xs sm:text-sm text-gray-700 font-light leading-relaxed">
                       {faq.a}
                     </p>
                   </div>
