@@ -150,15 +150,15 @@ export default function TherapistSettlementPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="text-sm text-gray-600 mb-1">총 수익</div>
-            <div className="text-2xl font-bold text-blue-600">₩{(totalRevenue / 1000000).toFixed(1)}M</div>
+            <div className="text-2xl font-bold text-blue-600">₱{(totalRevenue / 1000000).toFixed(1)}M</div>
           </div>
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="text-sm text-gray-600 mb-1">총 수수료</div>
-            <div className="text-2xl font-bold text-red-600">₩{(totalCommission / 1000000).toFixed(1)}M</div>
+            <div className="text-2xl font-bold text-red-600">₱{(totalCommission / 1000000).toFixed(1)}M</div>
           </div>
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <div className="text-sm text-gray-600 mb-1">총 지급액</div>
-            <div className="text-2xl font-bold text-green-600">₩{(totalPayout / 1000000).toFixed(1)}M</div>
+            <div className="text-2xl font-bold text-green-600">₱{(totalPayout / 1000000).toFixed(1)}M</div>
           </div>
         </div>
 
@@ -189,9 +189,9 @@ export default function TherapistSettlementPage() {
                       >
                         <td className="px-6 py-4 font-bold text-gray-900">{settlement.therapistName}</td>
                         <td className="text-right px-6 py-4 text-gray-900">{settlement.totalSessions}회</td>
-                        <td className="text-right px-6 py-4 text-gray-900">₩{(settlement.totalRevenue / 1000).toFixed(0)}K</td>
-                        <td className="text-right px-6 py-4 text-red-600 font-semibold">₩{(settlement.totalCommission / 1000).toFixed(0)}K</td>
-                        <td className="text-right px-6 py-4 text-green-600 font-bold">₩{(settlement.netAmount / 1000).toFixed(0)}K</td>
+                        <td className="text-right px-6 py-4 text-gray-900">₱{(settlement.totalRevenue / 1000).toFixed(0)}K</td>
+                        <td className="text-right px-6 py-4 text-red-600 font-semibold">₱{(settlement.totalCommission / 1000).toFixed(0)}K</td>
+                        <td className="text-right px-6 py-4 text-green-600 font-bold">₱{(settlement.netAmount / 1000).toFixed(0)}K</td>
                         <td className="text-center px-6 py-4">
                           <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(settlement.status)}`}>
                             {getStatusLabel(settlement.status)}
@@ -221,7 +221,7 @@ export default function TherapistSettlementPage() {
 
                   <div className="bg-gray-50 p-3 rounded-lg">
                     <div className="text-xs text-gray-600 mb-1">총 수익</div>
-                    <div className="text-2xl font-bold text-gray-900">₩{(selectedData.totalRevenue / 1000).toFixed(0)}K</div>
+                    <div className="text-2xl font-bold text-gray-900">₱{(selectedData.totalRevenue / 1000).toFixed(0)}K</div>
                   </div>
 
                   <div className="bg-red-50 p-3 rounded-lg">
@@ -231,12 +231,12 @@ export default function TherapistSettlementPage() {
 
                   <div className="bg-red-50 p-3 rounded-lg">
                     <div className="text-xs text-gray-600 mb-1">수수료 (차감)</div>
-                    <div className="text-2xl font-bold text-red-600">-₩{(selectedData.totalCommission / 1000).toFixed(0)}K</div>
+                    <div className="text-2xl font-bold text-red-600">-₱{(selectedData.totalCommission / 1000).toFixed(0)}K</div>
                   </div>
 
                   <div className="bg-green-50 p-4 rounded-lg border-2 border-green-300">
                     <div className="text-xs text-gray-600 mb-1">최종 지급액</div>
-                    <div className="text-3xl font-bold text-green-600">₩{(selectedData.netAmount / 1000).toFixed(0)}K</div>
+                    <div className="text-3xl font-bold text-green-600">₱{(selectedData.netAmount / 1000).toFixed(0)}K</div>
                   </div>
 
                   <div className="pt-4">
@@ -262,3 +262,4 @@ export default function TherapistSettlementPage() {
     </div>
   );
 }
+

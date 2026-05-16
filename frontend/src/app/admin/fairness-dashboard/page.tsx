@@ -317,7 +317,7 @@ export default function FairnessDashboardPage() {
                         <p className="text-xl font-bold">
                           {selectedMetric === 'bookings' && `${value}건`}
                           {selectedMetric === 'fairness' && `${value.toFixed(0)}/100`}
-                          {selectedMetric === 'earnings' && `₩${value.toFixed(1)}M`}
+                          {selectedMetric === 'earnings' && `₱${value.toFixed(1)}M`}
                         </p>
                         <p className="text-xs text-gray-600">
                           ⭐ {therapist.rating.toFixed(1)}
@@ -446,3 +446,4 @@ export default function FairnessDashboardPage() {
     </div>
   );
 }
+

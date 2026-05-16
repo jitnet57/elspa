@@ -41,7 +41,7 @@ function generateTherapists(): TherapistData[] {
     const isCheckedIn = Math.random() > 0.3; // 70% 출근
     const rating = (Math.random() * 0.5 + 4.5).toFixed(1); // 4.5~5.0
     const clients = Math.floor(Math.random() * 60 + 10); // 10~70명
-    const revenue = `₩${(clients * 50000 + Math.random() * 1000000).toLocaleString('ko-KR')}`;
+    const revenue = `₱${(clients * 50000 + Math.random() * 1000000).toLocaleString('ko-KR')}`;
 
     therapists.push({
       id: i,
@@ -67,3 +67,4 @@ function generateTherapists(): TherapistData[] {
 }
 
 export const REAL_THERAPISTS = generateTherapists();
+

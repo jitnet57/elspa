@@ -28,7 +28,7 @@ export default function MyPagePage() {
       therapist: 'Sarah',
       date: '2026-05-08',
       time: '10:00',
-      price: '₩80,000',
+      price: '₱80,000',
       status: 'completed',
     },
     {
@@ -37,7 +37,7 @@ export default function MyPagePage() {
       therapist: 'Amanda',
       date: '2026-05-01',
       time: '15:00',
-      price: '₩50,000',
+      price: '₱50,000',
       status: 'completed',
     },
     {
@@ -46,7 +46,7 @@ export default function MyPagePage() {
       therapist: 'Emma',
       date: '2026-04-24',
       time: '11:30',
-      price: '₩120,000',
+      price: '₱120,000',
       status: 'completed',
     },
   ];
@@ -90,7 +90,7 @@ export default function MyPagePage() {
         <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-stone-100 hover:shadow-md hover:scale-105 transition-all duration-300">
           <p className="text-xs sm:text-sm text-gray-600 mb-2">적립 포인트</p>
           <p className="text-3xl sm:text-4xl font-bold text-orange-600">{userProfile.points.toLocaleString()}</p>
-          <p className="text-xs text-gray-500 mt-2">₩1,000 = 100P</p>
+          <p className="text-xs text-gray-500 mt-2">₱1,000 = 100P</p>
         </div>
         <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-stone-100 hover:shadow-md hover:scale-105 transition-all duration-300">
           <p className="text-xs sm:text-sm text-gray-600 mb-2">총 방문 횟수</p>
@@ -257,3 +257,4 @@ export default function MyPagePage() {
     </div>
   );
 }
+

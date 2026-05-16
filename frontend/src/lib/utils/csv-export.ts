@@ -60,9 +60,9 @@ export const exportMonthlySettlementCSV = (
   };
 
   rows.push('📊 월정산 요약');
-  rows.push(`총 수익,₩${totals.revenue.toLocaleString()}`);
-  rows.push(`총 수수료,₩${totals.commission.toLocaleString()}`);
-  rows.push(`총 지급액,₩${totals.payment.toLocaleString()}`);
+  rows.push(`총 수익,₱${totals.revenue.toLocaleString()}`);
+  rows.push(`총 수수료,₱${totals.commission.toLocaleString()}`);
+  rows.push(`총 지급액,₱${totals.payment.toLocaleString()}`);
   rows.push(`총 세션 수,${totals.sessions}`);
   rows.push('');
 
@@ -206,3 +206,4 @@ export const downloadCSV = (filename: string, csvContent: string) => {
   element.click();
   document.body.removeChild(element);
 };
+

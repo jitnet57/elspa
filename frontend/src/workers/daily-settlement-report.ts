@@ -123,15 +123,15 @@ async function sendViaEmail(report: SettlementReport, env: Env): Promise<void> {
         </tr>
         <tr>
           <td style="border: 1px solid #e5e7eb; padding: 10px;"><strong>정산 금액</strong></td>
-          <td style="border: 1px solid #e5e7eb; padding: 10px; color: #059669; font-weight: bold;">₩${report.totalAmount.toLocaleString()}</td>
+          <td style="border: 1px solid #e5e7eb; padding: 10px; color: #059669; font-weight: bold;">₱${report.totalAmount.toLocaleString()}</td>
         </tr>
         <tr style="background-color: #f3f4f6;">
           <td style="border: 1px solid #e5e7eb; padding: 10px;"><strong>수수료</strong></td>
-          <td style="border: 1px solid #e5e7eb; padding: 10px;">₩${report.totalCommission.toLocaleString()}</td>
+          <td style="border: 1px solid #e5e7eb; padding: 10px;">₱${report.totalCommission.toLocaleString()}</td>
         </tr>
         <tr>
           <td style="border: 1px solid #e5e7eb; padding: 10px;"><strong>부가세</strong></td>
-          <td style="border: 1px solid #e5e7eb; padding: 10px;">₩${report.totalTax.toLocaleString()}</td>
+          <td style="border: 1px solid #e5e7eb; padding: 10px;">₱${report.totalTax.toLocaleString()}</td>
         </tr>
         <tr style="background-color: #f3f4f6;">
           <td style="border: 1px solid #e5e7eb; padding: 10px;"><strong>지급 완료</strong></td>
@@ -198,9 +198,9 @@ async function sendViaKakaoTalk(report: SettlementReport, env: Env): Promise<voi
 📊 정산 현황
 ━━━━━━━━━━━━━━━
 • 정산 건수: ${report.totalSettlements}건
-• 정산 금액: ₩${report.totalAmount.toLocaleString()}
-• 수수료: ₩${report.totalCommission.toLocaleString()}
-• 부가세: ₩${report.totalTax.toLocaleString()}
+• 정산 금액: ₱${report.totalAmount.toLocaleString()}
+• 수수료: ₱${report.totalCommission.toLocaleString()}
+• 부가세: ₱${report.totalTax.toLocaleString()}
 
 ✅ 지급완료: ${report.paidInvoices}건
 ⏳ 대기중: ${report.pendingInvoices}건
@@ -235,3 +235,4 @@ https://elspa.pages.dev/admin/billing
     console.error('❌ 카카오톡 발송 에러:', error);
   }
 }
+

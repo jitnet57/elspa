@@ -250,7 +250,7 @@ export default function TherapistFairnessPage() {
                   <div className="bg-stone-50 rounded-lg p-4 text-center border border-stone-200">
                     <p className="text-xs text-gray-600 font-light mb-2">예상 월 수익</p>
                     <p className="text-2xl font-bold text-green-600">
-                      ₩{(therapist.totalEarningsMonth / 1000000).toFixed(1)}M
+                      ₱{(therapist.totalEarningsMonth / 1000000).toFixed(1)}M
                     </p>
                     <p className="text-xs text-gray-600 mt-1">대략치</p>
                   </div>
@@ -419,3 +419,4 @@ export default function TherapistFairnessPage() {
     </div>
   );
 }
+

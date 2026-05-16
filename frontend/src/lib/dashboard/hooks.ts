@@ -4,23 +4,23 @@ export const useDashboardData = () => {
   const stats = [
     { label: '활성 테라피스트', value: '12', icon: '👥', change: '+2', changeType: 'positive' as const },
     { label: '오늘 예약', value: '24', icon: '📅', change: '+8', changeType: 'positive' as const },
-    { label: '월 매출', value: '₩4.8M', icon: '💰', change: '+12%', changeType: 'positive' as const },
+    { label: '월 매출', value: '₱4.8M', icon: '💰', change: '+12%', changeType: 'positive' as const },
     { label: '고객 만족도', value: '4.8★', icon: '⭐', change: '+0.2', changeType: 'positive' as const },
   ];
 
   const recentBookings = [
-    { id: 1, customer: '김민준', therapist: 'Sarah', service: '스웨디시 60분', time: '10:00 AM', status: 'confirmed' as const, revenue: '₩80,000' },
-    { id: 2, customer: '이수연', therapist: 'Emma', service: '타이 마사지 90분', time: '11:30 AM', status: 'confirmed' as const, revenue: '₩120,000' },
-    { id: 3, customer: '정현준', therapist: 'Jessica', service: '핫스톤 60분', time: '02:00 PM', status: 'in_progress' as const, revenue: '₩100,000' },
-    { id: 4, customer: '박지은', therapist: 'Amanda', service: '커플 마사지 120분', time: '03:00 PM', status: 'pending' as const, revenue: '₩180,000' },
-    { id: 5, customer: '최준호', therapist: 'Sarah', service: '발 마사지 30분', time: '04:30 PM', status: 'completed' as const, revenue: '₩50,000' },
+    { id: 1, customer: '김민준', therapist: 'Sarah', service: '스웨디시 60분', time: '10:00 AM', status: 'confirmed' as const, revenue: '₱80,000' },
+    { id: 2, customer: '이수연', therapist: 'Emma', service: '타이 마사지 90분', time: '11:30 AM', status: 'confirmed' as const, revenue: '₱120,000' },
+    { id: 3, customer: '정현준', therapist: 'Jessica', service: '핫스톤 60분', time: '02:00 PM', status: 'in_progress' as const, revenue: '₱100,000' },
+    { id: 4, customer: '박지은', therapist: 'Amanda', service: '커플 마사지 120분', time: '03:00 PM', status: 'pending' as const, revenue: '₱180,000' },
+    { id: 5, customer: '최준호', therapist: 'Sarah', service: '발 마사지 30분', time: '04:30 PM', status: 'completed' as const, revenue: '₱50,000' },
   ];
 
   const therapists = [
-    { name: 'Sarah', bookings: 8, rating: 4.9, revenue: '₩640K', availability: '95%', imageColor: 'from-orange-100 to-amber-100' },
-    { name: 'Emma', bookings: 6, rating: 4.7, revenue: '₩480K', availability: '87%', imageColor: 'from-pink-100 to-orange-100' },
-    { name: 'Jessica', bookings: 7, rating: 4.8, revenue: '₩560K', availability: '92%', imageColor: 'from-amber-100 to-yellow-100' },
-    { name: 'Amanda', bookings: 5, rating: 4.6, revenue: '₩400K', availability: '80%', imageColor: 'from-yellow-100 to-orange-100' },
+    { name: 'Sarah', bookings: 8, rating: 4.9, revenue: '₱640K', availability: '95%', imageColor: 'from-orange-100 to-amber-100' },
+    { name: 'Emma', bookings: 6, rating: 4.7, revenue: '₱480K', availability: '87%', imageColor: 'from-pink-100 to-orange-100' },
+    { name: 'Jessica', bookings: 7, rating: 4.8, revenue: '₱560K', availability: '92%', imageColor: 'from-amber-100 to-yellow-100' },
+    { name: 'Amanda', bookings: 5, rating: 4.6, revenue: '₱400K', availability: '80%', imageColor: 'from-yellow-100 to-orange-100' },
   ];
 
   const weeklyData = [65, 45, 72, 58, 85, 92, 78];
@@ -49,3 +49,4 @@ export const useStatusText = (status: StatusType): string => {
   };
   return texts[status];
 };
+

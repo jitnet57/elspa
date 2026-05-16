@@ -79,7 +79,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '오늘의 주요 지표 확인',
       status: 'completed',
       icon: '📊',
-      details: ['활성 테라피스트: 24명', '오늘 예약: 42건', '월 매출: ₩4.8M']
+      details: ['활성 테라피스트: 24명', '오늘 예약: 42건', '월 매출: ₱4.8M']
     },
     {
       time: '08:30',
@@ -275,7 +275,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '[도착] 버튼 클릭',
       status: 'pending',
       icon: '🏢',
-      details: ['고객 하차', '상태: idle', '수수료 자동 계산 (₩8,000)']
+      details: ['고객 하차', '상태: idle', '수수료 자동 계산 (₱8,000)']
     },
     {
       time: '08:45',
@@ -291,7 +291,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '[🚗 퇴근] 클릭',
       status: 'pending',
       icon: '🚪',
-      details: ['상태: off_duty', '오늘 수익: ₩240,000', '픽업 건수: 30건']
+      details: ['상태: off_duty', '오늘 수익: ₱240,000', '픽업 건수: 30건']
     }
   ],
   counter: [
@@ -373,7 +373,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '태블릿에서 결제 처리',
       status: 'pending',
       icon: '💳',
-      details: ['금액: ₩80,000', '현금/카드/모바일페이', '영수증 출력']
+      details: ['금액: ₱80,000', '현금/카드/모바일페이', '영수증 출력']
     },
     {
       time: '15:40',
@@ -563,3 +563,4 @@ export default function WorkflowPage() {
     </div>
   );
 }
+

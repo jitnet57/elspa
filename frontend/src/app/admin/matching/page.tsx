@@ -135,9 +135,9 @@ export default function TherapistManagementPage() {
       평점: t.rating,
       전문분야: t.specialty,
       세션수: t.sessions_today,
-      일일수익: `₩${t.revenue_today.toLocaleString()}`,
+      일일수익: `₱${t.revenue_today.toLocaleString()}`,
       수수료율: `${t.commission_rate}%`,
-      지급액: `₩${t.total_commission.toLocaleString()}`,
+      지급액: `₱${t.total_commission.toLocaleString()}`,
     }));
 
     const ws = XLSX.utils.json_to_sheet(data);
@@ -339,15 +339,15 @@ export default function TherapistManagementPage() {
                       </div>
                       <div>
                         <span className="text-gray-600 text-xs">수익</span>
-                        <div className="font-bold text-green-600 text-sm">₩{(therapist.revenue_today / 1000).toFixed(0)}K</div>
+                        <div className="font-bold text-green-600 text-sm">₱{(therapist.revenue_today / 1000).toFixed(0)}K</div>
                       </div>
                       <div>
                         <span className="text-gray-600 text-xs">지급</span>
-                        <div className="font-bold text-blue-600 text-sm">₩{(therapist.total_commission / 1000).toFixed(0)}K</div>
+                        <div className="font-bold text-blue-600 text-sm">₱{(therapist.total_commission / 1000).toFixed(0)}K</div>
                       </div>
                       <div>
                         <span className="text-gray-600 text-xs">매장</span>
-                        <div className="font-bold text-purple-600 text-sm">₩{((therapist.revenue_today - therapist.total_commission) / 1000).toFixed(0)}K</div>
+                        <div className="font-bold text-purple-600 text-sm">₱{((therapist.revenue_today - therapist.total_commission) / 1000).toFixed(0)}K</div>
                       </div>
                     </div>
                   </div>
@@ -373,7 +373,7 @@ export default function TherapistManagementPage() {
                   </div>
                   <div className="flex justify-between py-2 border-b border-gray-200">
                     <span className="text-gray-600">일일 수익</span>
-                    <span className="font-bold text-green-600">₩{selectedTherapist.revenue_today.toLocaleString()}</span>
+                    <span className="font-bold text-green-600">₱{selectedTherapist.revenue_today.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between py-2 border-b border-gray-200">
                     <span className="text-gray-600">수수료율</span>
@@ -381,7 +381,7 @@ export default function TherapistManagementPage() {
                   </div>
                   <div className="flex justify-between py-2 bg-blue-50 px-2 rounded font-bold">
                     <span className="text-blue-900">지급액</span>
-                    <span className="text-blue-600">₩{selectedTherapist.total_commission.toLocaleString()}</span>
+                    <span className="text-blue-600">₱{selectedTherapist.total_commission.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -497,7 +497,7 @@ export default function TherapistManagementPage() {
                   </div>
                   <div className="flex-shrink-0 text-right">
                     <div className="text-xs text-gray-500">수익</div>
-                    <div className="font-bold text-green-600">₩{(therapist.revenue_today / 1000).toFixed(0)}K</div>
+                    <div className="font-bold text-green-600">₱{(therapist.revenue_today / 1000).toFixed(0)}K</div>
                   </div>
                 </div>
               ))}
@@ -517,15 +517,15 @@ export default function TherapistManagementPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
               <div className="text-sm text-gray-600 mb-2">총 수익</div>
-              <div className="text-4xl font-bold text-green-600">₩{totalRevenue.toLocaleString()}</div>
+              <div className="text-4xl font-bold text-green-600">₱{totalRevenue.toLocaleString()}</div>
             </div>
             <div className="text-center border-l border-r border-gray-200">
               <div className="text-sm text-gray-600 mb-2">총 지급액</div>
-              <div className="text-4xl font-bold text-blue-600">₩{totalCommission.toLocaleString()}</div>
+              <div className="text-4xl font-bold text-blue-600">₱{totalCommission.toLocaleString()}</div>
             </div>
             <div className="text-center">
               <div className="text-sm text-gray-600 mb-2">매장 수익</div>
-              <div className="text-4xl font-bold text-purple-600">₩{(totalRevenue - totalCommission).toLocaleString()}</div>
+              <div className="text-4xl font-bold text-purple-600">₱{(totalRevenue - totalCommission).toLocaleString()}</div>
             </div>
           </div>
         </div>
@@ -566,7 +566,7 @@ export default function TherapistManagementPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white rounded-lg p-4 border border-indigo-200">
               <div className="text-sm text-gray-600 mb-2">현재월 누적 수익</div>
-              <div className="text-3xl font-bold text-indigo-600">₩{totalRevenue.toLocaleString()}</div>
+              <div className="text-3xl font-bold text-indigo-600">₱{totalRevenue.toLocaleString()}</div>
               <div className="text-xs text-gray-500 mt-2">
                 {therapists.filter(t => t.status !== 'checked_out').length}명 활동 중
               </div>
@@ -574,7 +574,7 @@ export default function TherapistManagementPage() {
 
             <div className="bg-white rounded-lg p-4 border border-indigo-200">
               <div className="text-sm text-gray-600 mb-2">월정산 예상 지급액</div>
-              <div className="text-3xl font-bold text-green-600">₩{(totalRevenue * 0.7).toLocaleString()}</div>
+              <div className="text-3xl font-bold text-green-600">₱{(totalRevenue * 0.7).toLocaleString()}</div>
               <div className="text-xs text-gray-500 mt-2">
                 평균 30% 수수료 기준
               </div>
@@ -582,7 +582,7 @@ export default function TherapistManagementPage() {
 
             <div className="bg-white rounded-lg p-4 border border-indigo-200">
               <div className="text-sm text-gray-600 mb-2">월정산 예상 수수료</div>
-              <div className="text-3xl font-bold text-red-600">₩{(totalRevenue * 0.3).toLocaleString()}</div>
+              <div className="text-3xl font-bold text-red-600">₱{(totalRevenue * 0.3).toLocaleString()}</div>
               <div className="text-xs text-gray-500 mt-2">
                 총 수익의 30%
               </div>
@@ -691,3 +691,4 @@ export default function TherapistManagementPage() {
     </div>
   );
 }
+

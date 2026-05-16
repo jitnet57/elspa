@@ -2,12 +2,12 @@
 
 export default function CustomerHome() {
   const services = [
-    { name: '스웨디시 마사지', duration: '60분', price: '₩80,000', rating: 4.9, reviews: 245, icon: '💆‍♀️' },
-    { name: '타이 마사지', duration: '90분', price: '₩120,000', rating: 4.8, reviews: 189, icon: '🧘' },
-    { name: '핫스톤 테라피', duration: '60분', price: '₩100,000', rating: 4.7, reviews: 156, icon: '🔥' },
-    { name: '발 마사지', duration: '30분', price: '₩50,000', rating: 4.9, reviews: 312, icon: '🦶' },
-    { name: '커플 패키지', duration: '120분', price: '₩180,000', rating: 5.0, reviews: 78, icon: '👫' },
-    { name: '아로마테라피', duration: '60분', price: '₩85,000', rating: 4.8, reviews: 201, icon: '🌸' },
+    { name: '스웨디시 마사지', duration: '60분', price: '₱80,000', rating: 4.9, reviews: 245, icon: '💆‍♀️' },
+    { name: '타이 마사지', duration: '90분', price: '₱120,000', rating: 4.8, reviews: 189, icon: '🧘' },
+    { name: '핫스톤 테라피', duration: '60분', price: '₱100,000', rating: 4.7, reviews: 156, icon: '🔥' },
+    { name: '발 마사지', duration: '30분', price: '₱50,000', rating: 4.9, reviews: 312, icon: '🦶' },
+    { name: '커플 패키지', duration: '120분', price: '₱180,000', rating: 5.0, reviews: 78, icon: '👫' },
+    { name: '아로마테라피', duration: '60분', price: '₱85,000', rating: 4.8, reviews: 201, icon: '🌸' },
   ];
 
   const therapists = [
@@ -214,3 +214,4 @@ export default function CustomerHome() {
     </div>
   );
 }
+

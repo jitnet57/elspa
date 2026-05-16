@@ -370,7 +370,7 @@ export default function MonthlySettlementPage() {
                                     updateSettlementStatus(settlement.id, 'confirmed');
                                     addNotification({
                                       type: 'settlement_confirmed',
-                                      message: `${getGuideName(settlement.guide_id)}의 ${settlement.settlement_month} 정산이 확정되었습니다. (₩${(settlement.payment_amount / 1000).toFixed(0)}K)`,
+                                      message: `${getGuideName(settlement.guide_id)}의 ${settlement.settlement_month} 정산이 확정되었습니다. (₱${(settlement.payment_amount / 1000).toFixed(0)}K)`,
                                       severity: 'success',
                                       isRead: false,
                                       action_url: `/admin/monthly-settlement`,
@@ -388,7 +388,7 @@ export default function MonthlySettlementPage() {
                                   updateSettlementStatus(settlement.id, 'paid');
                                   addNotification({
                                     type: 'settlement_paid',
-                                    message: `${getGuideName(settlement.guide_id)}에게 ₩${(settlement.payment_amount / 1000).toFixed(0)}K 지급을 완료했습니다.`,
+                                    message: `${getGuideName(settlement.guide_id)}에게 ₱${(settlement.payment_amount / 1000).toFixed(0)}K 지급을 완료했습니다.`,
                                     severity: 'success',
                                     isRead: false,
                                     action_url: `/admin/monthly-settlement`,
@@ -410,7 +410,7 @@ export default function MonthlySettlementPage() {
                     <div className="text-right">
                       <div className="text-xs text-gray-600">소계</div>
                       <div className="font-bold text-gray-900">
-                        ₩{(settlements.reduce((sum, s) => sum + s.total_revenue, 0) / 1000).toFixed(0)}K
+                        ₱{(settlements.reduce((sum, s) => sum + s.total_revenue, 0) / 1000).toFixed(0)}K
                       </div>
                     </div>
                   </div>
@@ -461,7 +461,7 @@ export default function MonthlySettlementPage() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-600">총 매출</span>
-                      <span className="font-bold">₩{selectedSettlement.total_revenue.toLocaleString()}</span>
+                      <span className="font-bold">₱{selectedSettlement.total_revenue.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">수수료율</span>
@@ -469,11 +469,11 @@ export default function MonthlySettlementPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">차감액</span>
-                      <span className="font-bold text-red-600">-₩{selectedSettlement.commission_amount.toLocaleString()}</span>
+                      <span className="font-bold text-red-600">-₱{selectedSettlement.commission_amount.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between pt-2 border-t border-gray-200 font-bold text-lg">
                       <span>지급액</span>
-                      <span className="text-green-600">₩{selectedSettlement.payment_amount.toLocaleString()}</span>
+                      <span className="text-green-600">₱{selectedSettlement.payment_amount.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
@@ -486,7 +486,7 @@ export default function MonthlySettlementPage() {
                         <span className="text-gray-600">
                           {service} ({data.sessions}회)
                         </span>
-                        <span className="font-bold">₩{data.revenue.toLocaleString()}</span>
+                        <span className="font-bold">₱{data.revenue.toLocaleString()}</span>
                       </div>
                     ))}
                   </div>
@@ -506,3 +506,4 @@ export default function MonthlySettlementPage() {
     </div>
   );
 }
+

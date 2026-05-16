@@ -11,7 +11,7 @@ export default function ServicesPage() {
       name: '스웨디시 마사지',
       category: 'massage',
       duration: '60분',
-      price: '₩80,000',
+      price: '₱80,000',
       rating: 4.9,
       reviews: 245,
       description: '유럽식 전통 마사지로 혈액순환을 촉진하고 근육 이완을 돕습니다.',
@@ -23,7 +23,7 @@ export default function ServicesPage() {
       name: '타이 마사지',
       category: 'massage',
       duration: '90분',
-      price: '₩120,000',
+      price: '₱120,000',
       rating: 4.8,
       reviews: 189,
       description: '태국 전통 마사지로 유연성을 높이고 기력을 회복시킵니다.',
@@ -35,7 +35,7 @@ export default function ServicesPage() {
       name: '핫스톤 테라피',
       category: 'therapy',
       duration: '60분',
-      price: '₩100,000',
+      price: '₱100,000',
       rating: 4.7,
       reviews: 156,
       description: '온열 돌을 이용한 깊은 근육 이완 및 에너지 균형 치료.',
@@ -47,7 +47,7 @@ export default function ServicesPage() {
       name: '발 마사지',
       category: 'massage',
       duration: '30분',
-      price: '₩50,000',
+      price: '₱50,000',
       rating: 4.9,
       reviews: 312,
       description: '발의 반사 지압점을 자극하여 전신 건강을 개선합니다.',
@@ -59,7 +59,7 @@ export default function ServicesPage() {
       name: '커플 패키지',
       category: 'package',
       duration: '120분',
-      price: '₩180,000',
+      price: '₱180,000',
       rating: 5.0,
       reviews: 78,
       description: '두 분이 함께 받으실 수 있는 특별한 마사지 패키지입니다.',
@@ -71,7 +71,7 @@ export default function ServicesPage() {
       name: '아로마테라피',
       category: 'therapy',
       duration: '60분',
-      price: '₩85,000',
+      price: '₱85,000',
       rating: 4.8,
       reviews: 201,
       description: '천연 에센셜 오일을 이용한 심신 안정 치료.',
@@ -185,3 +185,4 @@ export default function ServicesPage() {
     </div>
   );
 }
+

@@ -25,7 +25,7 @@ const mockTherapists: Therapist[] = [
     status: 'checked_in',
     rating: 4.9,
     totalClients: 45,
-    totalRevenue: '₩2,250,000',
+    totalRevenue: '₱2,250,000',
     commissionRate: 40,
     checkedInAt: '09:00 AM',
     phone: '010-1234-5678',
@@ -38,7 +38,7 @@ const mockTherapists: Therapist[] = [
     status: 'checked_in',
     rating: 4.8,
     totalClients: 42,
-    totalRevenue: '₩2,100,000',
+    totalRevenue: '₱2,100,000',
     commissionRate: 40,
     checkedInAt: '09:15 AM',
     phone: '010-2345-6789',
@@ -51,7 +51,7 @@ const mockTherapists: Therapist[] = [
     status: 'checked_in',
     rating: 4.7,
     totalClients: 38,
-    totalRevenue: '₩1,900,000',
+    totalRevenue: '₱1,900,000',
     commissionRate: 40,
     checkedInAt: '09:30 AM',
     phone: '010-3456-7890',
@@ -64,7 +64,7 @@ const mockTherapists: Therapist[] = [
     status: 'checked_out',
     rating: 4.6,
     totalClients: 35,
-    totalRevenue: '₩1,750,000',
+    totalRevenue: '₱1,750,000',
     commissionRate: 40,
     checkedOutAt: '17:00 PM',
     phone: '010-4567-8901',
@@ -77,7 +77,7 @@ const mockTherapists: Therapist[] = [
     status: 'checked_in',
     rating: 4.8,
     totalClients: 40,
-    totalRevenue: '₩2,000,000',
+    totalRevenue: '₱2,000,000',
     commissionRate: 40,
     checkedInAt: '09:45 AM',
     phone: '010-5678-9012',
@@ -90,7 +90,7 @@ const mockTherapists: Therapist[] = [
     status: 'checked_in',
     rating: 4.9,
     totalClients: 48,
-    totalRevenue: '₩2,400,000',
+    totalRevenue: '₱2,400,000',
     commissionRate: 40,
     checkedInAt: '08:45 AM',
     phone: '010-6789-0123',
@@ -103,7 +103,7 @@ const mockTherapists: Therapist[] = [
     status: 'checked_out',
     rating: 4.5,
     totalClients: 32,
-    totalRevenue: '₩1,600,000',
+    totalRevenue: '₱1,600,000',
     commissionRate: 40,
     checkedOutAt: '16:30 PM',
     phone: '010-7890-1234',
@@ -116,7 +116,7 @@ const mockTherapists: Therapist[] = [
     status: 'checked_in',
     rating: 4.9,
     totalClients: 46,
-    totalRevenue: '₩2,300,000',
+    totalRevenue: '₱2,300,000',
     commissionRate: 40,
     checkedInAt: '10:00 AM',
     phone: '010-8901-2345',
@@ -234,7 +234,7 @@ export default function TherapistsPage() {
 
           <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-100 hover:shadow-md transition-all">
             <div className="text-xs text-gray-500 mb-1 font-light">총 매출</div>
-            <div className="text-3xl font-bold text-gray-900">₩16.5M</div>
+            <div className="text-3xl font-bold text-gray-900">₱16.5M</div>
             <div className="text-xs text-purple-600 mt-2 font-light">✓ 월 집계</div>
           </div>
         </div>
@@ -403,3 +403,4 @@ export default function TherapistsPage() {
     </div>
   );
 }
+

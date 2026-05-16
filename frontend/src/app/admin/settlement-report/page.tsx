@@ -210,15 +210,15 @@ export default function SettlementReportPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-white rounded-lg p-6 border border-blue-200 shadow-sm">
                 <div className="text-sm text-gray-600 font-medium mb-1">총 수익</div>
-                <div className="text-3xl font-bold text-blue-600">₩{(monthlyStats.total_revenue / 1000000).toFixed(1)}M</div>
+                <div className="text-3xl font-bold text-blue-600">₱{(monthlyStats.total_revenue / 1000000).toFixed(1)}M</div>
               </div>
               <div className="bg-white rounded-lg p-6 border border-red-200 shadow-sm">
                 <div className="text-sm text-gray-600 font-medium mb-1">총 수수료</div>
-                <div className="text-3xl font-bold text-red-600">₩{(monthlyStats.total_commission / 1000000).toFixed(1)}M</div>
+                <div className="text-3xl font-bold text-red-600">₱{(monthlyStats.total_commission / 1000000).toFixed(1)}M</div>
               </div>
               <div className="bg-white rounded-lg p-6 border border-green-200 shadow-sm">
                 <div className="text-sm text-gray-600 font-medium mb-1">지급액</div>
-                <div className="text-3xl font-bold text-green-600">₩{(monthlyStats.total_payment / 1000000).toFixed(1)}M</div>
+                <div className="text-3xl font-bold text-green-600">₱{(monthlyStats.total_payment / 1000000).toFixed(1)}M</div>
               </div>
               <div className="bg-white rounded-lg p-6 border border-purple-200 shadow-sm">
                 <div className="text-sm text-gray-600 font-medium mb-1">세션 수</div>
@@ -241,13 +241,13 @@ export default function SettlementReportPage() {
                   <tbody>
                     <tr className="border-b border-gray-200 hover:bg-gray-50">
                       <td className="py-3 px-4 text-gray-900">총 수익</td>
-                      <td className="text-right py-3 px-4 font-bold text-gray-900">₩{monthlyStats.total_revenue.toLocaleString()}</td>
+                      <td className="text-right py-3 px-4 font-bold text-gray-900">₱{monthlyStats.total_revenue.toLocaleString()}</td>
                       <td className="text-right py-3 px-4 text-gray-900">100%</td>
                     </tr>
                     <tr className="border-b border-gray-200 hover:bg-gray-50">
                       <td className="py-3 px-4 text-red-600 font-semibold">수수료 (차감)</td>
                       <td className="text-right py-3 px-4 font-bold text-red-600">
-                        -₩{monthlyStats.total_commission.toLocaleString()}
+                        -₱{monthlyStats.total_commission.toLocaleString()}
                       </td>
                       <td className="text-right py-3 px-4 font-bold text-red-600">
                         {((monthlyStats.total_commission / monthlyStats.total_revenue) * 100).toFixed(1)}%
@@ -256,7 +256,7 @@ export default function SettlementReportPage() {
                     <tr className="bg-green-50 border-t-2 border-green-300">
                       <td className="py-3 px-4 font-bold text-gray-900">가이드 지급액</td>
                       <td className="text-right py-3 px-4 font-bold text-green-600">
-                        ₩{monthlyStats.total_payment.toLocaleString()}
+                        ₱{monthlyStats.total_payment.toLocaleString()}
                       </td>
                       <td className="text-right py-3 px-4 font-bold text-green-600">
                         {((monthlyStats.total_payment / monthlyStats.total_revenue) * 100).toFixed(1)}%
@@ -288,10 +288,10 @@ export default function SettlementReportPage() {
                   {companyStats.map(stat => (
                     <tr key={stat.company_id} className="border-b border-gray-200 hover:bg-gray-50">
                       <td className="py-3 px-4 font-semibold text-gray-900">{stat.company_name}</td>
-                      <td className="text-right py-3 px-4 text-gray-900">₩{(stat.total_revenue / 1000).toFixed(0)}K</td>
-                      <td className="text-right py-3 px-4 text-red-600 font-semibold">₩{(stat.total_commission / 1000).toFixed(0)}K</td>
+                      <td className="text-right py-3 px-4 text-gray-900">₱{(stat.total_revenue / 1000).toFixed(0)}K</td>
+                      <td className="text-right py-3 px-4 text-red-600 font-semibold">₱{(stat.total_commission / 1000).toFixed(0)}K</td>
                       <td className="text-right py-3 px-4 text-green-600 font-bold">
-                        ₩{(stat.total_payment / 1000).toFixed(0)}K
+                        ₱{(stat.total_payment / 1000).toFixed(0)}K
                       </td>
                       <td className="text-right py-3 px-4 text-gray-900">{stat.guide_count}명</td>
                     </tr>
@@ -324,10 +324,10 @@ export default function SettlementReportPage() {
                       <td className="py-3 px-4 font-semibold text-gray-900">{stat.guide_name}</td>
                       <td className="py-3 px-4 text-gray-700">{stat.company_name}</td>
                       <td className="text-right py-3 px-4 text-gray-900">{stat.total_sessions}회</td>
-                      <td className="text-right py-3 px-4 text-gray-900">₩{(stat.total_revenue / 1000).toFixed(0)}K</td>
-                      <td className="text-right py-3 px-4 text-red-600 font-semibold">₩{(stat.total_commission / 1000).toFixed(0)}K</td>
+                      <td className="text-right py-3 px-4 text-gray-900">₱{(stat.total_revenue / 1000).toFixed(0)}K</td>
+                      <td className="text-right py-3 px-4 text-red-600 font-semibold">₱{(stat.total_commission / 1000).toFixed(0)}K</td>
                       <td className="text-right py-3 px-4 text-green-600 font-bold">
-                        ₩{(stat.total_payment / 1000).toFixed(0)}K
+                        ₱{(stat.total_payment / 1000).toFixed(0)}K
                       </td>
                     </tr>
                   ))}
@@ -340,3 +340,4 @@ export default function SettlementReportPage() {
     </div>
   );
 }
+
