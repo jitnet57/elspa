@@ -803,33 +803,33 @@ export default function MonitorPage() {
 
         {/* 일일 스케줄 모드 */}
         {viewMode === 'schedule' && (
-        <div className="p-4 lg:p-8 space-y-6">
+        <div className="p-4 lg:p-8 space-y-6 bg-gradient-to-br from-blue-900/20 via-blue-800/10 to-blue-900/20 rounded-lg">
           {/* 헤더 */}
-          <div className="flex items-center justify-between bg-gray-800 p-4 rounded-lg">
+          <div className="flex items-center justify-between bg-gradient-to-r from-blue-600 to-blue-700 p-4 rounded-lg shadow-lg">
             <div className="flex items-center gap-4">
-              <button onClick={() => setScheduleDate(d => new Date(d.getTime() - 86400000))} className="text-2xl text-gray-400 hover:text-white">&lt;</button>
+              <button onClick={() => setScheduleDate(d => new Date(d.getTime() - 86400000))} className="text-2xl text-white/80 hover:text-white transition">&lt;</button>
               <span className="text-xl font-bold text-white min-w-[300px]">{scheduleDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', weekday: 'short' })}</span>
-              <button onClick={() => setScheduleDate(d => new Date(d.getTime() + 86400000))} className="text-2xl text-gray-400 hover:text-white">&gt;</button>
+              <button onClick={() => setScheduleDate(d => new Date(d.getTime() + 86400000))} className="text-2xl text-white/80 hover:text-white transition">&gt;</button>
             </div>
             <a
               href="/admin/therapist-schedule"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded transition-colors"
+              className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-bold text-sm rounded transition-colors border border-white/30"
             >
               📅 어드민 상세관리
             </a>
           </div>
 
           {/* 스케줄 그리드 */}
-          <div className="bg-gray-800 rounded-lg overflow-x-auto">
+          <div className="bg-blue-900/30 rounded-lg overflow-x-auto border border-blue-700/50">
             <div className="inline-block min-w-full">
               {/* 헤더 */}
-              <div className="flex border-b border-gray-700">
-                <div className="w-40 flex-shrink-0 px-4 py-3 font-bold text-gray-300 bg-gray-900 sticky left-0 z-10">Therapists (8)</div>
-                <div className="flex bg-gray-900">
+              <div className="flex border-b border-blue-700/50">
+                <div className="w-40 flex-shrink-0 px-4 py-3 font-bold text-blue-200 bg-blue-900/40 sticky left-0 z-10">Therapists (8)</div>
+                <div className="flex bg-blue-900/30">
                   {Array.from({ length: SCHEDULE_END_HOUR - SCHEDULE_START_HOUR }).map((_, i) => (
                     <div
                       key={i}
-                      className="flex-shrink-0 px-2 py-3 text-center text-sm font-bold text-gray-400 border-r border-gray-700"
+                      className="flex-shrink-0 px-2 py-3 text-center text-sm font-bold text-blue-300 border-r border-blue-700/50"
                       style={{ width: SCHEDULE_COLUMN_WIDTH }}
                     >
                       {String(SCHEDULE_START_HOUR + i).padStart(2, '0')}:00
@@ -840,14 +840,14 @@ export default function MonitorPage() {
 
               {/* 테라피스트 행 */}
               {MOCK_SCHEDULE_THERAPISTS.map(therapist => (
-                <div key={therapist.id} className="flex border-b border-gray-700 hover:bg-gray-700/50 transition">
+                <div key={therapist.id} className="flex border-b border-blue-700/50 hover:bg-blue-800/30 transition">
                   {/* 테라피스트 정보 */}
-                  <div className="w-40 flex-shrink-0 px-4 py-4 bg-gray-800 sticky left-0 z-5 border-r border-gray-700 flex items-center gap-3">
+                  <div className="w-40 flex-shrink-0 px-4 py-4 bg-blue-900/30 sticky left-0 z-5 border-r border-blue-700/50 flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${therapist.avatarColor} flex items-center justify-center text-white font-bold text-sm`}>
                       {therapist.name[0]}
                     </div>
                     <div>
-                      <div className="font-bold text-gray-100 text-sm">{therapist.name}</div>
+                      <div className="font-bold text-blue-100 text-sm">{therapist.name}</div>
                       <div className={`text-xs ${SCHEDULE_STATUS_BADGE[therapist.status].color}`}>
                         {SCHEDULE_STATUS_BADGE[therapist.status].dot} {SCHEDULE_STATUS_LABEL[therapist.status]}
                       </div>
@@ -866,7 +866,7 @@ export default function MonitorPage() {
                       return (
                         <div
                           key={colIndex}
-                          className="flex-shrink-0 px-1 py-4 border-r border-gray-700 relative bg-gray-800 hover:bg-gray-700 transition"
+                          className="flex-shrink-0 px-1 py-4 border-r border-blue-700/50 relative bg-blue-900/20 hover:bg-blue-900/40 transition"
                           style={{ width: SCHEDULE_COLUMN_WIDTH }}
                         >
                           {cellSessions.map(session => (
@@ -893,8 +893,8 @@ export default function MonitorPage() {
             </div>
           </div>
 
-          <div className="bg-gray-800 p-4 rounded-lg text-sm text-gray-400">
-            💡 <span className="text-gray-300">모니터에서 일정을 보기만 할 수 있습니다. 상세 편집은 어드민 사이트를 사용하세요.</span>
+          <div className="bg-blue-900/30 border border-blue-700/50 p-4 rounded-lg text-sm text-blue-300">
+            💡 <span className="text-blue-100">모니터에서 일정을 보기만 할 수 있습니다. 상세 편집은 어드민 사이트를 사용하세요.</span>
           </div>
         </div>
         )}
