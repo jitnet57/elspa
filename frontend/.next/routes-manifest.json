@@ -186,6 +186,12 @@
       "namedRegex": "^/therapist/fairness(?:/)?$"
     },
     {
+      "page": "/therapist-settlement",
+      "regex": "^/therapist\\-settlement(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/therapist\\-settlement(?:/)?$"
+    },
+    {
       "page": "/workflow",
       "regex": "^/workflow(?:/)?$",
       "routeKeys": {},

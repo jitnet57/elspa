@@ -22,10 +22,10 @@ export default function Home() {
             📊 대시보드
           </a>
           <a
-            href="/admin"
+            href="/therapist-settlement"
             className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-gray-600 hover:bg-white/50"
           >
-            👥 어드민
+            💰 정산 관리
           </a>
         </nav>
 
@@ -60,16 +60,16 @@ export default function Home() {
             >
               <div className="text-3xl lg:text-4xl mb-3 lg:mb-4">📊</div>
               <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-1 lg:mb-2">대시보드</h2>
-              <p className="text-xs lg:text-sm text-gray-600">카운터 모니터</p>
+              <p className="text-xs lg:text-sm text-gray-600">실시간 모니터</p>
             </a>
 
             <a
-              href="/admin"
+              href="/therapist-settlement"
               className="bg-white rounded-xl p-6 lg:p-8 shadow-sm border border-stone-200 hover:shadow-lg transition-all"
             >
-              <div className="text-3xl lg:text-4xl mb-3 lg:mb-4">👥</div>
-              <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-1 lg:mb-2">어드민</h2>
-              <p className="text-xs lg:text-sm text-gray-600">관리 시스템</p>
+              <div className="text-3xl lg:text-4xl mb-3 lg:mb-4">💰</div>
+              <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-1 lg:mb-2">정산 관리</h2>
+              <p className="text-xs lg:text-sm text-gray-600">테라피스트 정산</p>
             </a>
           </div>
         </div>
@@ -86,11 +86,11 @@ export default function Home() {
             <span className="hidden sm:inline">대시보드</span>
           </a>
           <a
-            href="/admin"
+            href="/therapist-settlement"
             className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold text-gray-600 hover:text-blue-600"
           >
-            <span className="text-lg">👥</span>
-            <span className="hidden sm:inline">어드민</span>
+            <span className="text-lg">💰</span>
+            <span className="hidden sm:inline">정산 관리</span>
           </a>
         </div>
       </div>

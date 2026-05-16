@@ -25,6 +25,7 @@
   "/monitor/page": "/monitor",
   "/page": "/",
   "/requirements/page": "/requirements",
+  "/therapist-settlement/page": "/therapist-settlement",
   "/therapist/fairness/page": "/therapist/fairness",
   "/workflow/page": "/workflow"
 }
