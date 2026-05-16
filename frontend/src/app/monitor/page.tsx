@@ -13,6 +13,113 @@ import { MobileBedCard } from '@/components/MobileBedCard';
 import { MobileBottomTabBar } from '@/components/MobileBottomTabBar';
 import { WalkInQueuePanel } from '@/components/WalkInQueuePanel';
 
+interface ScheduleSession {
+  id: string;
+  therapistId: number;
+  serviceType: 'swedish' | 'thai' | 'hotstone' | 'foot' | 'aroma' | 'break' | 'available';
+  startHour: number;
+  endHour: number;
+  customerName?: string;
+  status: 'scheduled' | 'in_progress' | 'completed';
+}
+
+interface ScheduleTherapist {
+  id: number;
+  name: string;
+  status: 'available' | 'in_session' | 'break' | 'off_duty';
+  avatarColor: string;
+  sessions: ScheduleSession[];
+}
+
+const SCHEDULE_SERVICE_CONFIG = {
+  swedish:   { label: 'Swedish Massage', bg: 'bg-blue-100 border-blue-300 text-blue-700', icon: '💆' },
+  thai:      { label: 'Thai Massage', bg: 'bg-green-100 border-green-300 text-green-700', icon: '🙏' },
+  hotstone:  { label: 'Hot Stone', bg: 'bg-orange-100 border-orange-300 text-orange-700', icon: '🪨' },
+  foot:      { label: 'Foot Massage', bg: 'bg-teal-100 border-teal-300 text-teal-700', icon: '🦶' },
+  aroma:     { label: 'Aromatherapy', bg: 'bg-purple-100 border-purple-300 text-purple-700', icon: '🌸' },
+  break:     { label: 'Break', bg: 'bg-yellow-200 border-yellow-400 text-yellow-800', icon: '☕' },
+  available: { label: 'Available', bg: 'bg-green-50 border-green-200 text-green-600', icon: '' },
+} as const;
+
+const SCHEDULE_STATUS_BADGE = {
+  available: { dot: '●', color: 'text-green-500' },
+  in_session: { dot: '●', color: 'text-blue-500' },
+  break: { dot: '◑', color: 'text-yellow-500' },
+  off_duty: { dot: '◌', color: 'text-gray-400' },
+} as const;
+
+const SCHEDULE_STATUS_LABEL = {
+  available: 'Available',
+  in_session: 'In Session',
+  break: 'Break',
+  off_duty: 'Off Duty',
+} as const;
+
+const MOCK_SCHEDULE_THERAPISTS: ScheduleTherapist[] = [
+  {
+    id: 1, name: 'Anna', status: 'available', avatarColor: 'from-orange-400 to-orange-600',
+    sessions: [
+      { id: 'a1', therapistId: 1, serviceType: 'available', startHour: 9, endHour: 10.5, status: 'scheduled' },
+      { id: 'a2', therapistId: 1, serviceType: 'available', startHour: 16, endHour: 21, status: 'scheduled' },
+    ],
+  },
+  {
+    id: 2, name: 'Bella', status: 'in_session', avatarColor: 'from-pink-400 to-pink-600',
+    sessions: [
+      { id: 'b1', therapistId: 2, serviceType: 'swedish', startHour: 10, endHour: 12, customerName: '김민준', status: 'in_progress' },
+      { id: 'b2', therapistId: 2, serviceType: 'aroma', startHour: 12.5, endHour: 14.5, customerName: '이수연', status: 'scheduled' },
+      { id: 'b3', therapistId: 2, serviceType: 'hotstone', startHour: 15, endHour: 17, customerName: '박지은', status: 'scheduled' },
+    ],
+  },
+  {
+    id: 3, name: 'Cathy', status: 'in_session', avatarColor: 'from-amber-400 to-amber-600',
+    sessions: [
+      { id: 'c1', therapistId: 3, serviceType: 'foot', startHour: 9.5, endHour: 11.5, customerName: '최준호', status: 'completed' },
+      { id: 'c2', therapistId: 3, serviceType: 'thai', startHour: 12, endHour: 14, customerName: '강지은', status: 'in_progress' },
+      { id: 'c3', therapistId: 3, serviceType: 'swedish', startHour: 14.5, endHour: 16.5, customerName: '이준영', status: 'scheduled' },
+    ],
+  },
+  {
+    id: 4, name: 'Daisy', status: 'break', avatarColor: 'from-yellow-400 to-yellow-600',
+    sessions: [
+      { id: 'd0', therapistId: 4, serviceType: 'break', startHour: 9, endHour: 10, status: 'scheduled' },
+      { id: 'd1', therapistId: 4, serviceType: 'aroma', startHour: 10, endHour: 12, customerName: '김수현', status: 'scheduled' },
+      { id: 'd2', therapistId: 4, serviceType: 'hotstone', startHour: 13, endHour: 15, customerName: '박민수', status: 'scheduled' },
+    ],
+  },
+  {
+    id: 5, name: 'Ella', status: 'in_session', avatarColor: 'from-green-400 to-green-600',
+    sessions: [
+      { id: 'e1', therapistId: 5, serviceType: 'thai', startHour: 11, endHour: 13, customerName: '이영희', status: 'in_progress' },
+      { id: 'e2', therapistId: 5, serviceType: 'swedish', startHour: 13.5, endHour: 15.5, customerName: '정현준', status: 'scheduled' },
+      { id: 'e3', therapistId: 5, serviceType: 'aroma', startHour: 16, endHour: 18, customerName: '박유진', status: 'scheduled' },
+    ],
+  },
+  {
+    id: 6, name: 'Fatima', status: 'available', avatarColor: 'from-purple-400 to-purple-600',
+    sessions: [
+      { id: 'f1', therapistId: 6, serviceType: 'available', startHour: 9, endHour: 11, status: 'scheduled' },
+      { id: 'f2', therapistId: 6, serviceType: 'available', startHour: 16, endHour: 21, status: 'scheduled' },
+    ],
+  },
+  {
+    id: 7, name: 'Gina', status: 'off_duty', avatarColor: 'from-gray-400 to-gray-600',
+    sessions: [],
+  },
+  {
+    id: 8, name: 'Hana', status: 'in_session', avatarColor: 'from-teal-400 to-teal-600',
+    sessions: [
+      { id: 'h1', therapistId: 8, serviceType: 'foot', startHour: 10.5, endHour: 12, customerName: '임다현', status: 'in_progress' },
+      { id: 'h2', therapistId: 8, serviceType: 'thai', startHour: 13, endHour: 15, customerName: '유지원', status: 'scheduled' },
+      { id: 'h3', therapistId: 8, serviceType: 'hotstone', startHour: 15.5, endHour: 17.5, customerName: '강지연', status: 'scheduled' },
+    ],
+  },
+];
+
+const SCHEDULE_START_HOUR = 9;
+const SCHEDULE_END_HOUR = 21;
+const SCHEDULE_COLUMN_WIDTH = 100;
+
 interface Bed {
   id: number;
   bed_number: number;
@@ -696,20 +803,98 @@ export default function MonitorPage() {
 
         {/* 일일 스케줄 모드 */}
         {viewMode === 'schedule' && (
-        <div className="text-center py-12">
-          <h2 className="text-3xl font-bold text-gray-200 mb-8">📅 테라피스트 일일 스케줄</h2>
-          <p className="text-gray-400 mb-6">상세 일정 보기는 <span className="text-blue-400 font-bold">어드민 사이트</span>에서 관리하세요.</p>
-          <a
-            href="/admin/therapist-schedule"
-            className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-lg transition-all inline-block"
-          >
-            📅 어드민 일일 스케줄로 이동
-          </a>
-          <div className="mt-12 max-w-2xl mx-auto">
-            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-              <p className="text-gray-400 text-sm">💡 <span className="text-gray-300">모니터 페이지는 실시간 침대 현황 관리에 집중합니다.</span></p>
-              <p className="text-gray-400 text-sm mt-2">테라피스트 일일 스케줄은 어드민 사이트에서 상세하게 관리할 수 있습니다.</p>
+        <div className="p-4 lg:p-8 space-y-6">
+          {/* 헤더 */}
+          <div className="flex items-center justify-between bg-gray-800 p-4 rounded-lg">
+            <div className="flex items-center gap-4">
+              <button onClick={() => setScheduleDate(d => new Date(d.getTime() - 86400000))} className="text-2xl text-gray-400 hover:text-white">&lt;</button>
+              <span className="text-xl font-bold text-white min-w-[300px]">{scheduleDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', weekday: 'short' })}</span>
+              <button onClick={() => setScheduleDate(d => new Date(d.getTime() + 86400000))} className="text-2xl text-gray-400 hover:text-white">&gt;</button>
             </div>
+            <a
+              href="/admin/therapist-schedule"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded transition-colors"
+            >
+              📅 어드민 상세관리
+            </a>
+          </div>
+
+          {/* 스케줄 그리드 */}
+          <div className="bg-gray-800 rounded-lg overflow-x-auto">
+            <div className="inline-block min-w-full">
+              {/* 헤더 */}
+              <div className="flex border-b border-gray-700">
+                <div className="w-40 flex-shrink-0 px-4 py-3 font-bold text-gray-300 bg-gray-900 sticky left-0 z-10">Therapists (8)</div>
+                <div className="flex bg-gray-900">
+                  {Array.from({ length: SCHEDULE_END_HOUR - SCHEDULE_START_HOUR }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="flex-shrink-0 px-2 py-3 text-center text-sm font-bold text-gray-400 border-r border-gray-700"
+                      style={{ width: SCHEDULE_COLUMN_WIDTH }}
+                    >
+                      {String(SCHEDULE_START_HOUR + i).padStart(2, '0')}:00
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 테라피스트 행 */}
+              {MOCK_SCHEDULE_THERAPISTS.map(therapist => (
+                <div key={therapist.id} className="flex border-b border-gray-700 hover:bg-gray-700/50 transition">
+                  {/* 테라피스트 정보 */}
+                  <div className="w-40 flex-shrink-0 px-4 py-4 bg-gray-800 sticky left-0 z-5 border-r border-gray-700 flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${therapist.avatarColor} flex items-center justify-center text-white font-bold text-sm`}>
+                      {therapist.name[0]}
+                    </div>
+                    <div>
+                      <div className="font-bold text-gray-100 text-sm">{therapist.name}</div>
+                      <div className={`text-xs ${SCHEDULE_STATUS_BADGE[therapist.status].color}`}>
+                        {SCHEDULE_STATUS_BADGE[therapist.status].dot} {SCHEDULE_STATUS_LABEL[therapist.status]}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 시간 그리드 */}
+                  <div className="flex relative flex-1">
+                    {Array.from({ length: SCHEDULE_END_HOUR - SCHEDULE_START_HOUR }).map((_, colIndex) => {
+                      const hourStart = SCHEDULE_START_HOUR + colIndex;
+                      const hourEnd = hourStart + 1;
+                      const cellSessions = therapist.sessions.filter(
+                        s => !(s.endHour <= hourStart || s.startHour >= hourEnd)
+                      );
+
+                      return (
+                        <div
+                          key={colIndex}
+                          className="flex-shrink-0 px-1 py-4 border-r border-gray-700 relative bg-gray-800 hover:bg-gray-700 transition"
+                          style={{ width: SCHEDULE_COLUMN_WIDTH }}
+                        >
+                          {cellSessions.map(session => (
+                            <div
+                              key={session.id}
+                              className={`absolute rounded-md border-2 text-xs p-1 text-white ${SCHEDULE_SERVICE_CONFIG[session.serviceType as keyof typeof SCHEDULE_SERVICE_CONFIG].bg}`}
+                              style={{
+                                left: `calc(${((session.startHour - hourStart) * SCHEDULE_COLUMN_WIDTH) / 1}px + 2px)`,
+                                width: `${(session.endHour - Math.max(session.startHour, hourStart)) * SCHEDULE_COLUMN_WIDTH - 4}px`,
+                                top: `${(MOCK_SCHEDULE_THERAPISTS.findIndex(t => t.id === therapist.id) % 2) * 28}px`,
+                                zIndex: 2,
+                              }}
+                            >
+                              <div className="font-bold text-xs">{session.startHour % 1 === 0 ? String(session.startHour).padStart(2, '0') : session.startHour}:00</div>
+                              {session.customerName && <div className="text-xs truncate">{session.customerName}</div>}
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-gray-800 p-4 rounded-lg text-sm text-gray-400">
+            💡 <span className="text-gray-300">모니터에서 일정을 보기만 할 수 있습니다. 상세 편집은 어드민 사이트를 사용하세요.</span>
           </div>
         </div>
         )}
