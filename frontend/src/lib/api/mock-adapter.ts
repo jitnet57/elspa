@@ -1,24 +1,22 @@
 /**
  * Mock API Adapter - Stream A: 데이터 레이어 (Data Layer)
  *
- * 목적: Team E(DB), F(매칭), G(API)가 완성되기 전에
- * Team A-D(Frontend)가 mock 데이터로 개발할 수 있도록 제공
+ * 목적: 실제 데이터(REAL_BEDS, REAL_THERAPISTS)를 사용하여
+ * Frontend가 수동 테스트할 수 있도록 제공
  *
- * 대규모 시스템 시뮬레이션:
- *   - 일일 1,000건 거래
- *   - 90명 테라피스트
- *   - 6가지 서비스
- *   - 시간대별 분포 및 거래 분석
+ * 사용 데이터:
+ *   - REAL_BEDS: 86개의 하드코딩된 침대 데이터
+ *   - REAL_THERAPISTS: 60명의 가상 테라피스트 데이터
+ *   - 더 이상 시뮬레이션하지 않음 (수동 테스트만)
  *
  * 사용법:
  *   import { mockApiAdapter } from '@/lib/api/mock-adapter'
  *   const beds = await mockApiAdapter.getBeds()
- *   const dailyData = await mockApiAdapter.getDailySettlement()
- *
- * 전환:
- *   실제 API 완성 후 이 파일을 삭제하고
- *   import { apiClient } from '@/lib/api/client' 로 변경
+ *   const therapists = await mockApiAdapter.getTherapists()
  */
+
+import { REAL_BEDS } from '@/lib/data/beds';
+import { REAL_THERAPISTS } from '@/lib/data/therapists';
 
 interface Bed {
   id: number;
@@ -340,157 +338,21 @@ const generateDailyTransactions = (count: number = 1000): Transaction[] => {
 // 모의 데이터 생성
 // ============================================================
 
+// REAL_BEDS를 그대로 사용 (더 이상 시뮬레이션하지 않음)
 const generateMockBeds = (): Bed[] => {
-  const beds: Bed[] = [];
-  let bedId = 1;
-
-  // 1000/day를 86개 침대에 분산: 약 11.6회/침대/일
-  // 실시간 상태는 확률 기반으로 생성
-  const customerNames = [
-    '김민준', '이수연', '정현준', '박지은', '최준호',
-    '강지은', '이준영', '김수현', '박민수', '이영희',
-    '이현욱', '정민우', '박소윤', '최지연', '강준영',
-    '임태호', '유수정', '조은혜', '송준호', '한지윤',
-    '윤준모', '현윤지', '장호준', '노현준', '진지수',
-    '각민준', '김영우', '이효진', '박민철', '최수진'
-  ];
-
-  // 침대 상태 조회 시, THERAPIST_POOL_90에서 랜덤 선택 (성능상 8명 표시, 실제는 90명)
-  const displayTherapistNames = [
-    'Sarah', 'Emma', 'Jessica', 'Amanda', '강지연',
-    '박민경', '임다현', '유지원'
-  ];
-
-  const serviceNames = Object.keys(SERVICE_PRICES);
-
-  const roomConfigs = [
-    { name: '마사지룸1', count: 30 },
-    { name: '마사지룸2', count: 30 },
-    { name: 'VIP룸', count: 16 },
-    { name: '커플룸', count: 10 }
-  ];
-
-  for (const room of roomConfigs) {
-    for (let i = 1; i <= room.count; i++) {
-      const statusRandom = Math.random();
-      let status: Bed['status'];
-
-      // 분포: available 50%, in_service 30%, reserved 10%, cleaning 10%
-      if (statusRandom < 0.5) status = 'available';
-      else if (statusRandom < 0.8) status = 'in_service';
-      else if (statusRandom < 0.9) status = 'reserved';
-      else status = 'cleaning';
-
-      const now = new Date();
-      const tenMinutesAgo = new Date(now.getTime() - 10 * 60000);
-      const thirtyMinutesLater = new Date(now.getTime() + 30 * 60000);
-
-      beds.push({
-        id: bedId++,
-        bed_number: i,
-        room_zone: room.name,
-        status,
-        customer_name:
-          status === 'in_service' || status === 'reserved'
-            ? customerNames[Math.floor(Math.random() * customerNames.length)]
-            : undefined,
-        therapist_name:
-          status === 'in_service' || status === 'reserved'
-            ? displayTherapistNames[Math.floor(Math.random() * displayTherapistNames.length)]
-            : undefined,
-        service_name:
-          status === 'in_service' || status === 'reserved'
-            ? serviceNames[Math.floor(Math.random() * serviceNames.length)]
-            : undefined,
-        starts_at:
-          status === 'in_service'
-            ? tenMinutesAgo.toLocaleTimeString('ko-KR', { hour12: false })
-            : undefined,
-        ends_at:
-          status === 'in_service'
-            ? thirtyMinutesLater.toLocaleTimeString('ko-KR', { hour12: false })
-            : undefined,
-      });
-    }
-  }
-
-  return beds;
+  return REAL_BEDS as Bed[];
 };
 
-/**
- * 📌 generateMockTherapists()
- * /monitor 페이지 성능을 위해 상위 8명의 테라피스트만 반환
- * (실제 시스템은 THERAPIST_POOL_90에서 모든 90명 관리)
- */
-const generateMockTherapists = (): Therapist[] => {
-  // THERAPIST_POOL_90의 상위 경력자 8명 (ID: 31-38)
-  return [
-    {
-      id: 31,
-      name: 'Sarah',
-      status: 'in_service',
-      current_bed: 5,
-      remaining_minutes: 17,
-      specialty: '스웨디시',
-      checked_in_at: '09:05'
-    },
-    {
-      id: 32,
-      name: 'Emma',
-      status: 'in_service',
-      current_bed: 12,
-      remaining_minutes: 32,
-      specialty: '타이마사지',
-      checked_in_at: '09:15'
-    },
-    {
-      id: 33,
-      name: 'Jessica',
-      status: 'idle',
-      specialty: '핫스톤',
-      checked_in_at: '09:30'
-    },
-    {
-      id: 34,
-      name: 'Amanda',
-      status: 'in_service',
-      current_bed: 18,
-      remaining_minutes: 5,
-      specialty: '발마사지',
-      checked_in_at: '09:45'
-    },
-    {
-      id: 35,
-      name: '강지연',
-      status: 'resting',
-      remaining_minutes: 10,
-      specialty: '아로마테라피',
-      checked_in_at: '10:00'
-    },
-    {
-      id: 36,
-      name: '박민경',
-      status: 'idle',
-      specialty: '종합',
-      checked_in_at: '10:10'
-    },
-    {
-      id: 37,
-      name: '임다현',
-      status: 'idle',
-      specialty: '스웨디시',
-      checked_in_at: '10:20'
-    },
-    {
-      id: 38,
-      name: '유지원',
-      status: 'in_service',
-      current_bed: 28,
-      remaining_minutes: 22,
-      specialty: '타이마사지',
-      checked_in_at: '10:30'
-    }
-  ];
+// REAL_THERAPISTS에서 Therapist 형식으로 변환
+const convertToTherapist = (realTherapist: any): Therapist => {
+  const isCheckedIn = realTherapist.status === 'checked_in';
+  return {
+    id: realTherapist.id,
+    name: realTherapist.name,
+    status: isCheckedIn ? 'idle' : 'checked_out',
+    specialty: realTherapist.specialty,
+    checked_in_at: realTherapist.checkedInAt,
+  };
 };
 
 // ============================================================
@@ -524,7 +386,7 @@ export const mockApiAdapter = {
   async getTherapists(status?: string): Promise<Therapist[]> {
     await new Promise(resolve => setTimeout(resolve, Math.random() * 200 + 100));
 
-    const allTherapists = generateMockTherapists();
+    const allTherapists = REAL_THERAPISTS.map(convertToTherapist);
 
     if (status) {
       return allTherapists.filter(t => t.status === status);
@@ -537,7 +399,7 @@ export const mockApiAdapter = {
   async getTherapist(therapistId: number): Promise<Therapist | null> {
     await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 50));
 
-    const therapists = generateMockTherapists();
+    const therapists = REAL_THERAPISTS.map(convertToTherapist);
     return therapists.find(t => t.id === therapistId) || null;
   },
 
@@ -577,23 +439,23 @@ export const mockApiAdapter = {
   async proposeMatching(bookingId: number, serviceType: string): Promise<MatchingProposal[]> {
     await new Promise(resolve => setTimeout(resolve, Math.random() * 500 + 200));
 
-    const therapists = generateMockTherapists();
+    const therapists = REAL_THERAPISTS;
 
     // 매칭 점수 계산 (더미 로직)
     const candidates = therapists
-      .filter(t => t.status === 'idle' || t.status === 'in_service')
+      .filter(t => t.status === 'checked_in')
       .map(t => {
-        // 70% 전문성, 20% 시간, 10% 평점
+        // 70% 전문성, 20% 평점, 10% 보너스
         const expertiseMatch = t.specialty && t.specialty.includes(serviceType) ? 70 : Math.random() * 70;
-        const timeAvailability = t.status === 'idle' ? 20 : Math.random() * 20;
-        const rating = Math.random() * 10;
+        const ratingScore = t.rating * 4; // 4.5~5.0 → 18~20
+        const bonus = Math.random() * 10;
 
         return {
           therapist_id: t.id,
           therapist_name: t.name,
           specialty: t.specialty || '일반',
-          score: Math.round(expertiseMatch + timeAvailability + rating),
-          availability: t.status === 'idle' ? '즉시 가용' : `${t.remaining_minutes}분 후`
+          score: Math.round(expertiseMatch + ratingScore + bonus),
+          availability: '즉시 가용'
         };
       })
       .sort((a, b) => b.score - a.score)
@@ -625,10 +487,9 @@ export const mockApiAdapter = {
   async checkInTherapist(therapistId: number): Promise<Therapist | null> {
     await new Promise(resolve => setTimeout(resolve, Math.random() * 200 + 100));
 
-    const therapist = generateMockTherapists().find(t => t.id === therapistId);
+    const therapist = REAL_THERAPISTS.find(t => t.id === therapistId);
     if (therapist) {
-      therapist.status = 'idle';
-      return therapist;
+      return convertToTherapist({ ...therapist, status: 'checked_in' });
     }
     return null;
   },
@@ -637,10 +498,9 @@ export const mockApiAdapter = {
   async checkOutTherapist(therapistId: number): Promise<Therapist | null> {
     await new Promise(resolve => setTimeout(resolve, Math.random() * 200 + 100));
 
-    const therapist = generateMockTherapists().find(t => t.id === therapistId);
+    const therapist = REAL_THERAPISTS.find(t => t.id === therapistId);
     if (therapist) {
-      therapist.status = 'checked_out';
-      return therapist;
+      return convertToTherapist({ ...therapist, status: 'checked_out' });
     }
     return null;
   },
@@ -649,15 +509,12 @@ export const mockApiAdapter = {
   async getPredictedWaitTime(): Promise<{ minutes: number; next_therapist: string }> {
     await new Promise(resolve => setTimeout(resolve, Math.random() * 150 + 50));
 
-    const therapists = generateMockTherapists();
-    const inService = therapists.filter(t => t.status === 'in_service');
-    const avgWait = inService.length > 0
-      ? Math.round(inService.reduce((sum, t) => sum + (t.remaining_minutes || 0), 0) / inService.length)
-      : 0;
+    const checkedInTherapists = REAL_THERAPISTS.filter(t => t.status === 'checked_in');
+    const avgWait = checkedInTherapists.length > 0 ? 5 : 0; // 평균 5분
 
     return {
       minutes: avgWait,
-      next_therapist: therapists.find(t => t.status === 'idle')?.name || 'Unknown'
+      next_therapist: checkedInTherapists[0]?.name || 'Unknown'
     };
   },
 
