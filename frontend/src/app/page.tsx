@@ -19,13 +19,13 @@ export default function Home() {
             href="/monitor"
             className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all bg-white text-gray-900 shadow-md border border-stone-200 hover:shadow-lg"
           >
-            📊 대시보드
+            📊 모니터
           </a>
           <a
-            href="/settlement-management"
+            href="/admin"
             className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-gray-600 hover:bg-white/50"
           >
-            💰 정산 관리
+            👥 어드민
           </a>
         </nav>
 
@@ -54,22 +54,24 @@ export default function Home() {
           <p className="text-lg lg:text-xl text-gray-600 mb-8 lg:mb-12">마사지 관리 시스템</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 max-w-2xl mx-auto">
+            {/* 모니터 */}
             <a
               href="/monitor"
-              className="bg-white rounded-xl p-6 lg:p-8 shadow-sm border border-stone-200 hover:shadow-lg transition-all"
+              className="bg-white rounded-xl p-6 lg:p-8 shadow-sm border border-stone-200 hover:shadow-lg transition-all hover:scale-105 active:scale-95"
             >
               <div className="text-3xl lg:text-4xl mb-3 lg:mb-4">📊</div>
-              <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-1 lg:mb-2">대시보드</h2>
-              <p className="text-xs lg:text-sm text-gray-600">실시간 모니터</p>
+              <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-1 lg:mb-2">모니터</h2>
+              <p className="text-xs lg:text-sm text-gray-600">실시간 대시보드</p>
             </a>
 
+            {/* 어드민 */}
             <a
-              href="/therapist-settlement"
-              className="bg-white rounded-xl p-6 lg:p-8 shadow-sm border border-stone-200 hover:shadow-lg transition-all"
+              href="/admin"
+              className="bg-white rounded-xl p-6 lg:p-8 shadow-sm border border-stone-200 hover:shadow-lg transition-all hover:scale-105 active:scale-95"
             >
-              <div className="text-3xl lg:text-4xl mb-3 lg:mb-4">💰</div>
-              <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-1 lg:mb-2">정산 관리</h2>
-              <p className="text-xs lg:text-sm text-gray-600">테라피스트 정산</p>
+              <div className="text-3xl lg:text-4xl mb-3 lg:mb-4">👥</div>
+              <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-1 lg:mb-2">어드민</h2>
+              <p className="text-xs lg:text-sm text-gray-600">관리 페이지</p>
             </a>
           </div>
         </div>
@@ -83,14 +85,14 @@ export default function Home() {
             className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold text-gray-600 hover:text-blue-600 border-r border-stone-200 last:border-r-0"
           >
             <span className="text-lg">📊</span>
-            <span className="hidden sm:inline">대시보드</span>
+            <span className="hidden sm:inline">모니터</span>
           </a>
           <a
-            href="/therapist-settlement"
+            href="/admin"
             className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold text-gray-600 hover:text-blue-600"
           >
-            <span className="text-lg">💰</span>
-            <span className="hidden sm:inline">정산 관리</span>
+            <span className="text-lg">👥</span>
+            <span className="hidden sm:inline">어드민</span>
           </a>
         </div>
       </div>
