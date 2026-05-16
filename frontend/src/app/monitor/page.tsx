@@ -1033,16 +1033,16 @@ export default function MonitorPage() {
           </div>
 
           {/* 스케줄 그리드 */}
-          <div className="bg-white rounded-lg overflow-x-auto border border-gray-200">
+          <div className="bg-white rounded-lg overflow-x-auto border border-gray-200 max-h-[60vh] overflow-y-auto">
             <div className="inline-block min-w-full">
-              {/* 헤더 */}
-              <div className="flex border-b border-gray-200">
-                <div className="w-40 flex-shrink-0 px-4 py-3 font-bold text-gray-700 bg-gray-50 sticky left-0 z-10">{t.scheduleLabels.therapists}</div>
+              {/* 헤더 - 고정 */}
+              <div className="flex border-b border-gray-200 sticky top-0 bg-white z-20">
+                <div className="w-40 flex-shrink-0 px-4 py-3 font-bold text-gray-700 bg-gray-50 sticky left-0 z-30">{t.scheduleLabels.therapists}</div>
                 <div className="flex bg-white">
                   {Array.from({ length: SCHEDULE_END_HOUR - SCHEDULE_START_HOUR }).map((_, i) => (
                     <div
                       key={i}
-                      className="flex-shrink-0 px-2 py-3 text-center text-sm font-bold text-gray-600 border-r border-gray-200"
+                      className="flex-shrink-0 px-2 py-3 text-center text-sm font-bold text-gray-600 border-r border-gray-200 bg-gray-50"
                       style={{ width: SCHEDULE_COLUMN_WIDTH }}
                     >
                       {String(SCHEDULE_START_HOUR + i).padStart(2, '0')}:00
