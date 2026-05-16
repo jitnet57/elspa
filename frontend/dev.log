@@ -11,7 +11,8 @@
 
 - Local:        http://localhost:3000
 - PID:          16608
-- Dir:          E:\elspa\frontend
+- Dir:          E:\el[?25h
+ntend
 - Log:          .next\dev\logs\next-development.log
 
 Run taskkill /PID 16608 /F to stop it.

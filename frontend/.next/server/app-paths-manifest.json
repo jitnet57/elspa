@@ -7,6 +7,7 @@
   "/admin/guides/page": "app/admin/guides/page.js",
   "/admin/matching/page": "app/admin/matching/page.js",
   "/admin/monthly-settlement/page": "app/admin/monthly-settlement/page.js",
+  "/admin/page": "app/admin/page.js",
   "/admin/policies/page": "app/admin/policies/page.js",
   "/admin/settlement-report/page": "app/admin/settlement-report/page.js",
   "/admin/simulation/page": "app/admin/simulation/page.js",

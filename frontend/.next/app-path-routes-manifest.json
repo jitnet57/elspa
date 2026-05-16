@@ -7,6 +7,7 @@
   "/admin/guides/page": "/admin/guides",
   "/admin/matching/page": "/admin/matching",
   "/admin/monthly-settlement/page": "/admin/monthly-settlement",
+  "/admin/page": "/admin",
   "/admin/policies/page": "/admin/policies",
   "/admin/settlement-report/page": "/admin/settlement-report",
   "/admin/simulation/page": "/admin/simulation",
