@@ -26,6 +26,14 @@ export const translations = {
       reserved: 'Reserved',
       cleaning: 'Cleaning',
       unknown: 'Unknown',
+      statusLabel: {
+        available: '✅ Available',
+        reserved: '🔵 Reserved',
+        inService: '💆 In Service',
+        cleaning: '🧹 Cleaning',
+      },
+      immediatelyAvailable: '🟢 Immediately Available',
+      cleaning_in_progress: '⏳ Cleaning...',
     },
 
     // Therapist Status
@@ -138,6 +146,53 @@ export const translations = {
       returnTime: 'Return Time',
       loading: 'Loading real-time data...',
     },
+
+    // Room Zones
+    roomZones: {
+      'room_a': 'Room A',
+      'room_b': 'Room B',
+      'room_c': 'Room C',
+      'vip_room': 'VIP Room',
+      'couple_room': 'Couple Room',
+    },
+
+    // Form Labels & Fields
+    labels: {
+      therapist: 'Therapist',
+      customer: 'Customer',
+      service: 'Service',
+      time: 'Time',
+      reservationTime: 'Reservation Time',
+      duration: 'Duration',
+      price: 'Price',
+      notes: 'Notes',
+      status: 'Status',
+      date: 'Date',
+      bedNumber: 'Bed Number',
+    },
+
+    // Modal & Dialog
+    modal: {
+      confirmPassword: 'Confirm Password',
+      enterPassword: 'Enter Password',
+      passwordRequired: 'Password is required',
+      invalidPassword: 'Invalid password',
+    },
+
+    // Menu Items
+    menu: {
+      monitor: 'Monitor',
+      schedule: 'Schedule',
+      therapists: 'Therapists',
+      customers: 'Customers',
+      bookings: 'Bookings',
+      finances: 'Finances',
+      settings: 'Settings',
+      logout: 'Logout',
+      changeLogs: 'Change Logs',
+      analytics: 'Analytics',
+      reports: 'Reports',
+    },
   },
 
   ko: {
@@ -160,6 +215,14 @@ export const translations = {
       reserved: '예약됨',
       cleaning: '정리중',
       unknown: '상태불명',
+      statusLabel: {
+        available: '✅ 비어있음',
+        reserved: '🔵 예약됨',
+        inService: '💆 서비스중',
+        cleaning: '🧹 정리중',
+      },
+      immediatelyAvailable: '🟢 즉시 이용 가능',
+      cleaning_in_progress: '⏳ 정리 중...',
     },
 
     // Therapist Status
@@ -271,6 +334,53 @@ export const translations = {
       nextAppointment: '다음 일정',
       returnTime: '복귀 예정',
       loading: '실시간 데이터 로드 중...',
+    },
+
+    // Room Zones
+    roomZones: {
+      'room_a': '룸 A',
+      'room_b': '룸 B',
+      'room_c': '룸 C',
+      'vip_room': 'VIP 룸',
+      'couple_room': '커플 룸',
+    },
+
+    // Form Labels & Fields
+    labels: {
+      therapist: '테라피스트',
+      customer: '고객',
+      service: '서비스',
+      time: '시간',
+      reservationTime: '예약시간',
+      duration: '소요시간',
+      price: '가격',
+      notes: '메모',
+      status: '상태',
+      date: '날짜',
+      bedNumber: '침대번호',
+    },
+
+    // Modal & Dialog
+    modal: {
+      confirmPassword: '비밀번호 확인',
+      enterPassword: '비밀번호 입력',
+      passwordRequired: '비밀번호를 입력하세요',
+      invalidPassword: '비밀번호가 틀렸습니다',
+    },
+
+    // Menu Items
+    menu: {
+      monitor: '모니터',
+      schedule: '스케줄',
+      therapists: '테라피스트',
+      customers: '고객',
+      bookings: '예약',
+      finances: '정산',
+      settings: '설정',
+      logout: '로그아웃',
+      changeLogs: '변경 로그',
+      analytics: '분석',
+      reports: '보고서',
     },
   },
 };

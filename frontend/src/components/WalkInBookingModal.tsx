@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { getTranslations } from '@/lib/translations';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface WalkInBookingModalProps {
   isOpen: boolean;

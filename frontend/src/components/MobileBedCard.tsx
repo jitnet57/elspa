@@ -1,5 +1,9 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { getTranslation } from '@/lib/translations';
+import { useLanguage } from '@/lib/LanguageContext';
+
 interface Bed {
   id: number;
   bed_number: number;
@@ -31,31 +35,26 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const getStatusLabel = (status: string) => {
-  switch (status) {
-    case 'available':
-      return '✅ 비어있음';
-    case 'reserved':
-      return '🔵 예약됨';
-    case 'in_service':
-      return '💆 서비스중';
-    case 'cleaning':
-      return '🧹 정리중';
-    default:
-      return status;
-  }
-};
-
 export function MobileBedCard({ bed }: MobileBedCardProps) {
+  const { language } = useLanguage();
+  const [roomZoneLabel, setRoomZoneLabel] = useState<string>(bed.room_zone);
+
+  useEffect(() => {
+    // room_zone 번역
+    const roomKey = bed.room_zone.toLowerCase().replace(' ', '_');
+    const translated = getTranslation(language, `roomZones.${roomKey}`);
+    setRoomZoneLabel(translated !== `roomZones.${roomKey}` ? translated : bed.room_zone);
+  }, [bed.room_zone, language]);
+
   return (
     <div className={`border-l-4 p-4 rounded-r mb-3 ${getStatusColor(bed.status)}`}>
       {/* 헤더: 침대번호와 상태 */}
       <div className="flex justify-between items-center mb-2">
         <div className="font-bold text-lg text-white">
-          {bed.room_zone} · {bed.bed_number}번
+          {roomZoneLabel} · {bed.bed_number}
         </div>
         <div className="text-xs font-bold text-gray-300">
-          {getStatusLabel(bed.status)}
+          {getTranslation(language, `bedStatus.statusLabel.${bed.status}`)}
         </div>
       </div>
 
@@ -63,19 +62,19 @@ export function MobileBedCard({ bed }: MobileBedCardProps) {
       {bed.status === 'in_service' && (
         <div className="space-y-1 text-sm text-gray-300">
           <div>
-            <span className="text-gray-400">테라피스트:</span>{' '}
+            <span className="text-gray-400">{getTranslation(language, 'labels.therapist')}:</span>{' '}
             <span className="font-semibold text-white">{bed.therapist_name}</span>
           </div>
           <div>
-            <span className="text-gray-400">고객:</span>{' '}
+            <span className="text-gray-400">{getTranslation(language, 'labels.customer')}:</span>{' '}
             <span className="font-semibold text-white">{bed.customer_name}</span>
           </div>
           <div>
-            <span className="text-gray-400">서비스:</span>{' '}
+            <span className="text-gray-400">{getTranslation(language, 'labels.service')}:</span>{' '}
             <span className="text-white">{bed.service_name}</span>
           </div>
           <div>
-            <span className="text-gray-400">시간:</span>{' '}
+            <span className="text-gray-400">{getTranslation(language, 'labels.time')}:</span>{' '}
             <span className="text-white">
               {bed.starts_at} ~ {bed.ends_at}
             </span>
@@ -86,11 +85,11 @@ export function MobileBedCard({ bed }: MobileBedCardProps) {
       {bed.status === 'reserved' && (
         <div className="space-y-1 text-sm text-gray-300">
           <div>
-            <span className="text-gray-400">고객:</span>{' '}
+            <span className="text-gray-400">{getTranslation(language, 'labels.customer')}:</span>{' '}
             <span className="font-semibold text-white">{bed.customer_name}</span>
           </div>
           <div>
-            <span className="text-gray-400">예약시간:</span>{' '}
+            <span className="text-gray-400">{getTranslation(language, 'labels.reservationTime')}:</span>{' '}
             <span className="text-white">{bed.starts_at}</span>
           </div>
         </div>
@@ -98,13 +97,13 @@ export function MobileBedCard({ bed }: MobileBedCardProps) {
 
       {bed.status === 'available' && (
         <div className="text-sm text-green-400 font-semibold">
-          🟢 즉시 이용 가능
+          {getTranslation(language, 'bedStatus.immediatelyAvailable')}
         </div>
       )}
 
       {bed.status === 'cleaning' && (
         <div className="text-sm text-orange-400 font-semibold">
-          ⏳ 정리 중...
+          {getTranslation(language, 'bedStatus.cleaning_in_progress')}
         </div>
       )}
     </div>

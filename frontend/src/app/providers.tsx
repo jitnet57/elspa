@@ -6,6 +6,7 @@ import { useSettlementScheduler } from '@/hooks/useSettlementScheduler';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { InAppBrowserBanner } from '@/components/InAppBrowserBanner';
+import { LanguageProvider } from '@/lib/LanguageContext';
 
 const createQueryClient = () => {
     return new QueryClient({
@@ -75,13 +76,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
     const queryClient = getQueryClient();
 
     return (
-        <QueryClientProvider client={queryClient}>
-            <InAppBrowserBanner />
-            <OfflineBanner />
-            <SettlementSchedulerMount />
-            <ExchangeRateMount />
-            <ExternalLinkHandler />
-            {children}
-        </QueryClientProvider>
+        <LanguageProvider>
+            <QueryClientProvider client={queryClient}>
+                <InAppBrowserBanner />
+                <OfflineBanner />
+                <SettlementSchedulerMount />
+                <ExchangeRateMount />
+                <ExternalLinkHandler />
+                {children}
+            </QueryClientProvider>
+        </LanguageProvider>
     );
 }
