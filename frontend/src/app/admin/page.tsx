@@ -68,10 +68,11 @@ export default function AdminPortal() {
       ],
     },
     {
-      category: '📈 분석',
+      category: '📈 분석 & 감사',
       items: [
         { name: '공정성 대시보드', href: '/admin/fairness-dashboard', icon: '⚖️' },
         { name: '결제 정보', href: '/admin/billing', icon: '💳' },
+        { name: '변경 로그', href: '/admin/change-logs', icon: '📋' },
       ],
     },
     {
@@ -85,9 +86,9 @@ export default function AdminPortal() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-white">
       {/* 헤더 */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 sm:p-6 lg:p-8 shadow-lg">
+      <div className="bg-gradient-to-r from-blue-400 to-blue-300 text-white p-4 sm:p-6 lg:p-8 shadow-md">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-3 mb-3 sm:mb-4">
             <div className="text-3xl sm:text-4xl">👥</div>
@@ -110,22 +111,22 @@ export default function AdminPortal() {
         <div className="space-y-6 sm:space-y-8">
           {adminMenus.map((section, idx) => (
             <div key={idx}>
-              <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">{section.category}</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">{section.category}</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {section.items.map((item) => (
                   <a
                     key={item.href}
                     href={item.href}
-                    className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-xl p-4 sm:p-6 transition-all hover:shadow-lg group"
+                    className="bg-white border border-gray-200 hover:border-blue-300 rounded-lg p-4 sm:p-6 transition-all hover:shadow-md group hover:bg-blue-50"
                   >
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="text-2xl sm:text-3xl mb-2">{item.icon}</div>
-                        <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-blue-300 transition-colors line-clamp-2">
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
                           {item.name}
                         </h3>
                       </div>
-                      <div className="text-xl sm:text-2xl opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2">
+                      <div className="text-xl sm:text-2xl opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2 text-gray-400">
                         →
                       </div>
                     </div>
@@ -137,18 +138,18 @@ export default function AdminPortal() {
         </div>
 
         {/* 바로가기 */}
-        <div className="mt-8 sm:mt-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 sm:p-8">
-          <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">🔗 주요 링크</h2>
+        <div className="mt-8 sm:mt-12 bg-gray-50 border border-gray-200 rounded-lg p-4 sm:p-8">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">🔗 주요 링크</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
             <a
               href="/monitor"
-              className="bg-blue-600 hover:bg-blue-700 text-white p-3 sm:p-4 rounded-lg text-center text-xs sm:text-sm font-bold transition-colors"
+              className="bg-blue-500 hover:bg-blue-600 text-white p-3 sm:p-4 rounded-lg text-center text-xs sm:text-sm font-bold transition-colors"
             >
               📊 카운터
             </a>
             <a
               href="/"
-              className="bg-gray-600 hover:bg-gray-700 text-white p-3 sm:p-4 rounded-lg text-center text-xs sm:text-sm font-bold transition-colors"
+              className="bg-gray-400 hover:bg-gray-500 text-white p-3 sm:p-4 rounded-lg text-center text-xs sm:text-sm font-bold transition-colors"
             >
               🏠 홈
             </a>

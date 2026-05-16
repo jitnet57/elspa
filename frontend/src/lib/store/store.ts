@@ -26,6 +26,9 @@ import {
   MonthlySettlementState,
   InvoiceState,
   ExchangeRateState,
+  LanguageState,
+  ChangeLogState,
+  ChangeLog,
   Bed,
   Therapist,
   Booking,
@@ -554,6 +557,41 @@ const createInvoiceSlice = (set: any): InvoiceState => ({
 });
 
 // ============================================================
+// Language Slice
+// ============================================================
+
+const createLanguageSlice = (set: any): LanguageState => ({
+  language: 'en',
+  setLanguage: (language: 'en' | 'ko') => set({ language }),
+});
+
+// ============================================================
+// Change Log Slice
+// ============================================================
+
+const createChangeLogSlice = (set: any): ChangeLogState => ({
+  changeLogs: [],
+
+  addChangeLog: (log: Omit<ChangeLog, 'id' | 'timestamp'>) => {
+    const newLog: ChangeLog = {
+      ...log,
+      id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: new Date().toISOString(),
+    };
+    set((state: any) => ({
+      changeLogs: [newLog, ...state.changeLogs],
+    }));
+  },
+
+  getChangeLogsByBed: (bedId: number) => {
+    const state = useStore.getState();
+    return state.changeLogs.filter(log => log.bedId === bedId);
+  },
+
+  clearChangeLogs: () => set({ changeLogs: [] }),
+});
+
+// ============================================================
 // Exchange Rate Slice
 // ============================================================
 
@@ -592,6 +630,8 @@ export const useStore = create<RootState>()(
       ...createCompanySlice(set),
       ...createGuideSlice(set),
       ...createMonthlySettlementSlice(set),
+      ...createLanguageSlice(set),
+      ...createChangeLogSlice(set),
       ...createExchangeRateSlice(set),
     }),
     {

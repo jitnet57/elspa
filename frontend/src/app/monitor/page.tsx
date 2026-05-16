@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useMonitorPolling, classifyBedsByRoom } from '@/hooks/useMonitorPolling';
 import { useFullStoreSync } from '@/hooks/useStoreSync';
 import { useStore } from '@/lib/store/store';
+import { getTranslations } from '@/lib/translations';
 import { NotificationCenter } from '@/components/NotificationCenter';
 import { WalkInBookingModal, type WalkInBookingRequest } from '@/components/WalkInBookingModal';
 import { useWalkInMatching, getServiceDuration } from '@/hooks/useWalkInMatching';
@@ -224,14 +225,14 @@ const generateMockBeds = (): Bed[] => {
 };
 
 const mockTherapists: Therapist[] = [
-  { id: 1, name: '박유진', status: 'in_service', current_bed: 5, remaining_minutes: 17, specialty: '스웨디시' },
-  { id: 2, name: '최정은', status: 'in_service', current_bed: 12, remaining_minutes: 32, specialty: '타이마사지' },
-  { id: 3, name: '이소영', status: 'idle', specialty: '핫스톤' },
-  { id: 4, name: '김태희', status: 'in_service', current_bed: 18, remaining_minutes: 5, specialty: '발마사지' },
-  { id: 5, name: '강지연', status: 'resting', remaining_minutes: 10, specialty: '아로마테라피' },
-  { id: 6, name: '박민경', status: 'idle', specialty: '종합' },
-  { id: 7, name: '임다현', status: 'idle', specialty: '스톤 마사지' },
-  { id: 8, name: '유지원', status: 'in_service', current_bed: 28, remaining_minutes: 22, specialty: '타이마사지' },
+  { id: 1, name: 'Elena Park', status: 'in_service', current_bed: 5, remaining_minutes: 17, specialty: 'Swedish' },
+  { id: 2, name: 'Jessica Choi', status: 'in_service', current_bed: 12, remaining_minutes: 32, specialty: 'Thai Massage' },
+  { id: 3, name: 'Sophie Lee', status: 'idle', specialty: 'Hot Stone' },
+  { id: 4, name: 'Grace Kim', status: 'in_service', current_bed: 18, remaining_minutes: 5, specialty: 'Foot Massage' },
+  { id: 5, name: 'Michelle Kang', status: 'resting', remaining_minutes: 10, specialty: 'Aromatherapy' },
+  { id: 6, name: 'Victoria Park', status: 'idle', specialty: 'General' },
+  { id: 7, name: 'Hannah Lim', status: 'idle', specialty: 'Stone Therapy' },
+  { id: 8, name: 'Rachel Yoo', status: 'in_service', current_bed: 28, remaining_minutes: 22, specialty: 'Thai Massage' },
 ];
 
 const getStatusColor = (status: string): string => {
@@ -277,6 +278,10 @@ export default function MonitorPage() {
   // React Query 폴링 + Zustand store 동기화
   useFullStoreSync();
 
+  // 📌 다국어 지원
+  const { language } = useStore();
+  const t = getTranslations(language);
+
   // LANGGRAPH Node 1-4: BedsPolling + TherapistsPolling + Stats + Predictions
   const {
     beds: pollingBeds,
@@ -299,6 +304,15 @@ export default function MonitorPage() {
   // 📌 모바일 드로어 상태
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
+  // 📌 상태 변경 (비밀번호 확인) 모달
+  const [passwordModal, setPasswordModal] = useState({
+    isOpen: false,
+    bedId: null as number | null,
+    newStatus: null as string | null,
+    password: '',
+    error: '',
+  });
+
   // Zustand store에서 데이터 읽기
   const {
     beds: storeBeds,
@@ -307,6 +321,7 @@ export default function MonitorPage() {
     isDetailModalOpen,
     openDetailModal,
     closeDetailModal,
+    addChangeLog,
   } = useStore();
 
   // Store가 최신이면 store 사용, 아니면 polling 데이터 사용
@@ -336,11 +351,20 @@ export default function MonitorPage() {
       {roomBeds.map(bed => (
         <div key={bed.id} className="relative">
           <button
-            onClick={() => openDetailModal(bed.id)}
+            onClick={() => {
+              // 비어있는 침대면 바로 워크인 모달 열기
+              if (bed.status === 'available') {
+                useStore.setState({ selectedBedId: bed.id });
+                setIsWalkInModalOpen(true);
+              } else {
+                // 그 외에는 상세 정보 모달
+                openDetailModal(bed.id);
+              }
+            }}
             className={`w-full h-16 ${getStatusColor(bed.status)} rounded-lg text-white text-xs font-bold hover:opacity-80 hover:scale-105 transition-all flex flex-col items-center justify-center p-1 border-2 ${
               selectedBedId === bed.id ? 'border-yellow-400' : 'border-gray-700'
             } cursor-pointer`}
-            title={`클릭하여 상세 정보 보기`}
+            title={bed.status === 'available' ? '클릭하여 마사지 등록' : '클릭하여 상세 정보 보기'}
           >
             <div className="font-bold">{bed.bed_number}번</div>
             {bed.status === 'in_service' && bed.customer_name && (
@@ -348,6 +372,9 @@ export default function MonitorPage() {
             )}
             {bed.status === 'reserved' && bed.customer_name && (
               <div className="text-xs truncate w-full text-center">{bed.customer_name}</div>
+            )}
+            {bed.status === 'available' && (
+              <div className="text-xs font-bold">➕ 마사지</div>
             )}
           </button>
         </div>
@@ -366,84 +393,129 @@ export default function MonitorPage() {
       ? Math.max(0, Math.floor((new Date(selectedBed.ends_at).getTime() - Date.now()) / 60000))
       : 0;
 
+    const getStatusDisplay = () => {
+      const statusMap: { [key: string]: { label: string; color: string; emoji: string } } = {
+        'in_service': { label: t.bedStatus.inService, color: 'text-blue-400', emoji: '🔵' },
+        'reserved': { label: t.bedStatus.reserved, color: 'text-orange-400', emoji: '🟠' },
+        'available': { label: t.bedStatus.available, color: 'text-green-400', emoji: '🟢' },
+        'cleaning': { label: t.bedStatus.cleaning, color: 'text-gray-400', emoji: '⚫' },
+      };
+      const status = statusMap[selectedBed.status] || { label: t.bedStatus.unknown, color: 'text-gray-500', emoji: '❓' };
+      return `${status.emoji} ${status.label}`;
+    };
+
     return (
       <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-        <div className="bg-gray-800 rounded-xl p-6 max-w-md w-full border-2 border-blue-500 shadow-2xl">
+        <div className="bg-white rounded-xl p-6 max-w-md w-full border-2 border-blue-300 shadow-2xl">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-blue-400">침대 {selectedBed.bed_number}번</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Bed {selectedBed.bed_number}</h2>
             <button
               onClick={() => closeDetailModal()}
-              className="text-gray-400 hover:text-white text-2xl"
+              className="text-gray-400 hover:text-gray-600 text-2xl"
             >
               ✕
             </button>
           </div>
 
           <div className="space-y-3 mb-6">
-            <div className="bg-gray-700 p-3 rounded">
-              <div className="text-gray-400 text-sm">위치</div>
-              <div className="text-lg font-bold text-white">{selectedBed.room_zone}</div>
+            <div className="bg-gray-50 p-3 rounded border border-gray-200">
+              <div className="text-gray-600 text-sm font-semibold">Location</div>
+              <div className="text-lg font-bold text-gray-900">{selectedBed.room_zone}</div>
             </div>
 
-            <div className="bg-gray-700 p-3 rounded">
-              <div className="text-gray-400 text-sm">상태</div>
-              <div className="text-lg font-bold">
-                {selectedBed.status === 'in_service' && <span className="text-blue-400">🔵 서비스중</span>}
-                {selectedBed.status === 'reserved' && <span className="text-orange-400">🟠 예약됨</span>}
-                {selectedBed.status === 'available' && <span className="text-green-400">🟢 사용가능</span>}
-                {selectedBed.status === 'cleaning' && <span className="text-gray-400">⚫ 정리중</span>}
-              </div>
+            <div className="bg-gray-50 p-3 rounded border border-gray-200">
+              <div className="text-gray-600 text-sm font-semibold">Status</div>
+              <div className="text-lg font-bold text-gray-900">{getStatusDisplay()}</div>
             </div>
 
             {selectedBed.customer_name && (
-              <div className="bg-gray-700 p-3 rounded">
-                <div className="text-gray-400 text-sm">👤 고객</div>
-                <div className="text-lg font-bold text-white">{selectedBed.customer_name}</div>
+              <div className="bg-gray-50 p-3 rounded border border-gray-200">
+                <div className="text-gray-600 text-sm font-semibold">👤 Customer</div>
+                <div className="text-lg font-bold text-gray-900">{selectedBed.customer_name}</div>
               </div>
             )}
 
             {selectedBed.therapist_name && (
-              <div className="bg-gray-700 p-3 rounded">
-                <div className="text-gray-400 text-sm">💆 테라피스트</div>
-                <div className="text-lg font-bold text-white">{selectedBed.therapist_name}</div>
+              <div className="bg-gray-50 p-3 rounded border border-gray-200">
+                <div className="text-gray-600 text-sm font-semibold">💆 Therapist</div>
+                <div className="text-lg font-bold text-gray-900">{selectedBed.therapist_name}</div>
               </div>
             )}
 
             {selectedBed.service_name && (
-              <div className="bg-gray-700 p-3 rounded">
-                <div className="text-gray-400 text-sm">💆‍♀️ 서비스</div>
-                <div className="text-lg font-bold text-white">{selectedBed.service_name}</div>
+              <div className="bg-gray-50 p-3 rounded border border-gray-200">
+                <div className="text-gray-600 text-sm font-semibold">💆‍♀️ Service</div>
+                <div className="text-lg font-bold text-gray-900">{selectedBed.service_name}</div>
               </div>
             )}
 
             {selectedBed.starts_at && (
-              <div className="bg-gray-700 p-3 rounded">
-                <div className="text-gray-400 text-sm">⏰ 시작 시간</div>
-                <div className="text-lg font-bold text-white">{selectedBed.starts_at}</div>
+              <div className="bg-gray-50 p-3 rounded border border-gray-200">
+                <div className="text-gray-600 text-sm font-semibold">⏰ Start Time</div>
+                <div className="text-lg font-bold text-gray-900">{selectedBed.starts_at}</div>
               </div>
             )}
 
             {selectedBed.ends_at && (
-              <div className="bg-gray-700 p-3 rounded">
-                <div className="text-gray-400 text-sm">⏱️ 종료 예정</div>
-                <div className="text-lg font-bold text-white">{selectedBed.ends_at}</div>
+              <div className="bg-gray-50 p-3 rounded border border-gray-200">
+                <div className="text-gray-600 text-sm font-semibold">⏱️ End Time</div>
+                <div className="text-lg font-bold text-gray-900">{selectedBed.ends_at}</div>
               </div>
             )}
 
             {selectedBed.status === 'in_service' && (
-              <div className="bg-blue-900/50 p-3 rounded border-l-4 border-blue-500">
-                <div className="text-gray-400 text-sm">⏳ 남은 시간</div>
-                <div className="text-2xl font-bold text-blue-400">{remainingTime}분</div>
+              <div className="bg-blue-50 p-3 rounded border-l-4 border-blue-300">
+                <div className="text-blue-700 text-sm font-semibold">⏳ Remaining</div>
+                <div className="text-2xl font-bold text-blue-600">{remainingTime} min</div>
               </div>
             )}
           </div>
 
-          <button
-            onClick={() => closeDetailModal()}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition-colors"
-          >
-            닫기
-          </button>
+          <div className="flex gap-3">
+            {selectedBed.status === 'available' && (
+              <button
+                onClick={() => {
+                  setIsWalkInModalOpen(true);
+                  closeDetailModal();
+                }}
+                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-2 rounded-lg transition-all hover:shadow-lg"
+              >
+                ➕ {language === 'en' ? 'Start Massage' : '마사지 시작'}
+              </button>
+            )}
+
+            {(selectedBed.status === 'in_service' || selectedBed.status === 'reserved') && (
+              <>
+                <button
+                  onClick={() => handleBedStatusChange(selectedBed.id, 'available')}
+                  className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-2 rounded-lg transition-all hover:shadow-lg"
+                  title="Change status to Available (requires password)"
+                >
+                  ✓ {language === 'en' ? 'Mark Available' : '사용가능으로 변경'}
+                </button>
+                {selectedBed.status === 'in_service' && (
+                  <button
+                    onClick={() => handleBedStatusChange(selectedBed.id, 'cleaning')}
+                    className="flex-1 bg-gradient-to-r from-yellow-600 to-amber-600 hover:from-yellow-700 hover:to-amber-700 text-white font-bold py-2 rounded-lg transition-all hover:shadow-lg"
+                    title="Change status to Cleaning (requires password)"
+                  >
+                    🧹 {language === 'en' ? 'Cleaning' : '정리중'}
+                  </button>
+                )}
+              </>
+            )}
+
+            <button
+              onClick={() => closeDetailModal()}
+              className={`${
+                selectedBed.status !== 'available' && selectedBed.status !== 'in_service' && selectedBed.status !== 'reserved'
+                  ? 'w-full'
+                  : 'flex-1'
+              } bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 rounded-lg transition-colors`}
+            >
+              {language === 'en' ? 'Close' : '닫기'}
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -472,6 +544,60 @@ export default function MonitorPage() {
       </div>
     );
   }
+
+  // ============================================================
+  // 📌 상태 변경 핸들러
+  // ============================================================
+  const handleBedStatusChange = (bedId: number, newStatus: string) => {
+    // 비밀번호 모달 열기
+    setPasswordModal({
+      isOpen: true,
+      bedId,
+      newStatus,
+      password: '',
+      error: '',
+    });
+  };
+
+  const handlePasswordConfirm = () => {
+    const ADMIN_PASSWORD = '1234'; // 실제로는 API에서 검증
+
+    if (passwordModal.password !== ADMIN_PASSWORD) {
+      setPasswordModal(prev => ({ ...prev, error: 'Invalid password' }));
+      return;
+    }
+
+    // 기존 상태 찾기
+    const bed = beds.find(b => b.id === passwordModal.bedId);
+    if (!bed) return;
+
+    const previousStatus = bed.status;
+    const newStatus = passwordModal.newStatus || 'available';
+
+    // 상태 변경 로그 기록
+    addChangeLog({
+      bedId: passwordModal.bedId!,
+      bedNumber: bed.bed_number,
+      previousStatus,
+      newStatus,
+      previousCustomer: bed.customer_name,
+      adminName: 'Admin User', // 실제로는 현재 로그인한 관리자 이름
+      reason: `Status changed from ${previousStatus} to ${newStatus}`,
+    });
+
+    // 실제 상태 변경 (API 호출)
+    console.log(`✅ Bed ${bed.bed_number}: ${previousStatus} → ${newStatus}`);
+
+    // 모달 닫기
+    setPasswordModal({
+      isOpen: false,
+      bedId: null,
+      newStatus: null,
+      password: '',
+      error: '',
+    });
+    closeDetailModal();
+  };
 
   // ============================================================
   // 📌 워크인 모달 제출 핸들러
@@ -581,66 +707,107 @@ export default function MonitorPage() {
       {/* 📌 메인 콘텐츠 */}
       <div className="lg:p-4 p-0">
         {/* 모드 선택 탭 */}
-        <div className="bg-gray-800 border-b border-gray-700 p-4 flex gap-2 sticky top-12 lg:top-0 z-30">
-          <button
-            onClick={() => setViewMode('beds')}
-            className={`px-4 py-2 rounded-lg font-bold transition-all ${
-              viewMode === 'beds'
-                ? 'bg-blue-600 text-white shadow-lg'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-          >
-            🛏️ 침대 실시간 모드
-          </button>
-          <button
-            onClick={() => setViewMode('schedule')}
-            className={`px-4 py-2 rounded-lg font-bold transition-all ${
-              viewMode === 'schedule'
-                ? 'bg-purple-600 text-white shadow-lg'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-          >
-            📅 테라피스트 일일 스케줄
-          </button>
+        <div className="bg-white border-b border-gray-200 p-4 flex gap-2 justify-between items-center sticky top-12 lg:top-0 z-30 shadow-sm">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setViewMode('beds')}
+              className={`px-6 py-2 rounded-lg font-bold transition-all ${
+                viewMode === 'beds'
+                  ? 'bg-blue-500 text-white shadow-lg'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              🛏️ {language === 'en' ? 'Real-time Bed Mode' : '침대 실시간 모드'}
+            </button>
+            <button
+              onClick={() => setViewMode('schedule')}
+              className={`px-6 py-2 rounded-lg font-bold transition-all ${
+                viewMode === 'schedule'
+                  ? 'bg-purple-500 text-white shadow-lg'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              📅 {language === 'en' ? 'Therapist Daily Schedule' : '테라피스트 일일 스케줄'}
+            </button>
+          </div>
+
+          {/* 언어 선택 & 어드민 아이콘 */}
+          <div className="flex items-center gap-2">
+            {/* 언어 선택 버튼 */}
+            <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
+              <button
+                onClick={() => useStore.setState({ language: 'en' })}
+                className={`px-3 py-1 rounded font-bold transition-all text-sm ${
+                  useStore.getState().language === 'en'
+                    ? 'bg-blue-500 text-white shadow-md'
+                    : 'text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                EN
+              </button>
+              <button
+                onClick={() => useStore.setState({ language: 'ko' })}
+                className={`px-3 py-1 rounded font-bold transition-all text-sm ${
+                  useStore.getState().language === 'ko'
+                    ? 'bg-blue-500 text-white shadow-md'
+                    : 'text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                KO
+              </button>
+            </div>
+
+            {/* 어드민 아이콘 버튼 */}
+            <a
+              href="/admin"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-all text-gray-700 hover:text-gray-900 hover:shadow-md"
+              title="Admin Page"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </a>
+          </div>
         </div>
 
         {/* 데스크톱용 헤더 */}
-        <div className="hidden lg:block mb-6 bg-gray-800 p-4 rounded-lg">
+        <div className="hidden lg:block mb-6 bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-3xl font-bold">✨ ELSPA 실시간 모니터</h1>
+            <h1 className="text-3xl font-bold text-gray-900">✨ ELSPA 실시간 모니터</h1>
             <div className="flex items-center gap-4">
-              <div className="text-sm text-gray-400">
+              <div className="text-sm text-gray-600">
                 🔄 폴링: {refetchCount}회 | ⏱️ {lastRefetch?.toLocaleTimeString('ko-KR', { hour12: false })}
               </div>
               {/* 📌 워크인 추가 버튼 (침대 모드에서만) */}
               {viewMode === 'beds' && (
                 <button
                   onClick={() => setIsWalkInModalOpen(true)}
-                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-lg transition-all hover:shadow-lg"
+                  className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-lg transition-all hover:shadow-lg"
                 >
                   + 워크인 추가
                 </button>
               )}
-              <div className="text-2xl font-mono">{currentTime}</div>
+              <div className="text-2xl font-mono text-gray-900 bg-gray-100 px-4 py-1 rounded-lg">{currentTime}</div>
             </div>
           </div>
           {viewMode === 'beds' && (
             <div className="grid grid-cols-4 gap-4 text-lg">
-              <div className="bg-green-600/30 p-3 rounded text-center">
-                <div className="text-green-400 font-bold">비어있음</div>
-                <div className="text-2xl font-bold">{bedStats.available}</div>
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200 text-center">
+                <div className="text-green-700 font-bold text-sm">비어있음</div>
+                <div className="text-3xl font-bold text-green-600">{bedStats.available}</div>
               </div>
-              <div className="bg-blue-600/30 p-3 rounded text-center">
-                <div className="text-blue-400 font-bold">서비스중</div>
-                <div className="text-2xl font-bold">{bedStats.in_service}</div>
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 text-center">
+                <div className="text-blue-700 font-bold text-sm">서비스중</div>
+                <div className="text-3xl font-bold text-blue-600">{bedStats.in_service}</div>
               </div>
-              <div className="bg-orange-600/30 p-3 rounded text-center">
-                <div className="text-orange-400 font-bold">예약됨</div>
-                <div className="text-2xl font-bold">{bedStats.reserved}</div>
+              <div className="bg-orange-50 p-4 rounded-lg border border-orange-200 text-center">
+                <div className="text-orange-700 font-bold text-sm">예약됨</div>
+                <div className="text-3xl font-bold text-orange-600">{bedStats.reserved}</div>
               </div>
-              <div className="bg-gray-600/30 p-3 rounded text-center">
-                <div className="text-gray-400 font-bold">정리중</div>
-                <div className="text-2xl font-bold">{bedStats.cleaning}</div>
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-300 text-center">
+                <div className="text-gray-700 font-bold text-sm">정리중</div>
+                <div className="text-3xl font-bold text-gray-600">{bedStats.cleaning}</div>
               </div>
             </div>
           )}
@@ -648,23 +815,23 @@ export default function MonitorPage() {
 
         {/* 모바일용 헤더 (침대 모드) */}
         {viewMode === 'beds' && (
-          <div className="lg:hidden mb-4 bg-gray-800 p-4 rounded-lg mx-4 mt-4">
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div className="bg-green-600/30 p-2 rounded text-center">
-                <div className="text-green-400 font-bold text-xs">비어있음</div>
-                <div className="text-xl font-bold">{bedStats.available}</div>
+          <div className="lg:hidden mb-4 bg-white p-4 rounded-lg mx-4 mt-4 border border-gray-200 shadow-sm">
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="bg-green-50 p-3 rounded-lg text-center border border-green-200">
+                <div className="text-green-700 font-bold text-xs">비어있음</div>
+                <div className="text-2xl font-bold text-green-600">{bedStats.available}</div>
               </div>
-              <div className="bg-blue-600/30 p-2 rounded text-center">
-                <div className="text-blue-400 font-bold text-xs">서비스중</div>
-                <div className="text-xl font-bold">{bedStats.in_service}</div>
+              <div className="bg-blue-50 p-3 rounded-lg text-center border border-blue-200">
+                <div className="text-blue-700 font-bold text-xs">서비스중</div>
+                <div className="text-2xl font-bold text-blue-600">{bedStats.in_service}</div>
               </div>
-              <div className="bg-orange-600/30 p-2 rounded text-center">
-                <div className="text-orange-400 font-bold text-xs">예약됨</div>
-                <div className="text-xl font-bold">{bedStats.reserved}</div>
+              <div className="bg-orange-50 p-3 rounded-lg text-center border border-orange-200">
+                <div className="text-orange-700 font-bold text-xs">예약됨</div>
+                <div className="text-2xl font-bold text-orange-600">{bedStats.reserved}</div>
               </div>
-              <div className="bg-gray-600/30 p-2 rounded text-center">
-                <div className="text-gray-400 font-bold text-xs">정리중</div>
-                <div className="text-xl font-bold">{bedStats.cleaning}</div>
+              <div className="bg-gray-50 p-3 rounded-lg text-center border border-gray-300">
+                <div className="text-gray-700 font-bold text-xs">정리중</div>
+                <div className="text-2xl font-bold text-gray-600">{bedStats.cleaning}</div>
               </div>
             </div>
           </div>
@@ -672,100 +839,124 @@ export default function MonitorPage() {
 
         {/* 데스크톱 레이아웃 (침대 모드) */}
         {viewMode === 'beds' && (
-        <div className="hidden lg:grid grid-cols-4 gap-6">
+        <div className="hidden lg:grid grid-cols-5 gap-6 p-6 bg-gradient-to-br from-white to-gray-50">
           <div className="col-span-3 space-y-6">
             {Object.entries(bedsByRoom).map(([roomName, roomBeds]) =>
               roomBeds.length > 0 ? (
-                <div key={roomName} className="bg-gray-800 p-4 rounded-lg">
-                  <h2 className="text-xl font-bold mb-3 text-blue-400">{roomName} ({roomBeds.length}개)</h2>
+                <div key={roomName} className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                  <h2 className="text-xl font-bold mb-4 text-gray-900 border-b border-gray-200 pb-3">{roomName} ({roomBeds.length}개)</h2>
                   <BedGrid roomBeds={roomBeds} />
                 </div>
               ) : null
             )}
           </div>
 
-          <div className="bg-gray-800 p-4 rounded-lg h-fit sticky top-4">
-          <h2 className="text-xl font-bold mb-4 text-blue-400">테라피스트 현황</h2>
+          <div className="col-span-2 space-y-4">
+            {/* 테라피스트 현황 카드 */}
+            <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+              <h2 className="text-lg font-bold mb-4 text-gray-900">테라피스트 현황</h2>
 
-          <div className="space-y-2 mb-6 pb-4 border-b border-gray-700">
-            <div className="flex justify-between text-sm">
-              <span>출근: {therapistStats.checkedIn}명 / 총 {therapistStats.total}명</span>
-              <span className="text-green-400 font-bold">대기: {therapistStats.idle}명</span>
-            </div>
-            <div className="text-sm text-gray-400">
-              서비스중: {therapistStats.in_service}명 | 휴식: {therapistStats.resting}명
-            </div>
-          </div>
-
-          {/* 예측 정보 표시 */}
-          {predictions && (
-            <div className="mb-4 bg-blue-900/30 p-3 rounded border-l-4 border-blue-500">
-              <div className="text-xs text-gray-400 mb-1">⏳ 평균 대기시간</div>
-              <div className="text-lg font-bold text-blue-400">{predictions.average_wait_minutes || 0}분</div>
-              {predictions.next_available_therapist && (
-                <div className="text-xs text-gray-400 mt-2">
-                  다음 가용: <span className="text-green-400 font-bold">{predictions.next_available_therapist.name}</span>
+              <div className="grid grid-cols-2 gap-3 mb-5 pb-4 border-b border-gray-200">
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <div className="text-xs text-gray-600">출근</div>
+                  <div className="text-2xl font-bold text-green-600">{therapistStats.checkedIn}/{therapistStats.total}</div>
                 </div>
-              )}
-            </div>
-          )}
-
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            {therapists.map(therapist => (
-              <div key={therapist.id} className="bg-gray-700 p-2 rounded text-xs hover:bg-gray-600 transition">
-                <div className="flex items-center justify-between">
-                  <div>
-                    {therapist.status === 'idle' && '●'}
-                    {therapist.status === 'in_service' && '◆'}
-                    {therapist.status === 'resting' && '○'}
-                    {therapist.status === 'checked_out' && '✕'}
-                    {' '}
-                    <span className="font-bold">{therapist.name}</span>
-                  </div>
-                  <span className={
-                    therapist.status === 'idle' ? 'text-green-400' :
-                    therapist.status === 'in_service' ? 'text-blue-400' :
-                    therapist.status === 'resting' ? 'text-yellow-400' :
-                    'text-gray-500'
-                  }>
-                    {therapist.status === 'idle' ? '[즉시가용]' : ''}
-                    {therapist.status === 'in_service' && `B${therapist.current_bed} | ${therapist.remaining_minutes}분↓`}
-                    {therapist.status === 'resting' && '[휴식중]'}
-                  </span>
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <div className="text-xs text-gray-600">대기 중</div>
+                  <div className="text-2xl font-bold text-blue-600">{therapistStats.idle}명</div>
                 </div>
-                <div className="text-gray-400 mt-1">{therapist.specialty}</div>
               </div>
-            ))}
-          </div>
 
-          <div className="mt-6 pt-4 border-t border-gray-700">
-            <div className="bg-blue-900/30 p-3 rounded text-sm">
-              <div className="font-bold text-blue-300">다음 배정 대상</div>
-              <div className="mt-1">이소영 (즉시 가능)</div>
+              <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
+                <div className="text-gray-700">서비스중: <span className="font-bold">{therapistStats.in_service}명</span></div>
+                <div className="text-gray-700">휴식: <span className="font-bold">{therapistStats.resting}명</span></div>
+              </div>
+            </div>
+
+            {/* 예측 정보 */}
+            {predictions && (
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-lg border border-blue-200">
+                <div className="text-sm text-gray-600 mb-2">⏳ 평균 대기시간</div>
+                <div className="text-3xl font-bold text-blue-700 mb-3">{predictions.average_wait_minutes || 0}분</div>
+                {predictions.next_available_therapist && (
+                  <div className="text-sm text-gray-700">
+                    다음 가용: <span className="font-bold text-green-600">{predictions.next_available_therapist.name}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 테라피스트 목록 */}
+            <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
+              <h3 className="font-bold text-gray-900 mb-3">테라피스트 상태</h3>
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {therapists.map(therapist => (
+                  <div key={therapist.id} className={`p-3 rounded-lg border transition ${
+                    therapist.status === 'idle' ? 'bg-green-50 border-green-200' :
+                    therapist.status === 'in_service' ? 'bg-blue-50 border-blue-200' :
+                    therapist.status === 'resting' ? 'bg-yellow-50 border-yellow-200' :
+                    'bg-gray-50 border-gray-200'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-lg ${
+                          therapist.status === 'idle' ? 'text-green-600' :
+                          therapist.status === 'in_service' ? 'text-blue-600' :
+                          therapist.status === 'resting' ? 'text-yellow-600' :
+                          'text-gray-500'
+                        }`}>
+                          {therapist.status === 'idle' && '●'}
+                          {therapist.status === 'in_service' && '◆'}
+                          {therapist.status === 'resting' && '○'}
+                          {therapist.status === 'checked_out' && '✕'}
+                        </span>
+                        <span className="font-bold text-sm text-gray-900">{therapist.name}</span>
+                      </div>
+                      <span className={`text-xs font-bold ${
+                        therapist.status === 'idle' ? 'text-green-600' :
+                        therapist.status === 'in_service' ? 'text-blue-600' :
+                        therapist.status === 'resting' ? 'text-yellow-600' :
+                        'text-gray-500'
+                      }`}>
+                        {therapist.status === 'idle' ? '[즉시가용]' : ''}
+                        {therapist.status === 'in_service' && `B${therapist.current_bed}`}
+                        {therapist.status === 'resting' && '[휴식중]'}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-600 mt-1 ml-7">{therapist.specialty}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 다음 배정 대상 */}
+            <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-5 rounded-lg border border-purple-200">
+              <div className="font-bold text-gray-900">다음 배정 대상</div>
+              <div className="text-lg font-bold text-purple-600 mt-2">이소영</div>
+              <div className="text-sm text-gray-600">(즉시 가능)</div>
             </div>
           </div>
-        </div>
-
-        {/* 워크인 대기 패널 */}
-        <WalkInQueuePanel />
         </div>
         )}
 
+        {/* 워크인 대기 패널 */}
+        {viewMode === 'beds' && <WalkInQueuePanel />}
+
         {/* 모바일 레이아웃 (침대 모드) */}
         {viewMode === 'beds' && (
-        <div className="lg:hidden px-4 pb-32 space-y-4 mt-4">
+        <div className="lg:hidden px-4 pb-32 space-y-5 mt-4 bg-gradient-to-b from-white to-gray-50 -mx-4 px-4 py-4">
           {Object.entries(bedsByRoom).map(([roomName, roomBeds]) =>
             roomBeds.length > 0 ? (
               <div key={roomName}>
-                <h2 className="text-lg font-bold mb-3 text-blue-400 sticky top-0 bg-gray-900 py-2">
+                <h2 className="text-lg font-bold mb-3 text-gray-900 sticky top-12 bg-white/95 py-2 px-2 -mx-2 rounded-lg border-b border-gray-200">
                   {roomName} ({roomBeds.length}개)
                 </h2>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {roomBeds.map(bed => (
                     <div
                       key={bed.id}
                       onClick={() => openDetailModal(bed.id)}
-                      className="cursor-pointer"
+                      className="cursor-pointer active:scale-95 transition-transform"
                     >
                       <MobileBedCard bed={bed} />
                     </div>
@@ -779,23 +970,24 @@ export default function MonitorPage() {
 
         {/* 범례 - 데스크톱만 (침대 모드) */}
         {viewMode === 'beds' && (
-        <div className="hidden lg:block mt-8 p-4 bg-gray-800 rounded-lg text-sm">
-          <div className="grid grid-cols-4 gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-green-500 rounded"></div>
-              <span>비어있음 (사용 가능)</span>
+        <div className="hidden lg:block mt-8 p-5 bg-white border border-gray-200 rounded-lg shadow-sm">
+          <h3 className="font-bold text-gray-900 mb-4">침대 상태 범례</h3>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+              <div className="w-6 h-6 bg-green-500 rounded-lg flex-shrink-0"></div>
+              <span className="text-sm text-gray-700">비어있음 (사용 가능)</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-blue-500 rounded"></div>
-              <span>서비스중 (타이머)</span>
+            <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="w-6 h-6 bg-blue-500 rounded-lg flex-shrink-0"></div>
+              <span className="text-sm text-gray-700">서비스중 (타이머)</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-orange-500 rounded animate-pulse"></div>
-              <span>예약됨 (고객 곧 도착)</span>
+            <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-200">
+              <div className="w-6 h-6 bg-orange-500 rounded-lg animate-pulse flex-shrink-0"></div>
+              <span className="text-sm text-gray-700">예약됨 (고객 곧 도착)</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-gray-500 rounded"></div>
-              <span>정리중 (청소/정리)</span>
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-300">
+              <div className="w-6 h-6 bg-gray-500 rounded-lg flex-shrink-0"></div>
+              <span className="text-sm text-gray-700">정리중 (청소/정리)</span>
             </div>
           </div>
         </div>
@@ -803,33 +995,35 @@ export default function MonitorPage() {
 
         {/* 일일 스케줄 모드 */}
         {viewMode === 'schedule' && (
-        <div className="p-4 lg:p-8 space-y-6 bg-gradient-to-br from-blue-900/20 via-blue-800/10 to-blue-900/20 rounded-lg">
+        <div className="p-4 lg:p-8 space-y-6 bg-white rounded-lg">
           {/* 헤더 */}
-          <div className="flex items-center justify-between bg-gradient-to-r from-blue-600 to-blue-700 p-4 rounded-lg shadow-lg">
+          <div className="flex items-center justify-between bg-gradient-to-r from-blue-400 to-blue-300 p-4 rounded-lg shadow-lg">
             <div className="flex items-center gap-4">
-              <button onClick={() => setScheduleDate(d => new Date(d.getTime() - 86400000))} className="text-2xl text-white/80 hover:text-white transition">&lt;</button>
-              <span className="text-xl font-bold text-white min-w-[300px]">{scheduleDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', weekday: 'short' })}</span>
-              <button onClick={() => setScheduleDate(d => new Date(d.getTime() + 86400000))} className="text-2xl text-white/80 hover:text-white transition">&gt;</button>
+              <button onClick={() => setScheduleDate(d => new Date(d.getTime() - 86400000))} className="text-2xl text-blue-700 hover:text-blue-900 transition">&lt;</button>
+              <span className="text-xl font-bold text-blue-900 min-w-[300px]">{scheduleDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', weekday: 'short' })}</span>
+              <button onClick={() => setScheduleDate(d => new Date(d.getTime() + 86400000))} className="text-2xl text-blue-700 hover:text-blue-900 transition">&gt;</button>
             </div>
-            <a
-              href="/admin/therapist-schedule"
-              className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-bold text-sm rounded transition-colors border border-white/30"
-            >
-              📅 어드민 상세관리
-            </a>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsWalkInModalOpen(true)}
+                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-sm rounded-lg transition-all hover:shadow-lg"
+              >
+                + {language === 'en' ? 'Start New Massage' : '마사지 시작'}
+              </button>
+            </div>
           </div>
 
           {/* 스케줄 그리드 */}
-          <div className="bg-blue-900/30 rounded-lg overflow-x-auto border border-blue-700/50">
+          <div className="bg-white rounded-lg overflow-x-auto border border-gray-200">
             <div className="inline-block min-w-full">
               {/* 헤더 */}
-              <div className="flex border-b border-blue-700/50">
-                <div className="w-40 flex-shrink-0 px-4 py-3 font-bold text-blue-200 bg-blue-900/40 sticky left-0 z-10">Therapists (8)</div>
-                <div className="flex bg-blue-900/30">
+              <div className="flex border-b border-gray-200">
+                <div className="w-40 flex-shrink-0 px-4 py-3 font-bold text-gray-700 bg-gray-50 sticky left-0 z-10">Therapists (8)</div>
+                <div className="flex bg-white">
                   {Array.from({ length: SCHEDULE_END_HOUR - SCHEDULE_START_HOUR }).map((_, i) => (
                     <div
                       key={i}
-                      className="flex-shrink-0 px-2 py-3 text-center text-sm font-bold text-blue-300 border-r border-blue-700/50"
+                      className="flex-shrink-0 px-2 py-3 text-center text-sm font-bold text-gray-600 border-r border-gray-200"
                       style={{ width: SCHEDULE_COLUMN_WIDTH }}
                     >
                       {String(SCHEDULE_START_HOUR + i).padStart(2, '0')}:00
@@ -840,14 +1034,14 @@ export default function MonitorPage() {
 
               {/* 테라피스트 행 */}
               {MOCK_SCHEDULE_THERAPISTS.map(therapist => (
-                <div key={therapist.id} className="flex border-b border-blue-700/50 hover:bg-blue-800/30 transition">
+                <div key={therapist.id} className="flex border-b border-gray-200 hover:bg-gray-50 transition">
                   {/* 테라피스트 정보 */}
-                  <div className="w-40 flex-shrink-0 px-4 py-4 bg-blue-900/30 sticky left-0 z-5 border-r border-blue-700/50 flex items-center gap-3">
+                  <div className="w-40 flex-shrink-0 px-4 py-4 bg-gray-50 sticky left-0 z-5 border-r border-gray-200 flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${therapist.avatarColor} flex items-center justify-center text-white font-bold text-sm`}>
                       {therapist.name[0]}
                     </div>
                     <div>
-                      <div className="font-bold text-blue-100 text-sm">{therapist.name}</div>
+                      <div className="font-bold text-gray-900 text-sm">{therapist.name}</div>
                       <div className={`text-xs ${SCHEDULE_STATUS_BADGE[therapist.status].color}`}>
                         {SCHEDULE_STATUS_BADGE[therapist.status].dot} {SCHEDULE_STATUS_LABEL[therapist.status]}
                       </div>
@@ -866,13 +1060,13 @@ export default function MonitorPage() {
                       return (
                         <div
                           key={colIndex}
-                          className="flex-shrink-0 px-1 py-4 border-r border-blue-700/50 relative bg-blue-900/20 hover:bg-blue-900/40 transition"
+                          className="flex-shrink-0 px-1 py-4 border-r border-gray-200 relative bg-white hover:bg-gray-50 transition"
                           style={{ width: SCHEDULE_COLUMN_WIDTH }}
                         >
                           {cellSessions.map(session => (
                             <div
                               key={session.id}
-                              className={`absolute rounded-md border-2 text-xs p-1 text-white ${SCHEDULE_SERVICE_CONFIG[session.serviceType as keyof typeof SCHEDULE_SERVICE_CONFIG].bg}`}
+                              className={`absolute rounded-md border-2 text-xs p-1 text-gray-700 ${SCHEDULE_SERVICE_CONFIG[session.serviceType as keyof typeof SCHEDULE_SERVICE_CONFIG].bg}`}
                               style={{
                                 left: `calc(${((session.startHour - hourStart) * SCHEDULE_COLUMN_WIDTH) / 1}px + 2px)`,
                                 width: `${(session.endHour - Math.max(session.startHour, hourStart)) * SCHEDULE_COLUMN_WIDTH - 4}px`,
@@ -893,8 +1087,8 @@ export default function MonitorPage() {
             </div>
           </div>
 
-          <div className="bg-blue-900/30 border border-blue-700/50 p-4 rounded-lg text-sm text-blue-300">
-            💡 <span className="text-blue-100">모니터에서 일정을 보기만 할 수 있습니다. 상세 편집은 어드민 사이트를 사용하세요.</span>
+          <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg text-sm text-blue-700">
+            💡 <span className="text-blue-900 font-semibold">모니터에서 일정을 보기만 할 수 있습니다. 상세 편집은 어드민 사이트를 사용하세요.</span>
           </div>
         </div>
         )}
@@ -912,6 +1106,66 @@ export default function MonitorPage() {
 
       {/* 상세 정보 모달 */}
       <DetailModal />
+
+      {/* 비밀번호 확인 모달 */}
+      {passwordModal.isOpen && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full border-2 border-red-300 shadow-2xl">
+            <h2 className="text-2xl font-bold text-red-600 mb-4">
+              🔐 {language === 'en' ? 'Security Confirmation' : '보안 확인'}
+            </h2>
+
+            <p className="text-gray-600 mb-4">
+              {language === 'en'
+                ? 'Enter admin password to change bed status'
+                : '침대 상태를 변경하려면 관리자 비밀번호를 입력하세요'}
+            </p>
+
+            <input
+              type="password"
+              value={passwordModal.password}
+              onChange={(e) =>
+                setPasswordModal(prev => ({
+                  ...prev,
+                  password: e.target.value,
+                  error: '',
+                }))
+              }
+              onKeyPress={(e) => e.key === 'Enter' && handlePasswordConfirm()}
+              placeholder={language === 'en' ? 'Enter password' : '비밀번호 입력'}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-red-500"
+              autoFocus
+            />
+
+            {passwordModal.error && (
+              <p className="text-red-600 text-sm mb-4">❌ {passwordModal.error}</p>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() =>
+                  setPasswordModal({
+                    isOpen: false,
+                    bedId: null,
+                    newStatus: null,
+                    password: '',
+                    error: '',
+                  })
+                }
+                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 rounded-lg transition-colors"
+              >
+                {language === 'en' ? 'Cancel' : '취소'}
+              </button>
+              <button
+                onClick={handlePasswordConfirm}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg transition-colors"
+              >
+                {language === 'en' ? 'Confirm' : '확인'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

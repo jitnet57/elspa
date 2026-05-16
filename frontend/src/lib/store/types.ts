@@ -463,6 +463,40 @@ export interface ExchangeRateState {
 // Root Store State
 // ============================================================
 
+// ============================================================
+// Language Support
+// ============================================================
+
+export interface LanguageState {
+  language: 'en' | 'ko';
+  setLanguage: (language: 'en' | 'ko') => void;
+}
+
+// ============================================================
+// Change Log
+// ============================================================
+
+export interface ChangeLog {
+  id: string;
+  timestamp: string;
+  bedId: number;
+  bedNumber: number;
+  previousStatus: string;
+  newStatus: string;
+  previousCustomer?: string;
+  newCustomer?: string;
+  adminName: string;
+  reason?: string;
+  notes?: string;
+}
+
+export interface ChangeLogState {
+  changeLogs: ChangeLog[];
+  addChangeLog: (log: Omit<ChangeLog, 'id' | 'timestamp'>) => void;
+  getChangeLogsByBed: (bedId: number) => ChangeLog[];
+  clearChangeLogs: () => void;
+}
+
 export interface RootState
   extends BedState,
     TherapistState,
@@ -476,6 +510,8 @@ export interface RootState
     GuideState,
     MonthlySettlementState,
     InvoiceState,
-    ExchangeRateState {
+    ExchangeRateState,
+    LanguageState,
+    ChangeLogState {
   // Combined state
 }

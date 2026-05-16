@@ -231,30 +231,30 @@ export default function SettlementReportPage() {
               <h2 className="text-2xl font-bold text-gray-900 mb-4">월 정산 요약</h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="border-b-2 border-gray-300">
+                  <thead className="bg-gray-100 border-b-2 border-gray-300">
                     <tr>
-                      <th className="text-left py-3 px-4 font-bold">구분</th>
-                      <th className="text-right py-3 px-4 font-bold">금액</th>
-                      <th className="text-right py-3 px-4 font-bold">비율</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-900">구분</th>
+                      <th className="text-right py-3 px-4 font-bold text-gray-900">금액</th>
+                      <th className="text-right py-3 px-4 font-bold text-gray-900">비율</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr className="border-b border-gray-200 hover:bg-gray-50">
-                      <td className="py-3 px-4">총 수익</td>
-                      <td className="text-right py-3 px-4 font-bold">₩{monthlyStats.total_revenue.toLocaleString()}</td>
-                      <td className="text-right py-3 px-4">100%</td>
+                      <td className="py-3 px-4 text-gray-900">총 수익</td>
+                      <td className="text-right py-3 px-4 font-bold text-gray-900">₩{monthlyStats.total_revenue.toLocaleString()}</td>
+                      <td className="text-right py-3 px-4 text-gray-900">100%</td>
                     </tr>
                     <tr className="border-b border-gray-200 hover:bg-gray-50">
-                      <td className="py-3 px-4 text-red-600">수수료 (차감)</td>
+                      <td className="py-3 px-4 text-red-600 font-semibold">수수료 (차감)</td>
                       <td className="text-right py-3 px-4 font-bold text-red-600">
                         -₩{monthlyStats.total_commission.toLocaleString()}
                       </td>
-                      <td className="text-right py-3 px-4 text-red-600">
+                      <td className="text-right py-3 px-4 font-bold text-red-600">
                         {((monthlyStats.total_commission / monthlyStats.total_revenue) * 100).toFixed(1)}%
                       </td>
                     </tr>
                     <tr className="bg-green-50 border-t-2 border-green-300">
-                      <td className="py-3 px-4 font-bold">가이드 지급액</td>
+                      <td className="py-3 px-4 font-bold text-gray-900">가이드 지급액</td>
                       <td className="text-right py-3 px-4 font-bold text-green-600">
                         ₩{monthlyStats.total_payment.toLocaleString()}
                       </td>
@@ -275,25 +275,25 @@ export default function SettlementReportPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-4">회사별 정산 현황</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="border-b-2 border-gray-300">
+                <thead className="bg-gray-100 border-b-2 border-gray-300">
                   <tr>
-                    <th className="text-left py-3 px-4 font-bold">회사</th>
-                    <th className="text-right py-3 px-4 font-bold">수익</th>
-                    <th className="text-right py-3 px-4 font-bold">수수료</th>
-                    <th className="text-right py-3 px-4 font-bold">지급액</th>
-                    <th className="text-right py-3 px-4 font-bold">가이드 수</th>
+                    <th className="text-left py-3 px-4 font-bold text-gray-900">회사</th>
+                    <th className="text-right py-3 px-4 font-bold text-gray-900">수익</th>
+                    <th className="text-right py-3 px-4 font-bold text-gray-900">수수료</th>
+                    <th className="text-right py-3 px-4 font-bold text-gray-900">지급액</th>
+                    <th className="text-right py-3 px-4 font-bold text-gray-900">가이드 수</th>
                   </tr>
                 </thead>
                 <tbody>
                   {companyStats.map(stat => (
                     <tr key={stat.company_id} className="border-b border-gray-200 hover:bg-gray-50">
-                      <td className="py-3 px-4 font-semibold">{stat.company_name}</td>
-                      <td className="text-right py-3 px-4">₩{(stat.total_revenue / 1000).toFixed(0)}K</td>
-                      <td className="text-right py-3 px-4 text-red-600">₩{(stat.total_commission / 1000).toFixed(0)}K</td>
+                      <td className="py-3 px-4 font-semibold text-gray-900">{stat.company_name}</td>
+                      <td className="text-right py-3 px-4 text-gray-900">₩{(stat.total_revenue / 1000).toFixed(0)}K</td>
+                      <td className="text-right py-3 px-4 text-red-600 font-semibold">₩{(stat.total_commission / 1000).toFixed(0)}K</td>
                       <td className="text-right py-3 px-4 text-green-600 font-bold">
                         ₩{(stat.total_payment / 1000).toFixed(0)}K
                       </td>
-                      <td className="text-right py-3 px-4">{stat.guide_count}명</td>
+                      <td className="text-right py-3 px-4 text-gray-900">{stat.guide_count}명</td>
                     </tr>
                   ))}
                 </tbody>
@@ -308,24 +308,24 @@ export default function SettlementReportPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-4">가이드별 정산 현황</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="border-b-2 border-gray-300">
+                <thead className="bg-gray-100 border-b-2 border-gray-300">
                   <tr>
-                    <th className="text-left py-3 px-4 font-bold">가이드</th>
-                    <th className="text-left py-3 px-4 font-bold">회사</th>
-                    <th className="text-right py-3 px-4 font-bold">세션</th>
-                    <th className="text-right py-3 px-4 font-bold">수익</th>
-                    <th className="text-right py-3 px-4 font-bold">수수료</th>
-                    <th className="text-right py-3 px-4 font-bold">지급액</th>
+                    <th className="text-left py-3 px-4 font-bold text-gray-900">가이드</th>
+                    <th className="text-left py-3 px-4 font-bold text-gray-900">회사</th>
+                    <th className="text-right py-3 px-4 font-bold text-gray-900">세션</th>
+                    <th className="text-right py-3 px-4 font-bold text-gray-900">수익</th>
+                    <th className="text-right py-3 px-4 font-bold text-gray-900">수수료</th>
+                    <th className="text-right py-3 px-4 font-bold text-gray-900">지급액</th>
                   </tr>
                 </thead>
                 <tbody>
                   {guideStats.map(stat => (
                     <tr key={stat.guide_id} className="border-b border-gray-200 hover:bg-gray-50">
-                      <td className="py-3 px-4 font-semibold">{stat.guide_name}</td>
-                      <td className="py-3 px-4 text-gray-600">{stat.company_name}</td>
-                      <td className="text-right py-3 px-4">{stat.total_sessions}회</td>
-                      <td className="text-right py-3 px-4">₩{(stat.total_revenue / 1000).toFixed(0)}K</td>
-                      <td className="text-right py-3 px-4 text-red-600">₩{(stat.total_commission / 1000).toFixed(0)}K</td>
+                      <td className="py-3 px-4 font-semibold text-gray-900">{stat.guide_name}</td>
+                      <td className="py-3 px-4 text-gray-700">{stat.company_name}</td>
+                      <td className="text-right py-3 px-4 text-gray-900">{stat.total_sessions}회</td>
+                      <td className="text-right py-3 px-4 text-gray-900">₩{(stat.total_revenue / 1000).toFixed(0)}K</td>
+                      <td className="text-right py-3 px-4 text-red-600 font-semibold">₩{(stat.total_commission / 1000).toFixed(0)}K</td>
                       <td className="text-right py-3 px-4 text-green-600 font-bold">
                         ₩{(stat.total_payment / 1000).toFixed(0)}K
                       </td>
