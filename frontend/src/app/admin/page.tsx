@@ -77,7 +77,7 @@ export default function AdminPortal() {
     {
       category: '📈 분석 & 감사',
       items: [
-        { name: '공정성 대시보드', href: '/admin/fairness-dashboard', icon: '⚖️' },
+        // { name: '공정성 대시보드', href: '/admin/fairness-dashboard', icon: '⚖️' }, // 추후 사용 예정
         { name: '결제 정보', href: '/admin/billing', icon: '💳' },
         { name: '변경 로그', href: '/admin/change-logs', icon: '📋' },
       ],
