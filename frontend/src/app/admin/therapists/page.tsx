@@ -15,6 +15,9 @@ interface Therapist {
   checkedOutAt?: string;
   phone: string;
   email: string;
+  gcash_number?: string;
+  bank_name?: string;
+  bank_account?: string;
 }
 
 const mockTherapists: Therapist[] = [
@@ -154,7 +157,7 @@ export default function TherapistsPage() {
 
   const handleAddTherapist = () => {
     if (!formData.name || !formData.specialty || !formData.phone || !formData.email) {
-      alert('모든 필드를 입력해주세요');
+      alert('필수 정보를 입력해주세요');
       return;
     }
     const newTherapist: Therapist = {
@@ -168,6 +171,9 @@ export default function TherapistsPage() {
       commissionRate: 40,
       phone: formData.phone,
       email: formData.email,
+      gcash_number: formData.gcash_number,
+      bank_name: formData.bank_name,
+      bank_account: formData.bank_account,
     };
     setTherapists([...therapists, newTherapist]);
     setShowModal(false);
@@ -362,15 +368,15 @@ export default function TherapistsPage() {
                       <p className="text-gray-900 font-medium">{selectedTherapist.email}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-600 mb-1 font-semibold">⭐ 평점</p>
-                      <p className="text-gray-900 font-bold text-lg">{selectedTherapist.rating}★</p>
+                      <p className="text-xs text-gray-600 mb-1 font-semibold">💳 GCash</p>
+                      <p className="text-gray-900 font-medium">{selectedTherapist.gcash_number || '-'}</p>
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <div>
-                      <p className="text-xs text-gray-600 mb-1 font-semibold">👥 총 고객</p>
-                      <p className="text-gray-900 font-bold text-lg">{selectedTherapist.totalClients}명</p>
+                      <p className="text-xs text-gray-600 mb-1 font-semibold">⭐ 평점</p>
+                      <p className="text-gray-900 font-bold text-lg">{selectedTherapist.rating}★</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-600 mb-1 font-semibold">💰 월 매출</p>
@@ -379,6 +385,20 @@ export default function TherapistsPage() {
                     <div>
                       <p className="text-xs text-gray-600 mb-1 font-semibold">📊 수수료율</p>
                       <p className="text-gray-900 font-bold text-lg">{selectedTherapist.commissionRate}%</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 border-t pt-4">
+                  <p className="text-xs font-bold text-gray-700 mb-3">🏦 계좌 정보</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-gray-600 mb-1">은행명</p>
+                      <p className="text-gray-900 font-medium">{selectedTherapist.bank_name || '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600 mb-1">계좌번호</p>
+                      <p className="text-gray-900 font-medium">{selectedTherapist.bank_account || '-'}</p>
                     </div>
                   </div>
                 </div>
@@ -398,35 +418,67 @@ export default function TherapistsPage() {
             ) : (
               // 새로 등록 모드
               <>
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    placeholder="이름"
-                    value={formData.name || ''}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                  />
-                  <input
-                    type="text"
-                    placeholder="전문분야"
-                    value={formData.specialty || ''}
-                    onChange={(e) => setFormData({ ...formData, specialty: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                  />
-                  <input
-                    type="tel"
-                    placeholder="전화"
-                    value={formData.phone || ''}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                  />
-                  <input
-                    type="email"
-                    placeholder="이메일"
-                    value={formData.email || ''}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                  />
+                <div className="space-y-4 max-h-80 overflow-y-auto">
+                  <div className="border-b pb-3">
+                    <p className="text-xs font-bold text-gray-700 mb-2">📋 기본 정보</p>
+                    <input
+                      type="text"
+                      placeholder="이름 *"
+                      value={formData.name || ''}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none mb-2"
+                    />
+                    <input
+                      type="text"
+                      placeholder="전문분야 *"
+                      value={formData.specialty || ''}
+                      onChange={(e) => setFormData({ ...formData, specialty: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none mb-2"
+                    />
+                    <input
+                      type="tel"
+                      placeholder="전화 *"
+                      value={formData.phone || ''}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none mb-2"
+                    />
+                    <input
+                      type="email"
+                      placeholder="이메일 *"
+                      value={formData.email || ''}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="border-b pb-3">
+                    <p className="text-xs font-bold text-gray-700 mb-2">💳 GCash 정보</p>
+                    <input
+                      type="text"
+                      placeholder="GCash 번호"
+                      value={formData.gcash_number || ''}
+                      onChange={(e) => setFormData({ ...formData, gcash_number: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-bold text-gray-700 mb-2">🏦 계좌 정보</p>
+                    <input
+                      type="text"
+                      placeholder="은행명"
+                      value={formData.bank_name || ''}
+                      onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none mb-2"
+                    />
+                    <input
+                      type="text"
+                      placeholder="계좌번호"
+                      value={formData.bank_account || ''}
+                      onChange={(e) => setFormData({ ...formData, bank_account: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                    />
+                  </div>
                 </div>
 
                 <div className="mt-8 flex gap-3">
