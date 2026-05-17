@@ -63,8 +63,15 @@ export default function AdminPortal() {
       category: '🏢 업체 관리',
       items: [
         { name: '업체 관리', href: '/admin/companies', icon: '🏢' },
-        { name: '정산 현황', href: '/admin/monthly-settlement', icon: '💰' },
+      ],
+    },
+    {
+      category: '💰 정산 관리',
+      items: [
+        { name: '테라피스트 정산', href: '/therapist-settlement', icon: '👨‍⚕️' },
+        { name: '업체 정산', href: '/admin/monthly-settlement', icon: '🏢' },
         { name: '정산 보고서', href: '/admin/settlement-report', icon: '📊' },
+        { name: '정산 안내', href: '/settlement-management', icon: '💰' },
       ],
     },
     {
