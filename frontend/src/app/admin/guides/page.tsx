@@ -222,7 +222,7 @@ export default function GuidesPage() {
         {/* 헤더 */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2 tracking-tight">
-            👤 가이드(마사지사) 관리
+            👤 가이드 관리
           </h1>
           <p className="text-lg text-gray-600 font-light">
             여행사별 가이드 정보 및 정산 설정
