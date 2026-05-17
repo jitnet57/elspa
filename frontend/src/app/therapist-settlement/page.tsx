@@ -99,22 +99,22 @@ export default function TherapistSettlementPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50">
       {/* 헤더 */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-8 shadow-lg">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 sm:p-6 lg:p-8 shadow-lg">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="text-4xl">💆</div>
+          <div className="flex items-center gap-2 sm:gap-4 mb-2">
+            <div className="text-2xl sm:text-3xl lg:text-4xl">💆</div>
             <div>
-              <h1 className="text-4xl font-bold">테라피스트 정산 관리</h1>
-              <p className="text-blue-100 text-sm mt-1">테라피스트별 수익 및 정산 현황 조회</p>
+              <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold">테라피스트 정산 관리</h1>
+              <p className="text-blue-100 text-xs sm:text-sm mt-1">테라피스트별 수익 및 정산 현황 조회</p>
             </div>
           </div>
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto p-6 lg:p-8">
+      <main className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* 필터 & 검색 */}
-        <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-6 mb-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
             {/* 월 선택 */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">월 선택</label>
@@ -192,10 +192,10 @@ export default function TherapistSettlementPage() {
         </div>
 
         {/* 메인 콘텐츠 */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* 테라피스트 목록 */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-sm border border-stone-200 overflow-hidden">
+            <div className="bg-white rounded-lg shadow-sm border border-stone-200 overflow-hidden" style={{ minHeight: 'auto' }}>
               {loading ? (
                 <div className="p-12 text-center">
                   <p className="text-gray-600">데이터를 불러오는 중...</p>
@@ -246,9 +246,9 @@ export default function TherapistSettlementPage() {
           </div>
 
           {/* 상세 정산서 */}
-          <div>
+          <div className="lg:block">
             {selectedData ? (
-              <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-6 sticky top-6 space-y-4">
+              <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 sm:p-6 space-y-3 sm:space-y-4 lg:sticky lg:top-6">
                 <div className="pb-4 border-b border-gray-200">
                   <h3 className="text-xl font-bold text-gray-900">{selectedData.name}</h3>
                   <p className="text-sm text-gray-600 mt-1">{selectedData.specialty}</p>
@@ -291,9 +291,9 @@ export default function TherapistSettlementPage() {
                 </button>
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-6 text-center sticky top-6">
-                <div className="text-5xl mb-3">👈</div>
-                <p className="text-gray-600">테라피스트를 선택하면<br />정산 정보가 표시됩니다</p>
+              <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 sm:p-6 text-center hidden lg:block lg:sticky lg:top-6">
+                <div className="text-4xl sm:text-5xl mb-3">👈</div>
+                <p className="text-sm sm:text-base text-gray-600">테라피스트를 선택하면<br />정산 정보가 표시됩니다</p>
               </div>
             )}
           </div>
@@ -301,15 +301,15 @@ export default function TherapistSettlementPage() {
 
         {/* 차트 섹션 */}
         {filteredSettlements.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-8">
             {/* 테라피스트별 수익 비교 */}
-            <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">테라피스트별 수익 비교</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">테라피스트별 수익 비교</h3>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={filteredSettlements}>
+                <BarChart data={filteredSettlements} margin={{ top: 5, right: 10, left: -20, bottom: 60 }}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                  <YAxis />
+                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={70} tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
                   <Tooltip formatter={(value: any) => `₱${(value / 1000).toFixed(0)}K`} />
                   <Bar dataKey="total_revenue" fill="#10b981" name="수익" />
                 </BarChart>
@@ -317,15 +317,15 @@ export default function TherapistSettlementPage() {
             </div>
 
             {/* 수수료 vs 순액 분석 */}
-            <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">수수료 분석</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">수수료 분석</h3>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={filteredSettlements}>
+                <LineChart data={filteredSettlements} margin={{ top: 5, right: 10, left: -20, bottom: 60 }}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                  <YAxis />
+                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={70} tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
                   <Tooltip formatter={(value: any) => `₱${(value / 1000).toFixed(0)}K`} />
-                  <Legend />
+                  <Legend wrapperStyle={{ fontSize: '12px' }} />
                   <Line type="monotone" dataKey="total_revenue" stroke="#3b82f6" name="수익" />
                   <Line type="monotone" dataKey="total_commission" stroke="#ef4444" name="수수료" />
                 </LineChart>
@@ -333,18 +333,19 @@ export default function TherapistSettlementPage() {
             </div>
 
             {/* 총 수익 분배 */}
-            <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">총 수익 분배</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">총 수익 분배</h3>
               <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
+                <PieChart margin={{ top: -20, right: 0, left: 0, bottom: 0 }}>
                   <Pie
                     data={filteredSettlements}
                     dataKey="total_revenue"
                     nameKey="name"
                     cx="50%"
                     cy="50%"
-                    outerRadius={100}
-                    label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                    outerRadius={60}
+                    label={({ name, percent }) => filteredSettlements.length > 3 ? `${((percent || 0) * 100).toFixed(0)}%` : `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                    labelLine={filteredSettlements.length <= 3}
                   >
                     {filteredSettlements.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'][index % 6]} />
@@ -356,13 +357,13 @@ export default function TherapistSettlementPage() {
             </div>
 
             {/* 세션 수 비교 */}
-            <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">테라피스트별 세션 수</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">테라피스트별 세션 수</h3>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={filteredSettlements}>
+                <BarChart data={filteredSettlements} margin={{ top: 5, right: 10, left: -20, bottom: 60 }}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                  <YAxis />
+                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={70} tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
                   <Tooltip />
                   <Bar dataKey="session_count" fill="#8b5cf6" name="세션 수" />
                 </BarChart>

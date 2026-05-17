@@ -57,6 +57,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // 캐시 가능한 요청만 처리 (http/https만 캐싱 가능)
+  const isCacheable = request.url.startsWith('http://') || request.url.startsWith('https://');
+  if (!isCacheable) {
+    event.respondWith(fetch(request));
+    return;
+  }
+
   // API 요청 처리 (네트워크 우선)
   if (request.url.includes('/api/')) {
     event.respondWith(
@@ -100,7 +107,11 @@ self.addEventListener('fetch', (event) => {
 
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseToCache);
+            try {
+              cache.put(request, responseToCache);
+            } catch (error) {
+              console.log('[Service Worker] Cache put failed:', error);
+            }
           });
 
           return response;
