@@ -153,53 +153,8 @@ export default function TherapistsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
-      {/* 사이드바 */}
-      <aside className="fixed left-0 top-0 h-screen w-72 bg-gradient-to-b from-stone-100 to-stone-50 border-r border-stone-200 overflow-y-auto p-8 shadow-sm">
-        <div className="mb-12">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center text-white font-bold shadow-md">
-              💆
-            </div>
-            <div className="text-2xl font-bold text-gray-900 tracking-tight">ELSPA</div>
-          </div>
-          <p className="text-xs text-gray-500 ml-10 font-light tracking-widest">MANAGEMENT SYSTEM</p>
-        </div>
-
-        <nav className="space-y-2 mb-8">
-          <p className="text-xs font-bold text-gray-600 px-4 mb-3">👥 테라피스트</p>
-          <a
-            href="/admin/therapists"
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all bg-white text-gray-900 shadow-md border border-stone-200"
-          >
-            👨‍⚕️ 테라피스트 관리
-          </a>
-          <a
-            href="/admin/therapist-schedule"
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-gray-600 hover:bg-white/50"
-          >
-            📅 일일 스케줄
-          </a>
-          <a
-            href="/admin/matching"
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-gray-600 hover:bg-white/50"
-          >
-            🎯 매칭 제어판
-          </a>
-          <a
-            href="/therapist-settlement"
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-gray-600 hover:bg-white/50"
-          >
-            💰 테라피스트 정산
-          </a>
-        </nav>
-
-        <div className="pt-8 border-t border-stone-200">
-          <p className="text-xs text-gray-500 font-light">v 2.1.0</p>
-        </div>
-      </aside>
-
       {/* 메인 콘텐츠 */}
-      <main className="ml-72 p-8">
+      <main className="p-4 sm:p-6 lg:p-8">
         {/* 헤더 */}
         <div className="mb-8">
           <h1 className="text-5xl font-bold text-gray-900 mb-2 tracking-tight">
