@@ -56,7 +56,7 @@ export default function AdminPortal() {
       items: [
         { name: '테라피스트 관리', href: '/admin/therapists', icon: '👨‍⚕️' },
         { name: '📅 일일 스케줄', href: '/admin/therapist-schedule', icon: '📅' },
-        { name: '🎯 매칭 제어판', href: '/admin/matching', icon: '🎯' },
+        // { name: '🎯 매칭 제어판', href: '/admin/matching', icon: '🎯' }, // 보류 중
       ],
     },
     {
