@@ -129,6 +129,7 @@ export default function TherapistsPage() {
   const [selectedTherapist, setSelectedTherapist] = useState<Therapist | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [formData, setFormData] = useState<Partial<Therapist>>({});
 
   const filteredTherapists = therapists.filter(t =>
     t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -149,6 +150,35 @@ export default function TherapistsPage() {
         ? { ...t, status: 'checked_out', checkedOutAt: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) }
         : t
     ));
+  };
+
+  const handleAddTherapist = () => {
+    if (!formData.name || !formData.specialty || !formData.phone || !formData.email) {
+      alert('모든 필드를 입력해주세요');
+      return;
+    }
+    const newTherapist: Therapist = {
+      id: Math.max(...therapists.map(t => t.id), 0) + 1,
+      name: formData.name,
+      specialty: formData.specialty,
+      status: 'checked_out',
+      rating: 4.5,
+      totalClients: 0,
+      totalRevenue: '₱0',
+      commissionRate: 40,
+      phone: formData.phone,
+      email: formData.email,
+    };
+    setTherapists([...therapists, newTherapist]);
+    setShowModal(false);
+    setFormData({});
+    alert('테라피스트가 등록되었습니다');
+  };
+
+  const openNewTherapistModal = () => {
+    setSelectedTherapist(null);
+    setFormData({});
+    setShowModal(true);
   };
 
   return (
@@ -203,7 +233,9 @@ export default function TherapistsPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="flex-1 px-4 py-2 border border-stone-300 rounded-lg bg-white text-gray-900 font-medium placeholder-gray-400 focus:outline-none focus:border-orange-500"
           />
-          <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
+          <button
+            onClick={openNewTherapistModal}
+            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
             + 새 테라피스트
           </button>
         </div>
@@ -287,71 +319,135 @@ export default function TherapistsPage() {
         </div>
       </main>
 
-      {/* 상세 모달 */}
-      {showModal && selectedTherapist && (
+      {/* 모달 - 상세 조회 / 새로 등록 */}
+      {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-lg p-8 max-w-2xl w-full max-h-96 overflow-y-auto">
             <div className="flex items-start justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                  {selectedTherapist.name[0]}
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900">{selectedTherapist.name}</h3>
-                  <p className="text-gray-600">{selectedTherapist.specialty}</p>
-                </div>
-              </div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {selectedTherapist ? '테라피스트 상세' : '새 테라피스트 등록'}
+              </h2>
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() => {
+                  setShowModal(false);
+                  setFormData({});
+                }}
                 className="text-2xl text-gray-400 hover:text-gray-600"
               >
                 ✕
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <p className="text-xs text-gray-600 mb-1 font-semibold">📞 전화</p>
-                  <p className="text-gray-900 font-medium">{selectedTherapist.phone}</p>
+            {selectedTherapist ? (
+              // 상세 조회 모드
+              <>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                    {selectedTherapist.name[0]}
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900">{selectedTherapist.name}</h3>
+                    <p className="text-gray-600">{selectedTherapist.specialty}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs text-gray-600 mb-1 font-semibold">📧 이메일</p>
-                  <p className="text-gray-900 font-medium">{selectedTherapist.email}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-600 mb-1 font-semibold">⭐ 평점</p>
-                  <p className="text-gray-900 font-bold text-lg">{selectedTherapist.rating}★</p>
-                </div>
-              </div>
 
-              <div className="space-y-4">
-                <div>
-                  <p className="text-xs text-gray-600 mb-1 font-semibold">👥 총 고객</p>
-                  <p className="text-gray-900 font-bold text-lg">{selectedTherapist.totalClients}명</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-600 mb-1 font-semibold">💰 월 매출</p>
-                  <p className="text-gray-900 font-bold text-lg">{selectedTherapist.totalRevenue}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-600 mb-1 font-semibold">📊 수수료율</p>
-                  <p className="text-gray-900 font-bold text-lg">{selectedTherapist.commissionRate}%</p>
-                </div>
-              </div>
-            </div>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-xs text-gray-600 mb-1 font-semibold">📞 전화</p>
+                      <p className="text-gray-900 font-medium">{selectedTherapist.phone}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600 mb-1 font-semibold">📧 이메일</p>
+                      <p className="text-gray-900 font-medium">{selectedTherapist.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600 mb-1 font-semibold">⭐ 평점</p>
+                      <p className="text-gray-900 font-bold text-lg">{selectedTherapist.rating}★</p>
+                    </div>
+                  </div>
 
-            <div className="mt-8 flex gap-3">
-              <button
-                onClick={() => setShowModal(false)}
-                className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 font-semibold rounded-lg transition-colors"
-              >
-                닫기
-              </button>
-              <button className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
-                정보 수정
-              </button>
-            </div>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-xs text-gray-600 mb-1 font-semibold">👥 총 고객</p>
+                      <p className="text-gray-900 font-bold text-lg">{selectedTherapist.totalClients}명</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600 mb-1 font-semibold">💰 월 매출</p>
+                      <p className="text-gray-900 font-bold text-lg">{selectedTherapist.totalRevenue}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600 mb-1 font-semibold">📊 수수료율</p>
+                      <p className="text-gray-900 font-bold text-lg">{selectedTherapist.commissionRate}%</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-8 flex gap-3">
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 font-semibold rounded-lg transition-colors"
+                  >
+                    닫기
+                  </button>
+                  <button className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
+                    정보 수정
+                  </button>
+                </div>
+              </>
+            ) : (
+              // 새로 등록 모드
+              <>
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    placeholder="이름"
+                    value={formData.name || ''}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                  />
+                  <input
+                    type="text"
+                    placeholder="전문분야"
+                    value={formData.specialty || ''}
+                    onChange={(e) => setFormData({ ...formData, specialty: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                  />
+                  <input
+                    type="tel"
+                    placeholder="전화"
+                    value={formData.phone || ''}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                  />
+                  <input
+                    type="email"
+                    placeholder="이메일"
+                    value={formData.email || ''}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+
+                <div className="mt-8 flex gap-3">
+                  <button
+                    onClick={() => {
+                      setShowModal(false);
+                      setFormData({});
+                    }}
+                    className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 font-semibold rounded-lg transition-colors"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={handleAddTherapist}
+                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
+                  >
+                    등록
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
