@@ -6,7 +6,7 @@ class Therapist(Base):
     """테라피스트 모델"""
     __tablename__ = "therapists"
 
-    id = Column(BigInteger, primary_key=True)
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
     specialty = Column(String(255), nullable=False)
     bio = Column(Text)
