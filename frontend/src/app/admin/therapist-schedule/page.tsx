@@ -580,10 +580,12 @@ export default function TherapistSchedulePage() {
       {/* Manual Booking Modal - Start New Massage Button */}
       {isNewSessionModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">🧘 Start New Massage Session</h3>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-gray-200 flex-shrink-0">
+              <h3 className="text-xl font-bold text-gray-900">🧘 Start New Massage Session</h3>
+            </div>
 
-            <div className="space-y-4 mb-6 max-h-[500px] overflow-y-auto">
+            <div className="space-y-4 p-6 overflow-y-auto flex-1">
               {/* Therapist Selection */}
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Select Therapist</label>
@@ -677,10 +679,10 @@ export default function TherapistSchedulePage() {
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 p-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
               <button
                 onClick={() => setIsNewSessionModalOpen(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-900 font-bold rounded-lg hover:bg-gray-50 transition"
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-900 font-bold rounded-lg hover:bg-white transition"
               >
                 Cancel
               </button>
@@ -730,10 +732,12 @@ export default function TherapistSchedulePage() {
       {/* Quick Booking Modal - Click Time Slot */}
       {bookingSlot && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">📅 Book New Massage</h3>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-gray-200 flex-shrink-0">
+              <h3 className="text-xl font-bold text-gray-900">⚡ Quick Book Massage</h3>
+            </div>
 
-            <div className="space-y-4 mb-6">
+            <div className="space-y-4 p-6 overflow-y-auto flex-1">
               {/* Time Info */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                 <p className="text-xs text-blue-600 font-semibold">SELECTED TIME SLOT</p>
@@ -789,7 +793,7 @@ export default function TherapistSchedulePage() {
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 p-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
               <button
                 onClick={() => setBookingSlot(null)}
                 className="flex-1 px-4 py-2 border border-gray-300 text-gray-900 font-bold rounded-lg hover:bg-gray-50 transition"
