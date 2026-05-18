@@ -144,6 +144,8 @@ export default function TherapistSchedulePage() {
   const [selectedTherapistId, setSelectedTherapistId] = useState(1);
   const [selectedSession, setSelectedSession] = useState<ScheduleSession | null>(null);
   const [isNewSessionModalOpen, setIsNewSessionModalOpen] = useState(false);
+  const [bookingSlot, setBookingSlot] = useState<{ therapistId: number; hour: number } | null>(null);
+  const [bookingForm, setBookingForm] = useState({ customerName: '', serviceType: 'swedish', roomNumber: '' });
 
   const formatTime = (hour: number) => {
     return `${Math.floor(hour)}:${String((hour % 1) * 60).padStart(2, '0')}`;
@@ -435,6 +437,13 @@ export default function TherapistSchedulePage() {
                           style={{ width: COLUMN_WIDTH }}
                           onClick={() => {
                             if (therapist.status === 'off_duty') return;
+                            const cellSessions = therapist.sessions.filter(
+                              s => !(s.endHour <= hourStart || s.startHour >= hourEnd)
+                            );
+                            if (cellSessions.length === 0) {
+                              setBookingSlot({ therapistId: therapist.id, hour: hourStart });
+                              setBookingForm({ customerName: '', serviceType: 'swedish', roomNumber: '' });
+                            }
                           }}
                         >
                           {cellSessions.length === 0 && (
@@ -554,6 +563,110 @@ export default function TherapistSchedulePage() {
                 className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition"
               >
                 Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Booking Modal */}
+      {bookingSlot && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">📅 Book New Massage</h3>
+
+            <div className="space-y-4 mb-6">
+              {/* Time Info */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-xs text-blue-600 font-semibold">SELECTED TIME SLOT</p>
+                <p className="text-lg font-bold text-blue-900 mt-1">
+                  {String(bookingSlot.hour).padStart(2, '0')}:00 - {String(bookingSlot.hour + 1).padStart(2, '0')}:00
+                </p>
+                <p className="text-sm text-blue-700 mt-1">
+                  {therapists.find(t => t.id === bookingSlot.therapistId)?.name}
+                </p>
+              </div>
+
+              {/* Customer Name */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Guest/Customer Name</label>
+                <input
+                  type="text"
+                  value={bookingForm.customerName}
+                  onChange={e => setBookingForm({ ...bookingForm, customerName: e.target.value })}
+                  placeholder="e.g., John Smith"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
+                />
+              </div>
+
+              {/* Service Type */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Service Type</label>
+                <select
+                  value={bookingForm.serviceType}
+                  onChange={e => setBookingForm({ ...bookingForm, serviceType: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
+                >
+                  <option value="swedish">{SERVICE_CONFIG.swedish.icon} Swedish Massage</option>
+                  <option value="thai">{SERVICE_CONFIG.thai.icon} Thai Massage</option>
+                  <option value="hotstone">{SERVICE_CONFIG.hotstone.icon} Hot Stone Therapy</option>
+                  <option value="foot">{SERVICE_CONFIG.foot.icon} Foot Massage</option>
+                  <option value="aroma">{SERVICE_CONFIG.aroma.icon} Aromatherapy</option>
+                </select>
+              </div>
+
+              {/* Room Number */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Room Assignment</label>
+                <select
+                  value={bookingForm.roomNumber}
+                  onChange={e => setBookingForm({ ...bookingForm, roomNumber: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
+                >
+                  <option value="">Select Room</option>
+                  {ROOM_NUMBERS.map(room => (
+                    <option key={room} value={room}>{room}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setBookingSlot(null)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-900 font-bold rounded-lg hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (!bookingForm.customerName.trim()) {
+                    alert('Please enter customer name');
+                    return;
+                  }
+                  const newSession: ScheduleSession = {
+                    id: `s${bookingSlot.therapistId}-${Date.now()}`,
+                    therapistId: bookingSlot.therapistId,
+                    serviceType: bookingForm.serviceType as any,
+                    startHour: bookingSlot.hour,
+                    endHour: bookingSlot.hour + 1,
+                    customerName: bookingForm.customerName,
+                    roomNumber: bookingForm.roomNumber || undefined,
+                    status: 'scheduled',
+                  };
+
+                  setTherapists(prev =>
+                    prev.map(t =>
+                      t.id === bookingSlot.therapistId
+                        ? { ...t, sessions: [...t.sessions, newSession].sort((a, b) => a.startHour - b.startHour) }
+                        : t
+                    )
+                  );
+                  setBookingSlot(null);
+                }}
+                className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition"
+              >
+                Book Massage
               </button>
             </div>
           </div>
