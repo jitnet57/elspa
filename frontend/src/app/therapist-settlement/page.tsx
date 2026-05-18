@@ -7,13 +7,19 @@ import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, L
 
 interface TherapistSettlement {
   therapist_id: number;
-  name: string;
-  specialty: string;
-  session_count: number;
-  total_revenue: number;
-  total_commission: number;
+  therapist_name: string;
+  name?: string;
+  specialty?: string;
+  session_count?: number;
+  total_revenue?: number;
+  avg_rating?: number;
+  monthly_revenue: number;
   commission_rate: number;
-  avg_rating: number;
+  commission_amount: number;
+  deductions: number;
+  net_payout: number;
+  status: 'completed' | 'confirmed' | 'pending';
+  settlement_date: string;
 }
 
 export default function TherapistSettlementPage() {
@@ -55,19 +61,18 @@ export default function TherapistSettlementPage() {
   // Filtering and search
   const filteredSettlements = useMemo(() => {
     let filtered = settlements.filter(s =>
-      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.specialty.toLowerCase().includes(searchQuery.toLowerCase())
+      s.therapist_name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     // Sorting
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'revenue':
-          return b.total_revenue - a.total_revenue;
+          return b.monthly_revenue - a.monthly_revenue;
         case 'sessions':
-          return b.session_count - a.session_count;
+          return 0; // No session count in new interface
         case 'name':
-          return a.name.localeCompare(b.name);
+          return a.therapist_name.localeCompare(b.therapist_name);
         default:
           return 0;
       }
@@ -82,14 +87,14 @@ export default function TherapistSettlementPage() {
 
   // Calculate statistics
   const stats = useMemo(() => {
-    const totalRevenue = settlements.reduce((sum, s) => sum + s.total_revenue, 0);
-    const totalCommission = settlements.reduce((sum, s) => sum + s.total_commission, 0);
-    const netAmount = totalRevenue - totalCommission;
-    const avgRating = settlements.length > 0
-      ? (settlements.reduce((sum, s) => sum + s.avg_rating, 0) / settlements.length).toFixed(1)
+    const totalRevenue = settlements.reduce((sum, s) => sum + s.monthly_revenue, 0);
+    const totalCommission = settlements.reduce((sum, s) => sum + s.commission_amount, 0);
+    const netAmount = settlements.reduce((sum, s) => sum + s.net_payout, 0);
+    const avgCommissionRate = settlements.length > 0
+      ? (settlements.reduce((sum, s) => sum + s.commission_rate, 0) / settlements.length * 100).toFixed(1)
       : 0;
 
-    return { totalRevenue, totalCommission, netAmount, avgRating };
+    return { totalRevenue, totalCommission, netAmount, avgCommissionRate };
   }, [settlements]);
 
   const formatPrice = (price: number) => {
@@ -185,9 +190,9 @@ export default function TherapistSettlementPage() {
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 hover:shadow-md transition">
-            <p className="text-xs text-gray-600 mb-1">평균 평점</p>
-            <p className="text-3xl font-bold text-amber-600">⭐ {stats.avgRating}</p>
-            <p className="text-xs text-gray-500 mt-2">전체</p>
+            <p className="text-xs text-gray-600 mb-1">Average Commission</p>
+            <p className="text-3xl font-bold text-amber-600">{stats.avgCommissionRate}%</p>
+            <p className="text-xs text-gray-500 mt-2">Overall</p>
           </div>
         </div>
 
@@ -233,7 +238,7 @@ export default function TherapistSettlementPage() {
                           <td className="px-6 py-4 font-semibold text-gray-900">{settlement.name}</td>
                           <td className="px-6 py-4 text-gray-600">{settlement.specialty}</td>
                           <td className="text-right px-6 py-4 text-gray-900">{settlement.session_count}</td>
-                          <td className="text-right px-6 py-4 font-semibold text-green-600">₱{formatPrice(settlement.total_revenue)}K</td>
+                          <td className="text-right px-6 py-4 font-semibold text-green-600">₱{formatPrice(settlement.total_revenue ?? 0)}K</td>
                           <td className="text-right px-6 py-4 text-red-600">{settlement.commission_rate}%</td>
                           <td className="text-right px-6 py-4 font-semibold">⭐ {settlement.avg_rating}</td>
                         </tr>
@@ -261,7 +266,7 @@ export default function TherapistSettlementPage() {
 
                 <div className="bg-green-50 rounded-lg p-4">
                   <p className="text-xs text-gray-600 mb-1">Total Revenue</p>
-                  <p className="text-2xl font-bold text-green-600">₱{formatPrice(selectedData.total_revenue)}K</p>
+                  <p className="text-2xl font-bold text-green-600">₱{formatPrice(selectedData.monthly_revenue ?? 0)}K</p>
                 </div>
 
                 <div className="bg-red-50 rounded-lg p-4">
@@ -271,13 +276,13 @@ export default function TherapistSettlementPage() {
 
                 <div className="bg-red-50 rounded-lg p-4">
                   <p className="text-xs text-gray-600 mb-1">Commission (Deducted)</p>
-                  <p className="text-2xl font-bold text-red-600">-₱{formatPrice(selectedData.total_commission)}K</p>
+                  <p className="text-2xl font-bold text-red-600">-₱{formatPrice(selectedData.commission_amount)}K</p>
                 </div>
 
                 <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border-2 border-green-300">
                   <p className="text-xs text-gray-600 mb-1">Final Payment Amount</p>
                   <p className="text-3xl font-bold text-green-700">
-                    ₱{formatPrice(selectedData.total_revenue - selectedData.total_commission)}K
+                    ₱{formatPrice(selectedData.monthly_revenue - selectedData.commission_amount)}K
                   </p>
                 </div>
 

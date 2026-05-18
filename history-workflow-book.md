@@ -776,3 +776,147 @@ Message: 🔧 Fix: Dynamic import for RealtimeMap to resolve SSR window issue + 
 
 ---
 
+
+---
+## [2026-05-18 14:55] Order: 006 - 고객 랜딩 페이지 HTML→Next.js 전환 및 배포 준비
+
+**주제:** customer-sample-premium.html을 Next.js 페이지로 변환하여 실제 배포 URL에서 접근 가능하게 구성
+
+### Plan
+✅ HTML 파일 분석 (1,220줄)
+✅ JSX 변환 (클래스 → className, onclick → onClick, 인라인 CSS → style 태그)
+✅ React 상태 관리 (모달, 예약 폼)
+✅ 전용 레이아웃 생성 (기존 사이드바/헤더 제외)
+✅ 이미지 통합 (WebP + JPEG fallback)
+✅ 로컬 테스트 및 빌드 검증
+✅ Cloudflare Pages 배포 설정
+
+### Task 수행 내용
+
+#### 섹션 1: HTML→Next.js 변환
+1. **파일 생성:** `frontend/src/app/customer/landing/page.tsx`
+   - 'use client' 지시어 추가
+   - HTML 구조 → JSX로 완전 변환
+   - 인라인 CSS 1,220줄 → <style>{``}</style> 태그로 최적화
+   - Vanilla JS 함수 → React useState로 전환
+     - openBooking() → setIsBookingOpen(true)
+     - closeBooking() → setIsBookingOpen(false)
+     - submitBooking() → alert + closeBooking()
+   - 모달 클릭 닫기 기능 구현 (onClick 이벤트 버블링 처리)
+   - <picture> 태그 유지 (WebP + JPEG 폴백)
+   - bottom-nav 스타일링 (fixed, z-index: 99)
+   - nav-spacer 추가 (80px 높이로 바텀 네비 겹침 방지)
+
+2. **레이아웃 파일:** `frontend/src/app/customer/landing/layout.tsx`
+   - 빈 레이아웃 (기존 customer/layout.tsx의 사이드바/헤더 제외)
+   - 독립적인 페이지 렌더링
+
+#### 섹션 2: 빌드 및 검증
+1. **TypeScript 에러 해결**
+   - `frontend/src/app/admin/companies/page.tsx`: Company 타입 문제 수정
+     - 로컬 interface → store/types의 Company 타입으로 통합
+     - representative를 optional로 변경
+   - npm run build 성공 (36/36 페이지 정적 생성)
+
+2. **개발 서버 테스트**
+   - npm run dev 실행 (포트 3003)
+   - http://localhost:3003/customer/landing 접근 확인
+   - 모든 인터랙티브 요소 작동 확인:
+     ✓ 히어로 섹션 렌더링
+     ✓ "📅 Book Now" 버튼 클릭 → 모달 팝업
+     ✓ 모달 닫기 (X 버튼 + 배경 클릭)
+     ✓ 예약 폼 제출 → 확인 알림 표시
+     ✓ 바텀 네비게이션 표시 및 스타일링
+     ✓ 반응형 디자인 (모바일/태블릿)
+
+#### 섹션 3: Cloudflare Pages 배포 설정
+1. **wrangler.toml 구성**
+   ```toml
+   name = "elspa"
+   pages_build_output_dir = "out"
+   ```
+
+2. **배포 상태**
+   - ✅ 프로덕션 빌드 완료 (out/ 폴더 생성)
+   - ⏳ Cloudflare Pages 프로젝트 생성 대기
+   - 배포 준비 완료 (프로젝트 생성 후 즉시 배포 가능)
+
+### Result
+✅ **2개 파일 신규 생성 완료**
+- `frontend/src/app/customer/landing/page.tsx` (React/TypeScript 랜딩 페이지) ✓
+- `frontend/src/app/customer/landing/layout.tsx` (독립 레이아웃) ✓
+
+✅ **1개 파일 수정 완료**
+- `frontend/src/app/admin/companies/page.tsx` (TypeScript 호환성) ✓
+
+✅ **기능 구현**
+- HTML→JSX 완전 변환 ✓
+- React 상태 관리 (모달, 예약) ✓
+- 반응형 디자인 유지 ✓
+- 이미지 경로 통합 (WebP) ✓
+- 로컬 테스트 성공 ✓
+- 프로덕션 빌드 성공 (36/36 페이지) ✓
+
+### 기술 상세
+
+**변환된 요소:**
+- HTML 클래스 → JSX className (234개)
+- onclick 핸들러 → onClick (3개)
+- inline style → style JSX
+- <style> 태그 → <style>{`` CSS ``}</style>
+- Vanilla JS 함수 → React hooks
+
+**이미지 최적화:**
+- /images/facilities/*.{jpg,webp}
+- /images/services/*.{jpg,webp}
+- /images/reviews/*.{jpg,webp}
+- <picture> 태그로 WebP 우선, JPEG 폴백
+
+**상태 관리:**
+- isBookingOpen: boolean (모달 오픈/클로즈)
+- useState hook으로 예약 모달 제어
+
+### 배포 경로
+```
+로컬 개발 → npm run build → out/ (정적 파일)
+         ↓
+Cloudflare Pages (next 단계)
+         ↓
+https://elspa.pages.dev/customer/landing
+```
+
+### Key Files
+1. `frontend/src/app/customer/landing/page.tsx` - 메인 랜딩 페이지 (850줄)
+2. `frontend/src/app/customer/landing/layout.tsx` - 빈 레이아웃 (7줄)
+3. `frontend/wrangler.toml` - Cloudflare Pages 설정
+4. `out/customer/landing/index.html` - 생성된 정적 파일
+
+### 다음 단계
+- [ ] Cloudflare Pages 프로젝트 "elspa" 생성
+- [ ] wrangler pages deploy out --commit-dirty=true 실행
+- [ ] https://elspa.pages.dev 라이브 URL 확인
+- [ ] 배포된 사이트 모든 기능 검증
+- [ ] history-workflow-book.md에 배포 완료 기록
+
+### 관련 기술 스택
+- Next.js 16.2.4 (output: "export" 정적 생성)
+- React 19 + TypeScript
+- Tailwind CSS 4 (인라인 <style> 사용)
+- Cloudflare Pages (정적 호스팅)
+- Wrangler CLI (배포 도구)
+
+### 학습 포인트
+**HTML→Next.js 마이그레이션:**
+1. 클래스명은 JSX에서 className으로 (class는 예약어)
+2. onclick은 onClick 이벤트 핸들러로
+3. 복잡한 인라인 CSS는 <style>{``}</style>으로 처리
+4. React 상태는 useState로 관리
+5. 독립 페이지는 전용 layout.tsx로 분리
+
+**Cloudflare Pages 배포:**
+1. wrangler.toml에 name, pages_build_output_dir 설정
+2. 빌드된 정적 파일을 out/ 폴더에 생성
+3. 프로젝트 생성 후 wrangler CLI로 배포
+4. *.pages.dev 자동 생성 URL 사용
+
+---

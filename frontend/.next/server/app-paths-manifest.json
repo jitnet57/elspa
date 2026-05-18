@@ -1,4 +1,5 @@
 {
+  "/(landing)/landing/page": "app/(landing)/landing/page.js",
   "/_global-error/page": "app/_global-error/page.js",
   "/_not-found/page": "app/_not-found/page.js",
   "/admin/billing/page": "app/admin/billing/page.js",
@@ -22,7 +23,6 @@
   "/customer/about-matching/page": "app/customer/about-matching/page.js",
   "/customer/booking/page": "app/customer/booking/page.js",
   "/customer/driver-tracking/page": "app/customer/driver-tracking/page.js",
-  "/customer/landing/page": "app/customer/landing/page.js",
   "/customer/mypage/page": "app/customer/mypage/page.js",
   "/customer/page": "app/customer/page.js",
   "/customer/reviews/page": "app/customer/reviews/page.js",

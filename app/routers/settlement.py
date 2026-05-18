@@ -49,40 +49,117 @@ def initialize_mock_data():
     """Initialize mock settlement data"""
     global MOCK_THERAPIST_SETTLEMENTS, MOCK_COMPANY_SETTLEMENTS, MOCK_SETTLEMENT_GUIDES
 
-    # Mock Therapist Settlements
+    # Mock Therapist Settlements (10 therapists matching guides)
     MOCK_THERAPIST_SETTLEMENTS = [
         TherapistSettlement(
             therapist_id=1,
-            therapist_name="Maria Santos",
-            monthly_revenue=25000,
+            therapist_name="Sarah",
+            monthly_revenue=32000,
             commission_rate=0.60,
-            commission_amount=15000,
+            commission_amount=19200,
             deductions=500,
-            net_payout=14500,
+            net_payout=18700,
             status="completed",
             settlement_date="2026-05-05"
         ),
         TherapistSettlement(
             therapist_id=2,
-            therapist_name="Juan Cruz",
-            monthly_revenue=28000,
+            therapist_name="Emma",
+            monthly_revenue=38000,
             commission_rate=0.62,  # +2% bonus for 20+ sessions
-            commission_amount=17360,
+            commission_amount=23560,
             deductions=500,
-            net_payout=16860,
+            net_payout=22960,
             status="completed",
             settlement_date="2026-05-05"
         ),
         TherapistSettlement(
             therapist_id=3,
-            therapist_name="Ana Garcia",
-            monthly_revenue=22000,
+            therapist_name="Jessica",
+            monthly_revenue=28000,
             commission_rate=0.60,
-            commission_amount=13200,
+            commission_amount=16800,
             deductions=500,
-            net_payout=12700,
+            net_payout=16300,
+            status="confirmed",
+            settlement_date="2026-05-15"
+        ),
+        TherapistSettlement(
+            therapist_id=4,
+            therapist_name="Amanda",
+            monthly_revenue=42000,
+            commission_rate=0.63,  # +3% loyalty bonus for 50+ sessions
+            commission_amount=26460,
+            deductions=500,
+            net_payout=25960,
+            status="completed",
+            settlement_date="2026-05-05"
+        ),
+        TherapistSettlement(
+            therapist_id=5,
+            therapist_name="Catherine",
+            monthly_revenue=30000,
+            commission_rate=0.60,
+            commission_amount=18000,
+            deductions=500,
+            net_payout=17500,
             status="pending",
-            settlement_date="2026-06-05"
+            settlement_date="2026-05-20"
+        ),
+        TherapistSettlement(
+            therapist_id=6,
+            therapist_name="Rachel",
+            monthly_revenue=35000,
+            commission_rate=0.62,  # +2% performance bonus
+            commission_amount=21700,
+            deductions=500,
+            net_payout=21200,
+            status="completed",
+            settlement_date="2026-05-05"
+        ),
+        TherapistSettlement(
+            therapist_id=7,
+            therapist_name="Monica",
+            monthly_revenue=26000,
+            commission_rate=0.60,
+            commission_amount=15600,
+            deductions=500,
+            net_payout=15100,
+            status="confirmed",
+            settlement_date="2026-05-15"
+        ),
+        TherapistSettlement(
+            therapist_id=8,
+            therapist_name="Diana",
+            monthly_revenue=33000,
+            commission_rate=0.61,  # +1% partial bonus
+            commission_amount=20130,
+            deductions=500,
+            net_payout=19630,
+            status="pending",
+            settlement_date="2026-05-20"
+        ),
+        TherapistSettlement(
+            therapist_id=9,
+            therapist_name="Michelle",
+            monthly_revenue=40000,
+            commission_rate=0.62,  # +2% performance bonus
+            commission_amount=24800,
+            deductions=500,
+            net_payout=24300,
+            status="confirmed",
+            settlement_date="2026-05-15"
+        ),
+        TherapistSettlement(
+            therapist_id=10,
+            therapist_name="Angela",
+            monthly_revenue=29000,
+            commission_rate=0.60,
+            commission_amount=17400,
+            deductions=500,
+            net_payout=16900,
+            status="pending",
+            settlement_date="2026-05-20"
         ),
     ]
 
@@ -261,6 +338,18 @@ initialize_mock_data()
 # ============================================================
 # API Endpoints
 # ============================================================
+
+@router.get("/therapist")
+async def get_therapist_settlement(target_date: str = "2026-05-01"):
+    """Get all therapist settlements for a target date (mock data)"""
+    if not MOCK_THERAPIST_SETTLEMENTS:
+        initialize_mock_data()
+    return {
+        "settlements": MOCK_THERAPIST_SETTLEMENTS,
+        "target_date": target_date,
+        "total": len(MOCK_THERAPIST_SETTLEMENTS),
+        "source": "mock_data"
+    }
 
 @router.get("/therapists")
 async def get_therapist_settlements():

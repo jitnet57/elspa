@@ -237,3 +237,4 @@ https://react.dev/link/hydration-mismatch
 ✓ Compiled in 484ms
 ✓ Compiled in 2.3s
 ✓ Compiled in 3.4s
+✓ Finished filesystem cache database compaction in 19.5s
