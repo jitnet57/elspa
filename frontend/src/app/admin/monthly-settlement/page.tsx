@@ -72,12 +72,23 @@ const mockCompanies: Company[] = [
 ];
 
 const mockGuides: Guide[] = [
+  // Makati Spa Center (company_id: 1)
   { id: 1, name: 'Sarah', company_id: 1 },
   { id: 2, name: 'Emma', company_id: 1 },
   { id: 3, name: 'Jessica', company_id: 1 },
+  // BGC Wellness Hub (company_id: 2)
   { id: 4, name: 'Amanda', company_id: 2 },
   { id: 5, name: 'Catherine', company_id: 2 },
+  // Taguig Health Spa (company_id: 3)
   { id: 6, name: 'Rachel', company_id: 3 },
+  // Pasig Relax Resort (company_id: 4)
+  { id: 7, name: 'Monica', company_id: 4 },
+  // Quezon City Massage (company_id: 5)
+  { id: 8, name: 'Diana', company_id: 5 },
+  // Ortigas Wellness (company_id: 6)
+  { id: 9, name: 'Michelle', company_id: 6 },
+  // Manila Health Spa (company_id: 7)
+  { id: 10, name: 'Angela', company_id: 7 },
 ];
 
 export default function MonthlySettlementPage() {

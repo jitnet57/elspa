@@ -87,13 +87,14 @@ def initialize_mock_data():
     ]
 
     # Mock Company Settlements (10 companies)
+    # Formula: platform_fee = revenue * 25%, net_profit = revenue - platform_fee
     MOCK_COMPANY_SETTLEMENTS = [
         CompanySettlement(
             company_id=1,
             company_name="Makati Spa Center",
             monthly_revenue=150000,
-            platform_fee=37500,  # 25%
-            net_profit=52500,
+            platform_fee=37500,  # 25% of 150000
+            net_profit=112500,  # 150000 - 37500
             therapist_count=8,
             status="completed",
             settlement_date="2026-05-05"
@@ -102,8 +103,8 @@ def initialize_mock_data():
             company_id=2,
             company_name="BGC Wellness Hub",
             monthly_revenue=120000,
-            platform_fee=30000,  # 25%
-            net_profit=42000,
+            platform_fee=30000,  # 25% of 120000
+            net_profit=90000,  # 120000 - 30000
             therapist_count=6,
             status="completed",
             settlement_date="2026-05-05"
@@ -112,8 +113,8 @@ def initialize_mock_data():
             company_id=3,
             company_name="Taguig Health Spa",
             monthly_revenue=95000,
-            platform_fee=23750,
-            net_profit=33250,
+            platform_fee=23750,  # 25% of 95000
+            net_profit=71250,  # 95000 - 23750
             therapist_count=5,
             status="pending",
             settlement_date="2026-06-05"
@@ -122,8 +123,8 @@ def initialize_mock_data():
             company_id=4,
             company_name="Pasig Relax Resort",
             monthly_revenue=180000,
-            platform_fee=45000,
-            net_profit=63000,
+            platform_fee=45000,  # 25% of 180000
+            net_profit=135000,  # 180000 - 45000
             therapist_count=10,
             status="completed",
             settlement_date="2026-05-05"
@@ -132,8 +133,8 @@ def initialize_mock_data():
             company_id=5,
             company_name="Quezon City Massage",
             monthly_revenue=110000,
-            platform_fee=27500,
-            net_profit=38500,
+            platform_fee=27500,  # 25% of 110000
+            net_profit=82500,  # 110000 - 27500
             therapist_count=5,
             status="completed",
             settlement_date="2026-05-05"
@@ -142,8 +143,8 @@ def initialize_mock_data():
             company_id=6,
             company_name="Ortigas Wellness",
             monthly_revenue=165000,
-            platform_fee=41250,
-            net_profit=57750,
+            platform_fee=41250,  # 25% of 165000
+            net_profit=123750,  # 165000 - 41250
             therapist_count=9,
             status="pending",
             settlement_date="2026-06-05"
@@ -152,8 +153,8 @@ def initialize_mock_data():
             company_id=7,
             company_name="Manila Health Spa",
             monthly_revenue=140000,
-            platform_fee=35000,
-            net_profit=49000,
+            platform_fee=35000,  # 25% of 140000
+            net_profit=105000,  # 140000 - 35000
             therapist_count=7,
             status="completed",
             settlement_date="2026-05-05"
@@ -162,8 +163,8 @@ def initialize_mock_data():
             company_id=8,
             company_name="Cavite Spa Lounge",
             monthly_revenue=85000,
-            platform_fee=21250,
-            net_profit=29750,
+            platform_fee=21250,  # 25% of 85000
+            net_profit=63750,  # 85000 - 21250
             therapist_count=4,
             status="completed",
             settlement_date="2026-05-05"
@@ -172,8 +173,8 @@ def initialize_mock_data():
             company_id=9,
             company_name="Antipolo Therapy Center",
             monthly_revenue=105000,
-            platform_fee=26250,
-            net_profit=36750,
+            platform_fee=26250,  # 25% of 105000
+            net_profit=78750,  # 105000 - 26250
             therapist_count=5,
             status="pending",
             settlement_date="2026-06-05"
@@ -182,8 +183,8 @@ def initialize_mock_data():
             company_id=10,
             company_name="Laguna Premium Spa",
             monthly_revenue=175000,
-            platform_fee=43750,
-            net_profit=61250,
+            platform_fee=43750,  # 25% of 175000
+            net_profit=131250,  # 175000 - 43750
             therapist_count=9,
             status="completed",
             settlement_date="2026-05-05"
