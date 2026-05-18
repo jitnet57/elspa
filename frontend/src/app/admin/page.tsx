@@ -71,6 +71,7 @@ export default function AdminPortal() {
         { name: 'Therapist Settlement', href: '/therapist-settlement', icon: '👨‍⚕️' },
         { name: 'Company Settlement', href: '/admin/monthly-settlement', icon: '🏢' },
         { name: 'Settlement Reports', href: '/admin/settlement-report', icon: '📊' },
+        { name: 'Guide Settlement', href: '/admin/guides', icon: '📚' },
         { name: 'Settlement Guide', href: '/settlement-management', icon: '💰' },
       ],
     },
@@ -123,7 +124,7 @@ export default function AdminPortal() {
                   <a
                     key={item.href}
                     href={item.href}
-                    className="bg-white border border-gray-200 hover:border-indigo-300 rounded-lg p-4 sm:p-6 transition-all hover:shadow-lg hover:scale-105 active:scale-95 group hover:bg-indigo-50 duration-300"
+                    className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 transition-all hover:border-indigo-300 hover:shadow-lg hover:scale-105 active:scale-95 group hover:bg-indigo-50 duration-300"
                   >
                     <div className="flex items-start justify-between">
                       <div>
