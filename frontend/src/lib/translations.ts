@@ -1,6 +1,6 @@
 /**
- * 다국어 번역 파일
- * 지원 언어: English (en), 한국어 (ko)
+ * Translation file for multi-language support
+ * Supported languages: English (en), Korean (ko)
  */
 
 export type Language = 'en' | 'ko';
@@ -386,7 +386,7 @@ export const translations = {
 };
 
 /**
- * 언어별 번역 가져오기
+ * Get translation by language and path
  */
 export const getTranslation = (language: Language, path: string): string => {
   const keys = path.split('.');
@@ -400,7 +400,7 @@ export const getTranslation = (language: Language, path: string): string => {
 };
 
 /**
- * 현재 언어의 번역 객체 가져오기
+ * Get translation object for current language
  */
 export const getTranslations = (language: Language) => {
   return translations[language];

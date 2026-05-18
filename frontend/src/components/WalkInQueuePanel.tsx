@@ -11,7 +11,7 @@ export function WalkInQueuePanel() {
   const assignedGuests = walkInQueue.filter(g => g.status === 'assigned');
 
   const handleRemove = (guestId: string) => {
-    if (confirm('이 손님을 목록에서 제거하시겠습니까?')) {
+    if (confirm('Remove this guest from the queue?')) {
       removeFromQueue(guestId);
     }
   };
@@ -19,15 +19,15 @@ export function WalkInQueuePanel() {
   return (
     <div className="bg-gray-800 rounded-lg p-4">
       <h3 className="text-lg font-bold text-blue-400 mb-4">
-        📋 워크인 대기 ({waitingGuests.length}명)
+        📋 Walk-in Queue ({waitingGuests.length})
       </h3>
 
-      {/* 대기 손님 목록 */}
+      {/* Waiting guests list */}
       {waitingGuests.length === 0 ? (
         <div className="text-center py-6 text-gray-400 text-sm">
-          <div>👏 대기 손님이 없습니다</div>
+          <div>👏 No guests waiting</div>
           <div className="text-xs mt-2 text-gray-500">
-            [+ 워크인 추가] 버튼으로 손님을 추가하세요
+            Add guests using the [+ Add Walk-in] button
           </div>
         </div>
       ) : (
@@ -40,10 +40,10 @@ export function WalkInQueuePanel() {
                 setExpandedId(expandedId === guest.id ? null : guest.id)
               }
             >
-              {/* 헤더 */}
+              {/* Header */}
               <div className="flex items-center justify-between mb-1">
                 <div className="font-bold text-white">
-                  #{guest.queue_number} {guest.customer_name || '손님'}
+                  #{guest.queue_number} {guest.customer_name || 'Guest'}
                 </div>
                 <button
                   onClick={(e) => {
@@ -51,44 +51,44 @@ export function WalkInQueuePanel() {
                     handleRemove(guest.id);
                   }}
                   className="text-xs px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
-                  title="제거"
+                  title="Remove"
                 >
                   ✕
                 </button>
               </div>
 
-              {/* 기본 정보 */}
+              {/* Basic Information */}
               <div className="flex items-center justify-between text-xs text-gray-300 mb-2">
                 <div>
                   💆 <span className="text-blue-300">{guest.service_type}</span>
                 </div>
                 <div className="text-yellow-300">
-                  {new Date(guest.created_at).toLocaleTimeString('ko-KR', {
+                  {new Date(guest.created_at).toLocaleTimeString('en-US', {
                     hour: '2-digit',
                     minute: '2-digit',
                   })}
                 </div>
               </div>
 
-              {/* 확장된 상세 정보 */}
+              {/* Expanded Details */}
               {expandedId === guest.id && (
                 <div className="border-t border-gray-600 mt-2 pt-2 text-xs text-gray-400 space-y-1">
                   {guest.requested_therapist_id && (
                     <div>
-                      👤 선호 테라피스트: ID {guest.requested_therapist_id}
+                      👤 Preferred Therapist: ID {guest.requested_therapist_id}
                     </div>
                   )}
                   <div>
-                    ⏱️ 대기 시간:{' '}
+                    ⏱️ Wait Time:{' '}
                     {Math.round(
                       (Date.now() - new Date(guest.created_at).getTime()) / 60000
                     )}{' '}
-                    분
+                    min
                   </div>
                   <div>
-                    상태:{' '}
+                    Status:{' '}
                     <span className="text-yellow-300">
-                      {guest.status === 'waiting' ? '🟡 대기중' : '🟢 배정됨'}
+                      {guest.status === 'waiting' ? '🟡 Waiting' : '🟢 Assigned'}
                     </span>
                   </div>
                 </div>
@@ -98,11 +98,11 @@ export function WalkInQueuePanel() {
         </div>
       )}
 
-      {/* 배정된 손님 섹션 */}
+      {/* Assigned Guests Section */}
       {assignedGuests.length > 0 && (
         <div>
           <h4 className="text-xs font-bold text-green-400 mb-2 uppercase">
-            ✅ 배정 완료 ({assignedGuests.length}명)
+            ✅ Assigned ({assignedGuests.length})
           </h4>
           <div className="space-y-1 text-xs">
             {assignedGuests.map(guest => (
@@ -112,7 +112,7 @@ export function WalkInQueuePanel() {
               >
                 <div className="flex justify-between items-center">
                   <div className="font-semibold">
-                    #{guest.queue_number} {guest.customer_name || '손님'}
+                    #{guest.queue_number} {guest.customer_name || 'Guest'}
                   </div>
                   <button
                     onClick={() => handleRemove(guest.id)}

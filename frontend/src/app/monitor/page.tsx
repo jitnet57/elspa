@@ -168,12 +168,12 @@ interface Stats {
   cleaning: number;
 }
 
-// 더 이상 필요 없음 (Mock API에서 제공)
+// No longer needed (Provided by Mock API)
 const generateMockBeds = (): Bed[] => {
   const beds: Bed[] = [];
   let bedId = 1;
-  const customerNames = ['김민준', '이수연', '정현준', '박지은', '최준호', '강지은', '이준영', '김수현', '박민수', '이영희'];
-  const therapistNames = ['박유진', '최정은', '이소영', '김태희', '강지연', '박민경', '임다현', '유지원'];
+  const customerNames = ['Min Jun Kim', 'Su Yeon Lee', 'Hyun Jun Jung', 'Ji Eun Park', 'Jun Ho Choi', 'Ji Eun Kang', 'Jun Young Lee', 'Su Hyun Kim', 'Min Su Park', 'Young Hee Lee'];
+  const therapistNames = ['Yujin Park', 'Jung Eun Choi', 'So Young Lee', 'Tae Hee Kim', 'Ji Yeon Kang', 'Min Kyung Park', 'Da Hyun Lim', 'Ji Won Yu'];
   const serviceNames = ['Swedish 60 min', 'Thai Massage 90 min', 'Hot Stone 60 min', 'Foot Massage 30 min', 'Aromatherapy 45 min'];
 
   for (let i = 1; i <= 30; i++) {
@@ -297,7 +297,7 @@ export default function MonitorPage() {
   // React Query 폴링 + Zustand store 동기화
   useFullStoreSync();
 
-  // 📌 다국어 지원
+  // 📌 Multi-language support
   const { language } = useStore();
   const t = getTranslations(language);
 
@@ -314,16 +314,16 @@ export default function MonitorPage() {
     lastRefetch,
   } = useMonitorPolling();
 
-  // 📌 워크인 손님 매칭 훅
+  // 📌 Walk-in guest matching hook
   const { walkInBookings, createWalkInBooking } = useWalkInMatching();
 
-  // 📌 워크인 모달 상태
+  // 📌 Walk-in modal state
   const [isWalkInModalOpen, setIsWalkInModalOpen] = useState(false);
 
-  // 📌 모바일 드로어 상태
+  // 📌 Mobile drawer state
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
-  // 📌 상태 변경 (비밀번호 확인) 모달
+  // 📌 Status change (password confirmation) modal
   const [passwordModal, setPasswordModal] = useState({
     isOpen: false,
     bedId: null as number | null,
@@ -332,7 +332,7 @@ export default function MonitorPage() {
     error: '',
   });
 
-  // Zustand store에서 데이터 읽기
+  // Read data from Zustand store
   const {
     beds: storeBeds,
     therapists: storeTherapists,
@@ -343,7 +343,7 @@ export default function MonitorPage() {
     addChangeLog,
   } = useStore();
 
-  // Store가 최신이면 store 사용, 아니면 polling 데이터 사용
+  // Use store if latest, otherwise use polling data
   const beds = storeBeds.length > 0 ? storeBeds : pollingBeds;
   const therapists = storeTherapists.length > 0 ? storeTherapists : pollingTherapists;
 
@@ -351,18 +351,18 @@ export default function MonitorPage() {
   const [viewMode, setViewMode] = useState<'beds' | 'schedule'>('beds');
   const [scheduleDate, setScheduleDate] = useState(new Date());
 
-  // 현재 시각 매초 갱신
+  // Update current time every second
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      setCurrentTime(now.toLocaleTimeString('ko-KR', { hour12: false }));
+      setCurrentTime(now.toLocaleTimeString('en-US', { hour12: false }));
     };
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
   }, []);
 
-  // Room별 침대 분류
+  // Classify beds by room
   const bedsByRoom = classifyBedsByRoom(beds);
 
   const BedGrid = ({ roomBeds }: { roomBeds: Bed[] }) => (
@@ -371,12 +371,12 @@ export default function MonitorPage() {
         <div key={bed.id} className="relative">
           <button
             onClick={() => {
-              // 비어있는 침대면 바로 워크인 모달 열기
+              // If bed is empty, open walk-in modal directly
               if (bed.status === 'available') {
                 useStore.setState({ selectedBedId: bed.id });
                 setIsWalkInModalOpen(true);
               } else {
-                // 그 외에는 상세 Information 모달
+                // Otherwise, open detail information modal
                 openDetailModal(bed.id);
               }
             }}
@@ -401,7 +401,7 @@ export default function MonitorPage() {
     </div>
   );
 
-  // 모달 컴포넌트
+  // Modal component
   const DetailModal = () => {
     if (!isDetailModalOpen || !selectedBedId) return null;
 
