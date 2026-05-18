@@ -21,11 +21,11 @@ export interface WalkInBookingRequest {
 }
 
 const SERVICE_TYPES = [
-  { id: 'swedish', name: '스웨디시', duration: 60 },
-  { id: 'thai', name: '타이', duration: 90 },
-  { id: 'hotstone', name: '핫스톤', duration: 60 },
-  { id: 'foot', name: '발마사지', duration: 30 },
-  { id: 'aroma', name: '아로마', duration: 45 },
+  { id: 'swedish', name: 'Swedish', duration: 60 },
+  { id: 'thai', name: 'Thai', duration: 90 },
+  { id: 'hotstone', name: 'Hot Stone', duration: 60 },
+  { id: 'foot', name: 'Deep Tissue', duration: 30 },
+  { id: 'aroma', name: 'Aroma', duration: 45 },
 ];
 
 export const WalkInBookingModal = ({
@@ -63,7 +63,7 @@ export const WalkInBookingModal = ({
     }
 
     if (!matchedTherapist || availableBeds.length === 0) {
-      alert('가용 테라피스트 또는 베드가 없습니다');
+      alert('No available therapists or beds');
       return;
     }
 
@@ -78,7 +78,7 @@ export const WalkInBookingModal = ({
   // 📌 최종 제출
   const handleFinalSubmit = () => {
     if (selectedBeds.length === 0 || selectedTherapists.length === 0) {
-      alert('테라피스트와 베드를 선택해주세요');
+      alert('Please select a therapist and bed');
       return;
     }
 
@@ -112,7 +112,7 @@ export const WalkInBookingModal = ({
         {/* 헤더 */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl sm:text-2xl font-bold text-blue-400">
-            ✨ 워크인 손님 추가
+            ✨ Add Walk-in Customer
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-white text-xl sm:text-2xl flex-shrink-0">
             ✕
@@ -124,7 +124,7 @@ export const WalkInBookingModal = ({
           <div className="space-y-4">
             {/* 서비스 종류 선택 */}
             <div>
-              <label className="text-gray-300 font-bold mb-2 block">💆 서비스 종류</label>
+              <label className="text-gray-300 font-bold mb-2 block">💆 Service Type</label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {SERVICE_TYPES.map(svc => (
                   <button
@@ -136,7 +136,7 @@ export const WalkInBookingModal = ({
                         : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                     }`}
                   >
-                    {svc.name} ({svc.duration}분)
+                    {svc.name} ({svc.duration} min)
                   </button>
                 ))}
               </div>
@@ -144,28 +144,28 @@ export const WalkInBookingModal = ({
 
             {/* 고객명 입력 */}
             <div>
-              <label className="text-gray-300 font-bold mb-2 block">👤 고객명 (선택)</label>
+              <label className="text-gray-300 font-bold mb-2 block">👤 Customer Name (Optional)</label>
               <input
                 type="text"
                 value={customerName}
                 onChange={e => setCustomerName(e.target.value)}
-                placeholder="손님 이름..."
+                placeholder="Guest Name..."
                 className="w-full bg-gray-700 text-white px-3 py-2 rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
               />
             </div>
 
             {/* 특정 테라피스트 지정 */}
             <div>
-              <label className="text-gray-300 font-bold mb-2 block">💆 테라피스트 지정 (선택)</label>
+              <label className="text-gray-300 font-bold mb-2 block">💆 Therapist Assignment (Optional)</label>
               <select
                 value={requestedTherapistId || ''}
                 onChange={e => setRequestedTherapistId(e.target.value ? Number(e.target.value) : undefined)}
                 className="w-full bg-gray-700 text-white px-3 py-2 rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
               >
-                <option value="">미지정 (출근 순번 자동)</option>
+                <option value="">Unassigned (Auto by Check-in Order)</option>
                 {idleTherapists.map(t => (
                   <option key={t.id} value={t.id}>
-                    {t.name} ({t.checked_in_at} 출근) - {t.specialty}
+                    {t.name} (checked in: {t.checked_in_at}) - {t.specialty}
                   </option>
                 ))}
               </select>
@@ -174,8 +174,8 @@ export const WalkInBookingModal = ({
             {/* 가용 현황 */}
             <div className="bg-blue-900/30 border-l-4 border-blue-500 p-3 rounded">
               <div className="text-sm text-blue-300">
-                <div>✅ 가용 베드: {availableBeds.length}개</div>
-                <div>✅ 대기 테라피스트: {idleTherapists.length}명</div>
+                <div>✅ Available Beds: {availableBeds.length}</div>
+                <div>✅ Waiting Therapists: {idleTherapists.length}</div>
               </div>
             </div>
 
@@ -185,7 +185,7 @@ export const WalkInBookingModal = ({
                 onClick={onClose}
                 className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 rounded transition-colors"
               >
-                취소
+                Cancel
               </button>
               <button
                 onClick={handleAutoMatch}
@@ -196,7 +196,7 @@ export const WalkInBookingModal = ({
                     : 'bg-blue-600 hover:bg-blue-700 text-white'
                 }`}
               >
-                자동 매칭 진행
+                Auto Match
               </button>
             </div>
           </div>
@@ -207,16 +207,16 @@ export const WalkInBookingModal = ({
           <div className="space-y-4">
             {/* 자동 매칭 결과 */}
             <div className="bg-green-900/30 border-l-4 border-green-500 p-3 rounded">
-              <div className="text-green-300 font-bold mb-2">✨ 자동 매칭 결과</div>
+              <div className="text-green-300 font-bold mb-2">✨ Auto Match Result</div>
               <div className="space-y-1 text-sm">
-                <div>테라피스트: <span className="text-white font-bold">{therapists.find(t => t.id === suggestedTherapists[0])?.name}</span> ({therapists.find(t => t.id === suggestedTherapists[0])?.checked_in_at} 출근)</div>
-                <div>침대: <span className="text-white font-bold">{availableBeds.find(b => b.id === suggestedBeds[0])?.room_zone} - {availableBeds.find(b => b.id === suggestedBeds[0])?.bed_number}번</span></div>
+                <div>Therapist: <span className="text-white font-bold">{therapists.find(t => t.id === suggestedTherapists[0])?.name}</span> (checked in: {therapists.find(t => t.id === suggestedTherapists[0])?.checked_in_at})</div>
+                <div>Bed: <span className="text-white font-bold">{availableBeds.find(b => b.id === suggestedBeds[0])?.room_zone} - Bed {availableBeds.find(b => b.id === suggestedBeds[0])?.bed_number}</span></div>
               </div>
             </div>
 
             {/* 테라피스트 선택 */}
             <div>
-              <label className="text-gray-300 font-bold mb-2 block">💆 테라피스트 선택</label>
+              <label className="text-gray-300 font-bold mb-2 block">💆 Select Therapist</label>
               <div className="space-y-1 max-h-40 overflow-y-auto">
                 {idleTherapists.map((t, idx) => (
                   <button
@@ -230,9 +230,9 @@ export const WalkInBookingModal = ({
                   >
                     <div className="flex justify-between items-center">
                       <div>
-                        <span className="font-bold">{idx + 1}위</span> {t.name}
+                        <span className="font-bold">#{idx + 1}</span> {t.name}
                       </div>
-                      <div className="text-xs">{t.checked_in_at} 출근</div>
+                      <div className="text-xs">checked in: {t.checked_in_at}</div>
                     </div>
                     <div className="text-xs text-gray-400">{t.specialty}</div>
                   </button>
@@ -242,7 +242,7 @@ export const WalkInBookingModal = ({
 
             {/* 침대 선택 */}
             <div>
-              <label className="text-gray-300 font-bold mb-2 block">🛏️ 침대 선택</label>
+              <label className="text-gray-300 font-bold mb-2 block">🛏️ Select Bed</label>
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-40 overflow-y-auto">
                 {availableBeds.map(bed => (
                   <button
@@ -255,7 +255,7 @@ export const WalkInBookingModal = ({
                     }`}
                   >
                     <div>{bed.room_zone}</div>
-                    <div className="text-xs">{bed.bed_number}번</div>
+                    <div className="text-xs">Bed {bed.bed_number}</div>
                   </button>
                 ))}
               </div>
@@ -267,7 +267,7 @@ export const WalkInBookingModal = ({
                 onClick={() => setStep('input')}
                 className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 rounded transition-colors"
               >
-                ← 뒤로
+                ← Back
               </button>
               <button
                 onClick={handleFinalSubmit}
@@ -278,7 +278,7 @@ export const WalkInBookingModal = ({
                     : 'bg-green-600 hover:bg-green-700 text-white'
                 }`}
               >
-                ✅ 배정 확정
+                ✅ Confirm Assignment
               </button>
             </div>
           </div>
