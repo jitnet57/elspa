@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELSPA - 예약하기</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #2c3e50;
+      background: #f8f9fa;
+    }
+
+    /* 네비게이션 */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: white;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 1.5em;
+      font-weight: 700;
+      color: #ff6b35;
+    }
+
+    .nav-icons {
+      display: flex;
+      gap: 20px;
+      font-size: 1.2em;
+      cursor: pointer;
+    }
+
+    /* 헤더 섹션 */
+    .header {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+      color: white;
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+
+    /* 스텝 인디케이터 */
+    .steps-container {
+      background: white;
+      padding: 40px 24px;
+      margin: 0 auto;
+      max-width: 1200px;
+    }
+
+    .steps-header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .steps-header h2 {
+      font-size: 1.8em;
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+
+    .steps-header p {
+      color: #7f8c8d;
+      font-size: 1.1em;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin-bottom: 60px;
+    }
+
+    .step {
+      text-align: center;
+      position: relative;
+    }
+
+    .step-number {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em;
+      font-weight: bold;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      transition: transform 0.3s;
+    }
+
+    .step:hover .step-number {
+      transform: scale(1.1);
+    }
+
+    .step-icon {
+      font-size: 2em;
+      margin-bottom: 15px;
+    }
+
+    .step h3 {
+      font-size: 1.3em;
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+
+    .step p {
+      color: #7f8c8d;
+      font-size: 0.95em;
+      line-height: 1.6;
+    }
+
+    /* 예약 폼 섹션 */
+    .booking-form-container {
+      background: white;
+      padding: 40px 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      max-width: 600px;
+      margin: 0 auto 60px;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 10px;
+      font-size: 1em;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #ecf0f1;
+      border-radius: 8px;
+      font-size: 1em;
+      font-family: inherit;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .service-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .service-option {
+      padding: 15px;
+      border: 2px solid #ecf0f1;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .service-option:hover {
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.05);
+    }
+
+    .service-option input[type="radio"] {
+      display: none;
+    }
+
+    .service-option input[type="radio"]:checked + label {
+      color: #667eea;
+      font-weight: 600;
+    }
+
+    .service-option input[type="radio"]:checked {
+      outline: 2px solid #667eea;
+    }
+
+    .service-option label {
+      margin-bottom: 5px;
+      font-size: 0.95em;
+      cursor: pointer;
+    }
+
+    .service-price {
+      font-weight: bold;
+      color: #ff6b35;
+      font-size: 1.1em;
+    }
+
+    /* 버튼 */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-submit:active {
+      transform: translateY(0);
+    }
+
+    /* 선택된 서비스 요약 */
+    .summary-section {
+      background: #f8f9fa;
+      padding: 25px;
+      border-radius: 12px;
+      margin-top: 30px;
+      border-left: 4px solid #667eea;
+    }
+
+    .summary-section h3 {
+      color: #2c3e50;
+      margin-bottom: 15px;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      color: #7f8c8d;
+    }
+
+    .summary-item.total {
+      border-top: 2px solid #ecf0f1;
+      padding-top: 10px;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #2c3e50;
+      font-size: 1.2em;
+    }
+
+    /* 타임라인 - 모바일 뷰 */
+    @media (max-width: 768px) {
+      .steps {
+        grid-template-columns: 1fr;
+      }
+
+      .header h1 {
+        font-size: 1.5em;
+      }
+
+      .step-number {
+        width: 70px;
+        height: 70px;
+        font-size: 1.8em;
+      }
+
+      .service-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* 바텀 네비게이션 - 모바일 */
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 1px solid #ecf0f1;
+      padding: 12px 0;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+    }
+
+    .bottom-nav-items {
+      display: flex;
+      justify-content: space-around;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .bottom-nav-item {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      cursor: pointer;
+      color: #7f8c8d;
+      text-decoration: none;
+      font-size: 0.85em;
+      transition: color 0.3s;
+    }
+
+    .bottom-nav-item:hover,
+    .bottom-nav-item.active {
+      color: #667eea;
+      font-weight: 600;
+    }
+
+    @media (max-width: 640px) {
+      .bottom-nav {
+        display: block;
+        padding-bottom: 70px;
+      }
+
+      nav {
+        padding: 16px 20px;
+      }
+
+      .logo {
+        font-size: 1.3em;
+      }
+
+      .nav-icons {
+        gap: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 네비게이션 -->
+  <nav>
+    <div class="logo">🏨 ELSPA</div>
+    <div class="nav-icons">
+      <span>🔍</span>
+      <span>❤️</span>
+      <span>👤</span>
+    </div>
+  </nav>
+
+  <!-- 헤더 -->
+  <div class="header">
+    <h1>예약하기</h1>
+    <p>편안한 휴식을 위한 첫 번째 단계</p>
+  </div>
+
+  <!-- 스텝 인디케이터 -->
+  <div class="steps-container">
+    <div class="steps-header">
+      <h2>간단한 6단계 예약 과정</h2>
+      <p>몇 분 안에 원하는 서비스를 예약하세요</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1️⃣</div>
+        <div class="step-icon">🎯</div>
+        <h3>서비스 선택</h3>
+        <p>원하는 마사지 또는 스파 서비스를 선택하세요</p>
+      </div>
+
+      <div class="step">
+        <div class="step-number">2️⃣</div>
+        <div class="step-icon">📍</div>
+        <h3>위치 입력</h3>
+        <p>서비스를 받을 위치를 입력하거나 현재 위치를 사용</p>
+      </div>
+
+      <div class="step">
+        <div class="step-number">3️⃣</div>
+        <div class="step-icon">📅</div>
+        <h3>날짜 & 시간</h3>
+        <p>원하는 날짜와 시간을 선택하세요</p>
+      </div>
+
+      <div class="step">
+        <div class="step-number">4️⃣</div>
+        <div class="step-icon">💬</div>
+        <h3>추가 요청</h3>
+        <p>특별한 요청이 있다면 메모에 남겨주세요</p>
+      </div>
+
+      <div class="step">
+        <div class="step-number">5️⃣</div>
+        <div class="step-icon">💳</div>
+        <h3>결제</h3>
+        <p>안전한 카드 결제 또는 카카오페이로 결제</p>
+      </div>
+
+      <div class="step">
+        <div class="step-number">6️⃣</div>
+        <div class="step-icon">✅</div>
+        <h3>예약 완료</h3>
+        <p>예약이 확정되었고 세라피스트가 곧 출발합니다</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 예약 폼 -->
+  <div class="booking-form-container">
+    <form>
+      <!-- 서비스 선택 -->
+      <div class="form-group">
+        <label>원하는 서비스를 선택하세요 *</label>
+        <div class="service-grid">
+          <div class="service-option">
+            <input type="radio" id="service1" name="service" value="swedish">
+            <label for="service1">
+              <div style="font-size: 1.8em; margin-bottom: 8px;">💆</div>
+              <div>스웨디시</div>
+              <div class="service-price">₱2,500</div>
+            </label>
+          </div>
+          <div class="service-option">
+            <input type="radio" id="service2" name="service" value="thai">
+            <label for="service2">
+              <div style="font-size: 1.8em; margin-bottom: 8px;">🧘</div>
+              <div>타이 마사지</div>
+              <div class="service-price">₱3,000</div>
+            </label>
+          </div>
+          <div class="service-option">
+            <input type="radio" id="service3" name="service" value="foot">
+            <label for="service3">
+              <div style="font-size: 1.8em; margin-bottom: 8px;">🦶</div>
+              <div>발마사지</div>
+              <div class="service-price">₱1,800</div>
+            </label>
+          </div>
+          <div class="service-option">
+            <input type="radio" id="service4" name="service" value="hot-stone">
+            <label for="service4">
+              <div style="font-size: 1.8em; margin-bottom: 8px;">🔥</div>
+              <div>핫스톤</div>
+              <div class="service-price">₱3,500</div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 지속시간 선택 -->
+      <div class="form-group">
+        <label>시술 시간을 선택하세요 *</label>
+        <select required>
+          <option value="">-- 선택하세요 --</option>
+          <option value="30">30분 (기본)</option>
+          <option value="60">60분 (인기)</option>
+          <option value="90">90분 (푸짐)</option>
+          <option value="120">120분 (최고급)</option>
+        </select>
+      </div>
+
+      <!-- 위치 입력 -->
+      <div class="form-group">
+        <label>서비스 위치 *</label>
+        <input type="text" placeholder="주소를 입력하세요 (예: 서울시 강남구 도곡동)" required>
+        <p style="color: #7f8c8d; font-size: 0.85em; margin-top: 8px;">📍 현재 위치 사용</p>
+      </div>
+
+      <!-- 날짜 선택 -->
+      <div class="form-group">
+        <label>예약 날짜 *</label>
+        <input type="date" required>
+      </div>
+
+      <!-- 시간 선택 -->
+      <div class="form-group">
+        <label>예약 시간 *</label>
+        <select required>
+          <option value="">-- 선택하세요 --</option>
+          <option value="09:00">09:00 AM</option>
+          <option value="10:00">10:00 AM</option>
+          <option value="11:00">11:00 AM</option>
+          <option value="12:00">12:00 PM</option>
+          <option value="13:00">01:00 PM</option>
+          <option value="14:00">02:00 PM</option>
+          <option value="15:00">03:00 PM</option>
+          <option value="16:00">04:00 PM</option>
+          <option value="17:00">05:00 PM</option>
+          <option value="18:00">06:00 PM</option>
+        </select>
+      </div>
+
+      <!-- 특수 요청 -->
+      <div class="form-group">
+        <label>특수 요청 사항 (선택)</label>
+        <textarea rows="4" placeholder="예: 아주 약한 강도로, 허리 부분 집중, 향료 없음 등"></textarea>
+      </div>
+
+      <!-- 요약 섹션 -->
+      <div class="summary-section">
+        <h3>예약 요약</h3>
+        <div class="summary-item">
+          <span>서비스:</span>
+          <span id="summary-service">선택 안 함</span>
+        </div>
+        <div class="summary-item">
+          <span>위치:</span>
+          <span id="summary-location">입력 필요</span>
+        </div>
+        <div class="summary-item">
+          <span>날짜 & 시간:</span>
+          <span id="summary-datetime">선택 필요</span>
+        </div>
+        <div class="summary-item total">
+          <span>예상 가격:</span>
+          <span id="summary-price">₱0</span>
+        </div>
+      </div>
+
+      <!-- 예약 버튼 -->
+      <button type="submit" class="btn-submit" style="margin-top: 30px;">예약 확인</button>
+    </form>
+  </div>
+
+  <!-- 바텀 네비게이션 (모바일) -->
+  <div class="bottom-nav">
+    <div class="bottom-nav-items">
+      <a href="#" class="bottom-nav-item">🏠 홈</a>
+      <a href="#" class="bottom-nav-item">🔍 검색</a>
+      <a href="#" class="bottom-nav-item active">📅 예약</a>
+      <a href="#" class="bottom-nav-item">❤️ 찜</a>
+      <a href="#" class="bottom-nav-item">👤 프로필</a>
+    </div>
+  </div>
+
+  <script>
+    // 서비스 선택 시 가격 업데이트
+    const serviceRadios = document.querySelectorAll('input[name="service"]');
+    const durationSelect = document.querySelector('select[required]');
+    const priceMap = {
+      swedish: 2500,
+      thai: 3000,
+      foot: 1800,
+      'hot-stone': 3500
+    };
+
+    function updateSummary() {
+      const selectedService = document.querySelector('input[name="service"]:checked');
+      const selectedDuration = durationSelect.value;
+
+      if (selectedService) {
+        const serviceName = selectedService.nextElementSibling.innerText.split('\n')[0];
+        const basePrice = priceMap[selectedService.value];
+        const durationMultiplier = selectedDuration === '30' ? 1 :
+                                  selectedDuration === '60' ? 1.5 :
+                                  selectedDuration === '90' ? 2 :
+                                  selectedDuration === '120' ? 2.5 : 1;
+
+        document.getElementById('summary-service').textContent = serviceName;
+        document.getElementById('summary-price').textContent = `₱${Math.round(basePrice * durationMultiplier)}`;
+      }
+    }
+
+    serviceRadios.forEach(radio => {
+      radio.addEventListener('change', updateSummary);
+    });
+
+    durationSelect.addEventListener('change', updateSummary);
+
+    // 폼 제출
+    document.querySelector('form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('예약 신청이 완료되었습니다! 곧 세라피스트가 확인 연락을 드릴 것입니다.');
+    });
+  </script>
+</body>
+</html>
