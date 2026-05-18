@@ -73,7 +73,7 @@ export default function CompaniesPage() {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [formData, setFormData] = useState<Partial<Company>>({});
 
-  // Mock 데이터 초기화
+  // Initialize mock data
   if (companies.length === 0) {
     setCompanies(mockCompanies);
   }
@@ -97,13 +97,13 @@ export default function CompaniesPage() {
 
   const handleSubmit = () => {
     if (!formData.name || !formData.representative || !formData.phone) {
-      alert('필수 항목을 입력해주세요');
+      alert('Please fill in all required fields');
       return;
     }
 
     if (selectedCompany) {
       updateCompany(selectedCompany.id, formData);
-      alert('업체 정보가 수정되었습니다');
+      alert('Company information has been updated');
     } else {
       const newCompany: Company = {
         id: Math.max(...companies.map(c => c.id), 0) + 1,
@@ -121,51 +121,51 @@ export default function CompaniesPage() {
         bank_holder: formData.bank_holder,
       };
       addCompany(newCompany);
-      alert('새로운 업체가 등록되었습니다');
+      alert('New company has been registered');
     }
     handleCloseModal();
   };
 
   const handleDelete = (id: number) => {
-    if (confirm('이 업체를 삭제하시겠습니까?')) {
+    if (confirm('Are you sure you want to delete this company?')) {
       deleteCompany(id);
-      alert('업체가 삭제되었습니다');
+      alert('Company has been deleted');
     }
   };
 
   const guideCountByCompany = (companyId: number) => {
-    // 현재는 0으로 표시, 나중에 가이드 데이터 통합 시 수정
+    // Currently displays 0, will be updated when guide data integration is complete
     return 0;
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
-        {/* 헤더 */}
+        {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2 tracking-tight">
-            🏢 업체 관리
+            🏢 Company Management
           </h1>
           <p className="text-base md:text-lg text-gray-600 font-light">
-            여행사/마사지샵 정보 및 정산 설정
+            Travel agency/massage shop information and settlement settings
           </p>
         </div>
 
-        {/* 액션 버튼 */}
+        {/* Action buttons */}
         <div className="mb-8">
           <button
             onClick={() => handleOpenModal()}
             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-lg shadow-lg transition-all"
           >
-            + 새 업체 등록
+            + Register New Company
           </button>
         </div>
 
-        {/* 업체 목록 */}
+        {/* Company list */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {companies.length === 0 ? (
             <div className="col-span-full text-center py-12 text-gray-500">
-              등록된 업체가 없습니다
+              No registered companies
             </div>
           ) : (
             companies.map(company => (
@@ -175,33 +175,33 @@ export default function CompaniesPage() {
               >
                 <div className="mb-4">
                   <h3 className="text-xl font-bold text-gray-900">{company.name}</h3>
-                  <p className="text-sm text-gray-500 mt-1">{company.representative} 대표</p>
+                  <p className="text-sm text-gray-500 mt-1">Representative: {company.representative}</p>
                 </div>
 
                 <div className="space-y-2 text-sm mb-4">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">정산일</span>
-                    <span className="font-semibold">매월 {company.settlement_day}일</span>
+                    <span className="text-gray-600">Settlement Day</span>
+                    <span className="font-semibold">Every {company.settlement_day}th</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">기본 수수료</span>
+                    <span className="text-gray-600">Commission Rate</span>
                     <span className="font-semibold">{company.commission_rate}%</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">소속 가이드</span>
-                    <span className="font-semibold">{guideCountByCompany(company.id)}명</span>
+                    <span className="text-gray-600">Affiliated Guides</span>
+                    <span className="font-semibold">{guideCountByCompany(company.id)} people</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">상태</span>
+                    <span className="text-gray-600">Status</span>
                     <span className={`font-semibold ${company.status === 'active' ? 'text-green-600' : 'text-red-600'}`}>
-                      {company.status === 'active' ? '활성' : '비활성'}
+                      {company.status === 'active' ? 'Active' : 'Inactive'}
                     </span>
                   </div>
                 </div>
 
                 {(company.gcash_number || company.bank_account) && (
                   <div className="bg-blue-50 rounded p-3 mb-4 border border-blue-200">
-                    <p className="text-xs font-semibold text-blue-900 mb-2">💳 결제 정보</p>
+                    <p className="text-xs font-semibold text-blue-900 mb-2">💳 Payment Info</p>
                     <div className="space-y-1 text-xs text-blue-800">
                       {company.gcash_number && <div>Gcash: {company.gcash_number}</div>}
                       {company.bank_name && (
@@ -209,7 +209,7 @@ export default function CompaniesPage() {
                           {company.bank_name} {company.bank_account && `(${company.bank_account})`}
                         </div>
                       )}
-                      {company.bank_holder && <div className="text-gray-700">예금주: {company.bank_holder}</div>}
+                      {company.bank_holder && <div className="text-gray-700">Account Holder: {company.bank_holder}</div>}
                     </div>
                   </div>
                 )}
@@ -219,13 +219,13 @@ export default function CompaniesPage() {
                     onClick={() => handleOpenModal(company)}
                     className="flex-1 px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold text-sm rounded transition-colors"
                   >
-                    편집
+                    Edit
                   </button>
                   <button
                     onClick={() => handleDelete(company.id)}
                     className="flex-1 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-semibold text-sm rounded transition-colors"
                   >
-                    삭제
+                    Delete
                   </button>
                 </div>
               </div>
@@ -233,13 +233,13 @@ export default function CompaniesPage() {
           )}
         </div>
 
-        {/* 모달 */}
+        {/* Modal */}
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
             <div className="bg-white rounded-xl p-4 md:p-8 w-full max-w-md max-h-[80vh] overflow-y-auto border-2 border-blue-500 shadow-2xl">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {selectedCompany ? '업체 수정' : '새 업체 등록'}
+                  {selectedCompany ? 'Edit Company' : 'Register New Company'}
                 </h2>
                 <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-600 text-2xl">
                   ✕
@@ -249,35 +249,35 @@ export default function CompaniesPage() {
               <div className="space-y-4">
                 <input
                   type="text"
-                  placeholder="업체명"
+                  placeholder="Company Name"
                   value={formData.name || ''}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                 />
                 <input
                   type="text"
-                  placeholder="대표명"
+                  placeholder="Representative Name"
                   value={formData.representative || ''}
                   onChange={e => setFormData({ ...formData, representative: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                 />
                 <input
                   type="tel"
-                  placeholder="전화번호"
+                  placeholder="Phone Number"
                   value={formData.phone || ''}
                   onChange={e => setFormData({ ...formData, phone: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                 />
                 <input
                   type="text"
-                  placeholder="주소"
+                  placeholder="Address"
                   value={formData.address || ''}
                   onChange={e => setFormData({ ...formData, address: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                 />
                 <div className="flex gap-4">
                   <div className="flex-1">
-                    <label className="block text-sm text-gray-600 mb-1">정산일 (일)</label>
+                    <label className="block text-sm text-gray-600 mb-1">Settlement Day (Day)</label>
                     <input
                       type="number"
                       min="1"
@@ -288,7 +288,7 @@ export default function CompaniesPage() {
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="block text-sm text-gray-600 mb-1">수수료율 (%)</label>
+                    <label className="block text-sm text-gray-600 mb-1">Commission Rate (%)</label>
                     <input
                       type="number"
                       min="0"
@@ -301,31 +301,31 @@ export default function CompaniesPage() {
                 </div>
 
                 <div className="pt-4 border-t">
-                  <p className="text-sm font-semibold text-gray-700 mb-3">💳 결제 정보</p>
+                  <p className="text-sm font-semibold text-gray-700 mb-3">💳 Payment Info</p>
                   <input
                     type="text"
-                    placeholder="Gcash 계정번호"
+                    placeholder="Gcash Account Number"
                     value={formData.gcash_number || ''}
                     onChange={e => setFormData({ ...formData, gcash_number: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none mb-2"
                   />
                   <input
                     type="text"
-                    placeholder="은행명"
+                    placeholder="Bank Name"
                     value={formData.bank_name || ''}
                     onChange={e => setFormData({ ...formData, bank_name: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none mb-2"
                   />
                   <input
                     type="text"
-                    placeholder="계좌번호"
+                    placeholder="Account Number"
                     value={formData.bank_account || ''}
                     onChange={e => setFormData({ ...formData, bank_account: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none mb-2"
                   />
                   <input
                     type="text"
-                    placeholder="예금주명"
+                    placeholder="Account Holder Name"
                     value={formData.bank_holder || ''}
                     onChange={e => setFormData({ ...formData, bank_holder: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
@@ -337,13 +337,13 @@ export default function CompaniesPage() {
                     onClick={handleCloseModal}
                     className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded transition-colors"
                   >
-                    취소
+                    Cancel
                   </button>
                   <button
                     onClick={handleSubmit}
                     className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded transition-colors"
                   >
-                    {selectedCompany ? '수정' : '등록'}
+                    {selectedCompany ? 'Update' : 'Register'}
                   </button>
                 </div>
               </div>

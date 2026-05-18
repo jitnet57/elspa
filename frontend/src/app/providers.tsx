@@ -30,7 +30,7 @@ function getQueryClient() {
 }
 
 /**
- * 월정산 자동 스케줄링 hook 마운트용 컴포넌트
+ * Monthly settlement auto scheduling hook mount component
  */
 function SettlementSchedulerMount() {
     useSettlementScheduler();
@@ -38,7 +38,7 @@ function SettlementSchedulerMount() {
 }
 
 /**
- * 환율 자동 갱신 hook 마운트용 컴포넌트 (5분마다 갱신)
+ * Exchange rate auto update hook mount component (updated every 5 minutes)
  */
 function ExchangeRateMount() {
     useExchangeRate();
@@ -46,7 +46,7 @@ function ExchangeRateMount() {
 }
 
 /**
- * 외부 링크 자동으로 새 탭에서 열기
+ * Automatically open external links in new tab
  */
 function ExternalLinkHandler() {
     React.useEffect(() => {
@@ -62,7 +62,7 @@ function ExternalLinkHandler() {
 
         processLinks();
 
-        // 동적으로 추가되는 링크도 감지
+        // Detect dynamically added links
         const observer = new MutationObserver(processLinks);
         observer.observe(document.body, { childList: true, subtree: true });
 

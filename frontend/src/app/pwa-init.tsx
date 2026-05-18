@@ -6,24 +6,24 @@ export function PWAInit() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Service Worker 등록
+    // Register Service Worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/service-worker.js', {
           scope: '/',
         })
         .then((registration) => {
-          console.log('✅ Service Worker 등록 성공:', registration);
+          console.log('✅ Service Worker registration successful:', registration);
 
-          // 주기적으로 업데이트 확인
+          // Check for updates periodically
           setInterval(() => {
             registration.update().catch((error) => {
-              console.log('Service Worker 업데이트 확인 중 오류:', error);
+              console.log('Error checking Service Worker update:', error);
             });
-          }, 60000); // 1분마다 확인
+          }, 60000); // Check every 1 minute
         })
         .catch((error) => {
-          console.error('❌ Service Worker 등록 실패:', error);
+          console.error('❌ Service Worker registration failed:', error);
         });
     }
 
@@ -33,21 +33,21 @@ export function PWAInit() {
     window.addEventListener('beforeinstallprompt', (event) => {
       event.preventDefault();
       deferredPrompt = event as BeforeInstallPromptEvent;
-      console.log('📱 앱 설치 가능');
+      console.log('📱 App installable');
     });
 
-    // PWA 설치 감지
+    // Detect PWA installation
     window.addEventListener('appinstalled', () => {
-      console.log('🎉 PWA 설치 완료');
+      console.log('🎉 PWA installation complete');
       deferredPrompt = null;
     });
 
-    // 전체 화면 모드 감지
+    // Detect fullscreen mode
     const onFullscreenChange = () => {
       if (document.fullscreenElement) {
-        console.log('🖥️ 전체 화면 모드 활성화');
+        console.log('🖥️ Fullscreen mode enabled');
       } else {
-        console.log('🖥️ 전체 화면 모드 비활성화');
+        console.log('🖥️ Fullscreen mode disabled');
       }
     };
 

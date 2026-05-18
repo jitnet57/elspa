@@ -28,7 +28,7 @@ export default function TherapistSettlementPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'revenue' | 'sessions' | 'name'>('revenue');
 
-  // API에서 테라피스트 정산 데이터 조회
+  // Fetch therapist settlement data from API
   useEffect(() => {
     const fetchSettlements = async () => {
       try {
@@ -36,14 +36,14 @@ export default function TherapistSettlementPage() {
         const response = await fetch(
           `/api/settlements/therapist?target_date=${selectedMonth}-01`
         );
-        if (!response.ok) throw new Error('정산 데이터 조회 실패');
+        if (!response.ok) throw new Error('Failed to retrieve settlement data');
 
         const data = await response.json();
         setSettlements(data.settlements || []);
         setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : '오류가 발생했습니다');
-        console.error('정산 데이터 조회 오류:', err);
+        setError(err instanceof Error ? err.message : 'An error occurred');
+        console.error('Settlement data retrieval error:', err);
       } finally {
         setLoading(false);
       }
@@ -52,14 +52,14 @@ export default function TherapistSettlementPage() {
     fetchSettlements();
   }, [selectedMonth]);
 
-  // 필터링 및 검색
+  // Filtering and search
   const filteredSettlements = useMemo(() => {
     let filtered = settlements.filter(s =>
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.specialty.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    // 정렬
+    // Sorting
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'revenue':
@@ -80,7 +80,7 @@ export default function TherapistSettlementPage() {
     ? settlements.find(s => s.therapist_id === selectedTherapist)
     : null;
 
-  // 통계 계산
+  // Calculate statistics
   const stats = useMemo(() => {
     const totalRevenue = settlements.reduce((sum, s) => sum + s.total_revenue, 0);
     const totalCommission = settlements.reduce((sum, s) => sum + s.total_commission, 0);
@@ -104,15 +104,15 @@ export default function TherapistSettlementPage() {
           <div className="flex items-center gap-2 sm:gap-4 mb-2">
             <div className="text-2xl sm:text-3xl lg:text-4xl">💆</div>
             <div>
-              <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold">테라피스트 정산 관리</h1>
-              <p className="text-blue-100 text-xs sm:text-sm mt-1">테라피스트별 수익 및 정산 현황 조회</p>
+              <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold">Therapist Settlement Management</h1>
+              <p className="text-blue-100 text-xs sm:text-sm mt-1">View therapist revenue and settlement status</p>
             </div>
           </div>
         </div>
       </div>
 
       <main className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-        {/* 필터 & 검색 */}
+        {/* Filter & Search */}
         <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 sm:p-6 mb-4 sm:mb-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
             {/* 월 선택 */}
@@ -149,9 +149,9 @@ export default function TherapistSettlementPage() {
                 onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
               >
-                <option value="revenue">수익 기준 (높음)</option>
-                <option value="sessions">세션 기준 (많음)</option>
-                <option value="name">이름 기준 (A-Z)</option>
+                <option value="revenue">Revenue (High)</option>
+                <option value="sessions">Sessions (Many)</option>
+                <option value="name">Name (A-Z)</option>
               </select>
             </div>
 
@@ -164,7 +164,7 @@ export default function TherapistSettlementPage() {
           </div>
         </div>
 
-        {/* 통계 */}
+        {/* Statistics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 hover:shadow-md transition">
             <p className="text-xs text-gray-600 mb-1">총 테라피스트</p>
@@ -198,7 +198,7 @@ export default function TherapistSettlementPage() {
             <div className="bg-white rounded-lg shadow-sm border border-stone-200 overflow-hidden" style={{ minHeight: 'auto' }}>
               {loading ? (
                 <div className="p-12 text-center">
-                  <p className="text-gray-600">데이터를 불러오는 중...</p>
+                  <p className="text-gray-600">Loading data...</p>
                 </div>
               ) : error ? (
                 <div className="p-6 text-center bg-red-50">
@@ -206,19 +206,19 @@ export default function TherapistSettlementPage() {
                 </div>
               ) : filteredSettlements.length === 0 ? (
                 <div className="p-12 text-center">
-                  <p className="text-gray-600">검색 결과가 없습니다</p>
+                  <p className="text-gray-600">No search results</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50 border-b border-gray-200">
                       <tr>
-                        <th className="text-left px-6 py-3 font-semibold text-gray-900">이름</th>
-                        <th className="text-left px-6 py-3 font-semibold text-gray-900">전문분야</th>
-                        <th className="text-right px-6 py-3 font-semibold text-gray-900">세션</th>
-                        <th className="text-right px-6 py-3 font-semibold text-gray-900">수익</th>
-                        <th className="text-right px-6 py-3 font-semibold text-gray-900">수수료율</th>
-                        <th className="text-right px-6 py-3 font-semibold text-gray-900">평점</th>
+                        <th className="text-left px-6 py-3 font-semibold text-gray-900">Name</th>
+                        <th className="text-left px-6 py-3 font-semibold text-gray-900">Specialty</th>
+                        <th className="text-right px-6 py-3 font-semibold text-gray-900">Sessions</th>
+                        <th className="text-right px-6 py-3 font-semibold text-gray-900">Revenue</th>
+                        <th className="text-right px-6 py-3 font-semibold text-gray-900">Commission Rate</th>
+                        <th className="text-right px-6 py-3 font-semibold text-gray-900">Rating</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -245,7 +245,7 @@ export default function TherapistSettlementPage() {
             </div>
           </div>
 
-          {/* 상세 정산서 */}
+          {/* Detailed Settlement */}
           <div className="lg:block">
             {selectedData ? (
               <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 sm:p-6 space-y-3 sm:space-y-4 lg:sticky lg:top-6">
@@ -255,45 +255,45 @@ export default function TherapistSettlementPage() {
                 </div>
 
                 <div className="bg-blue-50 rounded-lg p-4">
-                  <p className="text-xs text-gray-600 mb-1">총 세션</p>
-                  <p className="text-2xl font-bold text-blue-600">{selectedData.session_count}회</p>
+                  <p className="text-xs text-gray-600 mb-1">Total Sessions</p>
+                  <p className="text-2xl font-bold text-blue-600">{selectedData.session_count}</p>
                 </div>
 
                 <div className="bg-green-50 rounded-lg p-4">
-                  <p className="text-xs text-gray-600 mb-1">총 수익</p>
+                  <p className="text-xs text-gray-600 mb-1">Total Revenue</p>
                   <p className="text-2xl font-bold text-green-600">₱{formatPrice(selectedData.total_revenue)}K</p>
                 </div>
 
                 <div className="bg-red-50 rounded-lg p-4">
-                  <p className="text-xs text-gray-600 mb-1">수수료율</p>
+                  <p className="text-xs text-gray-600 mb-1">Commission Rate</p>
                   <p className="text-xl font-bold text-red-600">{selectedData.commission_rate}%</p>
                 </div>
 
                 <div className="bg-red-50 rounded-lg p-4">
-                  <p className="text-xs text-gray-600 mb-1">수수료 (차감)</p>
+                  <p className="text-xs text-gray-600 mb-1">Commission (Deducted)</p>
                   <p className="text-2xl font-bold text-red-600">-₱{formatPrice(selectedData.total_commission)}K</p>
                 </div>
 
                 <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border-2 border-green-300">
-                  <p className="text-xs text-gray-600 mb-1">최종 지급액</p>
+                  <p className="text-xs text-gray-600 mb-1">Final Payment Amount</p>
                   <p className="text-3xl font-bold text-green-700">
                     ₱{formatPrice(selectedData.total_revenue - selectedData.total_commission)}K
                   </p>
                 </div>
 
                 <div className="bg-amber-50 rounded-lg p-4">
-                  <p className="text-xs text-gray-600 mb-1">평가</p>
+                  <p className="text-xs text-gray-600 mb-1">Rating</p>
                   <p className="text-2xl font-bold text-amber-600">⭐ {selectedData.avg_rating}</p>
                 </div>
 
                 <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors mt-4">
-                  정산서 다운로드
+                  Download Settlement Statement
                 </button>
               </div>
             ) : (
               <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 sm:p-6 text-center hidden lg:block lg:sticky lg:top-6">
                 <div className="text-4xl sm:text-5xl mb-3">👈</div>
-                <p className="text-sm sm:text-base text-gray-600">테라피스트를 선택하면<br />정산 정보가 표시됩니다</p>
+                <p className="text-sm sm:text-base text-gray-600">Select a therapist to<br />view settlement information</p>
               </div>
             )}
           </div>
@@ -311,7 +311,7 @@ export default function TherapistSettlementPage() {
                   <XAxis dataKey="name" angle={-45} textAnchor="end" height={70} tick={{ fontSize: 12 }} />
                   <YAxis tick={{ fontSize: 12 }} />
                   <Tooltip formatter={(value: any) => `₱${(value / 1000).toFixed(0)}K`} />
-                  <Bar dataKey="total_revenue" fill="#10b981" name="수익" />
+                  <Bar dataKey="total_revenue" fill="#10b981" name="Revenue" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -326,8 +326,8 @@ export default function TherapistSettlementPage() {
                   <YAxis tick={{ fontSize: 12 }} />
                   <Tooltip formatter={(value: any) => `₱${(value / 1000).toFixed(0)}K`} />
                   <Legend wrapperStyle={{ fontSize: '12px' }} />
-                  <Line type="monotone" dataKey="total_revenue" stroke="#3b82f6" name="수익" />
-                  <Line type="monotone" dataKey="total_commission" stroke="#ef4444" name="수수료" />
+                  <Line type="monotone" dataKey="total_revenue" stroke="#3b82f6" name="Revenue" />
+                  <Line type="monotone" dataKey="total_commission" stroke="#ef4444" name="Commission" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -365,7 +365,7 @@ export default function TherapistSettlementPage() {
                   <XAxis dataKey="name" angle={-45} textAnchor="end" height={70} tick={{ fontSize: 12 }} />
                   <YAxis tick={{ fontSize: 12 }} />
                   <Tooltip />
-                  <Bar dataKey="session_count" fill="#8b5cf6" name="세션 수" />
+                  <Bar dataKey="session_count" fill="#8b5cf6" name="Sessions" />
                 </BarChart>
               </ResponsiveContainer>
             </div>

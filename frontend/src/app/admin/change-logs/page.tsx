@@ -15,7 +15,7 @@ export default function ChangeLogsPage() {
     dateTo: '',
   });
 
-  // 필터링된 로그
+  // Filtered logs
   const filteredLogs = useMemo(() => {
     return changeLogs
       .filter((log) => {
@@ -89,7 +89,7 @@ export default function ChangeLogsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* 헤더 */}
+      {/* Header */}
       <div className="bg-gradient-to-r from-blue-400 to-blue-300 text-white p-6 shadow-md">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-3 mb-2">
@@ -101,7 +101,7 @@ export default function ChangeLogsPage() {
       </div>
 
       <main className="max-w-7xl mx-auto p-6">
-        {/* 필터 섹션 */}
+        {/* Filter section */}
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Filters</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -191,7 +191,7 @@ export default function ChangeLogsPage() {
           </div>
         </div>
 
-        {/* 테이블 */}
+        {/* Table */}
         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
           {filteredLogs.length === 0 ? (
             <div className="p-8 text-center">
@@ -253,7 +253,7 @@ export default function ChangeLogsPage() {
           )}
         </div>
 
-        {/* 페이지네이션 정보 */}
+        {/* Pagination info */}
         {filteredLogs.length > 0 && (
           <div className="mt-4 text-sm text-gray-600 text-center">
             Showing {filteredLogs.length} of {changeLogs.length} change logs

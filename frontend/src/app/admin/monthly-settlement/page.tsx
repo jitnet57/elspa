@@ -70,7 +70,7 @@ const mockMonthlySettlements: MonthlySettlement[] = [
       thai: { sessions: 4, revenue: 360000 },
     },
     status: 'confirmed',
-    notes: '확정 완료',
+    notes: 'Confirmed',
     created_at: '2026-05-20',
   },
   {
@@ -88,7 +88,7 @@ const mockMonthlySettlements: MonthlySettlement[] = [
       hotstone: { sessions: 3, revenue: 280000 },
     },
     status: 'paid',
-    notes: '지급 완료',
+    notes: 'Paid',
     created_at: '2026-05-20',
   },
   {
@@ -112,9 +112,9 @@ const mockMonthlySettlements: MonthlySettlement[] = [
 ];
 
 const mockCompanies: Company[] = [
-  { id: 1, name: 'ABC여행사', settlement_day: 20 },
-  { id: 2, name: 'XYZ여행사', settlement_day: 15 },
-  { id: 3, name: '글로벌투어', settlement_day: 25 },
+  { id: 1, name: 'ABC Travel Agency', settlement_day: 20 },
+  { id: 2, name: 'XYZ Travel Agency', settlement_day: 15 },
+  { id: 3, name: 'Global Tours', settlement_day: 25 },
 ];
 
 const mockGuides: Guide[] = [
@@ -141,19 +141,19 @@ export default function MonthlySettlementPage() {
   const [selectedSettlement, setSelectedSettlement] = useState<MonthlySettlement | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  // 초기 데이터 로드
+  // Initial data load
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        // Mock 데이터 사용 (실제 API 연동은 백엔드 준비 후)
+        // Use mock data (actual API integration after backend is ready)
         setSettlements(mockMonthlySettlements);
         setCompanies(mockCompanies);
         setGuides(mockGuides);
         setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : '오류가 발생했습니다');
-        console.error('정산 데이터 조회 오류:', err);
+        setError(err instanceof Error ? err.message : 'An error occurred');
+        console.error('Settlement data query error:', err);
       } finally {
         setLoading(false);
       }
@@ -162,7 +162,7 @@ export default function MonthlySettlementPage() {
     loadData();
   }, []);
 
-  // 필터링 및 검색
+  // Filtering and search
   const filteredSettlements = useMemo(() => {
     let filtered = settlements.filter(s => {
       const monthMatch = s.settlement_month === selectedMonth;
@@ -204,16 +204,16 @@ export default function MonthlySettlementPage() {
   }, [filteredSettlements]);
 
   const getCompanyName = (companyId: number) => {
-    return companies.find(c => c.id === companyId)?.name || '알 수 없음';
+    return companies.find(c => c.id === companyId)?.name || 'Unknown';
   };
 
   const getGuideName = (guideId: number) => {
-    return guides.find(g => g.id === guideId)?.name || '알 수 없음';
+    return guides.find(g => g.id === guideId)?.name || 'Unknown';
   };
 
   const getNextSettlementDate = (companyId: number): string => {
     const company = companies.find(c => c.id === companyId);
-    if (!company || !company.settlement_day) return '정산일 미설정';
+    if (!company || !company.settlement_day) return 'Settlement day not set';
 
     const today = new Date();
     const year = today.getFullYear();
@@ -243,11 +243,11 @@ export default function MonthlySettlementPage() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'pending':
-        return '미확정';
+        return 'Pending';
       case 'confirmed':
-        return '확정';
+        return 'Confirmed';
       case 'paid':
-        return '지급완료';
+        return 'Paid';
       default:
         return status;
     }
@@ -265,8 +265,8 @@ export default function MonthlySettlementPage() {
       const guideName = getGuideName(updated.guide_id);
       const message =
         newStatus === 'confirmed'
-          ? `${guideName}의 ${updated.settlement_month} 정산이 확정되었습니다`
-          : `${guideName}에게 ₱${(updated.payment_amount / 1000).toFixed(0)}K 지급을 완료했습니다`;
+          ? `${guideName}'s ${updated.settlement_month} settlement has been confirmed`
+          : `Payment of ₱${(updated.payment_amount / 1000).toFixed(0)}K to ${guideName} has been completed`;
 
       addNotification({
         type: newStatus === 'confirmed' ? 'settlement_confirmed' : 'settlement_paid',
@@ -280,25 +280,25 @@ export default function MonthlySettlementPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-slate-50">
-      {/* 헤더 */}
+      {/* Header */}
       <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-4 sm:p-6 lg:p-8 shadow-lg">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-2 sm:gap-4 mb-2">
             <div className="text-2xl sm:text-3xl lg:text-4xl">📊</div>
             <div>
-              <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold">월정산 관리</h1>
-              <p className="text-green-100 text-xs sm:text-sm mt-1">업체별 정산 현황 조회 및 관리</p>
+              <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold">Monthly Settlement Management</h1>
+              <p className="text-green-100 text-xs sm:text-sm mt-1">View and manage settlement status by company</p>
             </div>
           </div>
         </div>
       </div>
 
       <main className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-        {/* 필터 & 액션 */}
+        {/* Filters & Actions */}
         <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 sm:p-6 mb-4 sm:mb-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4 mb-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">월 선택</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Select Month</label>
               <input
                 type="month"
                 value={selectedMonth}
@@ -307,13 +307,13 @@ export default function MonthlySettlementPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">업체</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Company</label>
               <select
                 value={filterCompanyId || ''}
                 onChange={e => setFilterCompanyId(e.target.value ? parseInt(e.target.value) : null)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
               >
-                <option value="">모든 업체</option>
+                <option value="">All Companies</option>
                 {companies.map(c => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -322,23 +322,23 @@ export default function MonthlySettlementPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">상태</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
               <select
                 value={statusFilter}
                 onChange={e => setStatusFilter(e.target.value as typeof statusFilter)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
               >
-                <option value="all">모든 상태</option>
-                <option value="pending">미확정</option>
-                <option value="confirmed">확정</option>
-                <option value="paid">지급완료</option>
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="paid">Paid</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">검색</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Search</label>
               <input
                 type="text"
-                placeholder="가이드 이름 검색"
+                placeholder="Search guide name"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
@@ -353,53 +353,53 @@ export default function MonthlySettlementPage() {
                     guides as any,
                     selectedMonth
                   );
-                  downloadCSV(`월정산_${selectedMonth}.csv`, csv);
-                  alert('정산 데이터가 다운로드되었습니다!');
+                  downloadCSV(`Monthly_Settlement_${selectedMonth}.csv`, csv);
+                  alert('Settlement data has been downloaded!');
                 }}
                 className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
               >
-                📥 CSV 내보내기
+                📥 Export CSV
               </button>
             </div>
           </div>
 
           <div className="text-sm text-gray-600">
-            검색 결과: <span className="font-bold text-green-600">{filteredSettlements.length}</span>건
+            Search Results: <span className="font-bold text-green-600">{filteredSettlements.length}</span> records
           </div>
         </div>
 
-        {/* 통계 */}
+        {/* Statistics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 hover:shadow-md transition">
-            <p className="text-xs text-gray-600 mb-1">총 거래액</p>
+            <p className="text-xs text-gray-600 mb-1">Total Revenue</p>
             <p className="text-3xl font-bold text-blue-600">₱{(totals.revenue / 1000).toFixed(0)}K</p>
             <p className="text-xs text-gray-500 mt-2">{filteredSettlements.length}건</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 hover:shadow-md transition">
-            <p className="text-xs text-gray-600 mb-1">총 수수료</p>
+            <p className="text-xs text-gray-600 mb-1">Total Commission</p>
             <p className="text-3xl font-bold text-red-600">₱{(totals.commission / 1000).toFixed(0)}K</p>
-            <p className="text-xs text-gray-500 mt-2">차감액</p>
+            <p className="text-xs text-gray-500 mt-2">Deducted Amount</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 hover:shadow-md transition">
-            <p className="text-xs text-gray-600 mb-1">최종 지급액</p>
+            <p className="text-xs text-gray-600 mb-1">Final Payment Amount</p>
             <p className="text-3xl font-bold text-green-600">₱{(totals.payment / 1000).toFixed(0)}K</p>
-            <p className="text-xs text-gray-500 mt-2">실 수령액</p>
+            <p className="text-xs text-gray-500 mt-2">Actual Payment</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 hover:shadow-md transition">
-            <p className="text-xs text-gray-600 mb-1">지급 건수</p>
+            <p className="text-xs text-gray-600 mb-1">Number of Payments</p>
             <p className="text-3xl font-bold text-purple-600">{totals.count}</p>
-            <p className="text-xs text-gray-500 mt-2">건</p>
+            <p className="text-xs text-gray-500 mt-2">payments</p>
           </div>
         </div>
 
-        {/* 정산 상세 */}
+        {/* Settlement Details */}
         <div className="bg-white rounded-lg shadow-sm border border-stone-200 overflow-hidden">
           {loading ? (
             <div className="p-12 text-center">
-              <p className="text-gray-600">데이터를 불러오는 중...</p>
+              <p className="text-gray-600">Loading data...</p>
             </div>
           ) : error ? (
             <div className="p-6 text-center bg-red-50">
@@ -407,21 +407,21 @@ export default function MonthlySettlementPage() {
             </div>
           ) : Object.keys(groupedByCompany).length === 0 ? (
             <div className="p-12 text-center">
-              <p className="text-gray-600">정산 데이터가 없습니다</p>
+              <p className="text-gray-600">No settlement data available</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
               {Object.entries(groupedByCompany).map(([companyId, companySettlements]) => (
                 <div key={companyId} className="border-b border-gray-200">
-                  {/* 업체 헤더 */}
+                  {/* Company Header */}
                   <div className="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                     <h3 className="text-base sm:text-lg font-bold text-gray-900">{getCompanyName(parseInt(companyId))}</h3>
                     <span className="text-xs px-2 sm:px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-semibold whitespace-nowrap">
-                      다음 정산: {getNextSettlementDate(parseInt(companyId))}
+                      Next Settlement: {getNextSettlementDate(parseInt(companyId))}
                     </span>
                   </div>
 
-                  {/* 가이드별 정산 */}
+                  {/* Settlement by Guide */}
                   <div className="divide-y divide-gray-100">
                     {companySettlements.map(settlement => (
                       <div
@@ -430,24 +430,24 @@ export default function MonthlySettlementPage() {
                       >
                         <div className="flex-1 min-w-0">
                           <h4 className="font-semibold text-gray-900 truncate">{getGuideName(settlement.guide_id)}</h4>
-                          <p className="text-xs sm:text-sm text-gray-600 mt-1">세션 {settlement.total_sessions}회 · {settlement.settlement_date}</p>
+                          <p className="text-xs sm:text-sm text-gray-600 mt-1">Sessions: {settlement.total_sessions} · {settlement.settlement_date}</p>
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 mr-0 sm:mr-6">
                           <div className="text-right">
-                            <p className="text-xs text-gray-600">수익</p>
+                            <p className="text-xs text-gray-600">Revenue</p>
                             <p className="font-bold text-gray-900">₱{(settlement.total_revenue / 1000).toFixed(0)}K</p>
                           </div>
                           <div className="text-right">
-                            <p className="text-xs text-gray-600">수수료</p>
+                            <p className="text-xs text-gray-600">Commission</p>
                             <p className="font-bold text-red-600">{settlement.commission_rate}%</p>
                           </div>
                           <div className="text-right">
-                            <p className="text-xs text-gray-600">지급</p>
+                            <p className="text-xs text-gray-600">Payment</p>
                             <p className="font-bold text-green-600">₱{(settlement.payment_amount / 1000).toFixed(0)}K</p>
                           </div>
                           <div className="text-right">
-                            <p className="text-xs text-gray-600">상태</p>
+                            <p className="text-xs text-gray-600">Status</p>
                             <span className={`inline-block text-xs font-bold px-2 py-1 rounded mt-1 ${getStatusColor(settlement.status)}`}>
                               {getStatusLabel(settlement.status)}
                             </span>
@@ -462,14 +462,14 @@ export default function MonthlySettlementPage() {
                             }}
                             className="flex-1 sm:flex-none px-2 sm:px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold text-xs sm:text-sm rounded transition-colors whitespace-nowrap text-center sm:text-left"
                           >
-                            상세보기
+                            View Details
                           </button>
                           {settlement.status === 'pending' && (
                             <button
                               onClick={() => updateSettlementStatus(settlement.id, 'confirmed')}
                               className="flex-1 sm:flex-none px-2 sm:px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm rounded transition-colors whitespace-nowrap text-center"
                             >
-                              ✅ 확정
+                              ✅ Confirm
                             </button>
                           )}
                           {settlement.status === 'confirmed' && (
@@ -477,7 +477,7 @@ export default function MonthlySettlementPage() {
                               onClick={() => updateSettlementStatus(settlement.id, 'paid')}
                               className="flex-1 sm:flex-none px-2 sm:px-3 py-1 bg-green-600 hover:bg-green-700 text-white font-semibold text-xs sm:text-sm rounded transition-colors whitespace-nowrap text-center"
                             >
-                              💰 지급
+                              💰 Pay
                             </button>
                           )}
                         </div>
@@ -485,14 +485,14 @@ export default function MonthlySettlementPage() {
                     ))}
                   </div>
 
-                  {/* 업체 소계 */}
+                  {/* Company Subtotal */}
                   <div className="bg-gray-50 px-4 sm:px-6 py-2 sm:py-3 border-t border-gray-200 flex flex-col sm:flex-row justify-end gap-6 sm:gap-12">
                     <div className="text-right">
-                      <p className="text-xs text-gray-600">소계 수익</p>
+                      <p className="text-xs text-gray-600">Subtotal Revenue</p>
                       <p className="font-bold text-gray-900">₱{(companySettlements.reduce((sum, s) => sum + s.total_revenue, 0) / 1000).toFixed(0)}K</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-gray-600">소계 지급</p>
+                      <p className="text-xs text-gray-600">Subtotal Payment</p>
                       <p className="font-bold text-green-700">₱{(companySettlements.reduce((sum, s) => sum + s.payment_amount, 0) / 1000).toFixed(0)}K</p>
                     </div>
                   </div>
@@ -502,13 +502,13 @@ export default function MonthlySettlementPage() {
           )}
         </div>
 
-        {/* 상세 조회 모달 */}
+        {/* Detail View Modal */}
         {isDetailModalOpen && selectedSettlement && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-4">
             <div className="bg-white rounded-xl p-4 sm:p-6 lg:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-green-500 shadow-2xl">
               <div className="flex justify-between items-start gap-2 mb-4 sm:mb-6">
                 <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 flex-1">
-                  {selectedSettlement.settlement_month} - {getGuideName(selectedSettlement.guide_id)} 정산
+                  {selectedSettlement.settlement_month} - {getGuideName(selectedSettlement.guide_id)} Settlement
                 </h2>
                 <button
                   onClick={() => setIsDetailModalOpen(false)}
@@ -521,51 +521,51 @@ export default function MonthlySettlementPage() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                   <div>
-                    <p className="text-xs text-gray-600 mb-1">업체</p>
+                    <p className="text-xs text-gray-600 mb-1">Company</p>
                     <p className="font-bold text-gray-900">{getCompanyName(selectedSettlement.company_id)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600 mb-1">가이드</p>
+                    <p className="text-xs text-gray-600 mb-1">Guide</p>
                     <p className="font-bold text-gray-900">{getGuideName(selectedSettlement.guide_id)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600 mb-1">총 세션</p>
-                    <p className="font-bold text-gray-900">{selectedSettlement.total_sessions}회</p>
+                    <p className="text-xs text-gray-600 mb-1">Total Sessions</p>
+                    <p className="font-bold text-gray-900">{selectedSettlement.total_sessions} sessions</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600 mb-1">정산일</p>
+                    <p className="text-xs text-gray-600 mb-1">Settlement Date</p>
                     <p className="font-bold text-gray-900">{selectedSettlement.settlement_date}</p>
                   </div>
                 </div>
 
                 <div className="border-t border-gray-200 pt-4">
-                  <h3 className="font-bold text-gray-900 mb-3">📊 정산 요약</h3>
+                  <h3 className="font-bold text-gray-900 mb-3">📊 Settlement Summary</h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">총 매출</span>
+                      <span className="text-gray-600">Total Revenue</span>
                       <span className="font-bold">₱{(selectedSettlement.total_revenue / 1000).toFixed(0)}K</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">수수료율</span>
+                      <span className="text-gray-600">Commission Rate</span>
                       <span className="font-bold">{selectedSettlement.commission_rate}%</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">차감액</span>
+                      <span className="text-gray-600">Deducted Amount</span>
                       <span className="font-bold text-red-600">-₱{(selectedSettlement.commission_amount / 1000).toFixed(0)}K</span>
                     </div>
                     <div className="flex justify-between pt-2 border-t border-gray-200 font-bold text-lg">
-                      <span>최종 지급액</span>
+                      <span>Final Payment Amount</span>
                       <span className="text-green-600">₱{(selectedSettlement.payment_amount / 1000).toFixed(0)}K</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="border-t border-gray-200 pt-4">
-                  <h3 className="font-bold text-gray-900 mb-3">📈 서비스별 상세</h3>
+                  <h3 className="font-bold text-gray-900 mb-3">📈 Service Details</h3>
                   <div className="space-y-2 text-sm">
                     {Object.entries(selectedSettlement.service_breakdown).map(([service, data]) => (
                       <div key={service} className="flex justify-between p-2 bg-gray-50 rounded">
-                        <span className="text-gray-600">{service} ({data.sessions}회)</span>
+                        <span className="text-gray-600">{service} ({data.sessions} sessions)</span>
                         <span className="font-bold">₱{(data.revenue / 1000).toFixed(0)}K</span>
                       </div>
                     ))}
@@ -574,7 +574,7 @@ export default function MonthlySettlementPage() {
 
                 {selectedSettlement.notes && (
                   <div className="border-t border-gray-200 pt-4">
-                    <h3 className="font-bold text-gray-900 mb-2">📝 비고</h3>
+                    <h3 className="font-bold text-gray-900 mb-2">📝 Notes</h3>
                     <p className="text-sm text-gray-600">{selectedSettlement.notes}</p>
                   </div>
                 )}
@@ -583,12 +583,12 @@ export default function MonthlySettlementPage() {
           </div>
         )}
 
-        {/* 차트 섹션 */}
+        {/* Chart Section */}
         {filteredSettlements.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-8">
-            {/* 업체별 정산액 비교 */}
+            {/* Company Settlement Comparison */}
             <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">업체별 정산액 비교</h3>
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Settlement Amount by Company</h3>
               {Object.keys(groupedByCompany).length > 0 && (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart
@@ -604,38 +604,38 @@ export default function MonthlySettlementPage() {
                     <YAxis tick={{ fontSize: 12 }} />
                     <Tooltip formatter={(value: any) => `₱${(value / 1000).toFixed(0)}K`} />
                     <Legend wrapperStyle={{ fontSize: '12px' }} />
-                    <Bar dataKey="revenue" fill="#10b981" name="수익" />
-                    <Bar dataKey="payment" fill="#3b82f6" name="지급액" />
+                    <Bar dataKey="revenue" fill="#10b981" name="Revenue" />
+                    <Bar dataKey="payment" fill="#3b82f6" name="Payment" />
                   </BarChart>
                 </ResponsiveContainer>
               )}
             </div>
 
-            {/* 상태별 정산 현황 */}
+            {/* Settlement Status Overview */}
             <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">상태별 정산 현황</h3>
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Settlement Status Overview</h3>
               {filteredSettlements.length > 0 && (
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
                       data={[
                         {
-                          name: '미확정',
+                          name: 'Pending',
                           value: filteredSettlements.filter(s => s.status === 'pending').length,
                         },
                         {
-                          name: '확정',
+                          name: 'Confirmed',
                           value: filteredSettlements.filter(s => s.status === 'confirmed').length,
                         },
                         {
-                          name: '지급완료',
+                          name: 'Paid',
                           value: filteredSettlements.filter(s => s.status === 'paid').length,
                         },
                       ].filter(d => d.value > 0)}
                       cx="50%"
                       cy="50%"
                       outerRadius={60}
-                      label={({ name, value }) => filteredSettlements.length > 5 ? `${value}건` : `${name} ${value}건`}
+                      label={({ name, value }) => filteredSettlements.length > 5 ? `${value}` : `${name} ${value}`}
                       labelLine={filteredSettlements.length <= 5}
                     >
                       <Cell fill="#fbbf24" />
@@ -648,9 +648,9 @@ export default function MonthlySettlementPage() {
               )}
             </div>
 
-            {/* 수수료율별 분석 */}
+            {/* Commission Rate Analysis */}
             <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">수익 vs 지급액 추이</h3>
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Revenue vs Payment Trend</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart
                   data={filteredSettlements.sort((a, b) =>
@@ -669,15 +669,15 @@ export default function MonthlySettlementPage() {
                   <YAxis tick={{ fontSize: 12 }} />
                   <Tooltip formatter={(value: any) => `₱${(value / 1000).toFixed(0)}K`} />
                   <Legend wrapperStyle={{ fontSize: '12px' }} />
-                  <Line type="monotone" dataKey="total_revenue" stroke="#10b981" name="수익" />
-                  <Line type="monotone" dataKey="payment_amount" stroke="#3b82f6" name="지급액" />
+                  <Line type="monotone" dataKey="total_revenue" stroke="#10b981" name="Revenue" />
+                  <Line type="monotone" dataKey="payment_amount" stroke="#3b82f6" name="Payment" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
 
-            {/* 가이드별 지급액 TOP 5 */}
+            {/* Top 5 Payment by Guide */}
             <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">가이드별 지급액 TOP 5</h3>
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Top 5 Payment by Guide</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart
                   data={filteredSettlements
@@ -693,7 +693,7 @@ export default function MonthlySettlementPage() {
                   <XAxis dataKey="name" angle={-45} textAnchor="end" height={70} tick={{ fontSize: 12 }} />
                   <YAxis tick={{ fontSize: 12 }} />
                   <Tooltip formatter={(value: any) => `₱${(value / 1000).toFixed(0)}K`} />
-                  <Bar dataKey="payment" fill="#8b5cf6" name="지급액" />
+                  <Bar dataKey="payment" fill="#8b5cf6" name="Payment" />
                 </BarChart>
               </ResponsiveContainer>
             </div>

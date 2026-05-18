@@ -147,13 +147,13 @@ export default function FairnessDashboardPage() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'ideal':
-        return '✓ 적정';
+        return '✓ Ideal';
       case 'overloaded':
-        return '⚠️ 과로';
+        return '⚠️ Overloaded';
       case 'underutilized':
-        return '◐ 저활용';
+        return '◐ Underutilized';
       case 'new':
-        return '⭐ 신입';
+        return '⭐ New';
       default:
         return '';
     }
@@ -162,26 +162,26 @@ export default function FairnessDashboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-blue-50 p-8">
       <div className="max-w-7xl mx-auto">
-        {/* 헤더 */}
+        {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2 tracking-tight">
-            📊 공정성 모니터링 대시보드
+            📊 Fairness Monitoring Dashboard
           </h1>
           <p className="text-lg text-gray-600 font-light">
-            테라피스트 팀의 공정한 일감 분배와 건강 상태를 실시간으로 모니터링합니다
+            Real-time monitoring of fair work distribution and therapist team health
           </p>
         </div>
 
-        {/* 필터 & 통계 */}
+        {/* Filters & Statistics */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
-          {/* 기간 선택 */}
+          {/* Period selection */}
           <div className="bg-white rounded-xl p-4 border border-stone-200">
-            <p className="text-xs text-gray-600 font-light mb-3">기간</p>
+            <p className="text-xs text-gray-600 font-light mb-3">Period</p>
             <div className="space-y-2">
               {[
-                { id: 'day', label: '오늘' },
-                { id: 'week', label: '이번 주' },
-                { id: 'month', label: '이번 달' },
+                { id: 'day', label: 'Today' },
+                { id: 'week', label: 'This Week' },
+                { id: 'month', label: 'This Month' },
               ].map(period => (
                 <button
                   key={period.id}
@@ -198,14 +198,14 @@ export default function FairnessDashboardPage() {
             </div>
           </div>
 
-          {/* 메트릭 선택 */}
+          {/* Metric selection */}
           <div className="bg-white rounded-xl p-4 border border-stone-200 lg:col-span-3">
-            <p className="text-xs text-gray-600 font-light mb-3">분석 메트릭</p>
+            <p className="text-xs text-gray-600 font-light mb-3">Analysis Metrics</p>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { id: 'bookings', label: '📋 일감 분배' },
-                { id: 'fairness', label: '⚖️ 공정성 점수' },
-                { id: 'earnings', label: '💰 수익' },
+                { id: 'bookings', label: '📋 Work Distribution' },
+                { id: 'fairness', label: '⚖️ Fairness Score' },
+                { id: 'earnings', label: '💰 Revenue' },
               ].map(metric => (
                 <button
                   key={metric.id}
@@ -223,47 +223,47 @@ export default function FairnessDashboardPage() {
           </div>
         </div>
 
-        {/* 메인 분석 */}
+        {/* Main Analysis */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
-          {/* 팀 통계 */}
+          {/* Team Statistics */}
           <div className="lg:col-span-1 space-y-4">
             <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-100">
-              <p className="text-xs text-gray-600 font-light mb-2">평균 일감 (현재 기간)</p>
+              <p className="text-xs text-gray-600 font-light mb-2">Average Work (Current Period)</p>
               <p className="text-3xl font-bold text-blue-600 mb-2">{avgBookings}</p>
-              <p className="text-xs text-gray-600 font-light">예약 건수</p>
+              <p className="text-xs text-gray-600 font-light">Bookings</p>
             </div>
 
             <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-100">
-              <p className="text-xs text-gray-600 font-light mb-2">팀 크기</p>
+              <p className="text-xs text-gray-600 font-light mb-2">Team Size</p>
               <p className="text-3xl font-bold text-emerald-600 mb-2">{THERAPIST_FAIRNESS.length}</p>
-              <p className="text-xs text-gray-600 font-light">명의 테라피스트</p>
+              <p className="text-xs text-gray-600 font-light">Therapists</p>
             </div>
 
             <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-100">
-              <p className="text-xs text-gray-600 font-light mb-2">공정성 평가</p>
+              <p className="text-xs text-gray-600 font-light mb-2">Fairness Rating</p>
               <p className="text-3xl font-bold text-purple-600 mb-2">
                 {(
                   THERAPIST_FAIRNESS.reduce((sum, t) => sum + t.fairnessScore, 0) /
                   THERAPIST_FAIRNESS.length
                 ).toFixed(1)}
               </p>
-              <p className="text-xs text-gray-600 font-light">/ 100점</p>
+              <p className="text-xs text-gray-600 font-light">/ 100</p>
             </div>
 
             <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-6 border-2 border-emerald-200">
-              <p className="text-sm font-bold text-emerald-900 mb-2">✓ 상태: 정상</p>
+              <p className="text-sm font-bold text-emerald-900 mb-2">✓ Status: Healthy</p>
               <p className="text-xs text-emerald-800 font-light">
-                모든 규칙이 준수 중이며 팀이 건강합니다.
+                All rules are being followed and the team is healthy.
               </p>
             </div>
           </div>
 
-          {/* 테라피스트 순위 */}
+          {/* Therapist Ranking */}
           <div className="lg:col-span-3 bg-white rounded-xl p-8 shadow-sm border border-stone-100">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              {selectedMetric === 'bookings' && '📋 일감 분배 현황'}
-              {selectedMetric === 'fairness' && '⚖️ 공정성 순위'}
-              {selectedMetric === 'earnings' && '💰 수익 분포'}
+              {selectedMetric === 'bookings' && '📋 Work Distribution Status'}
+              {selectedMetric === 'fairness' && '⚖️ Fairness Ranking'}
+              {selectedMetric === 'earnings' && '💰 Revenue Distribution'}
             </h2>
 
             <div className="space-y-4">
@@ -343,10 +343,10 @@ export default function FairnessDashboardPage() {
           </div>
         </div>
 
-        {/* 공정성 규칙 모니터링 */}
+        {/* Fairness Rule Monitoring */}
         <div className="bg-white rounded-xl p-8 shadow-sm border border-stone-100 mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            🛡️ 공정성 규칙 준수 현황
+            🛡️ Fairness Rule Compliance Status
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
@@ -370,24 +370,24 @@ export default function FairnessDashboardPage() {
           </div>
         </div>
 
-        {/* 주의 항목 */}
+        {/* Alert Items */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* 과로 경보 */}
+          {/* Overwork Alert */}
           <div className="bg-red-50 rounded-xl p-8 border-2 border-red-200">
-            <h3 className="text-xl font-bold text-red-900 mb-4">⚠️ 과로 경보</h3>
+            <h3 className="text-xl font-bold text-red-900 mb-4">⚠️ Overwork Alert</h3>
             <div className="space-y-3">
               {THERAPIST_FAIRNESS.filter(t => t.status === 'overloaded').map(therapist => (
                 <div key={therapist.name} className="bg-white rounded-lg p-4 border border-red-200">
                   <p className="font-bold text-gray-900 mb-1">{therapist.name}</p>
                   <p className="text-xs text-gray-600 font-light mb-2">
-                    오늘 {therapist.hoursWorkedToday}시간 근무 | 휴식 {therapist.restMinutesToday}분
+                    Today: {therapist.hoursWorkedToday} hours worked | {therapist.restMinutesToday} min rest
                   </p>
                   <div className="flex gap-2">
                     <button className="flex-1 px-3 py-2 bg-red-500 text-white rounded text-xs font-semibold hover:bg-red-600">
-                      강제 휴식 지정
+                      Force Rest
                     </button>
                     <button className="flex-1 px-3 py-2 bg-stone-200 text-gray-900 rounded text-xs font-semibold hover:bg-stone-300">
-                      상담
+                      Consult
                     </button>
                   </div>
                 </div>
@@ -395,9 +395,9 @@ export default function FairnessDashboardPage() {
             </div>
           </div>
 
-          {/* 저활용 & 신입 */}
+          {/* Underutilization & New */}
           <div className="bg-blue-50 rounded-xl p-8 border-2 border-blue-200">
-            <h3 className="text-xl font-bold text-blue-900 mb-4">💡 육성 & 활용</h3>
+            <h3 className="text-xl font-bold text-blue-900 mb-4">💡 Development & Utilization</h3>
             <div className="space-y-3">
               {THERAPIST_FAIRNESS.filter(t =>
                 t.status === 'underutilized' || t.status === 'new'
@@ -405,10 +405,10 @@ export default function FairnessDashboardPage() {
                 <div key={therapist.name} className="bg-white rounded-lg p-4 border border-blue-200">
                   <p className="font-bold text-gray-900 mb-1">{therapist.name}</p>
                   <p className="text-xs text-gray-600 font-light mb-2">
-                    {therapist.status === 'new' ? '신입 (신입 부스트 모드)' : '저활용 (더 많은 기회 제공 필요)'}
+                    {therapist.status === 'new' ? 'New (New Boost Mode)' : 'Underutilized (Need more opportunities)'}
                   </p>
                   <button className="w-full px-3 py-2 bg-blue-500 text-white rounded text-xs font-semibold hover:bg-blue-600">
-                    다음 예약 우선 배정
+                    Prioritize Next Booking
                   </button>
                 </div>
               ))}
@@ -416,28 +416,28 @@ export default function FairnessDashboardPage() {
           </div>
         </div>
 
-        {/* 정책 설명 */}
+        {/* Policy Explanation */}
         <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-8 border-2 border-blue-200">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            📚 공정성 정책의 목표
+            📚 Fairness Policy Goals
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div>
-              <p className="font-bold text-blue-900 mb-2">고객 만족도 ✓</p>
+              <p className="font-bold text-blue-900 mb-2">Customer Satisfaction ✓</p>
               <p className="text-sm text-gray-700 font-light">
-                기본 모드로 최고 품질의 서비스 제공. 모든 테라피스트는 충분히 휴식하고 있어 서비스 품질 보장.
+                Providing highest quality service. All therapists get sufficient rest ensuring service quality.
               </p>
             </div>
             <div>
-              <p className="font-bold text-purple-900 mb-2">테라피스트 건강 ✓</p>
+              <p className="font-bold text-purple-900 mb-2">Therapist Health ✓</p>
               <p className="text-sm text-gray-700 font-light">
-                3시간 연속근무 제한, 8시간 일일 최대 규칙으로 피로도 관리. 모두가 동등한 기회와 수익 제공.
+                3-hour continuous work limit, 8-hour daily max for fatigue management. Equal opportunities and earnings.
               </p>
             </div>
             <div>
-              <p className="font-bold text-blue-900 mb-2">회사 지속성 ✓</p>
+              <p className="font-bold text-blue-900 mb-2">Company Sustainability ✓</p>
               <p className="text-sm text-gray-700 font-light">
-                인력 이직률 감소, 신입 성장, 팀 응집력 강화. 장기적 성공을 위한 투자.
+                Reduced turnover, new staff growth, enhanced team cohesion. Investment for long-term success.
               </p>
             </div>
           </div>

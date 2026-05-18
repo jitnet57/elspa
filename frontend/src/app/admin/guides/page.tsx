@@ -144,7 +144,7 @@ export default function GuidesPage() {
   const [filterCompanyId, setFilterCompanyId] = useState<number | null>(null);
   const [formData, setFormData] = useState<Partial<Guide>>({});
 
-  // Mock 데이터 초기화
+  // Initialize mock data
   if (guides.length === 0) {
     setGuides(mockGuides);
   }
@@ -175,13 +175,13 @@ export default function GuidesPage() {
 
   const handleSubmit = () => {
     if (!formData.name || !formData.company_id || !formData.specialty || !formData.phone || !formData.bank_account) {
-      alert('필수 항목을 입력해주세요');
+      alert('Please fill in all required fields');
       return;
     }
 
     if (selectedGuide) {
       updateGuide(selectedGuide.id, formData);
-      alert('가이드 정보가 수정되었습니다');
+      alert('Guide information has been updated');
     } else {
       const newGuide: Guide = {
         id: Math.max(...guides.map(g => g.id), 0) + 1,
@@ -189,27 +189,27 @@ export default function GuidesPage() {
         name: formData.name!,
         specialty: formData.specialty!,
         phone: formData.phone!,
-        bank_name: formData.bank_name || '국민은행',
+        bank_name: formData.bank_name || 'KB Bank',
         bank_account: formData.bank_account!,
         commission_rate: formData.commission_rate,
         status: 'active',
         created_at: new Date().toISOString().split('T')[0],
       };
       addGuide(newGuide);
-      alert('새로운 가이드가 등록되었습니다');
+      alert('New guide has been registered');
     }
     handleCloseModal();
   };
 
   const handleDelete = (id: number) => {
-    if (confirm('이 가이드를 삭제하시겠습니까?')) {
+    if (confirm('Are you sure you want to delete this guide?')) {
       deleteGuide(id);
-      alert('가이드가 삭제되었습니다');
+      alert('Guide has been deleted');
     }
   };
 
   const getCompanyName = (companyId: number) => {
-    return companies.find(c => c.id === companyId)?.name || '알 수 없음';
+    return companies.find(c => c.id === companyId)?.name || 'Unknown';
   };
 
   const getCompanyCommissionRate = (companyId: number) => {
@@ -219,33 +219,33 @@ export default function GuidesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-8">
       <div className="max-w-6xl mx-auto">
-        {/* 헤더 */}
+        {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2 tracking-tight">
-            👤 가이드 관리
+            👤 Guide Management
           </h1>
           <p className="text-lg text-gray-600 font-light">
-            여행사별 가이드 정보 및 정산 설정
+            Guide information and settlement settings by company
           </p>
         </div>
 
-        {/* 액션 버튼 */}
+        {/* Action buttons */}
         <div className="mb-8 flex gap-4">
           <button
             onClick={() => handleOpenModal()}
             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-lg shadow-lg transition-all"
           >
-            + 새 가이드 등록
+            + Register New Guide
           </button>
 
-          {/* 필터 */}
+          {/* Filter */}
           <div>
             <select
               value={filterCompanyId || ''}
               onChange={e => setFilterCompanyId(e.target.value ? parseInt(e.target.value) : null)}
               className="px-4 py-3 bg-white border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none font-semibold"
             >
-              <option value="">모든 업체</option>
+              <option value="">All Companies</option>
               {companies.map(c => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -255,11 +255,11 @@ export default function GuidesPage() {
           </div>
         </div>
 
-        {/* 가이드 목록 */}
+        {/* Guide list */}
         <div className="space-y-4">
           {filteredGuides.length === 0 ? (
             <div className="bg-white rounded-lg p-12 text-center text-gray-500">
-              등록된 가이드가 없습니다
+              No registered guides
             </div>
           ) : (
             filteredGuides.map(guide => (
@@ -281,29 +281,29 @@ export default function GuidesPage() {
                         : 'bg-red-100 text-red-700'
                     }`}
                   >
-                    {guide.status === 'active' ? '활성' : '비활성'}
+                    {guide.status === 'active' ? 'Active' : 'Inactive'}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                   <div>
-                    <div className="text-xs text-gray-600">전화</div>
+                    <div className="text-xs text-gray-600">Phone</div>
                     <div className="text-sm font-semibold text-gray-900">{guide.phone}</div>
                   </div>
                   <div>
-                    <div className="text-xs text-gray-600">계좌</div>
+                    <div className="text-xs text-gray-600">Account</div>
                     <div className="text-sm font-semibold text-gray-900">
                       {guide.bank_name} {guide.bank_account}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-gray-600">수수료율</div>
+                    <div className="text-xs text-gray-600">Commission Rate</div>
                     <div className="text-sm font-semibold text-blue-600">
                       {guide.commission_rate || getCompanyCommissionRate(guide.company_id)}%
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-gray-600">등록일</div>
+                    <div className="text-xs text-gray-600">Registered Date</div>
                     <div className="text-sm font-semibold text-gray-900">{guide.created_at}</div>
                   </div>
                 </div>
@@ -313,13 +313,13 @@ export default function GuidesPage() {
                     onClick={() => handleOpenModal(guide)}
                     className="flex-1 px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold text-sm rounded transition-colors"
                   >
-                    편집
+                    Edit
                   </button>
                   <button
                     onClick={() => handleDelete(guide.id)}
                     className="flex-1 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-semibold text-sm rounded transition-colors"
                   >
-                    삭제
+                    Delete
                   </button>
                 </div>
               </div>
@@ -327,13 +327,13 @@ export default function GuidesPage() {
           )}
         </div>
 
-        {/* 모달 */}
+        {/* Modal */}
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="bg-white rounded-xl p-8 w-full max-w-md max-h-96 overflow-y-auto border-2 border-blue-500 shadow-2xl">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {selectedGuide ? '가이드 수정' : '새 가이드 등록'}
+                  {selectedGuide ? 'Edit Guide' : 'Register New Guide'}
                 </h2>
                 <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-600 text-2xl">
                   ✕
@@ -342,7 +342,7 @@ export default function GuidesPage() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">업체</label>
+                  <label className="block text-sm text-gray-600 mb-1">Company</label>
                   <select
                     value={formData.company_id || 1}
                     onChange={e => setFormData({ ...formData, company_id: parseInt(e.target.value) })}
@@ -357,42 +357,42 @@ export default function GuidesPage() {
                 </div>
                 <input
                   type="text"
-                  placeholder="가이드명"
+                  placeholder="Guide Name"
                   value={formData.name || ''}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                 />
                 <input
                   type="text"
-                  placeholder="전문분야"
+                  placeholder="Specialty"
                   value={formData.specialty || ''}
                   onChange={e => setFormData({ ...formData, specialty: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                 />
                 <input
                   type="tel"
-                  placeholder="전화번호"
+                  placeholder="Phone Number"
                   value={formData.phone || ''}
                   onChange={e => setFormData({ ...formData, phone: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                 />
                 <input
                   type="text"
-                  placeholder="은행명"
-                  value={formData.bank_name || '국민은행'}
+                  placeholder="Bank Name"
+                  value={formData.bank_name || 'KB Bank'}
                   onChange={e => setFormData({ ...formData, bank_name: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                 />
                 <input
                   type="text"
-                  placeholder="계좌번호"
+                  placeholder="Account Number"
                   value={formData.bank_account || ''}
                   onChange={e => setFormData({ ...formData, bank_account: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                 />
                 <div>
                   <label className="block text-sm text-gray-600 mb-1">
-                    수수료율 (%) - 비워두면 업체 기본값 사용
+                    Commission Rate (%) - Leave blank to use company default
                   </label>
                   <input
                     type="number"
@@ -414,13 +414,13 @@ export default function GuidesPage() {
                     onClick={handleCloseModal}
                     className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded transition-colors"
                   >
-                    취소
+                    Cancel
                   </button>
                   <button
                     onClick={handleSubmit}
                     className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded transition-colors"
                   >
-                    {selectedGuide ? '수정' : '등록'}
+                    {selectedGuide ? 'Update' : 'Register'}
                   </button>
                 </div>
               </div>

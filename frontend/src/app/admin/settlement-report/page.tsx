@@ -77,9 +77,9 @@ export default function SettlementReportPage() {
   }
 
   const mockCompanies: Company[] = [
-    { id: 1, name: 'ABC여행사' },
-    { id: 2, name: 'XYZ여행사' },
-    { id: 3, name: '글로벌투어' },
+    { id: 1, name: 'ABC Travel Agency' },
+    { id: 2, name: 'XYZ Travel Agency' },
+    { id: 3, name: 'Global Tours' },
   ];
   const mockGuides: Guide[] = [
     { id: 1, name: 'Sarah', company_id: 1 },
@@ -95,10 +95,10 @@ export default function SettlementReportPage() {
 
   const filteredSettlements = monthlySettlements.filter(s => s.settlement_month === selectedMonth);
 
-  const getCompanyName = (id: number) => (companies as Company[]).find(c => c.id === id)?.name || '알 수 없음';
-  const getGuideName = (id: number) => (guides as Guide[]).find(g => g.id === id)?.name || '알 수 없음';
+  const getCompanyName = (id: number) => (companies as Company[]).find(c => c.id === id)?.name || 'Unknown';
+  const getGuideName = (id: number) => (guides as Guide[]).find(g => g.id === id)?.name || 'Unknown';
 
-  // 월별 통계
+  // Monthly statistics
   const monthlyStats = {
     total_revenue: filteredSettlements.reduce((sum, s) => sum + s.total_revenue, 0),
     total_commission: filteredSettlements.reduce((sum, s) => sum + s.commission_amount, 0),
@@ -107,7 +107,7 @@ export default function SettlementReportPage() {
     guide_count: new Set(filteredSettlements.map(s => s.guide_id)).size,
   };
 
-  // 회사별 통계
+  // Statistics by company
   const companyStats = (companies as Company[]).map(company => {
     const companySettlements = filteredSettlements.filter(s => s.company_id === company.id);
     return {
@@ -120,7 +120,7 @@ export default function SettlementReportPage() {
     };
   });
 
-  // 가이드별 통계
+  // Statistics by guide
   const guideStats = (guides as Guide[])
     .map(guide => {
       const guideSettlements = filteredSettlements.filter(s => s.guide_id === guide.id);
@@ -140,20 +140,20 @@ export default function SettlementReportPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-8">
       <div className="max-w-7xl mx-auto">
-        {/* 헤더 */}
+        {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2 tracking-tight">
-            📈 정산 보고서
+            📈 Settlement Report
           </h1>
           <p className="text-lg text-gray-600 font-light">
-            월별, 회사별, 가이드별 정산 통계 및 분석
+            Settlement statistics and analysis by month, company, and guide
           </p>
         </div>
 
-        {/* 월 선택 & 보고서 유형 */}
+        {/* Month Selection & Report Type */}
         <div className="mb-8 flex flex-col md:flex-row gap-4 items-end">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">월 선택</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Select Month</label>
             <input
               type="month"
               value={selectedMonth}
@@ -162,12 +162,12 @@ export default function SettlementReportPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">보고서 유형</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Report Type</label>
             <div className="flex gap-2">
               {[
-                { value: 'monthly', label: '월별' },
-                { value: 'company', label: '회사별' },
-                { value: 'guide', label: '가이드별' },
+                { value: 'monthly', label: 'Monthly' },
+                { value: 'company', label: 'By Company' },
+                { value: 'guide', label: 'By Guide' },
               ].map(type => (
                 <button
                   key={type.value}
@@ -199,53 +199,53 @@ export default function SettlementReportPage() {
             }}
             className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
           >
-            📥 CSV 내보내기
+            📥 Export CSV
           </button>
         </div>
 
-        {/* 월별 보고서 */}
+        {/* Monthly Report */}
         {reportType === 'monthly' && (
           <div className="space-y-6">
-            {/* 요약 카드 */}
+            {/* Summary Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-white rounded-lg p-6 border border-blue-200 shadow-sm">
-                <div className="text-sm text-gray-600 font-medium mb-1">총 수익</div>
+                <div className="text-sm text-gray-600 font-medium mb-1">Total Revenue</div>
                 <div className="text-3xl font-bold text-blue-600">₱{(monthlyStats.total_revenue / 1000000).toFixed(1)}M</div>
               </div>
               <div className="bg-white rounded-lg p-6 border border-red-200 shadow-sm">
-                <div className="text-sm text-gray-600 font-medium mb-1">총 수수료</div>
+                <div className="text-sm text-gray-600 font-medium mb-1">Total Commission</div>
                 <div className="text-3xl font-bold text-red-600">₱{(monthlyStats.total_commission / 1000000).toFixed(1)}M</div>
               </div>
               <div className="bg-white rounded-lg p-6 border border-green-200 shadow-sm">
-                <div className="text-sm text-gray-600 font-medium mb-1">지급액</div>
+                <div className="text-sm text-gray-600 font-medium mb-1">Payment Amount</div>
                 <div className="text-3xl font-bold text-green-600">₱{(monthlyStats.total_payment / 1000000).toFixed(1)}M</div>
               </div>
               <div className="bg-white rounded-lg p-6 border border-purple-200 shadow-sm">
-                <div className="text-sm text-gray-600 font-medium mb-1">세션 수</div>
+                <div className="text-sm text-gray-600 font-medium mb-1">Number of Sessions</div>
                 <div className="text-3xl font-bold text-purple-600">{monthlyStats.total_sessions}</div>
               </div>
             </div>
 
-            {/* 상세 정보 */}
+            {/* Detailed Information */}
             <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">월 정산 요약</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Monthly Settlement Summary</h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-100 border-b-2 border-gray-300">
                     <tr>
-                      <th className="text-left py-3 px-4 font-bold text-gray-900">구분</th>
-                      <th className="text-right py-3 px-4 font-bold text-gray-900">금액</th>
-                      <th className="text-right py-3 px-4 font-bold text-gray-900">비율</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-900">Category</th>
+                      <th className="text-right py-3 px-4 font-bold text-gray-900">Amount</th>
+                      <th className="text-right py-3 px-4 font-bold text-gray-900">Ratio</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr className="border-b border-gray-200 hover:bg-gray-50">
-                      <td className="py-3 px-4 text-gray-900">총 수익</td>
+                      <td className="py-3 px-4 text-gray-900">Total Revenue</td>
                       <td className="text-right py-3 px-4 font-bold text-gray-900">₱{monthlyStats.total_revenue.toLocaleString()}</td>
                       <td className="text-right py-3 px-4 text-gray-900">100%</td>
                     </tr>
                     <tr className="border-b border-gray-200 hover:bg-gray-50">
-                      <td className="py-3 px-4 text-red-600 font-semibold">수수료 (차감)</td>
+                      <td className="py-3 px-4 text-red-600 font-semibold">Commission (Deducted)</td>
                       <td className="text-right py-3 px-4 font-bold text-red-600">
                         -₱{monthlyStats.total_commission.toLocaleString()}
                       </td>
@@ -254,7 +254,7 @@ export default function SettlementReportPage() {
                       </td>
                     </tr>
                     <tr className="bg-green-50 border-t-2 border-green-300">
-                      <td className="py-3 px-4 font-bold text-gray-900">가이드 지급액</td>
+                      <td className="py-3 px-4 font-bold text-gray-900">Guide Payment</td>
                       <td className="text-right py-3 px-4 font-bold text-green-600">
                         ₱{monthlyStats.total_payment.toLocaleString()}
                       </td>
@@ -269,19 +269,19 @@ export default function SettlementReportPage() {
           </div>
         )}
 
-        {/* 회사별 보고서 */}
+        {/* Report by Company */}
         {reportType === 'company' && (
           <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">회사별 정산 현황</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Settlement Status by Company</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-100 border-b-2 border-gray-300">
                   <tr>
-                    <th className="text-left py-3 px-4 font-bold text-gray-900">회사</th>
-                    <th className="text-right py-3 px-4 font-bold text-gray-900">수익</th>
-                    <th className="text-right py-3 px-4 font-bold text-gray-900">수수료</th>
-                    <th className="text-right py-3 px-4 font-bold text-gray-900">지급액</th>
-                    <th className="text-right py-3 px-4 font-bold text-gray-900">가이드 수</th>
+                    <th className="text-left py-3 px-4 font-bold text-gray-900">Company</th>
+                    <th className="text-right py-3 px-4 font-bold text-gray-900">Revenue</th>
+                    <th className="text-right py-3 px-4 font-bold text-gray-900">Commission</th>
+                    <th className="text-right py-3 px-4 font-bold text-gray-900">Payment</th>
+                    <th className="text-right py-3 px-4 font-bold text-gray-900">Number of Guides</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -293,7 +293,7 @@ export default function SettlementReportPage() {
                       <td className="text-right py-3 px-4 text-green-600 font-bold">
                         ₱{(stat.total_payment / 1000).toFixed(0)}K
                       </td>
-                      <td className="text-right py-3 px-4 text-gray-900">{stat.guide_count}명</td>
+                      <td className="text-right py-3 px-4 text-gray-900">{stat.guide_count}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -302,20 +302,20 @@ export default function SettlementReportPage() {
           </div>
         )}
 
-        {/* 가이드별 보고서 */}
+        {/* Report by Guide */}
         {reportType === 'guide' && (
           <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">가이드별 정산 현황</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Settlement Status by Guide</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-100 border-b-2 border-gray-300">
                   <tr>
-                    <th className="text-left py-3 px-4 font-bold text-gray-900">가이드</th>
-                    <th className="text-left py-3 px-4 font-bold text-gray-900">회사</th>
-                    <th className="text-right py-3 px-4 font-bold text-gray-900">세션</th>
-                    <th className="text-right py-3 px-4 font-bold text-gray-900">수익</th>
-                    <th className="text-right py-3 px-4 font-bold text-gray-900">수수료</th>
-                    <th className="text-right py-3 px-4 font-bold text-gray-900">지급액</th>
+                    <th className="text-left py-3 px-4 font-bold text-gray-900">Guide</th>
+                    <th className="text-left py-3 px-4 font-bold text-gray-900">Company</th>
+                    <th className="text-right py-3 px-4 font-bold text-gray-900">Sessions</th>
+                    <th className="text-right py-3 px-4 font-bold text-gray-900">Revenue</th>
+                    <th className="text-right py-3 px-4 font-bold text-gray-900">Commission</th>
+                    <th className="text-right py-3 px-4 font-bold text-gray-900">Payment</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -323,7 +323,7 @@ export default function SettlementReportPage() {
                     <tr key={stat.guide_id} className="border-b border-gray-200 hover:bg-gray-50">
                       <td className="py-3 px-4 font-semibold text-gray-900">{stat.guide_name}</td>
                       <td className="py-3 px-4 text-gray-700">{stat.company_name}</td>
-                      <td className="text-right py-3 px-4 text-gray-900">{stat.total_sessions}회</td>
+                      <td className="text-right py-3 px-4 text-gray-900">{stat.total_sessions}</td>
                       <td className="text-right py-3 px-4 text-gray-900">₱{(stat.total_revenue / 1000).toFixed(0)}K</td>
                       <td className="text-right py-3 px-4 text-red-600 font-semibold">₱{(stat.total_commission / 1000).toFixed(0)}K</td>
                       <td className="text-right py-3 px-4 text-green-600 font-bold">
