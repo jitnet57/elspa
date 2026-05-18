@@ -7,8 +7,18 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Supabase PostgreSQL 연결
+# 데이터베이스 URL 설정
 DATABASE_URL = os.getenv("DATABASE_URL")
+
+# SQLite 개발용 처리
+if DATABASE_URL and DATABASE_URL.startswith("sqlite://"):
+    # SQLite은 async를 위해 URL 변환
+    async_database_url = DATABASE_URL.replace("sqlite://", "sqlite+aiosqlite:///")
+else:
+    # PostgreSQL은 asyncpg 사용
+    async_database_url = (DATABASE_URL or "sqlite+aiosqlite:///./test.db").replace(
+        "postgresql://", "postgresql+asyncpg://"
+    )
 
 # 동기 엔진 (기본)
 engine = create_engine(
@@ -20,7 +30,7 @@ engine = create_engine(
 
 # 비동기 엔진 (고성능)
 async_engine = create_async_engine(
-    DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://"),
+    async_database_url,
     echo=False,
     pool_pre_ping=True,
     poolclass=NullPool,

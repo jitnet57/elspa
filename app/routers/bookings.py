@@ -18,7 +18,7 @@
 
 import logging
 from datetime import datetime, date
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select, func
@@ -26,6 +26,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.models import Booking
+from app.schemas.booking import BookingResponse
 
 logger = logging.getLogger(__name__)
 

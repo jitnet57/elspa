@@ -1,0 +1,89 @@
+E:\elspa\main.py:123: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+E:\elspa\main.py:135: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("shutdown")
+E:\elspa\main.py:219: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+E:\elspa\main.py:228: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("shutdown")
+INFO:     Will watch for changes in these directories: ['E:\\elspa']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [24412] using WatchFiles
+INFO:     Started server process [26416]
+INFO:     Waiting for application startup.
+INFO:main:🚀 ElSpa API 시작 중...
+INFO:watchfiles.main:4 changes detected
+INFO:main:✅ 데이터베이스 초기화 완료
+INFO:main:🚀 ElSpa API 시작 중...
+INFO:main:✅ 데이터베이스 초기화 완료
+INFO:main:📊 Supabase 연결: 
+INFO:     Application startup complete.
+INFO:main:📨 [req_1779086198971] GET /health (IP: 127.0.0.1)
+INFO:main:✅ [req_1779086198971] 200 GET /health (0.001s)
+INFO:     127.0.0.1:58084 - "GET /health HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:7 changes detected
+INFO:watchfiles.main:2 changes detected
+INFO:watchfiles.main:7 changes detected
+INFO:watchfiles.main:5 changes detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:2 changes detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:7 changes detected
+INFO:watchfiles.main:5 changes detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:7 changes detected
+INFO:watchfiles.main:5 changes detected
+INFO:watchfiles.main:2 changes detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:5 changes detected
+INFO:watchfiles.main:9 changes detected
+INFO:watchfiles.main:4 changes detected
+INFO:watchfiles.main:4 changes detected
+INFO:watchfiles.main:7 changes detected
+INFO:watchfiles.main:5 changes detected
+INFO:watchfiles.main:1063 changes detected
+INFO:watchfiles.main:419 changes detected
+INFO:watchfiles.main:9 changes detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:13 changes detected
+INFO:watchfiles.main:6 changes detected
+INFO:watchfiles.main:7 changes detected
+INFO:watchfiles.main:2 changes detected
+INFO:watchfiles.main:2 changes detected
+INFO:watchfiles.main:4 changes detected
+INFO:watchfiles.main:2 changes detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:7 changes detected
+INFO:watchfiles.main:4 changes detected
+INFO:watchfiles.main:5 changes detected
+INFO:watchfiles.main:2 changes detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:7 changes detected
+INFO:watchfiles.main:2 changes detected
+INFO:watchfiles.main:6 changes detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:16 changes detected
