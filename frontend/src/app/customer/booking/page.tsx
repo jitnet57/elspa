@@ -25,10 +25,10 @@ function BookingContent() {
   });
 
   const services = [
-    { id: 'swedish', name: '스웨디시 마사지', duration: '60분', priceUSD: 80, icon: '💆‍♀️' },
-    { id: 'thai', name: '타이 마사지', duration: '90분', priceUSD: 120, icon: '🧘' },
+    { id: 'swedish', name: '스웨디시 Massage', duration: '60분', priceUSD: 80, icon: '💆‍♀️' },
+    { id: 'thai', name: '타이 Massage', duration: '90분', priceUSD: 120, icon: '🧘' },
     { id: 'hotstone', name: '핫스톤 테라피', duration: '60분', priceUSD: 100, icon: '🔥' },
-    { id: 'foot', name: '발 마사지', duration: '30분', priceUSD: 50, icon: '🦶' },
+    { id: 'foot', name: '발 Massage', duration: '30분', priceUSD: 50, icon: '🦶' },
   ];
 
   const therapists = [
@@ -68,7 +68,7 @@ function BookingContent() {
     if (!formData.name || !formData.phone || !formData.service || !formData.date || !formData.time) {
       addNotification({
         type: 'error',
-        message: '모든 필수 정보를 입력해주세요.',
+        message: '모든 필수 Information를 입력해주세요.',
         severity: 'error',
         isRead: false,
       });
@@ -128,7 +128,7 @@ function BookingContent() {
         {[1, 2, 3].map((s) => (
           <div key={s} className="flex-1">
             <div className={`h-2 rounded-full transition-all ${s <= step ? 'bg-orange-500' : 'bg-stone-200'}`}></div>
-            <p className="text-xs text-gray-600 mt-2 text-center font-light">{['서비스선택', '날짜&시간', '개인정보'][s - 1]}</p>
+            <p className="text-xs text-gray-600 mt-2 text-center font-light">{['서비스선택', '날짜&시간', '개인Information'][s - 1]}</p>
           </div>
         ))}
       </div>
@@ -184,7 +184,7 @@ function BookingContent() {
       {/* Step 3: Confirmation & Personal Info */}
       {step === 3 && (
         <div className="bg-white rounded-xl p-8 shadow-sm border border-stone-100 space-y-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">3단계: 개인정보 입력</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">3단계: 개인Information 입력</h2>
           <div>
             <label className="block text-sm font-bold text-gray-900 mb-2">이름 *</label>
             <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="성함을 입력해주세요" className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:outline-none focus:border-orange-500 font-light" />
@@ -198,7 +198,7 @@ function BookingContent() {
             <textarea name="memo" value={formData.memo} onChange={handleChange} placeholder="알레르기나 특별한 요청사항이 있으신가요?" className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:outline-none focus:border-orange-500 resize-none h-24 font-light" ></textarea>
           </div>
           <div className="bg-stone-50 rounded-lg p-6 border border-stone-200">
-            <h3 className="font-bold text-gray-900 mb-4">예약 정보</h3>
+            <h3 className="font-bold text-gray-900 mb-4">예약 Information</h3>
             <div className="space-y-3 text-sm">
               <p>
                 <span className="text-gray-600 font-light">서비스:</span>
@@ -213,7 +213,7 @@ function BookingContent() {
                 <span className="font-semibold text-gray-900 ml-2">{formData.time}</span>
               </p>
               <p>
-                <span className="text-gray-600 font-light">테라피스트:</span>
+                <span className="text-gray-600 font-light">Therapist:</span>
                 <span className="font-semibold text-gray-900 ml-2">{selectedTherapist?.name}</span>
               </p>
               <p>

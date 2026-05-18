@@ -12,10 +12,10 @@ export default function RequirementsPage() {
       content: `
         회사명: 엘스파 (L'Spa)
         위치: 필리핀 세부
-        업종: 스파 / 마사지 운영업
+        업종: 스파 / Massage 운영업
 
         조직 규모:
-        • 직원: 21명 이상 (테라피스트 60여 명)
+        • 직원: 21명 이상 (Therapist 60여 명)
         • 베드: 86개 규모
         • 부대사업: 카페, 네일, 투어, 드라이버 서비스
       `
@@ -27,9 +27,9 @@ export default function RequirementsPage() {
         {
           title: '(1) 예약·매칭·정산 전부 수기 & 엑셀',
           items: [
-            '다음 날 필요 테라피스트 매니저가 수기로 예측·배정',
-            '손님-테라피스트-베드 매칭을 종이 표에 손으로 기록',
-            '마사지 종류와 시술자 기록을 일일이 입력',
+            '다음 날 필요 Therapist 매니저가 수기로 예측·배정',
+            '손님-Therapist-베드 매칭을 종이 표에 손으로 기록',
+            'Massage 종류와 시술자 기록을 일일이 입력',
             '이 기록이 그대로 일·주·월 정산 및 커미션 계산의 기초'
           ]
         },
@@ -47,8 +47,8 @@ export default function RequirementsPage() {
           items: [
             '데이터가 분산: 엑셀, 종이, 카톡, 수기 노트',
             '클라우드 통합 안 됨 → 사장 외 실시간 확인 어려움',
-            '시스템 간 연동 없음 → 같은 정보 반복 입력',
-            '마사지 예약 솔루션 커스터마이징 불가, 엑셀 연동 안 됨'
+            'System 간 연동 없음 → 같은 Information 반복 입력',
+            'Massage 예약 솔루션 커스터마이징 불가, 엑셀 연동 안 됨'
           ]
         },
         {
@@ -80,7 +80,7 @@ export default function RequirementsPage() {
             '정산 누락 차단 및 자동 추적',
             '한 달 뒤 가이드 커미션도 자동 추적',
             '실시간 매출·비용·이익 현황 파악',
-            '테라피스트별 커미션 자동 산출'
+            'Therapist별 커미션 자동 산출'
           ]
         },
         {
@@ -88,7 +88,7 @@ export default function RequirementsPage() {
           items: [
             '대표가 직원 관리 노동에서 벗어남',
             '마케팅과 신규 시장(중국·일본 관광객) 확장에 집중',
-            '전략적 의사결정을 위한 실시간 데이터 대시보드',
+            '전략적 의사결정을 위한 실시간 데이터 Dashboard',
             '부대사업(카페, 네일) 동일 구조 적용 가능'
           ]
         }
@@ -101,10 +101,10 @@ export default function RequirementsPage() {
         {
           title: '아키텍처: 3-Tier 모바일 앱 구조',
           items: [
-            '👥 손님 앱 (고객용): 예약, 결제, 평가',
-            '💆 테라피스트 앱 (직원용): 일정, 팁, 정산',
+            '👥 손님 앱 (Customer용): 예약, 결제, 평가',
+            '💆 Therapist 앱 (직원용): 일정, 팁, 정산',
             '🚗 드라이버 앱 (배송용): Pick & Drop, GPS 추적',
-            '⚙️ 어드민 패널 (관리자용): 전체 대시보드'
+            '⚙️ 어드민 패널 (관리자용): 전체 Dashboard'
           ]
         },
         {
@@ -119,8 +119,8 @@ export default function RequirementsPage() {
         {
           title: '2️⃣ AI 자동 매칭 & 배정',
           items: [
-            '손님 예약 → AI가 최적 테라피스트·베드 자동 할당',
-            '테라피스트 스킬·위치·가용성 종합 분석',
+            '손님 예약 → AI가 최적 Therapist·베드 자동 할당',
+            'Therapist 스킬·위치·가용성 종합 분석',
             '매니저는 클릭 한 번으로 확인·승인 (기록 끝)',
             '베드별 타이머 자동 시작 (시술 시간 자동 기록)'
           ]
@@ -129,7 +129,7 @@ export default function RequirementsPage() {
           title: '3️⃣ 대표용 AI 에이전트',
           items: [
             '✅ 예약 현황 실시간 파악',
-            '✅ 다음 날 필요 테라피스트 인원 자동 예측 (+α 설정값)',
+            '✅ 다음 날 필요 Therapist 인원 자동 예측 (+α 설정값)',
             '✅ 매출·비용 추산 (자동 계산)',
             '✅ 이상 신호 감지 (예: 취소율 높음, 공실 많음)'
           ]
@@ -138,7 +138,7 @@ export default function RequirementsPage() {
           title: '4️⃣ 자동 정산 & 급여',
           items: [
             '일일 정산: 매일 자동 계산 (수수료, 팁, 부대비용)',
-            '주간 정산: 테라피스트별 주급 자동 산출',
+            '주간 정산: Therapist별 주급 자동 산출',
             '월간 정산: 전체 P&L, 가이드·업체 커미션',
             '클릭 한 번으로 은행 송금 (자동화 예정)'
           ]
@@ -148,7 +148,7 @@ export default function RequirementsPage() {
           items: [
             '24시간 AI 상담원 (전화 자동 응대)',
             '채팅 에이전트 (카톡·라인·Telegram)',
-            '예약 확정 후 자동으로 시스템 입력',
+            '예약 확정 후 자동으로 System 입력',
             '다국어 자동 번역 (손님과 매니저 언어 다를 때)'
           ]
         },
@@ -156,7 +156,7 @@ export default function RequirementsPage() {
           title: '6️⃣ CRM & 마케팅 자동화',
           items: [
             '라이프 이벤트 기반 프로모션 (Mother\'s Day, 여름 휴가)',
-            '고객 등급별 자동 혜택 발송 (VIP→할인, 리뷰→포인트)',
+            'Customer 등급별 자동 혜택 발송 (VIP→할인, 리뷰→포인트)',
             '방문 주기 분석 → "최근 안 오신 손님" 자동 재방문 권유',
             '추천 친구 가입 시 양쪽에 보너스 자동 지급'
           ]
@@ -192,25 +192,25 @@ export default function RequirementsPage() {
     },
     {
       id: 'system-design',
-      title: '🏗️ 시스템 설계',
+      title: '🏗️ System 설계',
       subsections: [
         {
           title: 'UI/UX 흐름',
           items: [
-            '✓ 손님: "예약" → QR 로그인 → 테라피스트 선택 → 베드 시각화 → 결제 → 완료',
-            '✓ 테라피스트: "일정 확인" → 고객 정보 보기 → 체크인 → 시술 시작 → 종료 (자동 기록)',
-            '✓ 매니저: "오늘 대시보드" → 예약 현황 한눈에 → 매칭 클릭 → 확인 (끝)',
-            '✓ 대표: "경영진 대시보드" → KPI 그래프 → 예측값 → 액션 (마케팅, 채용 등)'
+            '✓ 손님: "예약" → QR 로그인 → Therapist 선택 → 베드 시각화 → 결제 → 완료',
+            '✓ Therapist: "일정 확인" → Customer Information 보기 → 체크인 → 시술 시작 → 종료 (자동 기록)',
+            '✓ 매니저: "오늘 Dashboard" → 예약 현황 한눈에 → 매칭 클릭 → 확인 (끝)',
+            '✓ 대표: "경영진 Dashboard" → KPI 그래프 → 예측값 → 액션 (마케팅, 채용 등)'
           ]
         },
         {
           title: '데이터베이스 구조',
           items: [
-            '사용자: 손님, 테라피스트, 드라이버, 매니저, 대표',
-            '예약: 날짜, 시간, 서비스 종류, 테라피스트, 베드, 상태',
+            '사용자: 손님, Therapist, 드라이버, 매니저, 대표',
+            '예약: 날짜, 시간, 서비스 종류, Therapist, 베드, 상태',
             '정산: 매출, 수수료, 팁, 환불, 가이드 커미션',
             '재고: 베드 상태, 물품 사용량, 비용',
-            '분석: 일별/주별/월별 통계, 테라피스트 성과, 고객 만족도'
+            '분석: 일별/주별/월별 통계, Therapist 성과, Customer 만족도'
           ]
         },
         {
@@ -241,8 +241,8 @@ export default function RequirementsPage() {
         {
           title: 'Phase 1: MVP (2개월)',
           items: [
-            'Core: 예약 관리, 테라피스트 스케줄, 기본 정산',
-            'Admin: 일일 예약 현황 대시보드',
+            'Core: 예약 관리, Therapist 스케줄, 기본 정산',
+            'Admin: 일일 예약 현황 Dashboard',
             'Scope 축소: 한국어 + 영어만, GPS 제외, AI 에이전트 베타'
           ]
         },
@@ -292,15 +292,15 @@ export default function RequirementsPage() {
           title: '수익 증대',
           items: [
             'AI 예측으로 최적 배정 → 서비스 품질 향상 → 재방문율 ↑',
-            '자동 CRM → 휴면 고객 재활성화 → 매출 ↑',
-            '추천 시스템 → 신규 고객 유입 ↑',
+            '자동 CRM → 휴면 Customer 재활성화 → 매출 ↑',
+            '추천 System → 신규 Customer 유입 ↑',
             '24시간 AI 상담 → 영업시간 외 예약 취약 해소'
           ]
         },
         {
           title: '운영 효율화',
           items: [
-            '실시간 대시보드 → 빠른 의사결정',
+            '실시간 Dashboard → 빠른 의사결정',
             '자동 정산 → 월말 스트레스 제거',
             '멀티 태스킹 제거 → 직원 만족도 ↑',
             '데이터 기반 관리 → 편의성 증대'
@@ -354,10 +354,10 @@ export default function RequirementsPage() {
            • 정산 오류율: 3% → 0%
            • 가이드 커미션 추적율: 70% → 100%
 
-        3️⃣ 고객 만족도
+        3️⃣ Customer 만족도
            • 예약 확정율: 85% → 95%
            • 평균 재방문 주기: 45일 → 35일
-           • 고객 평가: 4.5★ → 4.8★
+           • Customer 평가: 4.5★ → 4.8★
 
         4️⃣ 직원 만족도
            • 업무 스트레스 지수: 8/10 → 4/10
@@ -365,7 +365,7 @@ export default function RequirementsPage() {
            • 시간 외 업무: 30시간/월 → 5시간/월
 
         5️⃣ 사업 성장
-           • 월 신규 고객: 20명 → 50명
+           • 월 신규 Customer: 20명 → 50명
            • 신규 시장 진입: 0 → 중국·일본
            • 부대사업 매출 기여도: 20% → 35%
       `
@@ -384,7 +384,7 @@ export default function RequirementsPage() {
             <div>
               <h1 className="text-5xl font-bold text-white mb-2">L'Spa 디지털 혁신 프로젝트</h1>
               <p className="text-slate-400 text-lg">
-                필리핀 세부 스파 운영 자동화 · AI 기반 매칭 · 통합 정산 시스템
+                필리핀 세부 스파 운영 자동화 · AI 기반 매칭 · 통합 정산 System
               </p>
             </div>
           </div>

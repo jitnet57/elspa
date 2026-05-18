@@ -8,25 +8,25 @@ export default function ServicesPage() {
   const services = [
     {
       id: 1,
-      name: '스웨디시 마사지',
+      name: '스웨디시 Massage',
       category: 'massage',
       duration: '60분',
       price: '₱80,000',
       rating: 4.9,
       reviews: 245,
-      description: '유럽식 전통 마사지로 혈액순환을 촉진하고 근육 이완을 돕습니다.',
+      description: '유럽식 전통 Massage로 혈액순환을 촉진하고 근육 이완을 돕습니다.',
       benefits: ['혈액순환 개선', '근육 이완', '스트레스 해소'],
       icon: '💆‍♀️',
     },
     {
       id: 2,
-      name: '타이 마사지',
+      name: '타이 Massage',
       category: 'massage',
       duration: '90분',
       price: '₱120,000',
       rating: 4.8,
       reviews: 189,
-      description: '태국 전통 마사지로 유연성을 높이고 기력을 회복시킵니다.',
+      description: '태국 전통 Massage로 유연성을 높이고 기력을 회복시킵니다.',
       benefits: ['유연성 증대', '기력 회복', '독소 제거'],
       icon: '🧘',
     },
@@ -44,7 +44,7 @@ export default function ServicesPage() {
     },
     {
       id: 4,
-      name: '발 마사지',
+      name: '발 Massage',
       category: 'massage',
       duration: '30분',
       price: '₱50,000',
@@ -62,7 +62,7 @@ export default function ServicesPage() {
       price: '₱180,000',
       rating: 5.0,
       reviews: 78,
-      description: '두 분이 함께 받으실 수 있는 특별한 마사지 패키지입니다.',
+      description: '두 분이 함께 받으실 수 있는 특별한 Massage 패키지입니다.',
       benefits: ['함께하는 힐링', '특별 할인', '프리미엄 서비스'],
       icon: '👫',
     },
@@ -84,7 +84,7 @@ export default function ServicesPage() {
 
   const categories = [
     { id: 'all', label: '전체', count: services.length },
-    { id: 'massage', label: '마사지', count: services.filter((s) => s.category === 'massage').length },
+    { id: 'massage', label: 'Massage', count: services.filter((s) => s.category === 'massage').length },
     { id: 'therapy', label: '테라피', count: services.filter((s) => s.category === 'therapy').length },
     { id: 'package', label: '패키지', count: services.filter((s) => s.category === 'package').length },
   ];

@@ -14,7 +14,7 @@ export default function MyPagePage() {
     totalVisits: 12,
     points: 3500,
     nextBooking: {
-      service: '스웨디시 마사지 60분',
+      service: '스웨디시 Massage 60분',
       therapist: 'Sarah',
       date: '2026-05-15',
       time: '14:00',
@@ -24,7 +24,7 @@ export default function MyPagePage() {
   const bookingHistory = [
     {
       id: 1,
-      service: '스웨디시 마사지',
+      service: '스웨디시 Massage',
       therapist: 'Sarah',
       date: '2026-05-08',
       time: '10:00',
@@ -33,7 +33,7 @@ export default function MyPagePage() {
     },
     {
       id: 2,
-      service: '발 마사지',
+      service: '발 Massage',
       therapist: 'Amanda',
       date: '2026-05-01',
       time: '15:00',
@@ -42,7 +42,7 @@ export default function MyPagePage() {
     },
     {
       id: 3,
-      service: '타이 마사지',
+      service: '타이 Massage',
       therapist: 'Emma',
       date: '2026-04-24',
       time: '11:30',
@@ -56,7 +56,7 @@ export default function MyPagePage() {
       {/* Header - 모바일 최적화 */}
       <div>
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">마이페이지</h1>
-        <p className="text-sm sm:text-lg text-gray-600">나의 정보와 예약 내역</p>
+        <p className="text-sm sm:text-lg text-gray-600">나의 Information와 예약 내역</p>
       </div>
 
       {/* User Info Card - 모바일 최적화 */}
@@ -116,7 +116,7 @@ export default function MyPagePage() {
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-600 mb-1">테라피스트</p>
+              <p className="text-xs text-gray-600 mb-1">Therapist</p>
               <p className="text-xs sm:text-sm font-bold text-gray-900">
                 {userProfile.nextBooking.therapist}
               </p>

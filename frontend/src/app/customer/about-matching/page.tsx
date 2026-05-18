@@ -7,24 +7,24 @@ export default function CustomerAboutMatchingPage() {
 
   const faqs = [
     {
-      q: '왜 나는 Jessica이 아닌 다른 테라피스트가 배정되나요?',
-      a: '우리는 모든 고객에게 최고의 경험을 제공하면서도, 모든 테라피스트에게 공평한 기회를 주기 위해 "공정성 모드"를 사용합니다. 이는 인기 테라피스트가 과로하지 않도록 보호하고, 덜 알려진 테라피스트가 경험을 쌓을 수 있도록 합니다. 당신이 받는 테라피스트도 높은 평점을 가지고 있으며, 당신의 서비스에 매우 열정적입니다.',
+      q: '왜 나는 Jessica이 아닌 다른 Therapist가 배정되나요?',
+      a: '우리는 모든 Customer에게 최고의 경험을 제공하면서도, 모든 Therapist에게 공평한 기회를 주기 위해 "공정성 모드"를 사용합니다. 이는 인기 Therapist가 과로하지 않도록 보호하고, 덜 알려진 Therapist가 경험을 쌓을 수 있도록 합니다. 당신이 받는 Therapist도 높은 평점을 가지고 있으며, 당신의 서비스에 매우 열정적입니다.',
     },
     {
       q: '매칭은 어떻게 이루어지나요?',
-      a: '우리의 AI 매칭 시스템은 다음을 고려합니다: (1) 서비스 전문성 (70%) - 당신이 원하는 서비스에 가장 적합한 사람, (2) 가용성 (20%) - 지금 바로 시작할 수 있는지, (3) 평점 (10%) - 고객 만족도. 또한 모든 테라피스트의 일감이 균형을 이루도록 하는 "공정성 점수"도 고려합니다.',
+      a: '우리의 AI 매칭 System은 다음을 고려합니다: (1) 서비스 전문성 (70%) - 당신이 원하는 서비스에 가장 적합한 사람, (2) 가용성 (20%) - 지금 바로 시작할 수 있는지, (3) 평점 (10%) - Customer 만족도. 또한 모든 Therapist의 일감이 균형을 이루도록 하는 "공정성 점수"도 고려합니다.',
     },
     {
-      q: '특정 테라피스트를 요청할 수 있나요?',
-      a: '네, 특정 테라피스트를 선호하실 수 있습니다. 하지만 AI 시스템이 제안한 다른 테라피스트도 검토해주세요. 당신이 새로운 서비스나 스타일을 경험할 수 있는 좋은 기회가 될 수 있습니다. 우리는 모든 테라피스트를 신중하게 선발하고 교육합니다.',
+      q: '특정 Therapist를 요청할 수 있나요?',
+      a: '네, 특정 Therapist를 선호하실 수 있습니다. 하지만 AI System이 제안한 다른 Therapist도 검토해주세요. 당신이 새로운 서비스나 스타일을 경험할 수 있는 좋은 기회가 될 수 있습니다. 우리는 모든 Therapist를 신중하게 선발하고 교육합니다.',
     },
     {
       q: '대기 시간이 왜 가끔 길까요?',
-      a: '대기 시간은 현재 출근한 테라피스트의 수와 예약 상황에 따라 달라집니다. 우리는 공정성 모드를 사용하여 모든 테라피스트가 과로하지 않도록 합니다. 이는 때때로 최고 인기 테라피스트가 다른 고객을 서비스 중일 수 있다는 뜻입니다. 대신, 당신은 나중에 그 테라피스트를 선택할 수 있습니다.',
+      a: '대기 시간은 현재 출근한 Therapist의 수와 예약 상황에 따라 달라집니다. 우리는 공정성 모드를 사용하여 모든 Therapist가 과로하지 않도록 합니다. 이는 때때로 최고 인기 Therapist가 다른 Customer을 서비스 중일 수 있다는 뜻입니다. 대신, 당신은 나중에 그 Therapist를 선택할 수 있습니다.',
     },
     {
-      q: '내가 받는 평가는 다른 고객과 공평한가요?',
-      a: '네, 완전히 공평합니다. 우리는 모든 테라피스트가 동일한 가이드라인과 서비스 기준을 따르도록 합니다. 평점 시스템은 모든 고객에게 공평하게 적용됩니다. 당신의 피드백은 매우 중요하며, 테라피스트의 개선에 도움이 됩니다.',
+      q: '내가 받는 평가는 다른 Customer과 공평한가요?',
+      a: '네, 완전히 공평합니다. 우리는 모든 Therapist가 동일한 가이드라인과 서비스 기준을 따르도록 합니다. 평점 System은 모든 Customer에게 공평하게 적용됩니다. 당신의 피드백은 매우 중요하며, Therapist의 개선에 도움이 됩니다.',
     },
   ];
 
@@ -34,10 +34,10 @@ export default function CustomerAboutMatchingPage() {
         {/* 헤더 - 모바일 최적화 */}
         <div className="mb-8 sm:mb-12">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 sm:mb-3 tracking-tight">
-            🤖 AI 매칭 시스템
+            🤖 AI 매칭 System
           </h1>
           <p className="text-sm sm:text-base md:text-lg text-gray-600 font-light leading-relaxed">
-            엘스파의 테라피스트 자동 매칭이 어떻게 작동하고, 왜 공평한지 설명합니다.
+            엘스파의 Therapist 자동 매칭이 어떻게 작동하고, 왜 공평한지 설명합니다.
           </p>
         </div>
 
@@ -45,9 +45,9 @@ export default function CustomerAboutMatchingPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
           <div className="bg-white rounded-lg sm:rounded-xl p-6 sm:p-8 shadow-sm border border-stone-100 hover:shadow-md hover:scale-105 transition-all duration-300">
             <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">🎯</div>
-            <h3 className="font-bold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">고객 만족도</h3>
+            <h3 className="font-bold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">Customer 만족도</h3>
             <p className="text-xs sm:text-sm text-gray-700 font-light">
-              당신의 요청 서비스에 가장 잘 맞는 테라피스트를 찾습니다.
+              당신의 요청 서비스에 가장 잘 맞는 Therapist를 찾습니다.
             </p>
           </div>
 
@@ -71,7 +71,7 @@ export default function CustomerAboutMatchingPage() {
         {/* 매칭 프로세스 - 모바일 최적화 */}
         <div className="bg-white rounded-2xl sm:rounded-xl p-6 sm:p-8 shadow-sm border border-stone-100 mb-8 sm:mb-12">
           <h2 className="text-lg sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
-            📋 예약 처리 과정
+            📋 Booking Process
           </h2>
 
           <div className="space-y-4 sm:space-y-6">
@@ -97,7 +97,7 @@ export default function CustomerAboutMatchingPage() {
                 step: 4,
                 title: '최적 배정',
                 description:
-                  '최고 점수를 가진 테라피스트를 배정합니다.',
+                  '최고 점수를 가진 Therapist를 배정합니다.',
               },
               {
                 step: 5,
@@ -122,7 +122,7 @@ export default function CustomerAboutMatchingPage() {
         {/* 매칭 점수 설명 */}
         <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-8 border-2 border-orange-200 mb-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            🏆 매칭 점수는 어떻게 계산되나요?
+            🏆 Matching Score is 어떻게 계산되나요?
           </h2>
 
           <div className="space-y-6">
@@ -132,21 +132,21 @@ export default function CustomerAboutMatchingPage() {
                 name: '전문성',
                 icon: '🎓',
                 description:
-                  '당신이 요청한 서비스에 대한 테라피스트의 전문성과 경험. 예: 스웨디시 마사지를 원하면 스웨디시 전문가가 높은 점수를 받습니다.',
+                  '당신이 요청한 서비스에 대한 Therapist의 전문성과 경험. 예: 스웨디시 Massage를 원하면 스웨디시 전문가가 높은 점수를 받습니다.',
               },
               {
                 weight: 20,
                 name: '가용성',
                 icon: '⏰',
                 description:
-                  '테라피스트가 얼마나 빨리 시작할 수 있는지. 지금 바로 가능하면 100점, 30분 후면 60점, 1시간 후면 20점입니다.',
+                  'Therapist가 얼마나 빨리 시작할 수 있는지. 지금 바로 가능하면 100점, 30분 후면 60점, 1시간 후면 20점입니다.',
               },
               {
                 weight: 10,
                 name: '평점',
                 icon: '⭐',
                 description:
-                  '이전 고객들의 평가. 이는 테라피스트의 서비스 품질을 나타냅니다.',
+                  '이전 Customer들의 평가. 이는 Therapist의 서비스 품질을 나타냅니다.',
               },
             ].map((component, idx) => (
               <div key={idx} className="p-6 bg-white rounded-lg border border-orange-200">
@@ -169,7 +169,7 @@ export default function CustomerAboutMatchingPage() {
 
           <div className="mt-6 p-4 bg-white rounded-lg border border-orange-200">
             <p className="text-sm text-gray-900">
-              <span className="font-bold">예시:</span> 스웨디시 마사지를 예약했을 때
+              <span className="font-bold">예시:</span> 스웨디시 Massage를 예약했을 때
             </p>
             <ul className="text-xs text-gray-700 font-light mt-3 space-y-1 ml-4">
               <li>🎓 스웨디시 전문가 점수 95점 × 70% = 66.5점</li>
@@ -185,11 +185,11 @@ export default function CustomerAboutMatchingPage() {
         {/* 공정성 모드 설명 */}
         <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-8 border-2 border-green-200 mb-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            ⚖️ "공정성 모드"는 무엇인가요?
+            ⚖️ "Fairness Mode"는 무엇인가요?
           </h2>
 
           <p className="text-gray-700 font-light mb-6">
-            우리는 고객 만족도와 테라피스트의 공정한 대우 사이의 균형을 맞추기 위해
+            우리는 Customer 만족도와 Therapist의 공정한 대우 사이의 균형을 맞추기 위해
             "공정성 모드"를 사용합니다.
           </p>
 
@@ -198,17 +198,17 @@ export default function CustomerAboutMatchingPage() {
               <h3 className="font-bold text-gray-900 mb-3">❌ 공정성 없음</h3>
               <div className="p-4 bg-white rounded-lg border border-red-200">
                 <p className="text-sm text-gray-700 font-light mb-3">
-                  인기 있는 테라피스트는:
+                  인기 있는 Therapist는:
                 </p>
                 <ul className="text-xs text-gray-600 space-y-1">
-                  <li>✗ 매일 8시간 이상 마사지</li>
+                  <li>✗ 매일 8시간 이상 Massage</li>
                   <li>✗ 피로와 스트레스</li>
                   <li>✗ 이직 위험</li>
                   <li>✗ 서비스 품질 저하</li>
                 </ul>
 
                 <p className="text-sm text-gray-700 font-light mt-4 mb-3">
-                  덜 알려진 테라피스트는:
+                  덜 알려진 Therapist는:
                 </p>
                 <ul className="text-xs text-gray-600 space-y-1">
                   <li>✗ 하루 2시간만 일함</li>
@@ -223,7 +223,7 @@ export default function CustomerAboutMatchingPage() {
               <h3 className="font-bold text-gray-900 mb-3">✓ 공정성 모드</h3>
               <div className="p-4 bg-white rounded-lg border border-green-200">
                 <p className="text-sm text-gray-700 font-light mb-3">
-                  모든 테라피스트는:
+                  모든 Therapist는:
                 </p>
                 <ul className="text-xs text-gray-600 space-y-1">
                   <li>✓ 일감이 균형잡혀 있음</li>
@@ -233,11 +233,11 @@ export default function CustomerAboutMatchingPage() {
                 </ul>
 
                 <p className="text-sm text-gray-700 font-light mt-4 mb-3">
-                  모든 고객은:
+                  모든 Customer은:
                 </p>
                 <ul className="text-xs text-gray-600 space-y-1">
                   <li>✓ 여전히 최고 품질 서비스</li>
-                  <li>✓ 새로운 테라피스트 경험</li>
+                  <li>✓ 새로운 Therapist 경험</li>
                   <li>✓ 다양한 스타일과 기법</li>
                   <li>✓ 예약 가능성 높음</li>
                 </ul>
@@ -250,7 +250,7 @@ export default function CustomerAboutMatchingPage() {
               💡 쉽게 말해서:
             </p>
             <p className="text-sm text-gray-700 font-light">
-              모든 테라피스트가 행복하고 건강하면, 모든 고객도 최고의 서비스를 받을 수 있습니다.
+              모든 Therapist가 행복하고 건강하면, 모든 Customer도 최고의 서비스를 받을 수 있습니다.
               우리는 장기적인 만족도와 지속 가능한 서비스를 추구합니다.
             </p>
           </div>
@@ -259,7 +259,7 @@ export default function CustomerAboutMatchingPage() {
         {/* FAQ - 모바일 최적화 */}
         <div className="mb-8 sm:mb-12">
           <h2 className="text-lg sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
-            ❓ 자주 묻는 질문
+            ❓ Frequently Asked 질문
           </h2>
 
           <div className="space-y-2 sm:space-y-3">
@@ -298,7 +298,7 @@ export default function CustomerAboutMatchingPage() {
             💝 당신의 만족도가 우리의 목표입니다
           </h2>
           <p className="text-gray-700 font-light mb-6">
-            모든 테라피스트가 건강하고 행복할 때,
+            모든 Therapist가 건강하고 행복할 때,
             <br />
             우리는 당신에게 최고의 서비스를 제공할 수 있습니다.
             <br />
@@ -306,7 +306,7 @@ export default function CustomerAboutMatchingPage() {
             질문이나 피드백이 있으신가요?
           </p>
           <button className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg font-semibold hover:shadow-lg transition-all">
-            고객 지원 문의하기
+            Customer 지원 문의하기
           </button>
         </div>
       </div>

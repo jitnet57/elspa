@@ -174,14 +174,14 @@ const generateMockBeds = (): Bed[] => {
   let bedId = 1;
   const customerNames = ['김민준', '이수연', '정현준', '박지은', '최준호', '강지은', '이준영', '김수현', '박민수', '이영희'];
   const therapistNames = ['박유진', '최정은', '이소영', '김태희', '강지연', '박민경', '임다현', '유지원'];
-  const serviceNames = ['스웨디시 60분', '타이마사지 90분', '핫스톤 60분', '발마사지 30분', '아로마테라피 45분'];
+  const serviceNames = ['스웨디시 60분', '타이Massage 90분', '핫스톤 60분', '발Massage 30분', '아로마테라피 45분'];
 
   for (let i = 1; i <= 30; i++) {
     const status = ['available', 'reserved', 'in_service', 'cleaning'][Math.floor(Math.random() * 4)] as any;
     beds.push({
       id: bedId,
       bed_number: i,
-      room_zone: '마사지룸1',
+      room_zone: 'Massage룸1',
       status: status,
       customer_name: (status === 'in_service' || status === 'reserved') ? customerNames[Math.floor(Math.random() * customerNames.length)] : undefined,
       therapist_name: (status === 'in_service' || status === 'reserved') ? therapistNames[Math.floor(Math.random() * therapistNames.length)] : undefined,
@@ -197,7 +197,7 @@ const generateMockBeds = (): Bed[] => {
     beds.push({
       id: bedId,
       bed_number: i,
-      room_zone: '마사지룸2',
+      room_zone: 'Massage룸2',
       status: status,
       customer_name: (status === 'in_service' || status === 'reserved') ? customerNames[Math.floor(Math.random() * customerNames.length)] : undefined,
       therapist_name: (status === 'in_service' || status === 'reserved') ? therapistNames[Math.floor(Math.random() * therapistNames.length)] : undefined,
@@ -376,14 +376,14 @@ export default function MonitorPage() {
                 useStore.setState({ selectedBedId: bed.id });
                 setIsWalkInModalOpen(true);
               } else {
-                // 그 외에는 상세 정보 모달
+                // 그 외에는 상세 Information 모달
                 openDetailModal(bed.id);
               }
             }}
             className={`w-full h-16 ${getStatusColor(bed.status)} rounded-lg text-white text-xs font-bold hover:opacity-80 hover:scale-105 transition-all flex flex-col items-center justify-center p-1 border-2 ${
               selectedBedId === bed.id ? 'border-yellow-400' : 'border-gray-700'
             } cursor-pointer`}
-            title={bed.status === 'available' ? '클릭하여 마사지 등록' : '클릭하여 상세 정보 보기'}
+            title={bed.status === 'available' ? '클릭하여 Massage 등록' : '클릭하여 상세 Information 보기'}
           >
             <div className="font-bold">{bed.bed_number}번</div>
             {bed.status === 'in_service' && bed.customer_name && (
@@ -393,7 +393,7 @@ export default function MonitorPage() {
               <div className="text-xs truncate w-full text-center">{bed.customer_name}</div>
             )}
             {bed.status === 'available' && (
-              <div className="text-xs font-bold">➕ 마사지</div>
+              <div className="text-xs font-bold">➕ Massage</div>
             )}
           </button>
         </div>
@@ -499,7 +499,7 @@ export default function MonitorPage() {
                 }}
                 className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-2 rounded-lg transition-all hover:shadow-lg"
               >
-                ➕ {language === 'en' ? 'Start Massage' : '마사지 시작'}
+                ➕ {language === 'en' ? 'Start Massage' : 'Massage 시작'}
               </button>
             )}
 
@@ -647,14 +647,14 @@ export default function MonitorPage() {
         rightContent={<div className="text-xl font-mono">{currentTime}</div>}
       />
 
-      {/* 📌 모바일 드로어 (테라피스트 현황) */}
+      {/* 📌 모바일 드로어 (Therapist 현황) */}
       <MobileDrawer
         isOpen={isMobileDrawerOpen}
         onClose={() => setIsMobileDrawerOpen(false)}
       >
         <div className="space-y-4">
           <h3 className="text-lg font-bold text-blue-400 border-b border-gray-700 pb-2">
-            테라피스트 현황
+            Therapist 현황
           </h3>
 
           <div className="space-y-2 text-sm">
@@ -667,7 +667,7 @@ export default function MonitorPage() {
             </div>
           </div>
 
-          {/* 예측 정보 */}
+          {/* 예측 Information */}
           {predictions && (
             <div className="bg-blue-900/30 p-3 rounded border-l-4 border-blue-500">
               <div className="text-xs text-gray-400 mb-1">⏳ 평균 대기시간</div>
@@ -680,10 +680,10 @@ export default function MonitorPage() {
             </div>
           )}
 
-          {/* 테라피스트 목록 */}
+          {/* Therapist 목록 */}
           <div className="space-y-2 max-h-96 overflow-y-auto">
             <div className="text-xs font-bold text-gray-300 border-b border-gray-700 pb-2">
-              전체 테라피스트
+              전체 Therapist
             </div>
             {therapists.map(therapist => (
               <div key={therapist.id} className="bg-gray-700 p-2 rounded text-xs hover:bg-gray-600 transition">
@@ -746,7 +746,7 @@ export default function MonitorPage() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              📅 {language === 'en' ? 'Therapist Daily Schedule' : '테라피스트 일일 스케줄'}
+              📅 {language === 'en' ? 'Therapist Daily Schedule' : 'Therapist 일일 스케줄'}
             </button>
           </div>
 
@@ -871,9 +871,9 @@ export default function MonitorPage() {
           </div>
 
           <div className="col-span-2 space-y-4">
-            {/* 테라피스트 현황 카드 */}
+            {/* Therapist 현황 카드 */}
             <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-              <h2 className="text-lg font-bold mb-4 text-gray-900">테라피스트 현황</h2>
+              <h2 className="text-lg font-bold mb-4 text-gray-900">Therapist 현황</h2>
 
               <div className="grid grid-cols-2 gap-3 mb-5 pb-4 border-b border-gray-200">
                 <div className="bg-green-50 p-3 rounded-lg">
@@ -892,7 +892,7 @@ export default function MonitorPage() {
               </div>
             </div>
 
-            {/* 예측 정보 */}
+            {/* 예측 Information */}
             {predictions && (
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-lg border border-blue-200">
                 <div className="text-sm text-gray-600 mb-2">⏳ 평균 대기시간</div>
@@ -905,9 +905,9 @@ export default function MonitorPage() {
               </div>
             )}
 
-            {/* 테라피스트 목록 */}
+            {/* Therapist 목록 */}
             <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-              <h3 className="font-bold text-gray-900 mb-3">테라피스트 상태</h3>
+              <h3 className="font-bold text-gray-900 mb-3">Therapist 상태</h3>
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {therapists.map(therapist => (
                   <div key={therapist.id} className={`p-3 rounded-lg border transition ${
@@ -1002,7 +1002,7 @@ export default function MonitorPage() {
             </div>
             <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-200">
               <div className="w-6 h-6 bg-orange-500 rounded-lg animate-pulse flex-shrink-0"></div>
-              <span className="text-sm text-gray-700">예약됨 (고객 곧 도착)</span>
+              <span className="text-sm text-gray-700">예약됨 (Customer 곧 도착)</span>
             </div>
             <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-300">
               <div className="w-6 h-6 bg-gray-500 rounded-lg flex-shrink-0"></div>
@@ -1027,7 +1027,7 @@ export default function MonitorPage() {
                 onClick={() => setIsWalkInModalOpen(true)}
                 className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-sm rounded-lg transition-all hover:shadow-lg"
               >
-                + {language === 'en' ? 'Start New Massage' : '마사지 시작'}
+                + {language === 'en' ? 'Start New Massage' : 'Massage 시작'}
               </button>
             </div>
           </div>
@@ -1051,10 +1051,10 @@ export default function MonitorPage() {
                 </div>
               </div>
 
-              {/* 테라피스트 행 */}
+              {/* Therapist 행 */}
               {MOCK_SCHEDULE_THERAPISTS.map(therapist => (
                 <div key={therapist.id} className="flex border-b border-gray-200 hover:bg-gray-50 transition">
-                  {/* 테라피스트 정보 */}
+                  {/* Therapist Information */}
                   <div className="w-40 flex-shrink-0 px-4 py-4 bg-gray-50 sticky left-0 z-5 border-r border-gray-200 flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${therapist.avatarColor} flex items-center justify-center text-white font-bold text-sm`}>
                       {therapist.name[0]}
@@ -1117,13 +1117,13 @@ export default function MonitorPage() {
       <MobileBottomTabBar
         tabs={[
           { label: '모니터', icon: '📊', href: '/monitor', active: true },
-          { label: '테라피스트', icon: '👥', href: '/admin/therapists' },
+          { label: 'Therapist', icon: '👥', href: '/admin/therapists' },
           { label: '배정', icon: '⚙️', href: '/admin/matching' },
         ]}
         onWalkInAdd={() => setIsWalkInModalOpen(true)}
       />
 
-      {/* 상세 정보 모달 */}
+      {/* 상세 Information 모달 */}
       <DetailModal />
 
       {/* 비밀번호 확인 모달 */}

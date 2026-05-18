@@ -2,25 +2,25 @@
 
 export default function CustomerHome() {
   const services = [
-    { name: '스웨디시 마사지', duration: '60분', price: '₱80,000', rating: 4.9, reviews: 245, icon: '💆‍♀️' },
-    { name: '타이 마사지', duration: '90분', price: '₱120,000', rating: 4.8, reviews: 189, icon: '🧘' },
-    { name: '핫스톤 테라피', duration: '60분', price: '₱100,000', rating: 4.7, reviews: 156, icon: '🔥' },
-    { name: '발 마사지', duration: '30분', price: '₱50,000', rating: 4.9, reviews: 312, icon: '🦶' },
-    { name: '커플 패키지', duration: '120분', price: '₱180,000', rating: 5.0, reviews: 78, icon: '👫' },
-    { name: '아로마테라피', duration: '60분', price: '₱85,000', rating: 4.8, reviews: 201, icon: '🌸' },
+    { name: 'Swedish Massage', duration: '60 min', price: '₱80,000', rating: 4.9, reviews: 245, icon: '💆‍♀️' },
+    { name: 'Thai Massage', duration: '90 min', price: '₱120,000', rating: 4.8, reviews: 189, icon: '🧘' },
+    { name: 'Hot Stone Therapy', duration: '60 min', price: '₱100,000', rating: 4.7, reviews: 156, icon: '🔥' },
+    { name: 'Foot Massage', duration: '30 min', price: '₱50,000', rating: 4.9, reviews: 312, icon: '🦶' },
+    { name: 'Couple Package', duration: '120 min', price: '₱180,000', rating: 5.0, reviews: 78, icon: '👫' },
+    { name: 'Aromatherapy', duration: '60 min', price: '₱85,000', rating: 4.8, reviews: 201, icon: '🌸' },
   ];
 
   const therapists = [
-    { name: 'Sarah', specialty: '스웨디시 전문', experience: '7년', rating: 4.9, bookings: 156 },
-    { name: 'Emma', specialty: '타이 마사지', experience: '5년', rating: 4.7, bookings: 128 },
-    { name: 'Jessica', specialty: '핫스톤 테라피', experience: '8년', rating: 4.8, bookings: 167 },
-    { name: 'Amanda', specialty: '발 마사지', experience: '6년', rating: 4.6, bookings: 145 },
+    { name: 'Sarah', specialty: 'Swedish Specialist', experience: '7 years', rating: 4.9, bookings: 156 },
+    { name: 'Emma', specialty: 'Thai Massage', experience: '5 years', rating: 4.7, bookings: 128 },
+    { name: 'Jessica', specialty: 'Hot Stone Therapy', experience: '8 years', rating: 4.8, bookings: 167 },
+    { name: 'Amanda', specialty: 'Foot Massage', experience: '6 years', rating: 4.6, bookings: 145 },
   ];
 
   const testimonials = [
-    { name: '김민지', service: '스웨디시 마사지', text: '정말 편안한 경험이었어요. 다시 꼭 방문하겠습니다!', rating: 5 },
-    { name: '이준호', service: '타이 마사지', text: '테라피스트가 전문적이고 친절했어요. 강력 추천합니다!', rating: 5 },
-    { name: '박수진', service: '커플 패키지', text: '가격 대비 서비스가 정말 좋습니다. 이제 단골입니다!', rating: 5 },
+    { name: 'Min-ji Kim', service: 'Swedish Massage', text: 'It was a very relaxing experience. I will definitely visit again!', rating: 5 },
+    { name: 'Jun-ho Lee', service: 'Thai Massage', text: 'The therapist was professional and kind. Highly recommended!', rating: 5 },
+    { name: 'Su-jin Park', service: 'Couple Package', text: 'The service is really good for the price. I\'m a regular now!', rating: 5 },
   ];
 
   return (
@@ -29,17 +29,17 @@ export default function CustomerHome() {
       <section className="bg-gradient-to-br from-orange-50 via-white to-amber-50 rounded-2xl sm:rounded-xl p-6 sm:p-8 md:p-12 shadow-sm border border-stone-100 overflow-hidden">
         <div className="max-w-3xl">
           <h1 className="text-3xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 tracking-tight leading-tight">
-            당신의 웰니스<br />파트너, ElSpa
+            Your Wellness<br />Partner, ElSpa
           </h1>
           <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 leading-relaxed font-light">
-            프로페셔널 테라피스트들과 함께<br className="sm:hidden" /> 몸과 마음을 힐링해보세요.
+            Heal your body and mind with our<br className="sm:hidden" /> professional therapists.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <button className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:shadow-lg hover:scale-105 active:scale-95 transition-all font-semibold shadow-md">
-              지금 예약하기
+              Book Now
             </button>
             <button className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-white text-gray-900 border-2 border-gray-300 rounded-lg hover:border-orange-500 hover:bg-orange-50 hover:scale-105 active:scale-95 transition-all font-semibold">
-              더 알아보기
+              Learn More
             </button>
           </div>
         </div>
@@ -49,11 +49,11 @@ export default function CustomerHome() {
       <section>
         <div className="flex justify-between items-end mb-6 sm:mb-8">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">인기 서비스</h2>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2 font-light">엘스파의 프리미엄 서비스</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Featured Services</h2>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2 font-light">ElSpa Premium Services</p>
           </div>
           <a href="/customer/services" className="text-xs sm:text-sm text-orange-600 hover:text-orange-700 font-medium">
-            전체 →
+            View All →
           </a>
         </div>
 
@@ -82,7 +82,7 @@ export default function CustomerHome() {
                 </div>
 
                 <button className="w-full mt-3 sm:mt-4 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 active:bg-orange-700 transition-all text-xs sm:text-sm font-semibold hover:shadow-md">
-                  예약하기
+                  Book Now
                 </button>
               </div>
             </div>
@@ -93,8 +93,8 @@ export default function CustomerHome() {
       {/* Our Therapists - 모바일 최적화 */}
       <section>
         <div className="mb-6 sm:mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">저희 테라피스트</h2>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2 font-light">경험 많은 전문가들</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Our Therapists</h2>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2 font-light">Experienced Professionals</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -108,28 +108,28 @@ export default function CustomerHome() {
               </div>
               <h3 className="text-base sm:text-lg font-bold text-gray-900">{therapist.name}</h3>
               <p className="text-xs sm:text-sm text-gray-600 mt-1 font-light">{therapist.specialty}</p>
-              <p className="text-xs text-gray-500 mt-1 font-light">{therapist.experience} 경력</p>
+              <p className="text-xs text-gray-500 mt-1 font-light">{therapist.experience} experience</p>
 
               <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-stone-100 flex items-center justify-between">
                 <span className="text-xs sm:text-sm font-bold text-gray-900">⭐ {therapist.rating}</span>
-                <span className="text-xs text-gray-500 font-light">{therapist.bookings} 예약</span>
+                <span className="text-xs text-gray-500 font-light">{therapist.bookings} bookings</span>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Why Choose Us - 모바일 최적화 */}
+      {/* Why Choose Us */}
       <section className="bg-white rounded-2xl sm:rounded-xl p-6 sm:p-8 md:p-12 shadow-sm border border-stone-100">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">ElSpa를 선택하는 이유</h2>
-        <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 font-light">고객 만족이 우리의 최우선입니다</p>
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Why Choose ElSpa</h2>
+        <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 font-light">Customer satisfaction is our top priority</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {[
-            { icon: '✓', title: '전문 테라피스트', desc: '5년 이상 경력의\n검증된 전문가', stat: '4명' },
-            { icon: '✓', title: '청결한 시설', desc: '매일 3회 이상\n소독 및 관리', stat: '100%' },
-            { icon: '✓', title: '프리미엄 제품', desc: '100% 천연\n에센셜 오일', stat: 'A급' },
-            { icon: '✓', title: '맞춤 서비스', desc: '개인 상담 후\n맞춤 세션', stat: '24시' },
+            { icon: '✓', title: 'Expert Therapists', desc: 'Certified professionals\nwith 5+ years\nexperience', stat: '4' },
+            { icon: '✓', title: 'Clean Facilities', desc: 'Disinfected and\nmaintained 3+ times\ndaily', stat: '100%' },
+            { icon: '✓', title: 'Premium Products', desc: '100% Natural\nEssential Oils', stat: 'Grade A' },
+            { icon: '✓', title: 'Custom Service', desc: 'Personalized\nsessions after\nconsultation', stat: '24hrs' },
           ].map((item, idx) => (
             <div key={idx} className="border border-stone-200 rounded-lg sm:rounded-xl p-4 sm:p-6 hover:border-orange-300 hover:bg-orange-50 hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer">
               <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">💚</div>
@@ -141,10 +141,10 @@ export default function CustomerHome() {
         </div>
       </section>
 
-      {/* Testimonials - 모바일 최적화 */}
+      {/* Testimonials */}
       <section>
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">고객 후기</h2>
-        <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 font-light">실제 고객님들의 솔직한 경험담</p>
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Customer Reviews</h2>
+        <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 font-light">Real experiences from our valued customers</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {testimonials.map((testimonial, idx) => (
@@ -169,40 +169,40 @@ export default function CustomerHome() {
         </div>
       </section>
 
-      {/* CTA Section - 모바일 최적화 */}
+      {/* CTA Section */}
       <section className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl sm:rounded-xl p-6 sm:p-8 md:p-12 shadow-lg text-center hover:shadow-xl transition-all">
-        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">오늘 바로 예약하세요!</h2>
-        <p className="text-orange-100 mb-6 sm:mb-8 text-base sm:text-lg font-light">첫 방문 고객 20% 할인</p>
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Book Today!</h2>
+        <p className="text-orange-100 mb-6 sm:mb-8 text-base sm:text-lg font-light">20% off for first-time customers</p>
         <button className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-white text-orange-600 rounded-lg hover:bg-orange-50 hover:scale-105 active:scale-95 transition-all font-semibold shadow-lg">
-          지금 예약하기
+          Book Now
         </button>
       </section>
 
-      {/* Footer - 모바일 최적화 */}
+      {/* Footer */}
       <footer className="border-t border-stone-200 pt-8 sm:pt-12">
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 mb-6 sm:mb-8">
           <div>
             <h4 className="font-bold text-gray-900 mb-2 text-sm sm:text-base">ElSpa</h4>
-            <p className="text-xs sm:text-sm text-gray-600 font-light">당신의 웰니스 파트너</p>
+            <p className="text-xs sm:text-sm text-gray-600 font-light">Your wellness partner</p>
           </div>
           <div>
-            <h4 className="font-bold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">서비스</h4>
+            <h4 className="font-bold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">Services</h4>
             <ul className="text-xs sm:text-sm text-gray-600 space-y-1 sm:space-y-2 font-light">
-              <li><a href="/customer/booking" className="hover:text-orange-600 transition-colors">예약하기</a></li>
-              <li><a href="/customer/services" className="hover:text-orange-600 transition-colors">서비스 안내</a></li>
-              <li><a href="/customer/reviews" className="hover:text-orange-600 transition-colors">후기</a></li>
+              <li><a href="/customer/booking" className="hover:text-orange-600 transition-colors">Booking</a></li>
+              <li><a href="/customer/services" className="hover:text-orange-600 transition-colors">Services</a></li>
+              <li><a href="/customer/reviews" className="hover:text-orange-600 transition-colors">Reviews</a></li>
             </ul>
           </div>
           <div>
-            <h4 className="font-bold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">회사</h4>
+            <h4 className="font-bold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">Company</h4>
             <ul className="text-xs sm:text-sm text-gray-600 space-y-1 sm:space-y-2 font-light">
-              <li><a href="#" className="hover:text-orange-600 transition-colors">소개</a></li>
-              <li><a href="#" className="hover:text-orange-600 transition-colors">문의</a></li>
-              <li><a href="#" className="hover:text-orange-600 transition-colors">채용</a></li>
+              <li><a href="#" className="hover:text-orange-600 transition-colors">About</a></li>
+              <li><a href="#" className="hover:text-orange-600 transition-colors">Contact</a></li>
+              <li><a href="#" className="hover:text-orange-600 transition-colors">Careers</a></li>
             </ul>
           </div>
           <div>
-            <h4 className="font-bold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">연락처</h4>
+            <h4 className="font-bold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">Contact</h4>
             <p className="text-xs sm:text-sm text-gray-600 mb-1 font-light">📞 031-1234-5678</p>
             <p className="text-xs sm:text-sm text-gray-600 font-light">📧 info@elspa.co.kr</p>
           </div>

@@ -19,14 +19,14 @@ export default function CustomerLayout({
               ✨
             </div>
             <div className="text-xl font-bold text-gray-900 tracking-tight">ELSPA</div>
-            <span className="text-xs text-gray-500 ml-2 font-light">Customer</span>
+            <span className="text-xs text-gray-500 ml-2 font-light">Customer Portal</span>
           </div>
           <div className="flex items-center gap-4">
             <button className="text-sm text-gray-600 hover:text-gray-900 font-medium">
               📞 031-1234-5678
             </button>
             <button className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:shadow-lg transition-all text-sm font-medium shadow-md">
-              로그인
+              Sign In
             </button>
           </div>
         </div>
@@ -36,11 +36,11 @@ export default function CustomerLayout({
       <aside className="fixed left-0 top-20 h-[calc(100vh-80px)] w-64 bg-gradient-to-b from-stone-100 to-stone-50 border-r border-stone-200 overflow-y-auto p-6 shadow-sm">
         <nav className="space-y-1">
           {[
-            { id: 'home', label: '홈', icon: '◊' },
-            { id: 'services', label: '서비스 둘러보기', icon: '◊' },
-            { id: 'booking', label: '예약하기', icon: '◊' },
-            { id: 'mypage', label: '마이페이지', icon: '◊' },
-            { id: 'reviews', label: '후기 & 평점', icon: '◊' },
+            { id: 'home', label: 'Home', icon: '◊' },
+            { id: 'services', label: 'Services', icon: '◊' },
+            { id: 'booking', label: 'Booking', icon: '◊' },
+            { id: 'mypage', label: 'My Page', icon: '◊' },
+            { id: 'reviews', label: 'Reviews & Ratings', icon: '◊' },
           ].map((item) => (
             <button
               key={item.id}
@@ -59,12 +59,12 @@ export default function CustomerLayout({
 
         <div className="mt-10 pt-8 border-t border-stone-200">
           <div className="p-4 bg-white rounded-lg border border-stone-200 shadow-sm">
-            <p className="text-xs font-bold text-gray-900 mb-2">⭐ VIP 혜택</p>
+            <p className="text-xs font-bold text-gray-900 mb-2">⭐ VIP Benefits</p>
             <p className="text-xs text-gray-600 mb-3 leading-relaxed font-light">
-              프리미엄 회원이 되어 매월 5% 할인과 우선 예약 혜택을 받으세요!
+              Become a premium member and get 5% off monthly and priority booking!
             </p>
             <button className="w-full py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs font-bold rounded-lg hover:shadow-lg transition-all shadow-md">
-              업그레이드
+              Upgrade
             </button>
           </div>
 

@@ -11,9 +11,9 @@ export default function ReviewsPage() {
       id: 1,
       rating: 5,
       title: '정말 최고의 경험이었어요!',
-      content: '처음 방문했는데 시설도 깨끗하고 테라피스트님이 정말 전문적이었어요. 몸의 피로가 싹 풀렸습니다. 꼭 다시 방문하고 싶습니다!',
+      content: '처음 방문했는데 시설도 깨끗하고 Therapist님이 정말 전문적이었어요. 몸의 피로가 싹 풀렸습니다. 꼭 다시 방문하고 싶습니다!',
       author: '김민지',
-      service: '스웨디시 마사지',
+      service: '스웨디시 Massage',
       therapist: 'Sarah',
       date: '2026-05-08',
       helpful: 127,
@@ -35,9 +35,9 @@ export default function ReviewsPage() {
       id: 3,
       rating: 5,
       title: '만성 피로가 개선됐어요',
-      content: '타이 마사지를 받았는데 예상 이상으로 좋았어요. 특히 경추 부분이 많이 풀렸고, 다음날 몸 상태가 정말 좋았습니다.',
+      content: '타이 Massage를 받았는데 예상 이상으로 좋았어요. 특히 경추 부분이 많이 풀렸고, 다음날 몸 상태가 정말 좋았습니다.',
       author: '이준호',
-      service: '타이 마사지',
+      service: '타이 Massage',
       therapist: 'Emma',
       date: '2026-04-24',
       helpful: 156,
@@ -58,10 +58,10 @@ export default function ReviewsPage() {
     {
       id: 5,
       rating: 5,
-      title: '발 마사지 정말 좋습니다!',
+      title: '발 Massage 정말 좋습니다!',
       content: '30분 코스인데 정말 알차게 해주셨어요. 발이 시원해졌고, 다음날 컨디션이 훨씬 좋았습니다. 추천합니다!',
       author: '최유미',
-      service: '발 마사지',
+      service: '발 Massage',
       therapist: 'Amanda',
       date: '2026-04-10',
       helpful: 203,
@@ -97,7 +97,7 @@ export default function ReviewsPage() {
     <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
       {/* Header - 모바일 최적화 */}
       <div>
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">고객 후기</h1>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">Customer 후기</h1>
         <p className="text-sm sm:text-lg text-gray-600">
           ElSpa 경험담들을 만나보세요
         </p>
@@ -114,7 +114,7 @@ export default function ReviewsPage() {
               <span className="text-xl sm:text-2xl">⭐</span>
             </div>
             <p className="text-xs sm:text-base text-gray-600">
-              {reviews.length}명의 고객 평가 기반
+              {reviews.length}명의 Customer 평가 기반
             </p>
           </div>
 

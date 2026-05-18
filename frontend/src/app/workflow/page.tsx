@@ -29,7 +29,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '4단계 예약 마법사 시작',
       status: 'completed',
       icon: '📋',
-      details: ['1단계: 스웨디시 선택', '2단계: 14:30 시간 선택', '3단계: 테라피스트 선택', '4단계: 개인정보 입력']
+      details: ['1단계: 스웨디시 선택', '2단계: 14:30 시간 선택', '3단계: Therapist 선택', '4단계: 개인Information 입력']
     },
     {
       time: '10:20',
@@ -37,7 +37,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '확인 문자/이메일 수신',
       status: 'completed',
       icon: '✅',
-      details: ['예약번호: #12345', '서비스: 스웨디시 60분', '테라피스트: Jessica']
+      details: ['예약번호: #12345', '서비스: 스웨디시 60분', 'Therapist: Jessica']
     },
     {
       time: '14:00',
@@ -58,7 +58,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
     {
       time: '15:30',
       title: '서비스 완료',
-      description: '마사지 종료 및 결제',
+      description: 'Massage 종료 및 결제',
       status: 'pending',
       icon: '💳',
       details: ['결제: 80,000원', '현금/카드/모바일페이']
@@ -75,11 +75,11 @@ const workflows: Record<UserType, WorkflowStep[]> = {
   admin: [
     {
       time: '08:00',
-      title: '어드민 대시보드 확인',
+      title: '어드민 Dashboard 확인',
       description: '오늘의 주요 지표 확인',
       status: 'completed',
       icon: '📊',
-      details: ['활성 테라피스트: 24명', '오늘 예약: 42건', '월 매출: ₱4.8M']
+      details: ['활성 Therapist: 24명', '오늘 예약: 42건', '월 매출: ₱4.8M']
     },
     {
       time: '08:30',
@@ -100,7 +100,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
     {
       time: '08:37',
       title: '[✓ Jessica 배정] 클릭',
-      description: '테라피스트 배정 확정',
+      description: 'Therapist 배정 확정',
       status: 'completed',
       icon: '✅',
       details: ['데이터 저장', 'DB 업데이트', 'Realtime 브로드캐스트']
@@ -116,10 +116,10 @@ const workflows: Record<UserType, WorkflowStep[]> = {
     {
       time: '14:30',
       title: '[서비스 시작] 클릭',
-      description: '고객 도착 확인',
+      description: 'Customer 도착 확인',
       status: 'pending',
       icon: '🚀',
-      details: ['고객 체크인 완료', '침대 배정 확인', '서비스 시작']
+      details: ['Customer 체크인 완료', '침대 배정 확인', '서비스 시작']
     },
     {
       time: '15:30',
@@ -132,7 +132,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
     {
       time: '16:00',
       title: '월간 분석 보기',
-      description: '/admin/fairness 대시보드',
+      description: '/admin/fairness Dashboard',
       status: 'pending',
       icon: '📈',
       details: ['공정성 지수: 72점', 'Jessica 일감: 92%', 'Emma 일감: 38%']
@@ -145,7 +145,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '/therapist/checkin에서 [📋 출근] 클릭',
       status: 'completed',
       icon: '📋',
-      details: ['상태: checked_in', 'GPS 활성화', '시스템 등록']
+      details: ['상태: checked_in', 'GPS 활성화', 'System 등록']
     },
     {
       time: '08:15',
@@ -153,15 +153,15 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '/therapist/schedule 열기',
       status: 'completed',
       icon: '📅',
-      details: ['배정된 예약 5건 확인', '시간대별 정렬', '고객 프로필 미리 보기']
+      details: ['배정된 예약 5건 확인', '시간대별 정렬', 'Customer 프로필 미리 보기']
     },
     {
       time: '08:30',
-      title: '첫 번째 고객 알림',
+      title: '첫 번째 Customer 알림',
       description: '매니저가 배정했다는 푸시 알림',
       status: 'completed',
       icon: '🔔',
-      details: ['고객명: 박지은', '서비스: 스웨디시 60분', '시간: 08:30 (곧 시작!)']
+      details: ['Customer명: 박지은', '서비스: 스웨디시 60분', '시간: 08:30 (곧 시작!)']
     },
     {
       time: '08:30',
@@ -169,12 +169,12 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: 'B01 침대 준비',
       status: 'completed',
       icon: '🚶',
-      details: ['침대 정리', '타올 준비', '고객 맞이 준비']
+      details: ['침대 정리', '타올 준비', 'Customer 맞이 준비']
     },
     {
       time: '08:35',
       title: '[서비스 시작] 클릭',
-      description: '마사지 시작',
+      description: 'Massage 시작',
       status: 'active',
       icon: '💆',
       details: ['상태: in_service', '타이머: 60:00 시작', '어드민에게 보고']
@@ -185,7 +185,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '마무리 단계',
       status: 'active',
       icon: '⏱️',
-      details: ['남은 시간: 5분', '마사지 마무리', '타올로 닦기']
+      details: ['남은 시간: 5분', 'Massage 마무리', '타올로 닦기']
     },
     {
       time: '09:37',
@@ -205,11 +205,11 @@ const workflows: Record<UserType, WorkflowStep[]> = {
     },
     {
       time: '10:00',
-      title: '다음 고객 알림',
+      title: '다음 Customer 알림',
       description: '두 번째 예약 자동 배정',
       status: 'pending',
       icon: '🔔',
-      details: ['고객명: 이수연', '서비스: 타이 마사지 90분', '침대: B03']
+      details: ['Customer명: 이수연', '서비스: 타이 Massage 90분', '침대: B03']
     },
     {
       time: '18:00',
@@ -217,7 +217,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '/therapist/checkout에서 [🚪 퇴근] 클릭',
       status: 'pending',
       icon: '🚪',
-      details: ['상태: off_duty', '오늘 수익 확인', '고객수: 5명']
+      details: ['상태: off_duty', '오늘 수익 확인', 'Customer수: 5명']
     }
   ],
   driver: [
@@ -227,7 +227,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '/driver/checkin에서 [🚗 출근] 클릭',
       status: 'completed',
       icon: '🚗',
-      details: ['상태: checked_in', 'GPS 활성화', '배차 시스템 등록']
+      details: ['상태: checked_in', 'GPS 활성화', '배차 System 등록']
     },
     {
       time: '08:15',
@@ -235,15 +235,15 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '/driver/queue에서 대기 중인 요청 확인',
       status: 'completed',
       icon: '📍',
-      details: ['대기 픽업: 3건', '거리, 예정 시간 표시', '고객명 확인']
+      details: ['대기 픽업: 3건', '거리, 예정 시간 표시', 'Customer명 확인']
     },
     {
       time: '08:20',
       title: '픽업 요청 받음',
-      description: 'AI 자동 배정 (가장 가까운 고객)',
+      description: 'AI 자동 배정 (가장 가까운 Customer)',
       status: 'completed',
       icon: '🎯',
-      details: ['고객: 김민준', '주소: 강남구 테헤란로 123', '거리: 2.3km, 5분']
+      details: ['Customer: 김민준', '주소: 강남구 테헤란로 123', '거리: 2.3km, 5분']
     },
     {
       time: '08:25',
@@ -255,8 +255,8 @@ const workflows: Record<UserType, WorkflowStep[]> = {
     },
     {
       time: '08:30',
-      title: '고객 픽업',
-      description: '도착 후 고객 탑승',
+      title: 'Customer 픽업',
+      description: '도착 후 Customer 탑승',
       status: 'active',
       icon: '✅',
       details: ['[픽업 완료] 클릭', '상태: delivering', '목적지: ElSpa']
@@ -275,7 +275,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '[도착] 버튼 클릭',
       status: 'pending',
       icon: '🏢',
-      details: ['고객 하차', '상태: idle', '수수료 자동 계산 (₱8,000)']
+      details: ['Customer 하차', '상태: idle', '수수료 자동 계산 (₱8,000)']
     },
     {
       time: '08:45',
@@ -301,7 +301,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '카운터 모니터 시작 (읽기만 함)',
       status: 'completed',
       icon: '📺',
-      details: ['86개 침대 상태 표시', '테라피스트 현황 패널', '실시간 시계']
+      details: ['86개 침대 상태 표시', 'Therapist 현황 패널', '실시간 시계']
     },
     {
       time: '08:15',
@@ -309,11 +309,11 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: '각 침대의 색상으로 상태 파악',
       status: 'completed',
       icon: '👀',
-      details: ['초록색: 비어있음 (45개)', '파랑색: 마사지중 (28개)', '주황색: 예약됨 (13개)']
+      details: ['초록색: 비어있음 (45개)', '파랑색: Massage중 (28개)', '주황색: 예약됨 (13개)']
     },
     {
       time: '14:20',
-      title: '고객 "김민준" 도착',
+      title: 'Customer "김민준" 도착',
       description: '카운터에서 체크인 시작',
       status: 'completed',
       icon: '🧑',
@@ -325,15 +325,15 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: 'Jessica이 B05 침대에 배정됨을 확인',
       status: 'completed',
       icon: '✅',
-      details: ['B05가 파란색 (마사지중)', 'Jessica 상태 확인', '예약 정보 맞음']
+      details: ['B05가 파란색 (Massage중)', 'Jessica 상태 확인', '예약 Information 맞음']
     },
     {
       time: '14:28',
-      title: '고객 안내',
+      title: 'Customer 안내',
       description: '"B05 침대로 가세요"',
       status: 'active',
       icon: '🗺️',
-      details: ['"Jessica 테라피스트입니다"', '"60분 서비스입니다"', '"편히 쉬세요"']
+      details: ['"Jessica Therapist입니다"', '"60분 서비스입니다"', '"편히 쉬세요"']
     },
     {
       time: '14:30',
@@ -365,11 +365,11 @@ const workflows: Record<UserType, WorkflowStep[]> = {
       description: 'B05 침대가 회색(정리중)으로 변경',
       status: 'pending',
       icon: '🧹',
-      details: ['상태: cleaning', '고객 일어나기', '카운터에서 결제 준비']
+      details: ['상태: cleaning', 'Customer 일어나기', '카운터에서 결제 준비']
     },
     {
       time: '15:35',
-      title: '고객 결제',
+      title: 'Customer 결제',
       description: '태블릿에서 결제 처리',
       status: 'pending',
       icon: '💳',
@@ -377,7 +377,7 @@ const workflows: Record<UserType, WorkflowStep[]> = {
     },
     {
       time: '15:40',
-      title: '고객 배웅',
+      title: 'Customer 배웅',
       description: '"감사합니다! 다음에 뵙겠습니다"',
       status: 'pending',
       icon: '👋',
@@ -403,9 +403,9 @@ const workflows: Record<UserType, WorkflowStep[]> = {
 };
 
 const userTypeInfo = {
-  customer: { label: '고객', color: 'from-pink-500 to-rose-500', icon: '🧑' },
+  customer: { label: 'Customer', color: 'from-pink-500 to-rose-500', icon: '🧑' },
   admin: { label: '매니저', color: 'from-blue-500 to-cyan-500', icon: '👔' },
-  therapist: { label: '테라피스트', color: 'from-green-500 to-emerald-500', icon: '💆' },
+  therapist: { label: 'Therapist', color: 'from-green-500 to-emerald-500', icon: '💆' },
   driver: { label: '드라이버', color: 'from-yellow-500 to-orange-500', icon: '🚗' },
   counter: { label: '카운터', color: 'from-purple-500 to-indigo-500', icon: '📺' }
 };
@@ -450,7 +450,7 @@ export default function WorkflowPage() {
           ))}
         </div>
 
-        {/* 현재 사용자 정보 */}
+        {/* 현재 사용자 Information */}
         <div className={`bg-gradient-to-r ${userInfo.color} rounded-2xl p-8 mb-12 text-white shadow-2xl`}>
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -490,7 +490,7 @@ export default function WorkflowPage() {
                   )}
                 </div>
 
-                {/* 단계 상세 정보 */}
+                {/* 단계 상세 Information */}
                 <div className={`flex-1 p-6 rounded-xl border-2 ${config.bg} ${config.border} transition-all hover:shadow-lg`}>
                   <div className="flex items-start justify-between mb-4">
                     <div>

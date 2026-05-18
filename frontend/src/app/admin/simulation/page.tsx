@@ -23,21 +23,21 @@ interface SimulationResult {
 }
 
 const SERVICES = [
-  { id: 'swedish', name: '스웨디시 마사지', duration: 60 },
-  { id: 'thai', name: '타이 마사지', duration: 90 },
-  { id: 'hotstone', name: '핫스톤 테라피', duration: 60 },
-  { id: 'foot', name: '발 마사지', duration: 30 },
-  { id: 'aromatherapy', name: '아로마테라피', duration: 60 },
-  { id: 'couple', name: '커플 패키지', duration: 120 },
+  { id: 'swedish', name: 'Swedish Massage', duration: 60 },
+  { id: 'thai', name: 'Thai Massage', duration: 90 },
+  { id: 'hotstone', name: 'Hot Stone Therapy', duration: 60 },
+  { id: 'foot', name: 'Foot Massage', duration: 30 },
+  { id: 'aromatherapy', name: 'Aromatherapy', duration: 60 },
+  { id: 'couple', name: 'Couple Package', duration: 120 },
 ];
 
 const THERAPISTS = [
-  { id: 1, name: 'Sarah', specialty: '스웨디시 전문' },
-  { id: 2, name: 'Emma', specialty: '타이 마사지' },
-  { id: 3, name: 'Jessica', specialty: '핫스톤 테라피' },
-  { id: 4, name: 'Amanda', specialty: '발 마사지' },
-  { id: 5, name: '강지연', specialty: '아로마테라피' },
-  { id: 6, name: '박민경', specialty: '종합' },
+  { id: 1, name: 'Sarah', specialty: 'Swedish Specialist' },
+  { id: 2, name: 'Emma', specialty: 'Thai Massage' },
+  { id: 3, name: 'Jessica', specialty: 'Hot Stone Therapy' },
+  { id: 4, name: 'Amanda', specialty: 'Foot Massage' },
+  { id: 5, name: 'Kang Ji-yeon', specialty: 'Aromatherapy' },
+  { id: 6, name: 'Park Min-gyeong', specialty: 'General' },
 ];
 
 export default function SimulationPage() {
@@ -68,8 +68,8 @@ export default function SimulationPage() {
         expertise: 95,
         distance: 85,
         rating: 88,
-        currentStatus: '대기중 (idle)',
-        availableAt: '즉시',
+        currentStatus: 'Idle',
+        availableAt: 'Immediately',
       },
       {
         id: 2,
@@ -78,8 +78,8 @@ export default function SimulationPage() {
         expertise: 88,
         distance: 78,
         rating: 85,
-        currentStatus: '마사지중 (15분)',
-        availableAt: '약 15분 후',
+        currentStatus: 'In Session (15 min)',
+        availableAt: 'About 15 minutes later',
       },
       {
         id: 1,
@@ -88,8 +88,8 @@ export default function SimulationPage() {
         expertise: 90,
         distance: 72,
         rating: 92,
-        currentStatus: '휴식중',
-        availableAt: '약 5분 후',
+        currentStatus: 'On Break',
+        availableAt: 'About 5 minutes later',
       },
     ];
 
@@ -98,8 +98,8 @@ export default function SimulationPage() {
       estimatedStartTime: formatTime(startTime),
       estimatedEndTime: formatTime(endTime),
       selectedBed: 'B' + String(Math.floor(Math.random() * 40) + 1).padStart(2, '0'),
-      waitingTime: `${waitMinutes}분`,
-      message: `Jessica 테라피스트가 현재 대기 중입니다. 즉시 매칭 가능합니다.`,
+      waitingTime: `${waitMinutes} minutes`,
+      message: `Therapist Jessica is currently available. Instant matching is possible.`,
     };
   };
 
@@ -114,26 +114,26 @@ export default function SimulationPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 p-8">
       <div className="max-w-7xl mx-auto">
-        {/* 헤더 */}
+        {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2 tracking-tight">
-            What-if 매칭 시뮬레이션
+            What-If Matching Simulation
           </h1>
           <p className="text-lg text-gray-600 font-light">
-            고객 조건을 입력하면 AI가 최적의 테라피스트를 추천합니다.
+            Enter customer conditions and AI will recommend the best therapist.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* 입력 영역 */}
+          {/* Input Area */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl p-8 shadow-sm border border-stone-100 sticky top-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">조건 설정</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Set Conditions</h2>
 
-              {/* 서비스 선택 */}
+              {/* Service Selection */}
               <div className="mb-6">
                 <label className="block text-sm font-bold text-gray-900 mb-3">
-                  📋 서비스 선택
+                  📋 Select Service
                 </label>
                 <select
                   value={serviceId}
@@ -147,21 +147,21 @@ export default function SimulationPage() {
                   ))}
                 </select>
                 <p className="text-xs text-gray-500 mt-2 font-light">
-                  선택한 서비스: <span className="font-semibold">{selectedService?.duration}분</span>
+                  Selected Service Duration: <span className="font-semibold">{selectedService?.duration} min</span>
                 </p>
               </div>
 
-              {/* 테라피스트 선호도 */}
+              {/* Therapist Preference */}
               <div className="mb-6">
                 <label className="block text-sm font-bold text-gray-900 mb-3">
-                  👥 선호 테라피스트 (선택)
+                  👥 Preferred Therapist (Optional)
                 </label>
                 <select
                   value={preferredTherapist}
                   onChange={(e) => setPreferredTherapist(e.target.value)}
                   className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:outline-none focus:border-orange-500 font-light"
                 >
-                  <option value="">선호하는 테라피스트 없음</option>
+                  <option value="">No Preferred Therapist</option>
                   {THERAPISTS.map(therapist => (
                     <option key={therapist.id} value={therapist.id.toString()}>
                       {therapist.name} - {therapist.specialty}
@@ -170,10 +170,10 @@ export default function SimulationPage() {
                 </select>
               </div>
 
-              {/* 시간 선택 */}
+              {/* Time Selection */}
               <div className="mb-6">
                 <label className="block text-sm font-bold text-gray-900 mb-3">
-                  ⏰ 예약 시간
+                  ⏰ Booking Time
                 </label>
                 <div className="space-y-2">
                   <label className="flex items-center">
@@ -185,7 +185,7 @@ export default function SimulationPage() {
                       onChange={(e) => setTimeOption(e.target.value)}
                       className="mr-2"
                     />
-                    <span className="text-sm font-light text-gray-700">지금 (워크인 고객)</span>
+                    <span className="text-sm font-light text-gray-700">Now (Walk-in)</span>
                   </label>
                   <label className="flex items-center">
                     <input
@@ -196,7 +196,7 @@ export default function SimulationPage() {
                       onChange={(e) => setTimeOption(e.target.value)}
                       className="mr-2"
                     />
-                    <span className="text-sm font-light text-gray-700">특정 시간</span>
+                    <span className="text-sm font-light text-gray-700">Specific Time</span>
                   </label>
                 </div>
 
@@ -210,59 +210,59 @@ export default function SimulationPage() {
                 )}
               </div>
 
-              {/* 시뮬레이션 버튼 */}
+              {/* Simulation Button */}
               <button
                 onClick={handleSimulate}
                 disabled={simulating}
                 className="w-full px-6 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all shadow-md"
               >
-                {simulating ? '🔄 시뮬레이션 중...' : '🚀 시뮬레이션 실행'}
+                {simulating ? '🔄 Simulating...' : '🚀 Run Simulation'}
               </button>
 
-              {/* 안내 */}
+              {/* Tip */}
               <div className="mt-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
-                <p className="text-xs font-bold text-orange-900 mb-1">💡 팁</p>
+                <p className="text-xs font-bold text-orange-900 mb-1">💡 Tip</p>
                 <p className="text-xs text-orange-800 font-light">
-                  시뮬레이션 결과는 DB에 반영되지 않습니다. 순수 조회 목적입니다.
+                  Simulation results are not reflected in the database. This is for inquiry purposes only.
                 </p>
               </div>
             </div>
           </div>
 
-          {/* 결과 영역 */}
+          {/* Result Area */}
           <div className="lg:col-span-2">
             {!result ? (
               <div className="bg-white rounded-xl p-12 shadow-sm border border-stone-100 h-full flex items-center justify-center">
                 <div className="text-center">
                   <div className="text-6xl mb-4">🎯</div>
                   <p className="text-gray-500 font-light text-lg">
-                    조건을 설정하고 "시뮬레이션 실행" 버튼을 클릭하세요.
+                    Set conditions and click the "Run Simulation" button.
                   </p>
                 </div>
               </div>
             ) : (
               <div className="space-y-6">
-                {/* 요약 정보 */}
+                {/* Summary Information */}
                 <div className="bg-white rounded-xl p-8 shadow-sm border border-stone-100">
                   <div className="grid grid-cols-2 gap-4 mb-6">
                     <div>
-                      <p className="text-xs text-gray-500 font-light mb-1">서비스</p>
+                      <p className="text-xs text-gray-500 font-light mb-1">Service</p>
                       <p className="text-lg font-bold text-gray-900">{selectedService?.name}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 font-light mb-1">예상 대기 시간</p>
+                      <p className="text-xs text-gray-500 font-light mb-1">Est. Wait Time</p>
                       <p className="text-lg font-bold text-orange-600">{result.waitingTime}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 font-light mb-1">예상 시작 시간</p>
+                      <p className="text-xs text-gray-500 font-light mb-1">Est. Start Time</p>
                       <p className="text-lg font-bold text-gray-900">{result.estimatedStartTime}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 font-light mb-1">예상 종료 시간</p>
+                      <p className="text-xs text-gray-500 font-light mb-1">Est. End Time</p>
                       <p className="text-lg font-bold text-gray-900">{result.estimatedEndTime}</p>
                     </div>
                     <div className="col-span-2">
-                      <p className="text-xs text-gray-500 font-light mb-1">배정 침대</p>
+                      <p className="text-xs text-gray-500 font-light mb-1">Assigned Bed</p>
                       <p className="text-2xl font-bold text-blue-600">{result.selectedBed}</p>
                     </div>
                   </div>
@@ -272,13 +272,13 @@ export default function SimulationPage() {
                   </div>
                 </div>
 
-                {/* 추천 테라피스트들 */}
+                {/* Recommended Therapists */}
                 <div className="space-y-4">
-                  <h3 className="text-xl font-bold text-gray-900">🏆 AI 추천 테라피스트</h3>
+                  <h3 className="text-xl font-bold text-gray-900">🏆 AI Recommended Therapists</h3>
 
                   {result.candidates.map((candidate, idx) => (
                     <div key={candidate.id} className="bg-white rounded-xl p-6 shadow-sm border border-stone-100 hover:shadow-md transition-all">
-                      {/* 순위 배지 */}
+                      {/* Rank Badge */}
                       <div className="flex items-start justify-between mb-4">
                         <div>
                           <div className="flex items-center gap-3">
@@ -296,14 +296,14 @@ export default function SimulationPage() {
                         </div>
                         <div className="text-right">
                           <div className="text-3xl font-bold text-orange-600">{candidate.score}</div>
-                          <p className="text-xs text-gray-500">매칭점수</p>
+                          <p className="text-xs text-gray-500">Matching Score</p>
                         </div>
                       </div>
 
-                      {/* 점수 세분화 */}
+                      {/* Score Breakdown */}
                       <div className="grid grid-cols-3 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
                         <div>
-                          <p className="text-xs text-gray-600 font-light mb-1">전문성</p>
+                          <p className="text-xs text-gray-600 font-light mb-1">Expertise</p>
                           <div className="flex items-end gap-1">
                             <span className="text-lg font-bold text-gray-900">{candidate.expertise}</span>
                             <span className="text-xs text-gray-500">/ 100</span>
@@ -313,7 +313,7 @@ export default function SimulationPage() {
                           </div>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-600 font-light mb-1">거리/시간</p>
+                          <p className="text-xs text-gray-600 font-light mb-1">Distance/Time</p>
                           <div className="flex items-end gap-1">
                             <span className="text-lg font-bold text-gray-900">{candidate.distance}</span>
                             <span className="text-xs text-gray-500">/ 100</span>
@@ -323,7 +323,7 @@ export default function SimulationPage() {
                           </div>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-600 font-light mb-1">평점</p>
+                          <p className="text-xs text-gray-600 font-light mb-1">Rating</p>
                           <div className="flex items-end gap-1">
                             <span className="text-lg font-bold text-gray-900">{candidate.rating}</span>
                             <span className="text-xs text-gray-500">/ 100</span>
@@ -334,20 +334,20 @@ export default function SimulationPage() {
                         </div>
                       </div>
 
-                      {/* 현재 상태 */}
+                      {/* Current Status */}
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm text-gray-900 font-light">
-                            현재: <span className="font-semibold">{candidate.currentStatus}</span>
+                            Current: <span className="font-semibold">{candidate.currentStatus}</span>
                           </p>
                           <p className="text-sm text-orange-600 font-light">
-                            가용: <span className="font-semibold">{candidate.availableAt}</span>
+                            Available: <span className="font-semibold">{candidate.availableAt}</span>
                           </p>
                         </div>
 
                         {idx === 0 && (
                           <button className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:shadow-lg font-semibold transition-all shadow-md text-sm">
-                            ✓ 이 테라피스트 배정
+                            ✓ Assign Therapist
                           </button>
                         )}
                       </div>
@@ -355,12 +355,12 @@ export default function SimulationPage() {
                   ))}
                 </div>
 
-                {/* 다시 시뮬레이션 */}
+                {/* Run Simulation Again */}
                 <button
                   onClick={() => setResult(null)}
                   className="w-full px-6 py-3 bg-stone-100 text-gray-900 rounded-lg hover:bg-stone-200 font-semibold transition-colors"
                 >
-                  ← 조건 다시 설정
+                  ← Reset Conditions
                 </button>
               </div>
             )}

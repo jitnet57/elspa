@@ -87,13 +87,13 @@ const THERAPIST_DATA: TherapistMetrics[] = [
 const POLICY_MODES = [
   {
     name: '기본 모드 (70/20/10)',
-    description: '고객 만족도 우선',
-    impact: '평점 높은 테라피스트에게 유리',
+    description: 'Customer 만족도 우선',
+    impact: '평점 높은 Therapist에게 유리',
   },
   {
     name: '공정성 모드 (40/20/10/30)',
     description: '공정한 일감 분배',
-    impact: '모든 테라피스트에게 균등한 기회',
+    impact: '모든 Therapist에게 균등한 기회',
   },
   {
     name: '신입 부스트',
@@ -117,7 +117,7 @@ export default function TherapistFairnessPage() {
         {/* 헤더 */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2 tracking-tight">
-            📊 테라피스트 공정성 대시보드
+            📊 Therapist 공정성 Dashboard
           </h1>
           <p className="text-lg text-gray-600 font-light">
             매칭 정책이 당신의 일감과 수익에 어떻게 영향을 미치는지 확인하세요
@@ -125,7 +125,7 @@ export default function TherapistFairnessPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          {/* 좌측: 테라피스트 목록 */}
+          {/* 좌측: Therapist 목록 */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl p-8 shadow-sm border border-stone-100 sticky top-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">팀 현황</h2>
@@ -184,7 +184,7 @@ export default function TherapistFairnessPage() {
             </div>
           </div>
 
-          {/* 중앙: 선택된 테라피스트 상세 정보 */}
+          {/* 중앙: 선택된 Therapist 상세 Information */}
           {therapist && (
             <div className="lg:col-span-2 space-y-6">
               {/* 프로필 */}
@@ -342,7 +342,7 @@ export default function TherapistFairnessPage() {
             <div className="p-6 bg-red-50 rounded-lg border-2 border-red-200">
               <h3 className="font-bold text-gray-900 mb-3">❌ 문제 1: 일감 집중</h3>
               <p className="text-sm text-gray-700 font-light mb-3">
-                높은 평점의 테라피스트에게만 일이 몰려 수익 불균형 발생
+                높은 평점의 Therapist에게만 일이 몰려 수익 불균형 발생
               </p>
               <div className="bg-white rounded p-3 mb-3 text-xs text-gray-600">
                 예) 평점 4.9: 월 5배 수익<br />
@@ -396,13 +396,13 @@ export default function TherapistFairnessPage() {
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div>
-              <p className="font-bold text-emerald-900 mb-2">고객 ✓</p>
+              <p className="font-bold text-emerald-900 mb-2">Customer ✓</p>
               <p className="text-sm text-gray-700 font-light">
                 기본 모드로 최고의 서비스 경험 보장
               </p>
             </div>
             <div>
-              <p className="font-bold text-emerald-900 mb-2">테라피스트 ✓</p>
+              <p className="font-bold text-emerald-900 mb-2">Therapist ✓</p>
               <p className="text-sm text-gray-700 font-light">
                 공정한 일감 분배와 동일한 수익 기회
               </p>
