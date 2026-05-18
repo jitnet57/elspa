@@ -1,11 +1,11 @@
 [
   {
     "route": "/admin/monthly-settlement",
-    "firstLoadUncompressedJsBytes": 967906,
+    "firstLoadUncompressedJsBytes": 970341,
     "firstLoadChunkPaths": [
       ".next\\static\\chunks\\0wf8tkt_ask3w.js",
       ".next\\static\\chunks\\0.slq9f~yn21d.js",
-      ".next\\static\\chunks\\05t1ey1w_igqv.js",
+      ".next\\static\\chunks\\0c2xmqc3f8tfz.js",
       ".next\\static\\chunks\\0wo~0mp_a2rbp.js",
       ".next\\static\\chunks\\0ze4gu236oq96.js",
       ".next\\static\\chunks\\15hxc6.t35tz4.js",
