@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>실시간 위치 추적 시스템 - 페이지 기획</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 50px;
+      font-size: 2.5em;
+    }
+
+    .page-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+      gap: 30px;
+      margin-bottom: 60px;
+    }
+
+    .page-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .page-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .page-header {
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .page-header.admin {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .page-header.driver {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .page-header.customer {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .page-header h2 {
+      font-size: 1.5em;
+      margin-bottom: 5px;
+    }
+
+    .page-header p {
+      font-size: 0.9em;
+      opacity: 0.9;
+    }
+
+    .mockup {
+      padding: 20px;
+      height: 600px;
+      background: #fafafa;
+      border-bottom: 1px solid #e0e0e0;
+      position: relative;
+      overflow-y: auto;
+    }
+
+    .mockup-section {
+      margin-bottom: 20px;
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      border-left: 4px solid #667eea;
+    }
+
+    .mockup-section.map {
+      border-left-color: #4facfe;
+    }
+
+    .mockup-section.list {
+      border-left-color: #f5576c;
+    }
+
+    .mockup-section h3 {
+      font-size: 0.95em;
+      color: #2c3e50;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mockup-map {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 3em;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mockup-map::before {
+      content: '🗺️';
+      font-size: 1.2em;
+    }
+
+    .map-dot {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+
+    .map-dot.driver {
+      background: #2563eb;
+      top: 30%;
+      left: 30%;
+    }
+
+    .map-dot.customer {
+      background: #10b981;
+      top: 60%;
+      right: 30%;
+    }
+
+    .map-dot.target {
+      background: #dc2626;
+      top: 45%;
+      right: 45%;
+    }
+
+    .mockup-item {
+      background: #f9f9f9;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      border-left: 3px solid #667eea;
+      font-size: 0.9em;
+    }
+
+    .mockup-item.active {
+      background: #ede9fe;
+      border-left-color: #667eea;
+    }
+
+    .mockup-item-title {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 4px;
+    }
+
+    .mockup-item-desc {
+      color: #666;
+      font-size: 0.85em;
+      margin-bottom: 4px;
+    }
+
+    .mockup-item-meta {
+      color: #999;
+      font-size: 0.8em;
+    }
+
+    .features {
+      background: white;
+      padding: 15px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .feature-tag {
+      display: inline-block;
+      background: #e0e7ff;
+      color: #667eea;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75em;
+      font-weight: 600;
+      margin: 3px;
+    }
+
+    .comparison-table {
+      width: 100%;
+      margin-top: 50px;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .comparison-table h3 {
+      padding: 20px;
+      background: #2c3e50;
+      color: white;
+      font-size: 1.3em;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background: #f5f5f5;
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      color: #2c3e50;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    td {
+      padding: 15px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .check {
+      color: #10b981;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+
+    .flow-diagram {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-top: 50px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .flow-diagram h3 {
+      margin-bottom: 30px;
+      color: #2c3e50;
+      font-size: 1.3em;
+    }
+
+    .flow-container {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .flow-box {
+      flex: 1;
+      min-width: 150px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .flow-arrow {
+      font-size: 2em;
+      color: #667eea;
+    }
+
+    @media (max-width: 768px) {
+      .page-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-container {
+        flex-direction: column;
+      }
+
+      .flow-arrow {
+        transform: rotate(90deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🗺️ 실시간 위치 추적 시스템 - 페이지 기획</h1>
+
+    <!-- 페이지별 목업 -->
+    <div class="page-grid">
+      <!-- 관리자 페이지 -->
+      <div class="page-card">
+        <div class="page-header admin">
+          <h2>👨‍💼 관리자 대시보드</h2>
+          <p>/admin/realtime-locations</p>
+        </div>
+
+        <div class="mockup">
+          <div class="mockup-section map">
+            <h3>📍 실시간 위치 모니터링</h3>
+            <div class="mockup-map">
+              <div class="map-dot driver"></div>
+              <div class="map-dot customer"></div>
+              <div class="map-dot driver" style="top: 70%; left: 60%;"></div>
+            </div>
+          </div>
+
+          <div class="mockup-section">
+            <h3>📊 통계</h3>
+            <div class="mockup-item">
+              <div class="mockup-item-title">🚗 활성 드라이버</div>
+              <div class="mockup-item-desc">5명 현재 주행 중</div>
+            </div>
+            <div class="mockup-item">
+              <div class="mockup-item-title">👤 대기 중인 손님</div>
+              <div class="mockup-item-desc">12명 서비스 대기 중</div>
+            </div>
+            <div class="mockup-item">
+              <div class="mockup-item-title">⏱️ 평균 픽업 시간</div>
+              <div class="mockup-item-desc">약 6분 40초</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="features">
+          <span class="feature-tag">✅ 전체 모니터링</span>
+          <span class="feature-tag">📊 실시간 통계</span>
+          <span class="feature-tag">🎯 필터링</span>
+        </div>
+      </div>
+
+      <!-- 드라이버 페이지 -->
+      <div class="page-card">
+        <div class="page-header driver">
+          <h2>🚗 드라이버 앱</h2>
+          <p>/driver/customer-locations</p>
+        </div>
+
+        <div class="mockup">
+          <div class="mockup-section map">
+            <h3>🗺️ 손님 위치 맵</h3>
+            <div class="mockup-map" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+              <div class="map-dot customer"></div>
+              <div class="map-dot driver" style="top: 40%; left: 40%;"></div>
+            </div>
+          </div>
+
+          <div class="mockup-section list">
+            <h3>📋 오늘의 손님 (3명)</h3>
+            <div class="mockup-item active">
+              <div class="mockup-item-title">박미영</div>
+              <div class="mockup-item-desc">강남구 도곡동</div>
+              <div class="mockup-item-meta">📍 1.2km • 5분 소요</div>
+            </div>
+            <div class="mockup-item">
+              <div class="mockup-item-title">이지은</div>
+              <div class="mockup-item-desc">강남구 삼성동</div>
+              <div class="mockup-item-meta">📍 2.5km • 12분 소요</div>
+            </div>
+            <div class="mockup-item">
+              <div class="mockup-item-title">최수진</div>
+              <div class="mockup-item-desc">강남구 압구정동</div>
+              <div class="mockup-item-meta">📍 0.8km • 3분 소요</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="features">
+          <span class="feature-tag">👤 손님 위치 실시간</span>
+          <span class="feature-tag">🚗 픽업 시작/완료</span>
+          <span class="feature-tag">📞 전화/메시지</span>
+        </div>
+      </div>
+
+      <!-- 손님 페이지 -->
+      <div class="page-card">
+        <div class="page-header customer">
+          <h2>👤 손님 앱</h2>
+          <p>/customer/driver-tracking</p>
+        </div>
+
+        <div class="mockup">
+          <div class="mockup-section map">
+            <h3>🚗 드라이버 위치 추적</h3>
+            <div class="mockup-map" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+              <div class="map-dot driver"></div>
+              <div class="map-dot customer" style="top: 50%; right: 50%;"></div>
+            </div>
+          </div>
+
+          <div class="mockup-section">
+            <h3>⏳ 픽업 상태</h3>
+            <div class="mockup-item">
+              <div class="mockup-item-title">🚗 드라이버가 가고 있습니다</div>
+              <div class="mockup-item-desc">약 5분 후 도착 예정</div>
+            </div>
+            <div class="mockup-item">
+              <div class="mockup-item-title">👨‍💼 김철수 드라이버</div>
+              <div class="mockup-item-meta">⭐ 4.9 (237개 리뷰)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="features">
+          <span class="feature-tag">🗺️ 드라이버 위치</span>
+          <span class="feature-tag">⏱️ 도착 시간</span>
+          <span class="feature-tag">📞 긴급 연락</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 비교 테이블 -->
+    <div class="comparison-table">
+      <h3>🎯 각 페이지별 기능 비교</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>기능</th>
+            <th style="text-align: center;">👨‍💼 관리자</th>
+            <th style="text-align: center;">🚗 드라이버</th>
+            <th style="text-align: center;">👤 손님</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>모든 위치 보기</strong></td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+            <td style="text-align: center;">-</td>
+            <td style="text-align: center;">-</td>
+          </tr>
+          <tr>
+            <td><strong>할당된 손님 위치</strong></td>
+            <td style="text-align: center;">-</td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+            <td style="text-align: center;">-</td>
+          </tr>
+          <tr>
+            <td><strong>할당된 드라이버 위치</strong></td>
+            <td style="text-align: center;">-</td>
+            <td style="text-align: center;">-</td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td><strong>실시간 지도</strong></td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td><strong>목록 뷰</strong></td>
+            <td style="text-align: center;">통계</td>
+            <td style="text-align: center;">손님 목록</td>
+            <td style="text-align: center;">드라이버 정보</td>
+          </tr>
+          <tr>
+            <td><strong>연락 기능</strong></td>
+            <td style="text-align: center;">-</td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td><strong>상태 변경</strong></td>
+            <td style="text-align: center;">모니터링만</td>
+            <td style="text-align: center;">픽업/완료</td>
+            <td style="text-align: center;">상태 확인만</td>
+          </tr>
+          <tr>
+            <td><strong>거리/시간 표시</strong></td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 데이터 플로우 -->
+    <div class="flow-diagram">
+      <h3>📊 실시간 데이터 플로우</h3>
+
+      <h4 style="color: #2c3e50; margin-top: 20px; margin-bottom: 15px;">드라이버 → 손님</h4>
+      <div class="flow-container">
+        <div class="flow-box">드라이버 GPS</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">REST API</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">손님 실시간</div>
+      </div>
+
+      <h4 style="color: #2c3e50; margin-top: 20px; margin-bottom: 15px;">손님 정보 → 드라이버</h4>
+      <div class="flow-container">
+        <div class="flow-box">손님 위치</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">WebSocket</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">드라이버 지도</div>
+      </div>
+
+      <h4 style="color: #2c3e50; margin-top: 20px; margin-bottom: 15px;">전체 모니터링 → 관리자</h4>
+      <div class="flow-container">
+        <div class="flow-box">모든 위치</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">Admin WebSocket</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">대시보드</div>
+      </div>
+    </div>
+
+    <!-- 기술 스택 -->
+    <div class="comparison-table" style="margin-top: 40px;">
+      <h3>🛠️ 기술 스택</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>계층</th>
+            <th>기술</th>
+            <th>역할</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>지도</strong></td>
+            <td>Leaflet + OpenStreetMap (Free)</td>
+            <td>실시간 위치 표시 및 마커 관리</td>
+          </tr>
+          <tr>
+            <td><strong>실시간</strong></td>
+            <td>WebSocket</td>
+            <td>양방향 실시간 위치 업데이트</td>
+          </tr>
+          <tr>
+            <td><strong>API</strong></td>
+            <td>FastAPI REST + WebSocket</td>
+            <td>위치 저장, 조회, 실시간 스트림</td>
+          </tr>
+          <tr>
+            <td><strong>DB</strong></td>
+            <td>Supabase (PostgreSQL)</td>
+            <td>위치 히스토리 저장</td>
+          </tr>
+          <tr>
+            <td><strong>프론트</strong></td>
+            <td>Next.js 16 + React 19</td>
+            <td>반응형 UI 렌더링</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 페이지 로드맵 -->
+    <div class="flow-diagram">
+      <h3>🚀 개발 로드맵</h3>
+
+      <h4 style="color: #2c3e50; margin: 20px 0 15px 0;">1단계: 기본 지도 구현</h4>
+      <div class="flow-container">
+        <div class="flow-box" style="flex: 0.8; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">Leaflet 지도</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box" style="flex: 0.8; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">마커 표시</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box" style="flex: 0.8; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">팝업 정보</div>
+      </div>
+
+      <h4 style="color: #2c3e50; margin: 20px 0 15px 0;">2단계: 실시간 위치</h4>
+      <div class="flow-container">
+        <div class="flow-box" style="flex: 0.8; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">WebSocket</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box" style="flex: 0.8; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">위치 업데이트</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box" style="flex: 0.8; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">자동 이동</div>
+      </div>
+
+      <h4 style="color: #2c3e50; margin: 20px 0 15px 0;">3단계: 기능 추가</h4>
+      <div class="flow-container">
+        <div class="flow-box" style="flex: 0.6; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">경로 표시</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box" style="flex: 0.6; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">거리 계산</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box" style="flex: 0.6; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">알림</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

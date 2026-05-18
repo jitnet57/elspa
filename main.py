@@ -189,7 +189,7 @@ async def api_info():
 # 라우터 임포트 & 등록
 # ============================================================
 from app.routers import beds, therapists, bookings, matching
-from app.routers import settlements, predictions, dashboard, admin, services, customers, chats
+from app.routers import settlements, predictions, dashboard, admin, services, customers, chats, kakao, location
 
 # API 라우터 등록
 app.include_router(beds.router, prefix="/api")
@@ -203,6 +203,8 @@ app.include_router(admin.router, prefix="/api")
 app.include_router(services.router, prefix="/api")
 app.include_router(customers.router, prefix="/api")
 app.include_router(chats.router, prefix="/api")
+app.include_router(location.router, prefix="/api")
+app.include_router(kakao.router)
 
 
 @app.on_event("startup")

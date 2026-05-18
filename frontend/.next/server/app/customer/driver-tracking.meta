@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/customer/layout,_N_T_/customer/driver-tracking/layout,_N_T_/customer/driver-tracking/page,_N_T_/customer/driver-tracking"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/customer/driver-tracking/__PAGE__",
+    "/customer/driver-tracking",
+    "/customer",
+    "/_index",
+    "/_head"
+  ]
+}

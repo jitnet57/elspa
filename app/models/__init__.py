@@ -7,8 +7,9 @@ from .transaction import Transaction
 from .chat import Chat
 from .bed import Bed
 from .attendance import Attendance
+from .location import Location
 
 __all__ = [
     "Customer", "Service", "Booking", "Staff", "Transaction", "Chat",
-    "Bed", "Attendance"
+    "Bed", "Attendance", "Location"
 ]
