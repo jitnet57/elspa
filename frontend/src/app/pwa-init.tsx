@@ -15,12 +15,37 @@ export function PWAInit() {
         .then((registration) => {
           console.log('✅ Service Worker registration successful:', registration);
 
-          // Check for updates periodically
-          setInterval(() => {
+          // 페이지 로드 시 즉시 업데이트 확인
+          registration.update().catch((error) => {
+            console.log('Error checking Service Worker update:', error);
+          });
+
+          // 1분마다 업데이트 확인
+          const updateInterval = setInterval(() => {
             registration.update().catch((error) => {
               console.log('Error checking Service Worker update:', error);
             });
-          }, 60000); // Check every 1 minute
+          }, 60000);
+
+          // 새 Service Worker 대기 중일 때 알림
+          if (registration.waiting) {
+            console.log('⚠️ New Service Worker version available!');
+            // 강제 업데이트 (새 버전 적용)
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+          }
+
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            newWorker?.addEventListener('statechange', () => {
+              if (newWorker.state === 'activated') {
+                console.log('🔄 Service Worker updated! New version active.');
+                // 페이지 새로고침 (선택사항)
+                window.location.reload();
+              }
+            });
+          });
+
+          return () => clearInterval(updateInterval);
         })
         .catch((error) => {
           console.error('❌ Service Worker registration failed:', error);

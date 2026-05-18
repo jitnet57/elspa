@@ -2,6 +2,7 @@
   "name": "El Plaza - Spa & Wellness Booking Platform",
   "short_name": "El Plaza",
   "description": "Professional spa, massage, and wellness services with expert therapists",
+  "version": "1.0.0",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

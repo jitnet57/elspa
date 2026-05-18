@@ -1,7 +1,9 @@
 // ElSpa PWA Service Worker
 // 오프라인 지원 및 캐싱 전략
+// 배포할 때마다 버전을 올려서 캐시를 무효화합니다
 
-const CACHE_NAME = 'elspa-v1';
+const CACHE_VERSION = '20260518-1'; // YYYYMMDD-X 형식 (배포할 때마다 증가)
+const CACHE_NAME = `elspa-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -173,6 +175,14 @@ self.addEventListener('notificationclick', (event) => {
       }
     })
   );
+});
+
+// 메시지 수신 이벤트 (강제 업데이트)
+self.addEventListener('message', (event) => {
+  if (event.data.type === 'SKIP_WAITING') {
+    console.log('[Service Worker] Forcing update...');
+    self.skipWaiting();
+  }
 });
 
 console.log('[Service Worker] Loaded successfully');
