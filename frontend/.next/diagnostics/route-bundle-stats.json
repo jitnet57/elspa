@@ -94,11 +94,11 @@
   },
   {
     "route": "/admin/therapist-schedule",
-    "firstLoadUncompressedJsBytes": 575353,
+    "firstLoadUncompressedJsBytes": 579759,
     "firstLoadChunkPaths": [
       ".next\\static\\chunks\\0wf8tkt_ask3w.js",
       ".next\\static\\chunks\\0.slq9f~yn21d.js",
-      ".next\\static\\chunks\\0uz1-bxx59rq6.js",
+      ".next\\static\\chunks\\15.suz0dw8ae4.js",
       ".next\\static\\chunks\\0ze4gu236oq96.js",
       ".next\\static\\chunks\\15hxc6.t35tz4.js",
       ".next\\static\\chunks\\0n~dq4kpx9xxx.js",

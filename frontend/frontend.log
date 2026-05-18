@@ -14,3 +14,10 @@ See more: https://nextjs.org/docs/app/guides/local-development
 ○ Compiling /customer ...
  HEAD /customer 200 in 15.1s (next.js: 13.9s, application-code: 1198ms)
 ○ Compiling / ...
+ GET /customer 200 in 3.1s (next.js: 1353ms, application-code: 1786ms)
+ GET / 200 in 626ms (next.js: 15ms, application-code: 611ms)
+ GET /customer 200 in 627ms (next.js: 148ms, application-code: 478ms)
+○ Compiling /_not-found/page ...
+ GET /customer/reviews 200 in 12.7s (next.js: 12.0s, application-code: 720ms)
+ GET /customer/services 200 in 13.6s (next.js: 12.6s, application-code: 1026ms)
+ GET /index.html 404 in 13.7s (next.js: 13.3s, application-code: 471ms)

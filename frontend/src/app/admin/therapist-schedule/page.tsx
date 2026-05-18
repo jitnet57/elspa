@@ -146,6 +146,14 @@ export default function TherapistSchedulePage() {
   const [isNewSessionModalOpen, setIsNewSessionModalOpen] = useState(false);
   const [bookingSlot, setBookingSlot] = useState<{ therapistId: number; hour: number } | null>(null);
   const [bookingForm, setBookingForm] = useState({ customerName: '', serviceType: 'swedish', roomNumber: '' });
+  const [manualBookingForm, setManualBookingForm] = useState({
+    therapistId: 1,
+    date: new Date(2026, 4, 18),
+    hour: 10,
+    customerName: '',
+    serviceType: 'swedish' as const,
+    roomNumber: '',
+  });
 
   const formatTime = (hour: number) => {
     return `${Math.floor(hour)}:${String((hour % 1) * 60).padStart(2, '0')}`;
@@ -569,7 +577,157 @@ export default function TherapistSchedulePage() {
         </div>
       )}
 
-      {/* New Booking Modal */}
+      {/* Manual Booking Modal - Start New Massage Button */}
+      {isNewSessionModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">🧘 Start New Massage Session</h3>
+
+            <div className="space-y-4 mb-6 max-h-[500px] overflow-y-auto">
+              {/* Therapist Selection */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Select Therapist</label>
+                <select
+                  value={manualBookingForm.therapistId}
+                  onChange={e => setManualBookingForm({ ...manualBookingForm, therapistId: parseInt(e.target.value) })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
+                >
+                  {therapists.map(t => (
+                    <option key={t.id} value={t.id}>
+                      {t.name} ({t.status === 'available' ? '✓ Available' : t.status})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Date Selection */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Select Date</label>
+                <input
+                  type="date"
+                  value={manualBookingForm.date.toISOString().split('T')[0]}
+                  onChange={e => {
+                    const newDate = new Date(e.target.value);
+                    setManualBookingForm({ ...manualBookingForm, date: newDate });
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
+                />
+              </div>
+
+              {/* Time Selection */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Select Time</label>
+                <select
+                  value={manualBookingForm.hour}
+                  onChange={e => setManualBookingForm({ ...manualBookingForm, hour: parseInt(e.target.value) })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
+                >
+                  {Array.from({ length: END_HOUR - START_HOUR }).map((_, i) => {
+                    const hour = START_HOUR + i;
+                    return (
+                      <option key={hour} value={hour}>
+                        {String(hour).padStart(2, '0')}:00 - {String(hour + 1).padStart(2, '0')}:00
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              {/* Customer Name */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Guest/Customer Name *</label>
+                <input
+                  type="text"
+                  value={manualBookingForm.customerName}
+                  onChange={e => setManualBookingForm({ ...manualBookingForm, customerName: e.target.value })}
+                  placeholder="e.g., John Smith"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
+                />
+              </div>
+
+              {/* Service Type */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Service Type</label>
+                <select
+                  value={manualBookingForm.serviceType}
+                  onChange={e => setManualBookingForm({ ...manualBookingForm, serviceType: e.target.value as any })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
+                >
+                  <option value="swedish">{SERVICE_CONFIG.swedish.icon} Swedish Massage</option>
+                  <option value="thai">{SERVICE_CONFIG.thai.icon} Thai Massage</option>
+                  <option value="hotstone">{SERVICE_CONFIG.hotstone.icon} Hot Stone Therapy</option>
+                  <option value="foot">{SERVICE_CONFIG.foot.icon} Foot Massage</option>
+                  <option value="aroma">{SERVICE_CONFIG.aroma.icon} Aromatherapy</option>
+                </select>
+              </div>
+
+              {/* Room Number */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Room Assignment</label>
+                <select
+                  value={manualBookingForm.roomNumber}
+                  onChange={e => setManualBookingForm({ ...manualBookingForm, roomNumber: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
+                >
+                  <option value="">Select Room</option>
+                  {ROOM_NUMBERS.map(room => (
+                    <option key={room} value={room}>{room}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsNewSessionModalOpen(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-900 font-bold rounded-lg hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (!manualBookingForm.customerName.trim()) {
+                    alert('Please enter customer name');
+                    return;
+                  }
+                  const newSession: ScheduleSession = {
+                    id: `s${manualBookingForm.therapistId}-${Date.now()}`,
+                    therapistId: manualBookingForm.therapistId,
+                    serviceType: manualBookingForm.serviceType,
+                    startHour: manualBookingForm.hour,
+                    endHour: manualBookingForm.hour + 1,
+                    customerName: manualBookingForm.customerName,
+                    roomNumber: manualBookingForm.roomNumber || undefined,
+                    status: 'scheduled',
+                  };
+
+                  setTherapists(prev =>
+                    prev.map(t =>
+                      t.id === manualBookingForm.therapistId
+                        ? { ...t, sessions: [...t.sessions, newSession].sort((a, b) => a.startHour - b.startHour) }
+                        : t
+                    )
+                  );
+                  setIsNewSessionModalOpen(false);
+                  setManualBookingForm({
+                    therapistId: 1,
+                    date: new Date(2026, 4, 18),
+                    hour: 10,
+                    customerName: '',
+                    serviceType: 'swedish',
+                    roomNumber: '',
+                  });
+                }}
+                className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition"
+              >
+                Start Session
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Booking Modal - Click Time Slot */}
       {bookingSlot && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
