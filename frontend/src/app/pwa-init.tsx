@@ -15,34 +15,42 @@ export function PWAInit() {
         .then((registration) => {
           console.log('✅ Service Worker registration successful:', registration);
 
-          // 페이지 로드 시 즉시 업데이트 확인
-          registration.update().catch((error) => {
-            console.log('Error checking Service Worker update:', error);
-          });
-
-          // 1분마다 업데이트 확인
-          const updateInterval = setInterval(() => {
-            registration.update().catch((error) => {
+          // 페이지 로드 시 즉시 업데이트 확인 (자동 새로고침)
+          const checkForUpdates = () => {
+            registration.update().then(() => {
+              // 대기 중인 새 Service Worker가 있으면 강제로 활성화
+              if (registration.waiting) {
+                console.log('⚠️ New Service Worker version available! Activating...');
+                registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+              }
+            }).catch((error) => {
               console.log('Error checking Service Worker update:', error);
             });
-          }, 60000);
+          };
 
-          // 새 Service Worker 대기 중일 때 알림
-          if (registration.waiting) {
-            console.log('⚠️ New Service Worker version available!');
-            // 강제 업데이트 (새 버전 적용)
-            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-          }
+          // 초기 로드 시 즉시 업데이트 확인
+          checkForUpdates();
 
+          // 5초 후에 다시 확인 (2차 시도)
+          setTimeout(checkForUpdates, 5000);
+
+          // 1분마다 업데이트 확인
+          const updateInterval = setInterval(checkForUpdates, 60000);
+
+          // 설치 중인 새 Service Worker 감시
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
-            newWorker?.addEventListener('statechange', () => {
-              if (newWorker.state === 'activated') {
-                console.log('🔄 Service Worker updated! New version active.');
-                // 페이지 새로고침 (선택사항)
-                window.location.reload();
-              }
-            });
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'activated') {
+                  console.log('🔄 Service Worker updated! New version active. Reloading...');
+                  // 새 버전이 활성화되면 페이지 자동 새로고침
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 500);
+                }
+              });
+            }
           });
 
           return () => clearInterval(updateInterval);

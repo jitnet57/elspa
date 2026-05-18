@@ -1,9 +1,83 @@
+'use client';
+
+import { useState } from 'react';
+
 export default function Home() {
+  const [isClearingCache, setIsClearingCache] = useState(false);
+  const [cacheCleared, setCacheCleared] = useState(false);
+
+  const handleClearCache = async () => {
+    setIsClearingCache(true);
+    try {
+      // Clear service worker cache
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map(cacheName => caches.delete(cacheName))
+        );
+      }
+
+      // Clear localStorage
+      localStorage.clear();
+
+      // Clear sessionStorage
+      sessionStorage.clear();
+
+      // Clear IndexedDB
+      if ('indexedDB' in window) {
+        const dbs = await window.indexedDB.databases?.() || [];
+        dbs.forEach(db => {
+          if (db.name) {
+            window.indexedDB.deleteDatabase(db.name);
+          }
+        });
+      }
+
+      setCacheCleared(true);
+      setTimeout(() => setCacheCleared(false), 3000);
+
+      // Reload page
+      setTimeout(() => window.location.reload(), 500);
+    } catch (error) {
+      console.error('Cache clear error:', error);
+      setCacheCleared(false);
+    } finally {
+      setIsClearingCache(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      {/* Desktop Header */}
+      <div className="hidden lg:block sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+              💆
+            </div>
+            <div className="text-lg font-bold text-gray-900">ELSPA</div>
+            <span className="text-xs text-gray-500 ml-2">v 2.1.0</span>
+          </div>
+          <button
+            onClick={handleClearCache}
+            disabled={isClearingCache}
+            className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+              cacheCleared
+                ? 'bg-green-100 text-green-700'
+                : isClearingCache
+                ? 'bg-gray-200 text-gray-600 cursor-not-allowed'
+                : 'bg-orange-100 hover:bg-orange-200 text-orange-700'
+            }`}
+            title="Clear service worker cache, localStorage, and reload page"
+          >
+            {cacheCleared ? '✓ Cache Cleared' : isClearingCache ? '⏳ Clearing...' : '🔄 Clear Cache'}
+          </button>
+        </div>
+      </div>
+
       {/* Mobile Header */}
       <div className="lg:hidden sticky top-0 z-40 bg-white border-b border-slate-200 p-4 shadow-sm">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
               💆
@@ -12,6 +86,20 @@ export default function Home() {
           </div>
           <p className="text-xs text-gray-500 font-light">v 2.1.0</p>
         </div>
+        <button
+          onClick={handleClearCache}
+          disabled={isClearingCache}
+          className={`w-full px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+            cacheCleared
+              ? 'bg-green-100 text-green-700'
+              : isClearingCache
+              ? 'bg-gray-200 text-gray-600 cursor-not-allowed'
+              : 'bg-orange-100 hover:bg-orange-200 text-orange-700'
+          }`}
+          title="Clear service worker cache, localStorage, and reload page"
+        >
+          {cacheCleared ? '✓ Cache Cleared' : isClearingCache ? '⏳ Clearing...' : '🔄 Clear Cache'}
+        </button>
       </div>
 
       <main className="p-4 lg:p-8">

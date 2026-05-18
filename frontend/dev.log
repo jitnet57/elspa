@@ -7,3 +7,6 @@
 - Network:       http://192.168.1.21:3000
 - Environments: .env.local
 ✓ Ready in 2.6s
+⚠ Slow filesystem detected. The benchmark took 631ms. If E:\elspa\frontend\.next/dev is a network drive, consider moving it to a local folder.
+See more: https://nextjs.org/docs/app/guides/local-development
+
