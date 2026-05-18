@@ -15,13 +15,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ElSpa Manager - Wellness Booking Platform",
-  description: "Professional therapist and wellness management system for booking and settlement",
+  title: "El Plaza - Spa & Wellness Booking Platform",
+  description: "Professional spa, massage, and wellness services with expert therapists",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "ElSpa",
+    title: "El Plaza",
   },
   formatDetection: {
     telephone: false,
@@ -29,8 +29,8 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://elspa.co.kr",
-    siteName: "ElSpa Manager",
+    url: "https://elplaza.com",
+    siteName: "El Plaza",
   },
   icons: {
     icon: "/icon-192x192.png",

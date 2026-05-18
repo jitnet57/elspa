@@ -1,12 +1,12 @@
 {
-  "name": "ElSpa Manager - 웰니스 예약 플랫폼",
-  "short_name": "ElSpa",
-  "description": "프로페셔널 테라피스트와 함께 몸과 마음을 힐링하는 웰니스 예약 플랫폼",
+  "name": "El Plaza - Spa & Wellness Booking Platform",
+  "short_name": "El Plaza",
+  "description": "Professional spa, massage, and wellness services with expert therapists",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "theme_color": "#f97316",
+  "theme_color": "#d4af37",
   "background_color": "#ffffff",
   "categories": ["health", "wellness", "lifestyle"],
   "screenshots": [
@@ -51,9 +51,9 @@
   ],
   "shortcuts": [
     {
-      "name": "지금 예약하기",
-      "short_name": "예약",
-      "description": "빠르게 예약 페이지로 이동",
+      "name": "Book Now",
+      "short_name": "Book",
+      "description": "Quick access to booking page",
       "url": "/customer/booking",
       "icons": [
         {
@@ -64,9 +64,9 @@
       ]
     },
     {
-      "name": "마이페이지",
-      "short_name": "마이",
-      "description": "예약 내역 및 프로필 확인",
+      "name": "My Page",
+      "short_name": "Account",
+      "description": "View bookings and profile",
       "url": "/customer/mypage",
       "icons": [
         {
@@ -77,9 +77,9 @@
       ]
     },
     {
-      "name": "서비스 안내",
-      "short_name": "서비스",
-      "description": "제공되는 모든 서비스 확인",
+      "name": "Services",
+      "short_name": "Services",
+      "description": "Browse all available services",
       "url": "/customer/services",
       "icons": [
         {

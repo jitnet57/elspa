@@ -1,0 +1,40 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer circle -->
+  <circle cx="256" cy="256" r="250" fill="white" stroke="#333" stroke-width="8"/>
+
+  <!-- Inner circle for border effect -->
+  <circle cx="256" cy="256" r="245" fill="none" stroke="#d4af37" stroke-width="3"/>
+
+  <!-- Text on top arc -->
+  <defs>
+    <path id="topArc" d="M 100,256 A 156,156 0 0,1 412,256" fill="none"/>
+    <path id="bottomArc" d="M 412,256 A 156,156 0 0,1 100,256" fill="none"/>
+  </defs>
+
+  <text font-family="Georgia, serif" font-size="28" font-weight="bold" fill="#d4af37" letter-spacing="3">
+    <textPath href="#topArc" startOffset="50%" text-anchor="middle">
+      RESTAURANT · SKIN · SPATEL · NAIL CARE COFFEE
+    </textPath>
+  </text>
+
+  <text font-family="Georgia, serif" font-size="24" font-weight="bold" fill="#d4af37" letter-spacing="2">
+    <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">
+      PLAZA
+    </textPath>
+  </text>
+
+  <!-- Main logo "EL" in center -->
+  <g transform="translate(256, 256)">
+    <!-- E -->
+    <text x="-45" y="60" font-family="Georgia, serif" font-size="120" font-weight="bold" fill="#d4af37" text-anchor="middle">E</text>
+
+    <!-- L with flourish -->
+    <g>
+      <text x="45" y="60" font-family="Georgia, serif" font-size="120" font-weight="bold" fill="#d4af37" text-anchor="middle">L</text>
+
+      <!-- Decorative flourish under L -->
+      <path d="M 65,-10 Q 80,5 70,25 Q 60,35 45,30"
+            stroke="#d4af37" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>
