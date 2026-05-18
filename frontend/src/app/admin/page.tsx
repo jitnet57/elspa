@@ -70,8 +70,8 @@ export default function AdminPortal() {
       items: [
         { name: 'Therapist Settlement', href: '/therapist-settlement', icon: '👨‍⚕️' },
         { name: 'Company Settlement', href: '/admin/monthly-settlement', icon: '🏢' },
-        { name: 'Settlement Reports', href: '/admin/settlement-report', icon: '📊' },
         { name: 'Guide Settlement', href: '/admin/guides', icon: '📚' },
+        { name: 'Settlement Report', href: '/admin/settlement-report', icon: '📊' },
         { name: 'Settlement Guide', href: '/settlement-management', icon: '💰' },
       ],
     },
