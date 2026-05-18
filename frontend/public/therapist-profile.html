@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELSPA - 테라피스트 프로필</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #2c3e50;
+      background: #f8f9fa;
+    }
+
+    /* 네비게이션 */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: white;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 1.5em;
+      font-weight: 700;
+      color: #ff6b35;
+    }
+
+    .nav-back {
+      cursor: pointer;
+      font-size: 1.5em;
+    }
+
+    .nav-icons {
+      display: flex;
+      gap: 15px;
+      font-size: 1.1em;
+      cursor: pointer;
+    }
+
+    /* 헤더 섹션 */
+    .header {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+      color: white;
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    .profile-image {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 20px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4em;
+      border: 4px solid white;
+    }
+
+    .header h1 {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 1.05em;
+      opacity: 0.95;
+      margin-bottom: 8px;
+    }
+
+    .experience {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      padding: 8px 16px;
+      border-radius: 20px;
+      margin-top: 15px;
+      font-size: 0.95em;
+    }
+
+    /* 통계 섹션 */
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      padding: 20px 24px;
+      background: white;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      text-align: center;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      border-left: 3px solid #667eea;
+    }
+
+    .stat-number {
+      font-size: 1.8em;
+      font-weight: bold;
+      color: #667eea;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 0.85em;
+      color: #7f8c8d;
+    }
+
+    /* 메인 컨테이너 */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* 섹션 */
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .section h2 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+      font-size: 1.3em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section h2::before {
+      font-size: 1.5em;
+    }
+
+    /* 소개 */
+    .about-text {
+      color: #7f8c8d;
+      line-height: 1.8;
+      margin-bottom: 15px;
+    }
+
+    /* 서비스 목록 */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+    }
+
+    .service-card {
+      padding: 20px;
+      border: 2px solid #ecf0f1;
+      border-radius: 10px;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .service-card:hover {
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.05);
+      transform: translateY(-2px);
+    }
+
+    .service-icon {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+
+    .service-name {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 8px;
+    }
+
+    .service-price {
+      color: #ff6b35;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .service-duration {
+      color: #7f8c8d;
+      font-size: 0.9em;
+    }
+
+    /* 스킬 & 자격증 */
+    .skill-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      color: #667eea;
+      padding: 8px 16px;
+      border-radius: 20px;
+      margin: 8px 8px 8px 0;
+      font-size: 0.9em;
+      border: 1px solid #667eea;
+    }
+
+    /* 경력 & 학력 */
+    .timeline {
+      position: relative;
+      padding-left: 30px;
+    }
+
+    .timeline-item {
+      margin-bottom: 25px;
+      position: relative;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -30px;
+      top: 0;
+      width: 12px;
+      height: 12px;
+      background: #667eea;
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 0 0 2px #667eea;
+    }
+
+    .timeline-year {
+      font-weight: bold;
+      color: #667eea;
+      font-size: 0.95em;
+      margin-bottom: 3px;
+    }
+
+    .timeline-title {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 5px;
+    }
+
+    .timeline-desc {
+      color: #7f8c8d;
+      font-size: 0.95em;
+      line-height: 1.6;
+    }
+
+    /* 리뷰 섹션 */
+    .review-item {
+      padding: 20px;
+      border: 1px solid #ecf0f1;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .review-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .review-avatar {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2em;
+    }
+
+    .review-user-info h4 {
+      color: #2c3e50;
+      margin-bottom: 3px;
+    }
+
+    .review-user-info p {
+      color: #95a5a6;
+      font-size: 0.85em;
+    }
+
+    .review-rating {
+      color: #ffc107;
+      font-size: 0.9em;
+    }
+
+    .review-text {
+      color: #7f8c8d;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    .review-date {
+      color: #bdc3c7;
+      font-size: 0.85em;
+    }
+
+    /* 액션 버튼 */
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #ecf0f1;
+    }
+
+    .btn {
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+      background: #f8f9fa;
+      color: #667eea;
+      border: 2px solid #667eea;
+    }
+
+    .btn-secondary:hover {
+      background: #ecf0f1;
+    }
+
+    /* 바텀 네비게이션 */
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 1px solid #ecf0f1;
+      padding: 12px 0;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+    }
+
+    .bottom-nav-items {
+      display: flex;
+      justify-content: space-around;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .bottom-nav-item {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      cursor: pointer;
+      color: #7f8c8d;
+      text-decoration: none;
+      font-size: 0.85em;
+      transition: color 0.3s;
+    }
+
+    .bottom-nav-item:hover,
+    .bottom-nav-item.active {
+      color: #667eea;
+      font-weight: 600;
+    }
+
+    /* 모바일 반응형 */
+    @media (max-width: 768px) {
+      .stats-container {
+        grid-template-columns: 1fr 1fr 1fr;
+        padding: 15px 24px;
+      }
+
+      .stat-card {
+        padding: 12px;
+      }
+
+      .stat-number {
+        font-size: 1.5em;
+      }
+
+      .stat-label {
+        font-size: 0.8em;
+      }
+
+      .section {
+        padding: 20px;
+      }
+
+      .services-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .action-buttons {
+        grid-template-columns: 1fr;
+      }
+
+      .review-item {
+        padding: 15px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .bottom-nav {
+        display: block;
+        padding-bottom: 70px;
+      }
+
+      nav {
+        padding: 16px 20px;
+      }
+
+      .logo {
+        font-size: 1.3em;
+      }
+
+      .header {
+        padding: 30px 20px;
+      }
+
+      .header h1 {
+        font-size: 1.6em;
+      }
+
+      .profile-image {
+        width: 100px;
+        height: 100px;
+      }
+
+      .container {
+        padding: 0 16px 80px;
+      }
+
+      .section {
+        padding: 18px;
+        margin-bottom: 15px;
+      }
+
+      .section h2 {
+        font-size: 1.15em;
+      }
+
+      .stat-card {
+        padding: 10px;
+      }
+
+      .stat-number {
+        font-size: 1.3em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 네비게이션 -->
+  <nav>
+    <div class="nav-back" onclick="history.back();">←</div>
+    <div class="logo">🏨 ELSPA</div>
+    <div class="nav-icons">
+      <span>❤️</span>
+      <span>📞</span>
+    </div>
+  </nav>
+
+  <!-- 프로필 헤더 -->
+  <div class="header">
+    <div class="profile-image">💆</div>
+    <h1>김현정</h1>
+    <p>🌟 스웨디시 & 타이 마사지 전문가</p>
+    <p>서울 강남구 근무</p>
+    <div class="experience">👨‍💼 경력 6년</div>
+  </div>
+
+  <!-- 통계 -->
+  <div class="stats-container">
+    <div class="stat-card">
+      <span class="stat-number">4.9</span>
+      <span class="stat-label">평점</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-number">247</span>
+      <span class="stat-label">총 예약</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-number">95%</span>
+      <span class="stat-label">재예약률</span>
+    </div>
+  </div>
+
+  <!-- 메인 콘텐츠 -->
+  <div class="container">
+    <!-- 소개 -->
+    <div class="section">
+      <h2>👋 소개</h2>
+      <p class="about-text">
+        안녕하세요! 저는 김현정입니다. 대학교에서 스포츠 마사지를 전공하고 6년간 다양한 고객분들을 만나며 경험을 쌓았습니다.
+        각 고객분의 특성과 니즈에 맞춘 맞춤형 시술을 제공하는 것을 좋아합니다.
+      </p>
+      <p class="about-text">
+        스웨디시는 부드럽고 이완적인 시술로 일상의 스트레스를 풀어주고, 타이 마사지는 깊은 압력으로 근육 피로를 풀어줍니다.
+        당신의 몸과 마음을 편안하게 만들어 드릴 것을 약속합니다.
+      </p>
+    </div>
+
+    <!-- 서비스 -->
+    <div class="section">
+      <h2>💆 제공 서비스</h2>
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-icon">💆</div>
+          <div class="service-name">스웨디시 마사지</div>
+          <div class="service-price">₱2,500 ~ 3,500</div>
+          <div class="service-duration">⏱️ 30 ~ 120분</div>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon">🧘</div>
+          <div class="service-name">타이 마사지</div>
+          <div class="service-price">₱3,000 ~ 4,500</div>
+          <div class="service-duration">⏱️ 60 ~ 120분</div>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon">🦶</div>
+          <div class="service-name">발마사지</div>
+          <div class="service-price">₱1,800 ~ 2,500</div>
+          <div class="service-duration">⏱️ 30 ~ 60분</div>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon">🔥</div>
+          <div class="service-name">핫스톤 마사지</div>
+          <div class="service-price">₱3,500 ~ 5,000</div>
+          <div class="service-duration">⏱️ 60 ~ 90분</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 자격증 & 스킬 -->
+    <div class="section">
+      <h2>🎓 자격증 & 스킬</h2>
+      <div style="margin-top: 15px;">
+        <div class="skill-badge">국제 스웨디시 마사지 자격증</div>
+        <div class="skill-badge">타이 전통 마사지 기초 & 심화</div>
+        <div class="skill-badge">해부학 & 생리학</div>
+        <div class="skill-badge">고객 상담 & 관리</div>
+        <div class="skill-badge">스포츠 마사지</div>
+        <div class="skill-badge">영어 · 일본어</div>
+      </div>
+    </div>
+
+    <!-- 경력 & 교육 -->
+    <div class="section">
+      <h2>📚 경력 & 교육</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-year">2018 - 현재</div>
+          <div class="timeline-title">ELSPA 마사지 센터 시니어 테라피스트</div>
+          <div class="timeline-desc">월 평균 50회 시술, 고객 만족도 4.9점 유지</div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-year">2020</div>
+          <div class="timeline-title">아로마테라피 & 스파 관리 자격증</div>
+          <div class="timeline-desc">국제 공인 기관에서 취득</div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-year">2017 - 2018</div>
+          <div class="timeline-title">마포 웰니스 센터 마사지 테라피스트</div>
+          <div class="timeline-desc">신입 교육 및 실무 경험 1년</div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-year">2017</div>
+          <div class="timeline-title">서울 미용대학교 스포츠 마사지 전공 졸업</div>
+          <div class="timeline-desc">우수 졸업생 (GPA 3.8/4.0)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 고객 리뷰 -->
+    <div class="section">
+      <h2>⭐ 고객 리뷰 (상위 5개)</h2>
+
+      <div class="review-item">
+        <div class="review-header">
+          <div class="review-user">
+            <div class="review-avatar">👩</div>
+            <div class="review-user-info">
+              <h4>박미영</h4>
+              <p>2024년 3월 18일</p>
+            </div>
+          </div>
+          <div class="review-rating">⭐⭐⭐⭐⭐ (5/5)</div>
+        </div>
+        <p class="review-text">정말 최고의 테라피스트예요! 강도를 완벽하게 조절해주셨고 정말 편안했습니다. 다음 달도 바로 예약했어요!!</p>
+      </div>
+
+      <div class="review-item">
+        <div class="review-header">
+          <div class="review-user">
+            <div class="review-avatar">🧔</div>
+            <div class="review-user-info">
+              <h4>이준호</h4>
+              <p>2024년 3월 15일</p>
+            </div>
+          </div>
+          <div class="review-rating">⭐⭐⭐⭐⭐ (5/5)</div>
+        </div>
+        <p class="review-text">업무 스트레스로 목이 매우 뻣뻣했는데, 타이 마사지로 완벽하게 풀렸습니다. 추천합니다!</p>
+      </div>
+
+      <div class="review-item">
+        <div class="review-header">
+          <div class="review-user">
+            <div class="review-avatar">👩</div>
+            <div class="review-user-info">
+              <h4>최수진</h4>
+              <p>2024년 3월 12일</p>
+            </div>
+          </div>
+          <div class="review-rating">⭐⭐⭐⭐ (4.5/5)</div>
+        </div>
+        <p class="review-text">매우 전문적이고 친절했습니다. 처음 방문했는데도 편하게 느껴졌어요. 다음 달에 또 올게요!</p>
+      </div>
+
+      <div class="review-item">
+        <div class="review-header">
+          <div class="review-user">
+            <div class="review-avatar">🧑</div>
+            <div class="review-user-info">
+              <h4>김우진</h4>
+              <p>2024년 3월 10일</p>
+            </div>
+          </div>
+          <div class="review-rating">⭐⭐⭐⭐⭐ (5/5)</div>
+        </div>
+        <p class="review-text">발마사지를 받았는데 정말 좋았습니다. 발이 한결 가벼워졌어요. 강력 추천!!</p>
+      </div>
+
+      <div class="review-item">
+        <div class="review-header">
+          <div class="review-user">
+            <div class="review-avatar">👩</div>
+            <div class="review-user-info">
+              <h4>이지은</h4>
+              <p>2024년 3월 8일</p>
+            </div>
+          </div>
+          <div class="review-rating">⭐⭐⭐⭐⭐ (5/5)</div>
+        </div>
+        <p class="review-text">정말 유명하신 이유가 있네요. 완벽한 시술입니다. 주변 사람들에게 소개해주고 있어요!</p>
+      </div>
+    </div>
+
+    <!-- 액션 버튼 -->
+    <div class="action-buttons">
+      <button class="btn btn-secondary" onclick="alert('📞 고객 지원팀: 02-1234-5678\n\nChatBot: 카톡 @ELSPA')">
+        📞 문의하기
+      </button>
+      <button class="btn btn-primary" onclick="alert('김현정 테라피스트와의 예약이 시작됩니다.')">
+        📅 지금 예약하기
+      </button>
+    </div>
+  </div>
+
+  <!-- 바텀 네비게이션 -->
+  <div class="bottom-nav">
+    <div class="bottom-nav-items">
+      <a href="#" class="bottom-nav-item">🏠 홈</a>
+      <a href="#" class="bottom-nav-item">🔍 검색</a>
+      <a href="#" class="bottom-nav-item">📅 예약</a>
+      <a href="#" class="bottom-nav-item">❤️ 찜</a>
+      <a href="#" class="bottom-nav-item">👤 프로필</a>
+    </div>
+  </div>
+</body>
+</html>
