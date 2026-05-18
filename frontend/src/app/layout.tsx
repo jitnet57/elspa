@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ElSpa Manager - 웰니스 예약 플랫폼",
-  description: "프로페셔널 테라피스트와 함께 몸과 마음을 힐링하는 웰니스 예약 플랫폼",
+  title: "ElSpa Manager - Wellness Booking Platform",
+  description: "Professional therapist and wellness management system for booking and settlement",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "ko_KR",
+    locale: "en_US",
     url: "https://elspa.co.kr",
     siteName: "ElSpa Manager",
   },
@@ -45,7 +45,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="ko"
+      lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>

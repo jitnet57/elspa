@@ -20,124 +20,71 @@ interface Therapist {
   bank_account?: string;
 }
 
-const mockTherapists: Therapist[] = [
-  {
-    id: 1,
-    name: 'Anna',
-    specialty: 'Swedish Massage',
-    status: 'checked_in',
-    rating: 4.9,
-    totalClients: 45,
-    totalRevenue: '₱2,250,000',
-    commissionRate: 40,
-    checkedInAt: '09:00 AM',
-    phone: '010-1234-5678',
-    email: 'anna@elspa.com',
-  },
-  {
-    id: 2,
-    name: 'Bella',
-    specialty: 'Thai Massage',
-    status: 'checked_in',
-    rating: 4.8,
-    totalClients: 42,
-    totalRevenue: '₱2,100,000',
-    commissionRate: 40,
-    checkedInAt: '09:15 AM',
-    phone: '010-2345-6789',
-    email: 'bella@elspa.com',
-  },
-  {
-    id: 3,
-    name: 'Cathy',
-    specialty: 'Foot Massage',
-    status: 'checked_in',
-    rating: 4.7,
-    totalClients: 38,
-    totalRevenue: '₱1,900,000',
-    commissionRate: 40,
-    checkedInAt: '09:30 AM',
-    phone: '010-3456-7890',
-    email: 'cathy@elspa.com',
-  },
-  {
-    id: 4,
-    name: 'Daisy',
-    specialty: 'Hot Stone',
-    status: 'checked_out',
-    rating: 4.6,
-    totalClients: 35,
-    totalRevenue: '₱1,750,000',
-    commissionRate: 40,
-    checkedOutAt: '17:00 PM',
-    phone: '010-4567-8901',
-    email: 'daisy@elspa.com',
-  },
-  {
-    id: 5,
-    name: 'Ella',
-    specialty: 'Aromatherapy',
-    status: 'checked_in',
-    rating: 4.8,
-    totalClients: 40,
-    totalRevenue: '₱2,000,000',
-    commissionRate: 40,
-    checkedInAt: '09:45 AM',
-    phone: '010-5678-9012',
-    email: 'ella@elspa.com',
-  },
-  {
-    id: 6,
-    name: 'Fatima',
-    specialty: 'Swedish Massage',
-    status: 'checked_in',
-    rating: 4.9,
-    totalClients: 48,
-    totalRevenue: '₱2,400,000',
-    commissionRate: 40,
-    checkedInAt: '08:45 AM',
-    phone: '010-6789-0123',
-    email: 'fatima@elspa.com',
-  },
-  {
-    id: 7,
-    name: 'Gina',
-    specialty: 'General',
-    status: 'checked_out',
-    rating: 4.5,
-    totalClients: 32,
-    totalRevenue: '₱1,600,000',
-    commissionRate: 40,
-    checkedOutAt: '16:30 PM',
-    phone: '010-7890-1234',
-    email: 'gina@elspa.com',
-  },
-  {
-    id: 8,
-    name: 'Hana',
-    specialty: 'Thai Massage',
-    status: 'checked_in',
-    rating: 4.9,
-    totalClients: 46,
-    totalRevenue: '₱2,300,000',
-    commissionRate: 40,
-    checkedInAt: '10:00 AM',
-    phone: '010-8901-2345',
-    email: 'hana@elspa.com',
-  },
+// 60 Philippine English names for therapists
+const THERAPIST_NAMES = [
+  'Maria Santos', 'Jose Garcia', 'Carmen Reyes', 'Antonio Flores', 'Rosa Cruz',
+  'Francisco Rodriguez', 'Ana Maria', 'Juan Santos', 'Luz Garcia', 'Miguel Mendoza',
+  'Jennifer Cruz', 'Michael Santos', 'Mary Ann Garcia', 'Christopher Reyes', 'Patricia Flores',
+  'Robert Santos', 'Linda Rodriguez', 'James Garcia', 'Margaret Cruz', 'David Mendoza',
+  'Angela Reyes', 'John Santos', 'Theresa Flores', 'Peter Garcia', 'Gloria Rodriguez',
+  'Paul Mendoza', 'Irene Cruz', 'Mark Santos', 'Deborah Reyes', 'Steven Flores',
+  'Nancy Garcia', 'Kevin Santos', 'Lisa Rodriguez', 'Brian Mendoza', 'Donna Cruz',
+  'Edward Reyes', 'Michelle Santos', 'Ronald Flores', 'Dorothy Garcia', 'Timothy Rodriguez',
+  'Elizabeth Mendoza', 'Jason Cruz', 'Barbara Santos', 'Jeffrey Reyes', 'Maria Elena Flores',
+  'Ryan Garcia', 'Susan Rodriguez', 'Jacob Santos', 'Carol Mendoza', 'Gary Cruz',
+  'Sarah Reyes', 'Nicholas Flores', 'Jessica Garcia', 'Eric Rodriguez', 'Karen Santos',
+  'Jonathan Mendoza', 'Stephen Cruz', 'Betty Flores', 'Larry Garcia', 'Helen Reyes',
 ];
+
+const SPECIALTIES = [
+  'Swedish Massage', 'Thai Massage', 'Hot Stone Therapy', 'Foot Reflexology',
+  'Aromatherapy', 'Deep Tissue Massage', 'Sports Massage', 'Shiatsu',
+];
+
+// Generate 60 therapists with realistic data
+const generateMockTherapists = (): Therapist[] => {
+  return THERAPIST_NAMES.map((name, index) => {
+    const id = index + 1;
+    const specialty = SPECIALTIES[id % SPECIALTIES.length];
+    const isCheckedIn = true; // All 60 therapists checked in for testing
+    const totalClients = 30 + Math.floor(Math.random() * 30);
+    const rating = 4.5 + Math.random() * 0.5;
+    const totalRevenue = `₱${(totalClients * (2000 + Math.random() * 1500)).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+    const areaCode = '+63' + (900 + Math.floor(Math.random() * 100));
+    const phone = `${areaCode}-${Math.floor(Math.random() * 9000 + 1000)}-${Math.floor(Math.random() * 9000 + 1000)}`;
+
+    return {
+      id,
+      name,
+      specialty,
+      status: 'checked_in', // All therapists checked in
+      rating: Math.round(rating * 10) / 10,
+      totalClients,
+      totalRevenue,
+      commissionRate: 30 + Math.floor(Math.random() * 12),
+      checkedInAt: `${8 + Math.floor(Math.random() * 3)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')} AM`,
+      phone,
+      email: `${name.toLowerCase().replace(' ', '.')}@elspa.com`,
+    };
+  });
+};
+
+const mockTherapists: Therapist[] = generateMockTherapists();
 
 export default function TherapistsPage() {
   const [therapists, setTherapists] = useState<Therapist[]>(mockTherapists);
   const [selectedTherapist, setSelectedTherapist] = useState<Therapist | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'checked_in' | 'checked_out'>('all');
   const [formData, setFormData] = useState<Partial<Therapist>>({});
 
-  const filteredTherapists = therapists.filter(t =>
-    t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.specialty.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const checkedInCount = therapists.filter(t => t.status === 'checked_in').length;
+  const checkedOutCount = therapists.filter(t => t.status === 'checked_out').length;
+
+  const filteredTherapists = therapists.filter(t => {
+    if (filterStatus === 'all') return true;
+    return t.status === filterStatus;
+  });
 
   const handleCheckIn = (id: number) => {
     setTherapists(therapists.map(t =>
@@ -157,7 +104,7 @@ export default function TherapistsPage() {
 
   const handleAddTherapist = () => {
     if (!formData.name || !formData.specialty || !formData.phone || !formData.email) {
-      alert('필수 정보를 입력해주세요');
+      alert('Please enter all required information');
       return;
     }
     const newTherapist: Therapist = {
@@ -178,7 +125,7 @@ export default function TherapistsPage() {
     setTherapists([...therapists, newTherapist]);
     setShowModal(false);
     setFormData({});
-    alert('테라피스트가 등록되었습니다');
+    alert('Therapist registered successfully');
   };
 
   const openNewTherapistModal = () => {
@@ -188,125 +135,133 @@ export default function TherapistsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
-      {/* 메인 콘텐츠 */}
-      <main className="p-4 sm:p-6 lg:p-8">
-        {/* 헤더 */}
-        <div className="mb-8">
-          <h1 className="text-5xl font-bold text-gray-900 mb-2 tracking-tight">
-            👨‍⚕️ 테라피스트 관리
-          </h1>
-          <p className="text-sm text-gray-500 font-light">
-            테라피스트의 출근/퇴근, 성과, 수익을 관리합니다
-          </p>
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+      {/* Top Fixed Header */}
+      <div className="sticky top-0 z-40 bg-white border-b-2 border-gray-200 px-4 py-4">
+        <h1 className="text-2xl font-bold text-gray-900">👨‍⚕️ Therapists</h1>
+
+        {/* Statistics Badges */}
+        <div className="flex gap-3 mt-3">
+          <div className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold">
+            Working: {checkedInCount}
+          </div>
+          <div className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-bold">
+            Off Duty: {checkedOutCount}
+          </div>
         </div>
+      </div>
 
-        {/* 통계 */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-100 hover:shadow-md transition-all">
-            <div className="text-xs text-gray-500 mb-1 font-light">출근한 테라피스트</div>
-            <div className="text-3xl font-bold text-gray-900">{therapists.filter(t => t.status === 'checked_in').length}</div>
-            <div className="text-xs text-green-600 mt-2 font-light">✓ 활성 근무</div>
-          </div>
+      {/* Tab Filter */}
+      <div className="sticky top-16 z-30 bg-white border-b border-gray-200 px-4 py-3 flex gap-2 overflow-x-auto">
+        <button
+          onClick={() => setFilterStatus('all')}
+          className={`px-4 py-2 rounded-full font-bold whitespace-nowrap transition-all ${
+            filterStatus === 'all'
+              ? 'bg-orange-500 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          All
+        </button>
+        <button
+          onClick={() => setFilterStatus('checked_in')}
+          className={`px-4 py-2 rounded-full font-bold whitespace-nowrap transition-all ${
+            filterStatus === 'checked_in'
+              ? 'bg-green-500 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          🟢 Working
+        </button>
+        <button
+          onClick={() => setFilterStatus('checked_out')}
+          className={`px-4 py-2 rounded-full font-bold whitespace-nowrap transition-all ${
+            filterStatus === 'checked_out'
+              ? 'bg-gray-500 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          ⚪ Off Duty
+        </button>
+      </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-100 hover:shadow-md transition-all">
-            <div className="text-xs text-gray-500 mb-1 font-light">퇴근한 테라피스트</div>
-            <div className="text-3xl font-bold text-gray-900">{therapists.filter(t => t.status === 'checked_out').length}</div>
-            <div className="text-xs text-orange-600 mt-2 font-light">✓ 근무 완료</div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-100 hover:shadow-md transition-all">
-            <div className="text-xs text-gray-500 mb-1 font-light">평균 평점</div>
-            <div className="text-3xl font-bold text-gray-900">
-              {(therapists.reduce((sum, t) => sum + t.rating, 0) / therapists.length).toFixed(1)}★
+      {/* Therapist List */}
+      <main className="px-4 py-4 pb-24">
+        {/* Mobile Card View */}
+        <div className="lg:hidden space-y-3">
+          {filteredTherapists.length === 0 ? (
+            <div className="bg-white rounded-xl p-8 text-center text-gray-500 border-2 border-gray-200">
+              No therapists found
             </div>
-            <div className="text-xs text-blue-600 mt-2 font-light">✓ 우수 서비스</div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-100 hover:shadow-md transition-all">
-            <div className="text-xs text-gray-500 mb-1 font-light">총 매출</div>
-            <div className="text-3xl font-bold text-gray-900">₱16.5M</div>
-            <div className="text-xs text-purple-600 mt-2 font-light">✓ 월 집계</div>
-          </div>
-        </div>
-
-        {/* 검색 및 필터 */}
-        <div className="mb-6 flex gap-4">
-          <input
-            type="text"
-            placeholder="테라피스트 이름 또는 전문분야 검색..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 px-4 py-2 border border-stone-300 rounded-lg bg-white text-gray-900 font-medium placeholder-gray-400 focus:outline-none focus:border-orange-500"
-          />
-          <button
-            onClick={openNewTherapistModal}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
-            + 새 테라피스트
-          </button>
-        </div>
-
-        {/* 테라피스트 목록 */}
-        <div className="bg-white rounded-xl shadow-sm border border-stone-100 overflow-hidden">
-          <div className="grid grid-cols-7 gap-4 p-6 bg-gray-50 border-b border-stone-100 font-semibold text-sm text-gray-700">
-            <div>이름</div>
-            <div>전문분야</div>
-            <div>평점</div>
-            <div>총 고객</div>
-            <div>월 매출</div>
-            <div>상태</div>
-            <div>작업</div>
-          </div>
-
-          <div className="divide-y divide-stone-100">
-            {filteredTherapists.map(therapist => (
-              <div key={therapist.id} className="grid grid-cols-7 gap-4 p-6 items-center hover:bg-gray-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold">
+          ) : (
+            filteredTherapists.map(therapist => (
+              <div
+                key={therapist.id}
+                className="bg-white rounded-2xl p-4 border-2 border-gray-100 shadow-sm hover:shadow-md transition-all"
+              >
+                {/* Top - Name, Status, Avatar */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
                     {therapist.name[0]}
                   </div>
-                  <div>
-                    <div className="font-semibold text-gray-900 text-sm">{therapist.name}</div>
-                    <div className="text-xs text-gray-500">{therapist.email}</div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-bold text-gray-900">{therapist.name}</h3>
+                    <p className="text-sm text-gray-600">{therapist.specialty}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {therapist.status === 'checked_in' ? (
+                        <>
+                          <span className="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                          <span className="text-xs font-bold text-green-600">Working</span>
+                          {therapist.checkedInAt && (
+                            <span className="text-xs text-gray-500">{therapist.checkedInAt}</span>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <span className="inline-block w-2 h-2 bg-gray-400 rounded-full"></span>
+                          <span className="text-xs font-bold text-gray-600">Off Duty</span>
+                          {therapist.checkedOutAt && (
+                            <span className="text-xs text-gray-500">{therapist.checkedOutAt}</span>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <div className="text-lg font-bold text-yellow-600">{therapist.rating}★</div>
+                    <div className="text-xs text-gray-500">{therapist.totalClients} clients</div>
                   </div>
                 </div>
 
-                <div className="text-sm text-gray-700">{therapist.specialty}</div>
-
-                <div className="text-sm font-bold text-gray-900">{therapist.rating}★</div>
-
-                <div className="text-sm text-gray-700">{therapist.totalClients}명</div>
-
-                <div className="text-sm font-semibold text-gray-900">{therapist.totalRevenue}</div>
-
-                <div>
-                  {therapist.status === 'checked_in' ? (
-                    <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
-                      ● 근무중
-                      {therapist.checkedInAt && <span className="text-green-600 text-xs ml-1">({therapist.checkedInAt})</span>}
+                {/* Center - Revenue Info */}
+                <div className="mb-4 pb-4 border-b border-gray-100">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <div className="text-xs text-gray-600 font-semibold">Monthly Revenue</div>
+                      <div className="text-xl font-bold text-blue-600">{therapist.totalRevenue}</div>
                     </div>
-                  ) : (
-                    <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold">
-                      ○ 퇴근
-                      {therapist.checkedOutAt && <span className="text-gray-600 text-xs ml-1">({therapist.checkedOutAt})</span>}
+                    <div className="text-right">
+                      <div className="text-xs text-gray-600 font-semibold">Commission Rate</div>
+                      <div className="text-xl font-bold text-orange-600">{therapist.commissionRate}%</div>
                     </div>
-                  )}
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                {/* Action buttons */}
+                <div className="grid grid-cols-2 gap-2">
                   {therapist.status === 'checked_in' ? (
                     <button
                       onClick={() => handleCheckOut(therapist.id)}
-                      className="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded text-xs transition-colors"
+                      className="px-4 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-all active:scale-95 text-sm"
                     >
-                      퇴근
+                      🚪 Check Out
                     </button>
                   ) : (
                     <button
                       onClick={() => handleCheckIn(therapist.id)}
-                      className="px-3 py-1 bg-green-100 hover:bg-green-200 text-green-700 font-semibold rounded text-xs transition-colors"
+                      className="px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition-all active:scale-95 text-sm"
                     >
-                      출근
+                      ✓ Check In
                     </button>
                   )}
                   <button
@@ -314,196 +269,323 @@ export default function TherapistsPage() {
                       setSelectedTherapist(therapist);
                       setShowModal(true);
                     }}
-                    className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded text-xs transition-colors"
+                    className="px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl transition-all active:scale-95 text-sm"
                   >
-                    상세
+                    📋 Details
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop Table View */}
+        <div className="hidden lg:block">
+          {filteredTherapists.length === 0 ? (
+            <div className="bg-white rounded-xl p-8 text-center text-gray-500 border-2 border-gray-200">
+              No therapists found
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Name</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Specialty</th>
+                    <th className="px-6 py-4 text-center text-sm font-bold text-gray-700">Status</th>
+                    <th className="px-6 py-4 text-center text-sm font-bold text-gray-700">Rating</th>
+                    <th className="px-6 py-4 text-right text-sm font-bold text-gray-700">Clients</th>
+                    <th className="px-6 py-4 text-right text-sm font-bold text-gray-700">Revenue</th>
+                    <th className="px-6 py-4 text-center text-sm font-bold text-gray-700">Commission</th>
+                    <th className="px-6 py-4 text-center text-sm font-bold text-gray-700">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredTherapists.map((therapist) => (
+                    <tr key={therapist.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold">
+                            {therapist.name[0]}
+                          </div>
+                          <div>
+                            <p className="font-bold text-gray-900">{therapist.name}</p>
+                            <p className="text-xs text-gray-500">{therapist.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{therapist.specialty}</td>
+                      <td className="px-6 py-4 text-center">
+                        {therapist.status === 'checked_in' ? (
+                          <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
+                            🟢 Working
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-bold">
+                            ⚪ Off Duty
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-center text-sm font-bold text-yellow-600">{therapist.rating}★</td>
+                      <td className="px-6 py-4 text-right text-sm text-gray-700">{therapist.totalClients}</td>
+                      <td className="px-6 py-4 text-right text-sm font-bold text-blue-600">{therapist.totalRevenue}</td>
+                      <td className="px-6 py-4 text-center text-sm font-bold text-orange-600">{therapist.commissionRate}%</td>
+                      <td className="px-6 py-4 text-center space-x-2">
+                        {therapist.status === 'checked_in' ? (
+                          <button
+                            onClick={() => handleCheckOut(therapist.id)}
+                            className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white font-bold rounded text-xs transition-all"
+                          >
+                            Check Out
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleCheckIn(therapist.id)}
+                            className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white font-bold rounded text-xs transition-all"
+                          >
+                            Check In
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            setSelectedTherapist(therapist);
+                            setShowModal(true);
+                          }}
+                          className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded text-xs transition-all"
+                        >
+                          Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </main>
 
-      {/* 모달 - 상세 조회 / 새로 등록 */}
+      {/* Register button (FAB) */}
+      <button
+        onClick={openNewTherapistModal}
+        className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full shadow-lg flex items-center justify-center text-2xl hover:shadow-xl transition-all active:scale-95 z-50 font-bold"
+      >
+        +
+      </button>
+
+      {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg p-8 max-w-2xl w-full max-h-96 overflow-y-auto">
-            <div className="flex items-start justify-between mb-6">
+        <div className="fixed inset-0 bg-black/50 flex items-end lg:items-center justify-center z-50">
+          <div className="bg-white w-full lg:max-w-2xl rounded-t-3xl lg:rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto">
+            {/* Modal header */}
+            <div className="sticky top-0 bg-white border-b-2 border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-3xl">
               <h2 className="text-2xl font-bold text-gray-900">
-                {selectedTherapist ? '테라피스트 상세' : '새 테라피스트 등록'}
+                {selectedTherapist ? 'Therapist Info' : 'Register New Therapist'}
               </h2>
               <button
                 onClick={() => {
                   setShowModal(false);
                   setFormData({});
                 }}
-                className="text-2xl text-gray-400 hover:text-gray-600"
+                className="text-4xl text-gray-400 hover:text-gray-600 leading-none w-10 h-10 flex items-center justify-center"
               >
                 ✕
               </button>
             </div>
 
-            {selectedTherapist ? (
-              // 상세 조회 모드
-              <>
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                    {selectedTherapist.name[0]}
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900">{selectedTherapist.name}</h3>
-                    <p className="text-gray-600">{selectedTherapist.specialty}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-xs text-gray-600 mb-1 font-semibold">📞 전화</p>
-                      <p className="text-gray-900 font-medium">{selectedTherapist.phone}</p>
+            <div className="p-6">
+              {selectedTherapist ? (
+                // View Details Mode
+                <>
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white text-4xl font-bold flex-shrink-0">
+                      {selectedTherapist.name[0]}
                     </div>
                     <div>
-                      <p className="text-xs text-gray-600 mb-1 font-semibold">📧 이메일</p>
-                      <p className="text-gray-900 font-medium">{selectedTherapist.email}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-600 mb-1 font-semibold">💳 GCash</p>
-                      <p className="text-gray-900 font-medium">{selectedTherapist.gcash_number || '-'}</p>
+                      <h3 className="text-2xl font-bold text-gray-900">{selectedTherapist.name}</h3>
+                      <p className="text-lg text-gray-600">{selectedTherapist.specialty}</p>
                     </div>
                   </div>
 
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-xs text-gray-600 mb-1 font-semibold">⭐ 평점</p>
-                      <p className="text-gray-900 font-bold text-lg">{selectedTherapist.rating}★</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-600 mb-1 font-semibold">💰 월 매출</p>
-                      <p className="text-gray-900 font-bold text-lg">{selectedTherapist.totalRevenue}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-600 mb-1 font-semibold">📊 수수료율</p>
-                      <p className="text-gray-900 font-bold text-lg">{selectedTherapist.commissionRate}%</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6 border-t pt-4">
-                  <p className="text-xs font-bold text-gray-700 mb-3">🏦 계좌 정보</p>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-xs text-gray-600 mb-1">은행명</p>
-                      <p className="text-gray-900 font-medium">{selectedTherapist.bank_name || '-'}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-600 mb-1">계좌번호</p>
-                      <p className="text-gray-900 font-medium">{selectedTherapist.bank_account || '-'}</p>
+                  {/* Status */}
+                  <div className={`mb-6 p-4 rounded-xl border-2 ${
+                    selectedTherapist.status === 'checked_in'
+                      ? 'bg-green-50 border-green-300'
+                      : 'bg-gray-50 border-gray-300'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-block w-4 h-4 rounded-full ${
+                        selectedTherapist.status === 'checked_in' ? 'bg-green-500' : 'bg-gray-400'
+                      }`}></span>
+                      <span className={`text-lg font-bold ${
+                        selectedTherapist.status === 'checked_in' ? 'text-green-700' : 'text-gray-700'
+                      }`}>
+                        {selectedTherapist.status === 'checked_in' ? 'Working' : 'Off Duty'}
+                      </span>
+                      <span className="text-sm text-gray-600 ml-2">
+                        {selectedTherapist.checkedInAt || selectedTherapist.checkedOutAt}
+                      </span>
                     </div>
                   </div>
-                </div>
 
-                <div className="mt-8 flex gap-3">
-                  <button
-                    onClick={() => setShowModal(false)}
-                    className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 font-semibold rounded-lg transition-colors"
-                  >
-                    닫기
-                  </button>
-                  <button className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
-                    정보 수정
-                  </button>
-                </div>
-              </>
-            ) : (
-              // 새로 등록 모드
-              <>
-                <div className="space-y-4 max-h-80 overflow-y-auto">
-                  <div className="border-b pb-3">
-                    <p className="text-xs font-bold text-gray-700 mb-2">📋 기본 정보</p>
-                    <input
-                      type="text"
-                      placeholder="이름 *"
-                      value={formData.name || ''}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none mb-2"
-                    />
-                    <input
-                      type="text"
-                      placeholder="전문분야 *"
-                      value={formData.specialty || ''}
-                      onChange={(e) => setFormData({ ...formData, specialty: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none mb-2"
-                    />
-                    <input
-                      type="tel"
-                      placeholder="전화 *"
-                      value={formData.phone || ''}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none mb-2"
-                    />
-                    <input
-                      type="email"
-                      placeholder="이메일 *"
-                      value={formData.email || ''}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                    />
+                  {/* Information Section */}
+                  <div className="space-y-4 mb-6">
+                    <div className="bg-yellow-50 p-4 rounded-xl border-2 border-yellow-200">
+                      <div className="text-sm text-yellow-700 font-semibold mb-1">Rating</div>
+                      <div className="text-2xl font-bold text-yellow-900">{selectedTherapist.rating}★ ({selectedTherapist.totalClients})</div>
+                    </div>
+                    <div className="bg-blue-50 p-4 rounded-xl border-2 border-blue-200">
+                      <div className="text-sm text-blue-700 font-semibold mb-1">Monthly Revenue</div>
+                      <div className="text-2xl font-bold text-blue-900">{selectedTherapist.totalRevenue}</div>
+                    </div>
+                    <div className="bg-purple-50 p-4 rounded-xl border-2 border-purple-200">
+                      <div className="text-sm text-purple-700 font-semibold mb-1">Commission Rate</div>
+                      <div className="text-2xl font-bold text-purple-900">{selectedTherapist.commissionRate}%</div>
+                    </div>
                   </div>
 
-                  <div className="border-b pb-3">
-                    <p className="text-xs font-bold text-gray-700 mb-2">💳 GCash 정보</p>
-                    <input
-                      type="text"
-                      placeholder="GCash 번호"
-                      value={formData.gcash_number || ''}
-                      onChange={(e) => setFormData({ ...formData, gcash_number: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                    />
+                  {/* Contact Information */}
+                  <div className="mb-6">
+                    <h4 className="text-lg font-bold text-gray-900 mb-3">Contact Information</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <span className="text-xl">📞</span>
+                        <span className="text-gray-900">{selectedTherapist.phone}</span>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <span className="text-xl">📧</span>
+                        <span className="text-gray-900 break-all">{selectedTherapist.email}</span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div>
-                    <p className="text-xs font-bold text-gray-700 mb-2">🏦 계좌 정보</p>
-                    <input
-                      type="text"
-                      placeholder="은행명"
-                      value={formData.bank_name || ''}
-                      onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none mb-2"
-                    />
-                    <input
-                      type="text"
-                      placeholder="계좌번호"
-                      value={formData.bank_account || ''}
-                      onChange={(e) => setFormData({ ...formData, bank_account: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                    />
-                  </div>
-                </div>
+                  {/* GCash and Bank Account */}
+                  {(selectedTherapist.gcash_number || selectedTherapist.bank_name) && (
+                    <div className="mb-6">
+                      <h4 className="text-lg font-bold text-gray-900 mb-3">Payment Information</h4>
+                      <div className="space-y-2">
+                        {selectedTherapist.gcash_number && (
+                          <div className="p-3 bg-cyan-50 rounded-lg border-2 border-cyan-200">
+                            <div className="text-sm text-cyan-700 font-semibold">💳 GCash</div>
+                            <div className="text-lg font-bold text-cyan-900">{selectedTherapist.gcash_number}</div>
+                          </div>
+                        )}
+                        {selectedTherapist.bank_name && (
+                          <div className="p-3 bg-green-50 rounded-lg border-2 border-green-200">
+                            <div className="text-sm text-green-700 font-semibold">🏦 {selectedTherapist.bank_name}</div>
+                            <div className="text-lg font-bold text-green-900">{selectedTherapist.bank_account}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
-                <div className="mt-8 flex gap-3">
-                  <button
-                    onClick={() => {
-                      setShowModal(false);
-                      setFormData({});
-                    }}
-                    className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 font-semibold rounded-lg transition-colors"
-                  >
-                    취소
-                  </button>
-                  <button
-                    onClick={handleAddTherapist}
-                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
-                  >
-                    등록
-                  </button>
-                </div>
-              </>
-            )}
+                  {/* Buttons */}
+                  <div className="grid grid-cols-2 gap-3 mt-8">
+                    <button
+                      onClick={() => setShowModal(false)}
+                      className="px-6 py-4 bg-gray-200 hover:bg-gray-300 text-gray-900 font-bold rounded-xl transition-colors text-base"
+                    >
+                      Close
+                    </button>
+                    <button className="px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors text-base">
+                      Edit
+                    </button>
+                  </div>
+                </>
+              ) : (
+                // Registration Mode
+                <>
+                  <div className="space-y-5">
+                    <div>
+                      <label className="text-sm font-bold text-gray-700 mb-2 block">📋 Basic Information</label>
+                      <div className="space-y-3">
+                        <input
+                          type="text"
+                          placeholder="Name *"
+                          value={formData.name || ''}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-base font-medium"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Specialty *"
+                          value={formData.specialty || ''}
+                          onChange={(e) => setFormData({ ...formData, specialty: e.target.value })}
+                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-base font-medium"
+                        />
+                        <input
+                          type="tel"
+                          placeholder="Phone *"
+                          value={formData.phone || ''}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-base font-medium"
+                        />
+                        <input
+                          type="email"
+                          placeholder="Email *"
+                          value={formData.email || ''}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-base font-medium"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-bold text-gray-700 mb-2 block">💳 GCash Information (Optional)</label>
+                      <input
+                        type="text"
+                        placeholder="GCash Number"
+                        value={formData.gcash_number || ''}
+                        onChange={(e) => setFormData({ ...formData, gcash_number: e.target.value })}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-base font-medium"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-bold text-gray-700 mb-2 block">🏦 Bank Account Information (Optional)</label>
+                      <div className="space-y-3">
+                        <input
+                          type="text"
+                          placeholder="Bank Name"
+                          value={formData.bank_name || ''}
+                          onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
+                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-base font-medium"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Account Number"
+                          value={formData.bank_account || ''}
+                          onChange={(e) => setFormData({ ...formData, bank_account: e.target.value })}
+                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-base font-medium"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mt-8">
+                    <button
+                      onClick={() => {
+                        setShowModal(false);
+                        setFormData({});
+                      }}
+                      className="px-6 py-4 bg-gray-200 hover:bg-gray-300 text-gray-900 font-bold rounded-xl transition-colors text-base"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleAddTherapist}
+                      className="px-6 py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-colors text-base"
+                    >
+                      Register
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
     </div>
   );
 }
-
