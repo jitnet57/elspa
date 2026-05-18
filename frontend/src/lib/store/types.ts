@@ -277,14 +277,14 @@ export interface SettlementState {
 
 export interface Company {
   id: number;
-  name: string; // 여행사명
-  representative: string; // 대표명
-  phone: string;
-  address: string;
-  settlement_day: number; // 정산일 (5 = 5일, 20 = 20일)
-  commission_rate: number; // 기본 수수료율 (30 = 30%)
-  status: 'active' | 'inactive';
-  created_at: string;
+  name: string; // 회사명
+  representative?: string; // 대표명
+  phone?: string;
+  address?: string;
+  settlement_day?: number; // 정산일 (5 = 5일, 20 = 20일)
+  commission_rate?: number; // 기본 수수료율 (25 = 25%)
+  status?: 'active' | 'inactive';
+  created_at?: string;
   // 결제정보
   gcash_number?: string; // Gcash 계정 번호
   bank_name?: string; // 은행명
@@ -497,6 +497,26 @@ export interface ChangeLogState {
   clearChangeLogs: () => void;
 }
 
+// ============================================================
+// Commission Rates (수수료율 설정)
+// ============================================================
+
+export interface CommissionRates {
+  platformFee: number; // ELSPA 플랫폼 수수료 (25%)
+  therapistCommission: number; // 테라피스트 수수료 (60%)
+  performanceBonus: number; // 성과 보너스 (+2%)
+  loyaltyBonus: number; // 충성도 보너스 (+3%)
+  peakSeasonBonus: number; // 성수기 보너스 (+5%)
+  lastUpdated: string;
+}
+
+export interface CommissionRatesState {
+  commissionRates: CommissionRates;
+  updateCommissionRates: (rates: Partial<CommissionRates>) => void;
+  resetCommissionRates: () => void;
+  getEffectiveCommissionRate: (companyId?: number, guideId?: number) => number;
+}
+
 export interface RootState
   extends BedState,
     TherapistState,
@@ -512,6 +532,7 @@ export interface RootState
     InvoiceState,
     ExchangeRateState,
     LanguageState,
-    ChangeLogState {
+    ChangeLogState,
+    CommissionRatesState {
   // Combined state
 }

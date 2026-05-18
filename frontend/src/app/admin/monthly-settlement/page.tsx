@@ -27,6 +27,16 @@ interface Company {
   id: number;
   name: string;
   settlement_day?: number;
+  commission_rate?: number;
+  representative?: string;
+  phone?: string;
+  address?: string;
+  status?: 'active' | 'inactive';
+  created_at?: string;
+  gcash_number?: string;
+  bank_name?: string;
+  bank_account?: string;
+  bank_holder?: string;
 }
 
 interface Guide {
@@ -59,16 +69,16 @@ const mockMonthlySettlements: MonthlySettlement[] = [
 ];
 
 const mockCompanies: Company[] = [
-  { id: 1, name: 'Makati Spa Center', settlement_day: 5 },
-  { id: 2, name: 'BGC Wellness Hub', settlement_day: 5 },
-  { id: 3, name: 'Taguig Health Spa', settlement_day: 5 },
-  { id: 4, name: 'Pasig Relax Resort', settlement_day: 10 },
-  { id: 5, name: 'Quezon City Massage', settlement_day: 15 },
-  { id: 6, name: 'Ortigas Wellness', settlement_day: 10 },
-  { id: 7, name: 'Manila Health Spa', settlement_day: 20 },
-  { id: 8, name: 'Cavite Spa Lounge', settlement_day: 15 },
-  { id: 9, name: 'Antipolo Therapy Center', settlement_day: 25 },
-  { id: 10, name: 'Laguna Premium Spa', settlement_day: 5 },
+  { id: 1, name: 'Makati Spa Center', settlement_day: 5, commission_rate: 25, representative: 'Juan Santos', phone: '+63-02-1234-5678', address: 'Makati, Manila', status: 'active', created_at: '2026-01-01' },
+  { id: 2, name: 'BGC Wellness Hub', settlement_day: 5, commission_rate: 25, representative: 'Maria Garcia', phone: '+63-02-2345-6789', address: 'BGC, Taguig', status: 'active', created_at: '2026-01-01' },
+  { id: 3, name: 'Taguig Health Spa', settlement_day: 5, commission_rate: 25, representative: 'Carlos Cruz', phone: '+63-02-3456-7890', address: 'Taguig, Manila', status: 'active', created_at: '2026-01-01' },
+  { id: 4, name: 'Pasig Relax Resort', settlement_day: 10, commission_rate: 25, representative: 'Ana Reyes', phone: '+63-02-4567-8901', address: 'Pasig City', status: 'active', created_at: '2026-01-01' },
+  { id: 5, name: 'Quezon City Massage', settlement_day: 15, commission_rate: 25, representative: 'Roberto Flores', phone: '+63-02-5678-9012', address: 'Quezon City', status: 'active', created_at: '2026-01-01' },
+  { id: 6, name: 'Ortigas Wellness', settlement_day: 10, commission_rate: 25, representative: 'Rosa Mendoza', phone: '+63-02-6789-0123', address: 'Ortigas, Pasig', status: 'active', created_at: '2026-01-01' },
+  { id: 7, name: 'Manila Health Spa', settlement_day: 20, commission_rate: 25, representative: 'Miguel Rodriguez', phone: '+63-02-7890-1234', address: 'Manila', status: 'active', created_at: '2026-01-01' },
+  { id: 8, name: 'Cavite Spa Lounge', settlement_day: 15, commission_rate: 25, representative: 'Teresa Santos', phone: '+63-046-234-5678', address: 'Cavite', status: 'active', created_at: '2026-01-01' },
+  { id: 9, name: 'Antipolo Therapy Center', settlement_day: 25, commission_rate: 25, representative: 'Francisco Lopez', phone: '+63-046-345-6789', address: 'Antipolo City', status: 'active', created_at: '2026-01-01' },
+  { id: 10, name: 'Laguna Premium Spa', settlement_day: 5, commission_rate: 25, representative: 'Luz Fernandez', phone: '+63-049-456-7890', address: 'Laguna', status: 'active', created_at: '2026-01-01' },
 ];
 
 const mockGuides: Guide[] = [

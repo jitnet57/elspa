@@ -79,6 +79,7 @@ export default function AdminPortal() {
       items: [
         { name: 'Billing Information', href: '/admin/billing', icon: '💳' },
         { name: 'Change Logs', href: '/admin/change-logs', icon: '📋' },
+        { name: 'Commission Settings', href: '/admin/commission-settings', icon: '💰' },
         { name: 'Test Data & Validation', href: '/admin/test-data', icon: '🧪' },
       ],
     },

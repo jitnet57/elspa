@@ -60,6 +60,12 @@
       "namedRegex": "^/admin/change\\-logs(?:/)?$"
     },
     {
+      "page": "/admin/commission-settings",
+      "regex": "^/admin/commission\\-settings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/commission\\-settings(?:/)?$"
+    },
+    {
       "page": "/admin/companies",
       "regex": "^/admin/companies(?:/)?$",
       "routeKeys": {},
@@ -160,6 +166,12 @@
       "regex": "^/customer/driver\\-tracking(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/customer/driver\\-tracking(?:/)?$"
+    },
+    {
+      "page": "/customer/landing",
+      "regex": "^/customer/landing(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/customer/landing(?:/)?$"
     },
     {
       "page": "/customer/mypage",

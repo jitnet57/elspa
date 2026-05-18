@@ -28,6 +28,7 @@ import {
   ExchangeRateState,
   LanguageState,
   ChangeLogState,
+  CommissionRatesState,
   ChangeLog,
   Bed,
   Therapist,
@@ -612,6 +613,48 @@ const createExchangeRateSlice = (set: any) => ({
 });
 
 // ============================================================
+// Commission Rates Slice
+// ============================================================
+
+const createCommissionRatesSlice = (set: any): any => ({
+  commissionRates: {
+    platformFee: 25, // ELSPA의 기본 플랫폼 수수료
+    therapistCommission: 60, // 테라피스트 기본 수수료
+    performanceBonus: 2, // 성과 보너스 (20+ 세션)
+    loyaltyBonus: 3, // 충성도 보너스
+    peakSeasonBonus: 5, // 성수기 보너스
+    lastUpdated: new Date().toISOString(),
+  },
+
+  updateCommissionRates: (rates: any) => {
+    set((state: any) => ({
+      commissionRates: {
+        ...state.commissionRates,
+        ...rates,
+        lastUpdated: new Date().toISOString(),
+      },
+    }));
+  },
+
+  resetCommissionRates: () => {
+    set({
+      commissionRates: {
+        platformFee: 25,
+        therapistCommission: 60,
+        performanceBonus: 2,
+        loyaltyBonus: 3,
+        peakSeasonBonus: 5,
+        lastUpdated: new Date().toISOString(),
+      },
+    });
+  },
+
+  getEffectiveCommissionRate: (companyId?: number, guideId?: number) => {
+    return useStore.getState().commissionRates.platformFee;
+  },
+});
+
+// ============================================================
 // Root Store
 // ============================================================
 
@@ -633,6 +676,7 @@ export const useStore = create<RootState>()(
       ...createLanguageSlice(set),
       ...createChangeLogSlice(set),
       ...createExchangeRateSlice(set),
+      ...createCommissionRatesSlice(set),
     }),
     {
       name: 'elspa-store',

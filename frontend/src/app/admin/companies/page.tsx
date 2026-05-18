@@ -2,22 +2,7 @@
 
 import { useState } from 'react';
 import { useStore } from '@/lib/store/store';
-
-interface Company {
-  id: number;
-  name: string;
-  representative: string;
-  phone: string;
-  address: string;
-  settlement_day: number;
-  commission_rate: number;
-  status: 'active' | 'inactive';
-  created_at: string;
-  gcash_number?: string;
-  bank_name?: string;
-  bank_account?: string;
-  bank_holder?: string;
-}
+import { Company } from '@/lib/store/types';
 
 const mockCompanies: Company[] = [
   {

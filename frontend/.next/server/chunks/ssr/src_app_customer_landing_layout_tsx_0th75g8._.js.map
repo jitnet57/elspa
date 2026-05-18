@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../src/app/customer/landing/layout.tsx"],"sourcesContent":["export default function LandingLayout({\n  children,\n}: {\n  children: React.ReactNode;\n}) {\n  return <>{children}</>;\n}\n"],"names":["LandingLayout","children"],"mappings":"uEAAe,SAASA,AAAc,UACpCC,CAAQ,CAGT,EACC,MAAO,CAAA,EAAA,EAAA,GAAA,EAAA,EAAA,QAAA,CAAA,UAAGA,GACZ"}
