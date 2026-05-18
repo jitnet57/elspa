@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/therapist/layout,_N_T_/therapist/fairness/layout,_N_T_/therapist/fairness/page,_N_T_/therapist/fairness"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/therapist/fairness/__PAGE__",
+    "/therapist/fairness",
+    "/therapist",
+    "/_index",
+    "/_head"
+  ]
+}
