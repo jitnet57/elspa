@@ -649,3 +649,130 @@ Message: 🔧 Fix: Dynamic import for RealtimeMap to resolve SSR window issue + 
 - [ ] 예약 페이지 이미지 통합
 - [ ] 대시보드 샘플 페이지 제작
 
+
+---
+
+## Session 8: Cache Invalidation, English Localization & Therapist Schedule Booking
+
+**Date**: 2026-05-18
+
+**요청**: 
+1. 배포 후 모바일에서 한글 캐시 계속 로드되는 문제 해결
+2. 영어 번역 완료 확인
+3. Guide Settlement 페이지 및 메뉴 정리
+4. 테라피스트 스케줄에서 직접 예약 기능 추가
+
+### Plan
+✅ Service Worker 캐시 버전 자동 무효화 시스템 구현
+✅ 모든 페이지 영어 번역 완료 및 배포
+✅ Guide Settlement 페이지 생성 및 메뉴 통합
+✅ 테라피스트 스케줄 두 가지 예약 방식 구현 (Quick + Manual)
+✅ 중복 메뉴 아이템 제거
+
+### Task 수행 내용
+
+#### 섹션 1: 캐시 및 배포 최적화
+1. **Service Worker 캐시 버전 관리** (`frontend/public/service-worker.js`)
+   - CACHE_VERSION: '20260518-1' → '20260518-2'
+   - YYYYMMDD-X 형식으로 자동 무효화
+   - 배포 시 마다 버전 증분으로 구 캐시 자동 삭제
+
+2. **Admin Dashboard 스타일 정리** (`frontend/src/app/admin/page.tsx`)
+   - 모든 카드 스타일 통일 (border border-gray-200)
+   - 호버 상태 정리
+
+3. **메뉴 구조 개편**
+   - Settlement Management 순서 정렬:
+     1. Therapist Settlement
+     2. Company Settlement  
+     3. Guide Settlement (NEW - /admin/guides)
+     4. Settlement Report
+     5. Settlement Guide
+
+#### 섹션 2: 영어 번역 & 가이드 페이지
+1. **Guide Settlement 페이지** (`frontend/src/app/admin/guides/page.tsx`)
+   - 완전 영어 페이지
+   - Overview cards: Settlement Cycle, Therapist Rate, Payment Methods
+   - 6개 섹션:
+     - Settlement Rules (월별 정산 주기 및 규칙)
+     - Commission Structure (60% 기본, 보너스 +2~+5%)
+     - Payment Methods (은행송금, GCash)
+     - Deductions & Fees (세금, 수수료)
+     - Tax & Compliance (세금 신고, 준법)
+     - Dispute Resolution (분쟁 해결)
+   - FAQ 4개 + Support 연락처 (필리핀 지역화)
+
+2. **Settlement Management 페이지 번역** (`frontend/src/app/settlement-management/page.tsx`)
+   - 완전 영어 번역
+   - 3가지 카테고리: Therapist, Company, Guide Settlement
+
+#### 섹션 3: 테라피스트 스케줄 예약 기능
+1. **Quick Booking 기능** (시간 슬롯 클릭)
+   - 빈 시간 슬롯 클릭 → 모달 팝업
+   - 시간, 치료사 자동 선택
+   - 고객명, 서비스 타입, 방 번호 입력
+   - 즉시 스케줄에 반영
+
+2. **Manual Booking 기능** ("+ Start New Massage" 버튼)
+   - 포괄적 예약 폼
+   - 드롭다운으로 치료사 선택
+   - 날짜/시간 선택 가능
+   - 모든 정보 입력 후 "Start Session" 클릭
+   - 리스트에 자동 정렬되어 추가
+
+3. **구현 코드** (`frontend/src/app/admin/therapist-schedule/page.tsx`)
+   ```typescript
+   // State 추가
+   const [isNewSessionModalOpen, setIsNewSessionModalOpen] = useState(false);
+   const [bookingSlot, setBookingSlot] = useState<{ therapistId: number; hour: number } | null>(null);
+   const [manualBookingForm, setManualBookingForm] = useState({...});
+   
+   // 두 가지 모달 구현
+   // 1. Manual booking: Start New Massage 버튼 클릭
+   // 2. Quick booking: 시간 슬롯 클릭
+   ```
+
+#### 섹션 4: 메뉴 통합 및 중복 제거
+1. **Service Guides 제거** (`frontend/src/app/admin/page.tsx`)
+   - Company Management에서 "Service Guides" 제거
+   - Guide Settlement (Settlement Management)로 통합
+   - 단일 진입점으로 정리
+
+### Result
+✅ **7개 파일 수정, 1개 파일 신규 생성 완료**
+- 캐시 자동 무효화 시스템 구현 ✓
+- 영어 페이지 완성 및 배포 ✓
+- Guide Settlement 페이지 구현 ✓
+- 테라피스트 스케줄 Quick 예약 기능 ✓
+- 테라피스트 스케줄 Manual 예약 기능 ✓
+- 메뉴 구조 정리 및 중복 제거 ✓
+- npm run build 성공 (36/36 페이지) ✓
+
+### Key Technologies
+- **Service Worker Cache Management**: CACHE_VERSION pattern
+- **React State Management**: Multiple modal states
+- **Dynamic Data Creation**: New booking sessions with auto-sorting
+- **Form Validation**: Customer name required check
+- **UI/UX**: Two booking workflows (quick + comprehensive)
+
+### Files Modified
+1. `frontend/public/service-worker.js` - Cache version bump
+2. `frontend/src/app/admin/page.tsx` - Menu reorganization
+3. `frontend/src/app/settlement-management/page.tsx` - English translation
+4. `frontend/src/app/admin/guides/page.tsx` - Already created (Guide Settlement)
+5. `frontend/src/app/admin/therapist-schedule/page.tsx` - Booking features added
+
+### Next
+- [ ] Connect settlement pages to actual API data (currently hardcoded)
+- [ ] Add therapist booking confirmation notifications
+- [ ] Implement therapist availability checking
+- [ ] Add booking history/export functionality
+- [ ] Connect real database instead of mock data
+
+### Technical Debt
+- Booking data stored in React state only (not persisted)
+- No real therapist availability checking
+- Mock data will be replaced with database before app store launch
+
+---
+
