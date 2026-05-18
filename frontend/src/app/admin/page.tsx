@@ -62,7 +62,6 @@ export default function AdminPortal() {
       category: '🏢 Company Management',
       items: [
         { name: 'Companies', href: '/admin/companies', icon: '🏢' },
-        { name: 'Service Guides', href: '/admin/guides', icon: '📖' },
       ],
     },
     {

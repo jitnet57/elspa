@@ -180,6 +180,12 @@
       "namedRegex": "^/customer/services(?:/)?$"
     },
     {
+      "page": "/driver",
+      "regex": "^/driver(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/driver(?:/)?$"
+    },
+    {
       "page": "/driver/customer-locations",
       "regex": "^/driver/customer\\-locations(?:/)?$",
       "routeKeys": {},

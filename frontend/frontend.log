@@ -21,3 +21,214 @@ See more: https://nextjs.org/docs/app/guides/local-development
  GET /customer/reviews 200 in 12.7s (next.js: 12.0s, application-code: 720ms)
  GET /customer/services 200 in 13.6s (next.js: 12.6s, application-code: 1026ms)
  GET /index.html 404 in 13.7s (next.js: 13.3s, application-code: 471ms)
+[browser] Uncaught Error: Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/customer" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head headCacheNode={{rsc:{...}, ...}}>
+                    <__next_viewport_boundary__>
+                    <MetadataWrapper>
+                      <div
++                       hidden={true}
+-                       hidden={null}
+-                       data-wxt-integrated=""
+                      >
+                        <__next_metadata_boundary__>
++                         <Suspense name="Next.Metadata">
+-                         <div id="__endic_crx__">
+                    ...
+                  ...
+
+    at <unknown> (https://react.dev/link/hydration-mismatch)
+    at Suspense (<anonymous>)
+ GET /customer 200 in 629ms (next.js: 65ms, application-code: 563ms)
+ GET /customer 200 in 319ms (next.js: 9ms, application-code: 310ms)
+[browser] Uncaught Error: Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/customer" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head headCacheNode={{rsc:{...}, ...}}>
+                    <__next_viewport_boundary__>
+                    <MetadataWrapper>
+                      <div
++                       hidden={true}
+-                       hidden={null}
+-                       data-wxt-integrated=""
+                      >
+                        <__next_metadata_boundary__>
++                         <Suspense name="Next.Metadata">
+-                         <div id="__endic_crx__">
+                    ...
+                  ...
+
+    at <unknown> (https://react.dev/link/hydration-mismatch)
+    at Suspense (<anonymous>)
+✓ Finished filesystem cache database compaction in 24.3s
+✓ Compiled in 1802ms
+ GET /customer 200 in 2.2s (next.js: 1575ms, application-code: 613ms)
+ GET /customer 200 in 503ms (next.js: 17ms, application-code: 486ms)
+ GET /customer 200 in 399ms (next.js: 25ms, application-code: 374ms)
+ GET /customer 200 in 396ms (next.js: 168ms, application-code: 228ms)
+ GET /customer 200 in 386ms (next.js: 205ms, application-code: 181ms)
+ GET /customer 200 in 400ms (next.js: 118ms, application-code: 282ms)
+ GET /customer 200 in 487ms (next.js: 9ms, application-code: 478ms)
+ GET /customer 200 in 521ms (next.js: 12ms, application-code: 510ms)
+ GET /customer 200 in 440ms (next.js: 9ms, application-code: 431ms)
+ GET /customer 200 in 446ms (next.js: 153ms, application-code: 293ms)
+ GET /customer 200 in 450ms (next.js: 76ms, application-code: 373ms)
+ GET /customer 200 in 450ms (next.js: 240ms, application-code: 210ms)
+ GET /customer 200 in 534ms (next.js: 10ms, application-code: 523ms)
+ GET /customer 200 in 516ms (next.js: 22ms, application-code: 493ms)
+ GET /customer 200 in 449ms (next.js: 11ms, application-code: 438ms)
+ GET /customer 200 in 449ms (next.js: 77ms, application-code: 372ms)
+ GET /customer 200 in 448ms (next.js: 170ms, application-code: 278ms)
+ GET /customer 200 in 331ms (next.js: 106ms, application-code: 225ms)
+ GET /customer 200 in 789ms (next.js: 10ms, application-code: 779ms)
+ GET /customer 200 in 701ms (next.js: 9ms, application-code: 692ms)
+ GET /customer 200 in 653ms (next.js: 9ms, application-code: 644ms)
+ GET /customer 200 in 652ms (next.js: 63ms, application-code: 589ms)
+ GET /customer 200 in 650ms (next.js: 177ms, application-code: 474ms)
+ GET /customer 200 in 490ms (next.js: 237ms, application-code: 254ms)
+ GET /customer 200 in 398ms (next.js: 9ms, application-code: 389ms)
+ GET /customer 200 in 401ms (next.js: 65ms, application-code: 336ms)
+ GET /customer 200 in 402ms (next.js: 132ms, application-code: 270ms)
+ GET /customer 200 in 407ms (next.js: 191ms, application-code: 216ms)
+ GET /customer 200 in 409ms (next.js: 233ms, application-code: 176ms)
+ GET /customer 200 in 410ms (next.js: 325ms, application-code: 85ms)
+ GET /customer 200 in 526ms (next.js: 23ms, application-code: 502ms)
+ GET /customer 200 in 518ms (next.js: 400ms, application-code: 118ms)
+ GET /customer 200 in 524ms (next.js: 75ms, application-code: 449ms)
+ GET /customer 200 in 520ms (next.js: 328ms, application-code: 192ms)
+ GET /customer 200 in 524ms (next.js: 125ms, application-code: 399ms)
+ GET /customer 200 in 523ms (next.js: 182ms, application-code: 341ms)
+ GET /customer 200 in 340ms (next.js: 290ms, application-code: 50ms)
+ GET /customer 200 in 344ms (next.js: 192ms, application-code: 152ms)
+ GET /customer 200 in 348ms (next.js: 11ms, application-code: 336ms)
+ GET /customer 200 in 348ms (next.js: 82ms, application-code: 266ms)
+ GET /customer 200 in 346ms (next.js: 239ms, application-code: 107ms)
+ GET /customer 200 in 350ms (next.js: 134ms, application-code: 216ms)
+ GET /customer 200 in 324ms (next.js: 56ms, application-code: 268ms)
+ GET /customer 200 in 326ms (next.js: 7ms, application-code: 319ms)
+ GET /customer 200 in 326ms (next.js: 99ms, application-code: 227ms)
+ GET /customer 200 in 190ms (next.js: 8ms, application-code: 181ms)
+ GET /customer 200 in 192ms (next.js: 73ms, application-code: 119ms)
+ GET /customer 200 in 192ms (next.js: 114ms, application-code: 79ms)
+ GET /customer 200 in 349ms (next.js: 11ms, application-code: 338ms)
+ GET /customer 200 in 350ms (next.js: 75ms, application-code: 275ms)
+ GET /customer 200 in 350ms (next.js: 122ms, application-code: 229ms)
+ GET /customer 200 in 355ms (next.js: 173ms, application-code: 182ms)
+ GET /customer 200 in 295ms (next.js: 164ms, application-code: 131ms)
+ GET /customer 200 in 296ms (next.js: 215ms, application-code: 81ms)
+ GET /customer 200 in 423ms (next.js: 12ms, application-code: 411ms)
+ GET /customer 200 in 358ms (next.js: 31ms, application-code: 327ms)
+ GET /customer 200 in 356ms (next.js: 149ms, application-code: 207ms)
+ GET /customer 200 in 360ms (next.js: 89ms, application-code: 271ms)
+ GET /customer 200 in 358ms (next.js: 229ms, application-code: 129ms)
+ GET /customer 200 in 358ms (next.js: 291ms, application-code: 68ms)
+ GET /customer 200 in 334ms (next.js: 7ms, application-code: 326ms)
+ GET /customer 200 in 334ms (next.js: 64ms, application-code: 270ms)
+ GET /customer 200 in 335ms (next.js: 114ms, application-code: 221ms)
+ GET /customer 200 in 175ms (next.js: 28ms, application-code: 147ms)
+ GET /customer 200 in 177ms (next.js: 66ms, application-code: 111ms)
+ GET /customer 200 in 177ms (next.js: 112ms, application-code: 66ms)
+ GET /customer 200 in 368ms (next.js: 15ms, application-code: 353ms)
+ GET /customer 200 in 365ms (next.js: 127ms, application-code: 238ms)
+ GET /customer 200 in 367ms (next.js: 69ms, application-code: 298ms)
+ GET /customer 200 in 306ms (next.js: 136ms, application-code: 170ms)
+ GET /customer 200 in 307ms (next.js: 189ms, application-code: 118ms)
+ GET /customer 200 in 182ms (next.js: 120ms, application-code: 62ms)
+ HEAD /driver 200 in 3.2s (next.js: 2.8s, application-code: 396ms)
+ GET /driver 200 in 2.7s (next.js: 1268ms, application-code: 1420ms)
+[browser] Uncaught Error: Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/driver" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head headCacheNode={{rsc:{...}, ...}}>
+                    <__next_viewport_boundary__>
+                    <MetadataWrapper>
+                      <div
++                       hidden={true}
+-                       hidden={null}
+-                       data-wxt-integrated=""
+                      >
+                        <__next_metadata_boundary__>
++                         <Suspense name="Next.Metadata">
+-                         <div id="__endic_crx__">
+                    ...
+                  ...
+
+    at <unknown> (https://react.dev/link/hydration-mismatch)
+    at Suspense (<anonymous>)
+○ Compiling /driver/customer-locations ...
+ GET /driver/customer-locations 200 in 15.3s (next.js: 15.0s, application-code: 297ms)
+✓ Finished filesystem cache database compaction in 12.0s
+ GET /driver/customer-locations 200 in 977ms (next.js: 13ms, application-code: 964ms)
+[browser] WebSocket error: [object Event] 
+    at RealtimeMap.useEffect (src/components/RealtimeMap.tsx:160:15)
+  158 |
+  159 |     websocket.current.onerror = (error) => {
+> 160 |       console.error('WebSocket error:', error);
+      |               ^
+  161 |     };
+  162 |
+  163 |     return () => { (src/components/RealtimeMap.tsx:160:15)
+[browser] WebSocket error: [object Event] 
+    at RealtimeMap.useEffect (src/components/RealtimeMap.tsx:160:15)
+  158 |
+  159 |     websocket.current.onerror = (error) => {
+> 160 |       console.error('WebSocket error:', error);
+      |               ^
+  161 |     };
+  162 |
+  163 |     return () => { (src/components/RealtimeMap.tsx:160:15)
