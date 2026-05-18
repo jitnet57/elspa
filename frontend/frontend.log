@@ -7,13 +7,9 @@
 - Local:         http://localhost:3002
 - Network:       http://192.168.1.21:3002
 - Environments: .env.local
-✓ Ready in 4.9s
-⨯ Another next dev server is already running.
+✓ Ready in 2.8s
+⚠ Slow filesystem detected. The benchmark took 297ms. If E:\elspa\frontend\.next/dev is a network drive, consider moving it to a local folder.
+See more: https://nextjs.org/docs/app/guides/local-development
 
-- Local:        http://localhost:3001
-- PID:          31448
-- Dir:          E:\elspa\frontend
-- Log:          .next\dev\logs\next-development.log
-
-Run taskkill /PID 31448 /F to stop it.
-[?25h
+○ Compiling /customer ...
+ HEAD /customer 200 in 15.1s (next.js: 13.9s, application-code: 1198ms)

@@ -189,7 +189,7 @@ async def api_info():
 # 라우터 임포트 & 등록
 # ============================================================
 # 🎯 고객 중심 API 라우터 (신규)
-from app.routers import therapists_api, bookings_api, reviews_api
+from app.routers import therapists_api, bookings_api, reviews_api, settlement
 
 # 기존 라우터들 (일부 호환성 문제로 주석 처리)
 # from app.routers import beds, therapists, bookings, matching
@@ -214,6 +214,7 @@ from app.routers import therapists_api, bookings_api, reviews_api
 app.include_router(therapists_api.router)
 app.include_router(bookings_api.router)
 app.include_router(reviews_api.router)
+app.include_router(settlement.router)  # Settlement API (Mock Data)
 
 
 @app.on_event("startup")
