@@ -48,12 +48,12 @@
   },
   {
     "route": "/monitor",
-    "firstLoadUncompressedJsBytes": 629694,
+    "firstLoadUncompressedJsBytes": 629453,
     "firstLoadChunkPaths": [
       ".next\\static\\chunks\\13stwefw.cbuv.js",
       ".next\\static\\chunks\\0.slq9f~yn21d.js",
       ".next\\static\\chunks\\0419vmb-wujrv.js",
-      ".next\\static\\chunks\\0b3k14idfhx7o.js",
+      ".next\\static\\chunks\\0~1b.ai1suuze.js",
       ".next\\static\\chunks\\0ze4gu236oq96.js",
       ".next\\static\\chunks\\15hxc6.t35tz4.js",
       ".next\\static\\chunks\\0n~dq4kpx9xxx.js",

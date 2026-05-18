@@ -174,14 +174,14 @@ const generateMockBeds = (): Bed[] => {
   let bedId = 1;
   const customerNames = ['김민준', '이수연', '정현준', '박지은', '최준호', '강지은', '이준영', '김수현', '박민수', '이영희'];
   const therapistNames = ['박유진', '최정은', '이소영', '김태희', '강지연', '박민경', '임다현', '유지원'];
-  const serviceNames = ['스웨디시 60분', '타이Massage 90분', '핫스톤 60분', '발Massage 30분', '아로마테라피 45분'];
+  const serviceNames = ['Swedish 60 min', 'Thai Massage 90 min', 'Hot Stone 60 min', 'Foot Massage 30 min', 'Aromatherapy 45 min'];
 
   for (let i = 1; i <= 30; i++) {
     const status = ['available', 'reserved', 'in_service', 'cleaning'][Math.floor(Math.random() * 4)] as any;
     beds.push({
       id: bedId,
       bed_number: i,
-      room_zone: 'Massage룸1',
+      room_zone: 'Massage Room 1',
       status: status,
       customer_name: (status === 'in_service' || status === 'reserved') ? customerNames[Math.floor(Math.random() * customerNames.length)] : undefined,
       therapist_name: (status === 'in_service' || status === 'reserved') ? therapistNames[Math.floor(Math.random() * therapistNames.length)] : undefined,
@@ -197,7 +197,7 @@ const generateMockBeds = (): Bed[] => {
     beds.push({
       id: bedId,
       bed_number: i,
-      room_zone: 'Massage룸2',
+      room_zone: 'Massage Room 2',
       status: status,
       customer_name: (status === 'in_service' || status === 'reserved') ? customerNames[Math.floor(Math.random() * customerNames.length)] : undefined,
       therapist_name: (status === 'in_service' || status === 'reserved') ? therapistNames[Math.floor(Math.random() * therapistNames.length)] : undefined,
@@ -213,7 +213,7 @@ const generateMockBeds = (): Bed[] => {
     beds.push({
       id: bedId,
       bed_number: i,
-      room_zone: 'VIP룸',
+      room_zone: 'VIP Room',
       status: status,
       customer_name: (status === 'in_service' || status === 'reserved') ? customerNames[Math.floor(Math.random() * customerNames.length)] : undefined,
       therapist_name: (status === 'in_service' || status === 'reserved') ? therapistNames[Math.floor(Math.random() * therapistNames.length)] : undefined,
@@ -229,7 +229,7 @@ const generateMockBeds = (): Bed[] => {
     beds.push({
       id: bedId,
       bed_number: i,
-      room_zone: '커플룸',
+      room_zone: 'Couple Room',
       status: status,
       customer_name: (status === 'in_service' || status === 'reserved') ? customerNames[Math.floor(Math.random() * customerNames.length)] : undefined,
       therapist_name: (status === 'in_service' || status === 'reserved') ? therapistNames[Math.floor(Math.random() * therapistNames.length)] : undefined,
@@ -272,15 +272,15 @@ const getStatusColor = (status: string): string => {
 const getStatusLabel = (status: string): string => {
   switch (status) {
     case 'available':
-      return '사용가능';
+      return 'Available';
     case 'reserved':
-      return '예약됨';
+      return 'Reserved';
     case 'in_service':
-      return '서비스중';
+      return 'In Service';
     case 'cleaning':
-      return '정리중';
+      return 'Cleaning';
     default:
-      return '상태불명';
+      return 'Unknown';
   }
 };
 
@@ -383,9 +383,9 @@ export default function MonitorPage() {
             className={`w-full h-16 ${getStatusColor(bed.status)} rounded-lg text-white text-xs font-bold hover:opacity-80 hover:scale-105 transition-all flex flex-col items-center justify-center p-1 border-2 ${
               selectedBedId === bed.id ? 'border-yellow-400' : 'border-gray-700'
             } cursor-pointer`}
-            title={bed.status === 'available' ? '클릭하여 Massage 등록' : '클릭하여 상세 Information 보기'}
+            title={bed.status === 'available' ? 'Click to add Massage' : 'Click for details'}
           >
-            <div className="font-bold">{bed.bed_number}번</div>
+            <div className="font-bold">Bed {bed.bed_number}</div>
             {bed.status === 'in_service' && bed.customer_name && (
               <div className="text-xs truncate w-full text-center">{bed.customer_name}</div>
             )}
@@ -545,8 +545,8 @@ export default function MonitorPage() {
     return (
       <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
         <div className="text-center">
-          <div className="text-2xl font-bold mb-4">🔄 실시간 데이터 로드 중...</div>
-          <div className="text-gray-400">5초 폴링으로 침대 상태를 조회하고 있습니다.</div>
+          <div className="text-2xl font-bold mb-4">🔄 Loading Real-time Data...</div>
+          <div className="text-gray-400">Polling bed status every 5 seconds.</div>
         </div>
       </div>
     );
@@ -557,7 +557,7 @@ export default function MonitorPage() {
     return (
       <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
         <div className="text-center">
-          <div className="text-2xl font-bold mb-4 text-red-400">❌ 데이터 조회 오류</div>
+          <div className="text-2xl font-bold mb-4 text-red-400">❌ Data Retrieval Error</div>
           <div className="text-gray-400">{error.message}</div>
         </div>
       </div>
@@ -631,9 +631,9 @@ export default function MonitorPage() {
       estimatedDuration: duration,
     });
 
-    // 성공 알림
-    console.log(`✅ 워크인 손님 예약 완료: ${bookingId}`);
-    alert(`✅ 워크인 손님이 예약되었습니다.\n베드: ${data.suggestedBeds.join(', ')}`);
+    // Success notification
+    console.log(`✅ Walk-in Booking Confirmed: ${bookingId}`);
+    alert(`✅ Walk-in guest has been booked.\nBeds: ${data.suggestedBeds.join(', ')}`);
   };
 
   return (
@@ -643,7 +643,7 @@ export default function MonitorPage() {
       {/* 📌 모바일 헤더 */}
       <MobileHeader
         onMenuClick={() => setIsMobileDrawerOpen(true)}
-        title="✨ ELSPA 모니터"
+        title="✨ ELSPA Monitor"
         rightContent={<div className="text-xl font-mono">{currentTime}</div>}
       />
 
@@ -654,27 +654,27 @@ export default function MonitorPage() {
       >
         <div className="space-y-4">
           <h3 className="text-lg font-bold text-blue-400 border-b border-gray-700 pb-2">
-            Therapist 현황
+            Therapist Status
           </h3>
 
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span>출근: {therapistStats.checkedIn}명 / 총 {therapistStats.total}명</span>
-              <span className="text-green-400 font-bold">대기: {therapistStats.idle}명</span>
+              <span>Checked In: {therapistStats.checkedIn} / Total: {therapistStats.total}</span>
+              <span className="text-green-400 font-bold">Waiting: {therapistStats.idle}</span>
             </div>
             <div className="text-gray-400 text-xs">
-              서비스중: {therapistStats.in_service}명 | 휴식: {therapistStats.resting}명
+              In Service: {therapistStats.in_service} | Break: {therapistStats.resting}
             </div>
           </div>
 
           {/* 예측 Information */}
           {predictions && (
             <div className="bg-blue-900/30 p-3 rounded border-l-4 border-blue-500">
-              <div className="text-xs text-gray-400 mb-1">⏳ 평균 대기시간</div>
-              <div className="text-lg font-bold text-blue-400">{predictions.average_wait_minutes || 0}분</div>
+              <div className="text-xs text-gray-400 mb-1">⏳ Average Wait Time</div>
+              <div className="text-lg font-bold text-blue-400">{predictions.average_wait_minutes || 0} min</div>
               {predictions.next_available_therapist && (
                 <div className="text-xs text-gray-400 mt-2">
-                  다음 가용: <span className="text-green-400 font-bold">{predictions.next_available_therapist.name}</span>
+                  Next Available: <span className="text-green-400 font-bold">{predictions.next_available_therapist.name}</span>
                 </div>
               )}
             </div>
@@ -683,7 +683,7 @@ export default function MonitorPage() {
           {/* Therapist 목록 */}
           <div className="space-y-2 max-h-96 overflow-y-auto">
             <div className="text-xs font-bold text-gray-300 border-b border-gray-700 pb-2">
-              전체 Therapist
+              All Therapists
             </div>
             {therapists.map(therapist => (
               <div key={therapist.id} className="bg-gray-700 p-2 rounded text-xs hover:bg-gray-600 transition">
@@ -702,9 +702,9 @@ export default function MonitorPage() {
                     therapist.status === 'resting' ? 'text-yellow-400' :
                     'text-gray-500'
                   }>
-                    {therapist.status === 'idle' ? '[즉시]' : ''}
-                    {therapist.status === 'in_service' && `${therapist.remaining_minutes}분↓`}
-                    {therapist.status === 'resting' && '[휴식]'}
+                    {therapist.status === 'idle' ? '[Available Now]' : ''}
+                    {therapist.status === 'in_service' && `${therapist.remaining_minutes} min ↓`}
+                    {therapist.status === 'resting' && '[Break]'}
                   </span>
                 </div>
                 <div className="text-gray-400 mt-0.5">{therapist.specialty}</div>
@@ -736,7 +736,7 @@ export default function MonitorPage() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              🛏️ {language === 'en' ? 'Real-time Bed Mode' : '침대 실시간 모드'}
+              🛏️ Real-time Bed Mode
             </button>
             <button
               onClick={() => setViewMode('schedule')}
@@ -746,7 +746,7 @@ export default function MonitorPage() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              📅 {language === 'en' ? 'Therapist Daily Schedule' : 'Therapist 일일 스케줄'}
+              📅 Therapist Daily Schedule
             </button>
           </div>
 
@@ -793,10 +793,10 @@ export default function MonitorPage() {
         {/* 데스크톱용 헤더 */}
         <div className="hidden lg:block mb-6 bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-3xl font-bold text-gray-900">✨ ELSPA 실시간 모니터</h1>
+            <h1 className="text-3xl font-bold text-gray-900">✨ ELSPA Real-time Monitor</h1>
             <div className="flex items-center gap-4">
               <div className="text-sm text-gray-600">
-                🔄 폴링: {refetchCount}회 | ⏱️ {lastRefetch?.toLocaleTimeString('ko-KR', { hour12: false })}
+                🔄 Polls: {refetchCount} | ⏱️ {lastRefetch?.toLocaleTimeString('en-US', { hour12: false })}
               </div>
               {/* 📌 워크인 추가 버튼 (침대 모드에서만) */}
               {viewMode === 'beds' && (
@@ -804,7 +804,7 @@ export default function MonitorPage() {
                   onClick={() => setIsWalkInModalOpen(true)}
                   className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-lg transition-all hover:shadow-lg"
                 >
-                  + 워크인 추가
+                  + Add Walk-in
                 </button>
               )}
               <div className="text-2xl font-mono text-gray-900 bg-gray-100 px-4 py-1 rounded-lg">{currentTime}</div>
@@ -813,19 +813,19 @@ export default function MonitorPage() {
           {viewMode === 'beds' && (
             <div className="grid grid-cols-4 gap-4 text-lg">
               <div className="bg-green-50 p-4 rounded-lg border border-green-200 text-center">
-                <div className="text-green-700 font-bold text-sm">비어있음</div>
+                <div className="text-green-700 font-bold text-sm">Available</div>
                 <div className="text-3xl font-bold text-green-600">{bedStats.available}</div>
               </div>
               <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 text-center">
-                <div className="text-blue-700 font-bold text-sm">서비스중</div>
+                <div className="text-blue-700 font-bold text-sm">In Service</div>
                 <div className="text-3xl font-bold text-blue-600">{bedStats.in_service}</div>
               </div>
               <div className="bg-orange-50 p-4 rounded-lg border border-orange-200 text-center">
-                <div className="text-orange-700 font-bold text-sm">예약됨</div>
+                <div className="text-orange-700 font-bold text-sm">Reserved</div>
                 <div className="text-3xl font-bold text-orange-600">{bedStats.reserved}</div>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-300 text-center">
-                <div className="text-gray-700 font-bold text-sm">정리중</div>
+                <div className="text-gray-700 font-bold text-sm">Cleaning</div>
                 <div className="text-3xl font-bold text-gray-600">{bedStats.cleaning}</div>
               </div>
             </div>
@@ -837,19 +837,19 @@ export default function MonitorPage() {
           <div className="lg:hidden mb-4 bg-white p-4 rounded-lg mx-4 mt-4 border border-gray-200 shadow-sm">
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="bg-green-50 p-3 rounded-lg text-center border border-green-200">
-                <div className="text-green-700 font-bold text-xs">비어있음</div>
+                <div className="text-green-700 font-bold text-xs">Available</div>
                 <div className="text-2xl font-bold text-green-600">{bedStats.available}</div>
               </div>
               <div className="bg-blue-50 p-3 rounded-lg text-center border border-blue-200">
-                <div className="text-blue-700 font-bold text-xs">서비스중</div>
+                <div className="text-blue-700 font-bold text-xs">In Service</div>
                 <div className="text-2xl font-bold text-blue-600">{bedStats.in_service}</div>
               </div>
               <div className="bg-orange-50 p-3 rounded-lg text-center border border-orange-200">
-                <div className="text-orange-700 font-bold text-xs">예약됨</div>
+                <div className="text-orange-700 font-bold text-xs">Reserved</div>
                 <div className="text-2xl font-bold text-orange-600">{bedStats.reserved}</div>
               </div>
               <div className="bg-gray-50 p-3 rounded-lg text-center border border-gray-300">
-                <div className="text-gray-700 font-bold text-xs">정리중</div>
+                <div className="text-gray-700 font-bold text-xs">Cleaning</div>
                 <div className="text-2xl font-bold text-gray-600">{bedStats.cleaning}</div>
               </div>
             </div>
@@ -863,7 +863,7 @@ export default function MonitorPage() {
             {Object.entries(bedsByRoom).map(([roomName, roomBeds]) =>
               roomBeds.length > 0 ? (
                 <div key={roomName} className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                  <h2 className="text-xl font-bold mb-4 text-gray-900 border-b border-gray-200 pb-3">{roomName} ({roomBeds.length}개)</h2>
+                  <h2 className="text-xl font-bold mb-4 text-gray-900 border-b border-gray-200 pb-3">{roomName} ({roomBeds.length})</h2>
                   <BedGrid roomBeds={roomBeds} />
                 </div>
               ) : null
@@ -873,30 +873,30 @@ export default function MonitorPage() {
           <div className="col-span-2 space-y-4">
             {/* Therapist 현황 카드 */}
             <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-              <h2 className="text-lg font-bold mb-4 text-gray-900">Therapist 현황</h2>
+              <h2 className="text-lg font-bold mb-4 text-gray-900">Therapist Status</h2>
 
               <div className="grid grid-cols-2 gap-3 mb-5 pb-4 border-b border-gray-200">
                 <div className="bg-green-50 p-3 rounded-lg">
-                  <div className="text-xs text-gray-600">출근</div>
+                  <div className="text-xs text-gray-600">Checked In</div>
                   <div className="text-2xl font-bold text-green-600">{therapistStats.checkedIn}/{therapistStats.total}</div>
                 </div>
                 <div className="bg-blue-50 p-3 rounded-lg">
-                  <div className="text-xs text-gray-600">대기 중</div>
-                  <div className="text-2xl font-bold text-blue-600">{therapistStats.idle}명</div>
+                  <div className="text-xs text-gray-600">Waiting</div>
+                  <div className="text-2xl font-bold text-blue-600">{therapistStats.idle}</div>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
-                <div className="text-gray-700">서비스중: <span className="font-bold">{therapistStats.in_service}명</span></div>
-                <div className="text-gray-700">휴식: <span className="font-bold">{therapistStats.resting}명</span></div>
+                <div className="text-gray-700">In Service: <span className="font-bold">{therapistStats.in_service}</span></div>
+                <div className="text-gray-700">Break: <span className="font-bold">{therapistStats.resting}</span></div>
               </div>
             </div>
 
             {/* 예측 Information */}
             {predictions && (
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-lg border border-blue-200">
-                <div className="text-sm text-gray-600 mb-2">⏳ 평균 대기시간</div>
-                <div className="text-3xl font-bold text-blue-700 mb-3">{predictions.average_wait_minutes || 0}분</div>
+                <div className="text-sm text-gray-600 mb-2">⏳ Average Wait Time</div>
+                <div className="text-3xl font-bold text-blue-700 mb-3">{predictions.average_wait_minutes || 0} min</div>
                 {predictions.next_available_therapist && (
                   <div className="text-sm text-gray-700">
                     다음 가용: <span className="font-bold text-green-600">{predictions.next_available_therapist.name}</span>
