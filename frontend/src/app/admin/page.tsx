@@ -69,9 +69,9 @@ export default function AdminPortal() {
       items: [
         { name: 'Therapist Settlement', href: '/therapist-settlement', icon: '👨‍⚕️' },
         { name: 'Company Settlement', href: '/admin/monthly-settlement', icon: '🏢' },
-        { name: 'Guide Settlement', href: '/admin/guides', icon: '📚' },
+        { name: 'Guide Referral Fee', href: '/admin/guide-referral-fee', icon: '🎯' },
         { name: 'Settlement Report', href: '/admin/settlement-report', icon: '📊' },
-        { name: 'Settlement Guide', href: '/settlement-management', icon: '💰' },
+        { name: 'Settlement Guide', href: '/settlement-management', icon: '📚' },
       ],
     },
     {

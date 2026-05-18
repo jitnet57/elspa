@@ -6,6 +6,7 @@
   "/admin/commission-settings/page": "app/admin/commission-settings/page.js",
   "/admin/companies/page": "app/admin/companies/page.js",
   "/admin/fairness-dashboard/page": "app/admin/fairness-dashboard/page.js",
+  "/admin/guide-referral-fee/page": "app/admin/guide-referral-fee/page.js",
   "/admin/guides/page": "app/admin/guides/page.js",
   "/admin/matching/page": "app/admin/matching/page.js",
   "/admin/monthly-settlement/page": "app/admin/monthly-settlement/page.js",

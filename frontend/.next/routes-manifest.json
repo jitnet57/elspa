@@ -78,6 +78,12 @@
       "namedRegex": "^/admin/fairness\\-dashboard(?:/)?$"
     },
     {
+      "page": "/admin/guide-referral-fee",
+      "regex": "^/admin/guide\\-referral\\-fee(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/guide\\-referral\\-fee(?:/)?$"
+    },
+    {
       "page": "/admin/guides",
       "regex": "^/admin/guides(?:/)?$",
       "routeKeys": {},

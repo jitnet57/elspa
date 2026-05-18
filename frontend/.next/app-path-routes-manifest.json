@@ -6,6 +6,7 @@
   "/admin/commission-settings/page": "/admin/commission-settings",
   "/admin/companies/page": "/admin/companies",
   "/admin/fairness-dashboard/page": "/admin/fairness-dashboard",
+  "/admin/guide-referral-fee/page": "/admin/guide-referral-fee",
   "/admin/guides/page": "/admin/guides",
   "/admin/matching/page": "/admin/matching",
   "/admin/monthly-settlement/page": "/admin/monthly-settlement",
