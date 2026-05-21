@@ -2,13 +2,17 @@
 급여 정산 시스템 — SQLAlchemy 모델 (6개)
 경로: app/models/payroll.py
 작성일: 2026-05-21
+업데이트: 2026-05-21 - 제약 조건, 인덱스, CASCADE 설정 추가
 """
 
 from datetime import datetime, date
 from decimal import Decimal
-from sqlalchemy import Column, Integer, String, Float, Date, DateTime, Boolean, ForeignKey, Numeric, Enum
+from sqlalchemy import (
+    Column, Integer, String, Date, DateTime, Boolean,
+    ForeignKey, Numeric, Index, UniqueConstraint, CheckConstraint
+)
 from sqlalchemy.orm import relationship
-from database import Base
+from app.database import Base
 import enum
 
 
@@ -56,6 +60,13 @@ class Employee(Base):
     """
     직원 마스터 데이터
     기존 Staff + Therapist 통합
+
+    제약 조건:
+      - base_salary >= 0 (CHECK)
+      - commission_rate >= 0 (CHECK)
+
+    인덱스:
+      - (employee_type, is_active, pay_group) - 필터링 최적화
     """
     __tablename__ = "employees"
 
@@ -71,6 +82,13 @@ class Employee(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    # 제약 조건 및 인덱스
+    __table_args__ = (
+        CheckConstraint("base_salary >= 0", name="ck_employee_base_salary_positive"),
+        CheckConstraint("commission_rate >= 0", name="ck_employee_commission_rate_positive"),
+        Index("idx_employee_type_active_paygroup", "employee_type", "is_active", "pay_group"),
+    )
+
     # 관계
     cash_advances = relationship("CashAdvance", back_populates="employee")
     attendance_logs = relationship("AttendanceLog", back_populates="employee")
@@ -84,6 +102,13 @@ class CashAdvance(Base):
     """
     직원 선지급 (CA) 관리
     정산 시 자동 차감 대상
+
+    제약 조건:
+      - amount >= 0 (CHECK)
+      - settled_payroll_id ON DELETE CASCADE
+
+    인덱스:
+      - (employee_id, status) - 상태별 조회 최적화
     """
     __tablename__ = "cash_advances"
 
@@ -93,9 +118,19 @@ class CashAdvance(Base):
     request_date = Column(Date, nullable=False)
     reason = Column(String(500))
     status = Column(String(50), nullable=False, default="pending")  # pending, approved, rejected, settled
-    settled_payroll_id = Column(Integer, ForeignKey("payroll_records.id"), nullable=True)
+    settled_payroll_id = Column(
+        Integer,
+        ForeignKey("payroll_records.id", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=True
+    )
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # 제약 조건 및 인덱스
+    __table_args__ = (
+        CheckConstraint("amount >= 0", name="ck_cash_advance_amount_positive"),
+        Index("idx_cash_advance_employee_status", "employee_id", "status"),
+    )
 
     # 관계
     employee = relationship("Employee", back_populates="cash_advances")
@@ -108,6 +143,12 @@ class AttendanceLog(Base):
     """
     출퇴근 기록 및 근태 관리
     지각, OT 자동 계산
+
+    제약 조건:
+      - (employee_id, work_date) 복합 고유 제약 - 하루에 한 번만 기록
+
+    인덱스:
+      - (employee_id, work_date) - 직원별 날짜 조회 최적화
     """
     __tablename__ = "attendance_logs"
 
@@ -123,6 +164,12 @@ class AttendanceLog(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    # 제약 조건 및 인덱스
+    __table_args__ = (
+        UniqueConstraint("employee_id", "work_date", name="uq_attendance_employee_workdate"),
+        Index("idx_attendance_employee_workdate", "employee_id", "work_date"),
+    )
+
     # 관계
     employee = relationship("Employee", back_populates="attendance_logs")
 
@@ -134,6 +181,9 @@ class PayrollPeriod(Base):
     """
     급여 정산 기간 (주간/격주)
     한 번에 여러 직원의 급여 계산 대상
+
+    인덱스:
+      - (pay_group, status) - 상태별 조회 최적화
     """
     __tablename__ = "payroll_periods"
 
@@ -144,6 +194,11 @@ class PayrollPeriod(Base):
     status = Column(String(50), nullable=False, default="draft")  # draft, approved, paid
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # 인덱스
+    __table_args__ = (
+        Index("idx_payroll_period_status", "pay_group", "status"),
+    )
 
     # 관계
     payroll_records = relationship("PayrollRecord", back_populates="payroll_period")
@@ -156,6 +211,17 @@ class PayrollRecord(Base):
     """
     개인별 정산 결과
     모든 수입, 차감 항목 포함한 최종 급여
+
+    제약 조건:
+      - gross_pay >= 0 (CHECK)
+      - total_deductions >= 0 (CHECK)
+      - net_pay >= 0 (CHECK)
+
+    인덱스:
+      - (payroll_period_id, employee_id, status) - 정산 조회 최적화
+
+    컬럼:
+      - is_obsolete: 소프트 삭제 플래그 (거래 추적성 유지)
     """
     __tablename__ = "payroll_records"
 
@@ -185,9 +251,18 @@ class PayrollRecord(Base):
 
     status = Column(String(50), nullable=False, default="draft")  # draft, approved, paid
     notes = Column(String(1000))
+    is_obsolete = Column(Boolean, default=False)  # 소프트 삭제 플래그
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # 제약 조건 및 인덱스
+    __table_args__ = (
+        CheckConstraint("gross_pay >= 0", name="ck_payroll_gross_pay_positive"),
+        CheckConstraint("total_deductions >= 0", name="ck_payroll_deductions_positive"),
+        CheckConstraint("net_pay >= 0", name="ck_payroll_net_pay_positive"),
+        Index("idx_payroll_period_employee_status", "payroll_period_id", "employee_id", "status"),
+    )
 
     # 관계
     payroll_period = relationship("PayrollPeriod", back_populates="payroll_records")
@@ -202,6 +277,12 @@ class PhilippineHoliday(Base):
     필리핀 공휴일 관리
     국가 공휴일: 200% 지급
     특정 공휴일: 130% 지급
+
+    제약 조건:
+      - holiday_date UNIQUE - 같은 날짜 중복 불가
+
+    인덱스:
+      - (holiday_date) - 공휴일 조회 최적화
     """
     __tablename__ = "philippine_holidays"
 
@@ -212,3 +293,8 @@ class PhilippineHoliday(Base):
     rate_multiplier = Column(Numeric(3, 2), nullable=False)  # 2.0 or 1.3
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # 인덱스
+    __table_args__ = (
+        Index("idx_holiday_date", "holiday_date"),
+    )

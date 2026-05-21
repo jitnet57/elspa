@@ -1,0 +1,113 @@
+openapi: 3.0.0
+info:
+  title: ElSpa Payroll API
+  description: 마사지 샵 급여 정산 통합 관리 시스템
+  version: 1.0.0
+  contact:
+    name: Team G
+
+servers:
+  - url: http://localhost:8000
+    description: Development
+  - url: https://api.elspa.app
+    description: Production
+
+tags:
+  - name: Employees
+    description: 직원 관리
+  - name: CashAdvance
+    description: 선지급 관리
+  - name: Attendance
+    description: 출퇴근 관리
+  - name: Holidays
+    description: 공휴일 관리
+  - name: PayrollPeriods
+    description: 정산 기간
+  - name: PayrollRecords
+    description: 정산 결과
+
+paths:
+  /api/payroll/employees:
+    post:
+      tags:
+        - Employees
+      summary: 직원 신규 등록
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, phone, employee_type, pay_group, base_salary, hire_date]
+              properties:
+                name:
+                  type: string
+                  example: "김테라피스트"
+                phone:
+                  type: string
+                  example: "09012345678"
+                employee_type:
+                  type: string
+                  enum: [therapist, nail, driver, maintenance, hollys, manager]
+                pay_group:
+                  type: string
+                  enum: [weekly, biweekly]
+                base_salary:
+                  type: number
+                  example: 15000
+                commission_rate:
+                  type: number
+                  example: 5
+                hire_date:
+                  type: string
+                  format: date
+      responses:
+        201:
+          description: 생성 성공
+
+  /api/payroll/periods/{period_id}/calculate:
+    post:
+      tags:
+        - PayrollRecords
+      summary: 급여 계산 실행
+      description: |
+        정산 기간의 모든 직원 급여를 자동으로 계산합니다.
+        
+        **수입 항목:**
+        - 기본급
+        - 커미션 (therapist/nail)
+        - 초과근무 (40분 이상)
+        - 공휴일 가산 (국가 200%, 특정 130%)
+        - 드라이버 식대 (200 Peso)
+        
+        **차감 항목:**
+        - 지각 (10분 초과 시 1분당 10 Peso)
+        - 결근
+        - SSS 선지급
+        - 선지급(CA)
+        - 보건소 검사비
+        - 13개월 보너스 선지급
+      parameters:
+        - name: period_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 급여 계산 완료
+
+  /api/payroll/periods/{period_id}/approve:
+    post:
+      tags:
+        - PayrollPeriods
+      summary: 정산 승인 (draft → approved)
+      parameters:
+        - name: period_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 정산 승인 성공

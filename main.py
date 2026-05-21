@@ -231,6 +231,14 @@ app.include_router(admin_data_api.router)
 app.include_router(reviews_api.router)
 app.include_router(settlement.router)  # Settlement API (Mock Data)
 
+# 재무 감사 로그 라우터 등록
+from app.routers import audit_api
+app.include_router(audit_api.router)
+
+# 재무 WebSocket 라우터 등록
+from app.routers import websocket_financial
+app.include_router(websocket_financial.router)
+
 # 📱 메신저 봇 라우터 등록
 app.include_router(kakao.router)
 app.include_router(whatsapp.router)
@@ -240,6 +248,9 @@ app.include_router(sss.router)
 app.include_router(expense.router)
 # 💵 급여 정산 라우터 등록
 app.include_router(payroll.router)
+# 💹 예산 모니터링 라우터 등록
+from app.routers import budget_monitor_api
+app.include_router(budget_monitor_api.router)
 # app.include_router(financial_api.router)  # async 전환 후 재활성화
 
 

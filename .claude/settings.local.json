@@ -12,7 +12,27 @@
       "Bash(curl -s http://localhost:5173)",
       "PowerShell(Start-Process \"http://localhost:3000\")",
       "PowerShell(Start-Process -FilePath \"cmd\" -ArgumentList \"/c\", \"cd /d e:\\\\elspa && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload > backend.log 2>&1\" -WindowStyle Minimized)",
-      "Bash(powershell -Command \"Get-Date -Format 'yyyy-MM-dd HH:mm'\")"
+      "Bash(powershell -Command \"Get-Date -Format 'yyyy-MM-dd HH:mm'\")",
+      "Bash(python scripts/init_payroll_data.py)",
+      "Bash(Test-Path \"e:\\\\elspa\\\\app\\\\models\\\\payroll.py\")",
+      "Bash(python -c \"from app.routers import payroll\")",
+      "Bash(python -c \"import main\")",
+      "Bash(python -m py_compile app/utils/errors.py app/utils/validation.py)",
+      "Bash(python -c ' *)",
+      "Bash(curl -s http://localhost:8000/health)",
+      "Bash(curl -s http://localhost:8000/api/expense/dates)",
+      "Bash(curl -s http://localhost:8000/api/sss/months)",
+      "Bash(curl -s http://localhost:8000/api/payroll/employees)",
+      "Bash(curl -sv http://localhost:8000/api/payroll/employees)",
+      "Bash(python -m py_compile app/utils/permissions.py app/services/audit_service.py app/routers/audit_api.py app/utils/audit_helpers.py)",
+      "Bash(python -c \"from app.routers import payroll; from app.services import payroll_calculator\")",
+      "Bash(python -m py_compile app/services/websocket_manager.py app/routers/websocket_financial.py)",
+      "Bash(timeout 180 bash -c 'while [ ! -f C:\\\\\\\\Users\\\\\\\\jitne\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\claude\\\\\\\\e--elspa\\\\\\\\c55999d1-2390-48cc-b90e-57d87d5304fe\\\\\\\\tasks\\\\\\\\bey8yfw6b.output ]; do sleep 1; done && tail -f C:\\\\\\\\Users\\\\\\\\jitne\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\claude\\\\\\\\e--elspa\\\\\\\\c55999d1-2390-48cc-b90e-57d87d5304fe\\\\\\\\tasks\\\\\\\\bey8yfw6b.output')",
+      "Bash(python3)",
+      "Bash(Get-ChildItem -Path \"e:\\\\elspa\\\\docs\" -File)",
+      "Bash(Select-Object Name, Length)",
+      "PowerShell(Get-ChildItem -Path \"e:\\\\elspa\\\\docs\" -File | Select-Object Name, Length, @{n=\"Size\\(KB\\)\";e={[math]::Round\\($_.Length/1KB, 2\\)}} | Format-Table -AutoSize)",
+      "PowerShell(python -m py_compile \"e:\\\\elspa\\\\main.py\" \"e:\\\\elspa\\\\app\\\\services\\\\budget_monitor.py\" \"e:\\\\elspa\\\\app\\\\routers\\\\budget_monitor_api.py\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\jitne\\Desktop"

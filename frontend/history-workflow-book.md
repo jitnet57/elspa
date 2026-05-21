@@ -196,3 +196,135 @@
 ---
 
 *Last Updated: 2026-05-16 14:30*
+
+---
+## [2026-05-21 16:15] Order: 008 - Sprint 9: Permission Enforcement & Audit Logging
+
+**주제:** 경영지표자료 대시보드 권한 기반 접근 제어 및 감사 로그 시스템
+
+### Plan
+✅ 권한 검증 데코레이터 (FastAPI)
+✅ 감사 로그 서비스 (Audit log CRUD)
+✅ 감사 로그 API 엔드포인트 (6개)
+✅ 권한 가드 컴포넌트 (프론트엔드)
+✅ 감사 로그 뷰어 컴포넌트
+✅ 감사 로그 통합 헬퍼 함수
+
+### Task 수행 내용
+
+#### 백엔드 권한 및 감사 시스템 (Python)
+1. **app/utils/permissions.py** (약 110줄)
+   - require_permission: 권한 검증 데코레이터
+   - require_admin, require_edit_permission, require_delete_permission 등 4개 편의 데코레이터
+   - PermissionChecker 클래스: 8가지 권한 메서드 (can_view, can_add, can_edit, can_delete, can_export, can_set_budget, can_view_audit_log, can_access_all_months)
+
+2. **app/services/audit_service.py** (약 150줄)
+   - log_action: 감사 로그 생성 (JSON 변경 추적)
+   - get_logs: 필터링된 로그 조회 (action, user_id, entity_type, entity_id)
+   - get_user_actions: 특정 사용자의 모든 작업
+   - get_entity_history: 특정 엔티티의 변경 이력
+   - get_recent_actions: 최근 로그
+   - count_actions: 작업 수 계산
+
+3. **app/routers/audit_api.py** (약 170줄)
+   - GET /api/admin/audit/logs — 필터링된 감사 로그 (action, user_id, entity_type, entity_id)
+   - GET /api/admin/audit/logs/user/{user_id} — 사용자별 작업 이력
+   - GET /api/admin/audit/logs/entity/{entity_type}/{entity_id} — 엔티티별 변경 이력
+   - GET /api/admin/audit/logs/recent — 최근 20개 로그
+   - GET /api/admin/audit/stats — 감사 통계 (total, created, updated, deleted, budget_set)
+
+4. **app/utils/audit_helpers.py** (약 200줄)
+   - log_expense_created: 지출 생성 로그
+   - log_expense_updated: 지출 수정 로그 (old_value, new_value)
+   - log_expense_deleted: 지출 삭제 로그
+   - log_budget_set: 예산 설정/수정 로그
+   - log_category_created: 카테고리 생성 로그
+   - log_revenue_recorded: 수익 기록 로그
+   - log_export_generated: 내보내기 로그
+
+5. **main.py** 업데이트
+   - audit_api 라우터 등록
+
+#### 프론트엔드 권한 및 감사 UI (TypeScript/React)
+1. **frontend/src/components/financial/PermissionGuard.tsx** (약 130줄)
+   - PermissionGuard: 권한에 따라 컴포넌트 조건부 렌더링
+   - ConditionalButton: 권한이 없으면 비활성화된 버튼
+   - RoleBasedContent: 역할별 다른 컨텐츠 표시
+
+2. **frontend/src/components/financial/AuditLogViewer.tsx** (약 220줄)
+   - 감사 로그 테이블 (날짜, 작업, 사용자, 엔티티)
+   - 작업별 색상 코딩 (생성: 초록, 수정: 파랑, 삭제: 빨강)
+   - 필터: 작업 유형 드롭다운
+   - 상세 보기: 모달에서 변경사항 JSON 표시
+   - 빈 상태 처리
+
+### Result
+✅ **7개 파일 생성/수정 완료**
+✅ **백엔드**: 630줄 (permissions + audit_service + audit_api + audit_helpers + main.py)
+✅ **프론트엔드**: 350줄 (PermissionGuard + AuditLogViewer)
+✅ **권한 메서드**: 8가지
+✅ **감사 로그 엔드포인트**: 5개
+✅ **로그 타입**: 8가지 (expense CRUD + budget + category + revenue + export)
+✅ **빌드 성공**: Python 구문 검증 + TypeScript 검증 통과
+
+### 주요 구현 특징
+
+**1. 권한 검증 데코레이터**
+```python
+@require_permission("canDelete", ["admin"])
+async def delete_expense(expense_id: int, db: Session):
+    # 只有 admin 可以删除
+    ...
+```
+
+**2. 감사 로그 통합**
+```python
+new_expense = Expense(...)
+db.add(new_expense)
+db.commit()
+
+# 자동 로그 기록
+log_expense_created(
+    db=db,
+    expense=new_expense,
+    user_id="user123",
+    ip_address=request.client.host
+)
+```
+
+**3. 권한 기반 UI 제어**
+```tsx
+<ConditionalButton
+  userRole={userRole}
+  permission="canDelete"
+  onClick={handleDelete}
+>
+  Delete
+</ConditionalButton>
+```
+
+**4. 감사 로그 조회**
+- 사용자별 모든 작업 추적
+- 엔티티별 변경 이력 (before/after)
+- JSON 형식 변경사항 저장
+- IP 주소 + User-Agent 기록
+
+### 다음 단계
+✅ **Sprint 9 완료**: Permission Enforcement ✅
+⏳ **Sprint 10**: WebSocket Real-time Sync
+  - 백엔드 WebSocket 서버 (지출/예산 변경 broadcast)
+  - 프론트엔드 WebSocket 훅 (이미 존재, 통합만)
+  - 실시간 알림 시스템
+
+⏳ **Sprint 11**: Advanced Features
+  - 예산 초과 알림/경고
+  - 오프라인 지원 (IndexedDB 캐싱)
+  - 가상 스크롤링 (대량 지출 목록)
+
+### 기술 검증
+- **권한 시스템**: RBAC (Role-Based Access Control)
+- **감사 로그**: 생성일, 사용자, 작업 유형, 변경사항 추적
+- **API 디자인**: RESTful + 필터링 지원
+- **프론트엔드**: 조건부 렌더링 + 권한 검사
+
+---

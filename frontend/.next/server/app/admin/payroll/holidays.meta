@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/admin/layout,_N_T_/admin/payroll/layout,_N_T_/admin/payroll/holidays/layout,_N_T_/admin/payroll/holidays/page,_N_T_/admin/payroll/holidays"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/admin/payroll/holidays/__PAGE__",
+    "/admin/payroll/holidays",
+    "/admin/payroll",
+    "/admin",
+    "/_index",
+    "/_head"
+  ]
+}

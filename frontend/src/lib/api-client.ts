@@ -240,3 +240,42 @@ export async function getReview(id: number): Promise<Review> {
   if (!response.ok) throw new Error('리뷰를 불러올 수 없습니다');
   return response.json();
 }
+
+// ============================================================
+// Financial API (Generic)
+// ============================================================
+
+export async function fetchFinancial<T = any>(
+  endpoint: string,
+  options?: {
+    method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+    body?: Record<string, any>;
+  }
+): Promise<T> {
+  const url = `${API_BASE_URL}${endpoint}`;
+  const fetchOptions: RequestInit = {
+    cache: 'no-store',
+    method: options?.method || 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-User-Role': 'admin', // TODO: Extract from JWT token
+    },
+  };
+
+  if (options?.body) {
+    fetchOptions.body = JSON.stringify(options.body);
+  }
+
+  const response = await fetch(url, fetchOptions);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      errorData.error_message ||
+      errorData.detail ||
+      `재무 API 요청 실패 (${response.status})`
+    );
+  }
+
+  return response.json();
+}

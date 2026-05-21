@@ -3,7 +3,7 @@ Financial dashboard API endpoints for expense tracking and revenue management.
 Handles: revenue queries, expense tracking, budget management, expense categories
 """
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from app.config import get_db
@@ -13,6 +13,14 @@ from app.models.financial import (
 from app.schemas.financial import (
     ExpenseCreate, ExpenseUpdate, BudgetCreate, ExpenseCategoryResponse,
     ExpenseResponse, BudgetResponse, MonthlyRevenueResponse
+)
+from app.utils.validation import (
+    validate_date_range, validate_month, validate_year,
+    validate_amount, validate_year_month_period
+)
+from app.utils.errors import (
+    FinancialValidationError, ResourceNotFoundError,
+    InvalidDateRangeError, InvalidMonthError, InvalidYearError
 )
 
 router = APIRouter(prefix="/api/admin/financial", tags=["financial"])
@@ -24,38 +32,62 @@ router = APIRouter(prefix="/api/admin/financial", tags=["financial"])
 
 @router.get("/revenue", response_model=list[MonthlyRevenueResponse])
 async def get_monthly_revenue(
-    year: int = Query(2026),
-    month: int = Query(None),
+    year: int = Query(2026, ge=2000, le=2100),
+    month: int = Query(None, ge=1, le=12),
     db: Session = Depends(get_db)
 ):
     """Get monthly revenue data for specified period"""
-    query = db.query(MonthlyRevenue).filter(MonthlyRevenue.year == year)
+    try:
+        validate_year(year)
+        if month:
+            validate_month(month)
 
-    if month:
-        query = query.filter(MonthlyRevenue.month == month)
+        query = db.query(MonthlyRevenue).filter(MonthlyRevenue.year == year)
 
-    return query.order_by(MonthlyRevenue.month).all()
+        if month:
+            query = query.filter(MonthlyRevenue.month == month)
+
+        return query.order_by(MonthlyRevenue.month).all()
+    except (InvalidYearError, InvalidMonthError) as e:
+        raise e
+    except Exception as e:
+        raise FinancialValidationError(
+            error_code="QUERY_FAILED",
+            error_message="수익 데이터 조회 실패",
+            detail=str(e)
+        )
 
 
 @router.get("/revenue/summary")
 async def get_revenue_summary(
-    year: int = Query(2026),
+    year: int = Query(2026, ge=2000, le=2100),
     db: Session = Depends(get_db)
 ):
     """Get annual revenue summary"""
-    revenues = db.query(MonthlyRevenue).filter(
-        MonthlyRevenue.year == year
-    ).all()
+    try:
+        validate_year(year)
 
-    total = sum(r.total_revenue for r in revenues)
-    avg_monthly = total / 12 if revenues else 0
+        revenues = db.query(MonthlyRevenue).filter(
+            MonthlyRevenue.year == year
+        ).all()
 
-    return {
-        "year": year,
-        "total_annual_revenue": total,
-        "average_monthly_revenue": avg_monthly,
-        "month_count": len(revenues)
-    }
+        total = sum(r.total_revenue for r in revenues)
+        avg_monthly = total / 12 if revenues else 0
+
+        return {
+            "year": year,
+            "total_annual_revenue": total,
+            "average_monthly_revenue": avg_monthly,
+            "month_count": len(revenues)
+        }
+    except InvalidYearError as e:
+        raise e
+    except Exception as e:
+        raise FinancialValidationError(
+            error_code="SUMMARY_FAILED",
+            error_message="연간 요약 조회 실패",
+            detail=str(e)
+        )
 
 
 # ============================================================
@@ -137,19 +169,32 @@ async def create_expense(
     db: Session = Depends(get_db)
 ):
     """Add new expense transaction"""
-    # Verify category exists
-    category = db.query(ExpenseCategory).filter(
-        ExpenseCategory.id == expense.category_id
-    ).first()
+    try:
+        # Verify category exists
+        category = db.query(ExpenseCategory).filter(
+            ExpenseCategory.id == expense.category_id
+        ).first()
 
-    if not category:
-        raise ValueError(f"Category {expense.category_id} not found")
+        if not category:
+            raise ResourceNotFoundError("ExpenseCategory", expense.category_id)
 
-    new_expense = Expense(**expense.dict())
-    db.add(new_expense)
-    db.commit()
-    db.refresh(new_expense)
-    return new_expense
+        # Validate amount
+        validate_amount(expense.amount, "amount")
+
+        new_expense = Expense(**expense.dict())
+        db.add(new_expense)
+        db.commit()
+        db.refresh(new_expense)
+        return new_expense
+    except (ResourceNotFoundError, ValueError) as e:
+        raise e
+    except Exception as e:
+        db.rollback()
+        raise FinancialValidationError(
+            error_code="EXPENSE_CREATE_FAILED",
+            error_message="지출 생성 실패",
+            detail=str(e)
+        )
 
 
 @router.put("/expenses/{expense_id}", response_model=ExpenseResponse)
@@ -159,30 +204,62 @@ async def update_expense(
     db: Session = Depends(get_db)
 ):
     """Update existing expense"""
-    db_expense = db.query(Expense).filter(Expense.id == expense_id).first()
+    try:
+        db_expense = db.query(Expense).filter(Expense.id == expense_id).first()
 
-    if not db_expense:
-        raise ValueError(f"Expense {expense_id} not found")
+        if not db_expense:
+            raise ResourceNotFoundError("Expense", expense_id)
 
-    for field, value in expense.dict(exclude_unset=True).items():
-        setattr(db_expense, field, value)
+        # Validate category if provided
+        if expense.category_id:
+            category = db.query(ExpenseCategory).filter(
+                ExpenseCategory.id == expense.category_id
+            ).first()
+            if not category:
+                raise ResourceNotFoundError("ExpenseCategory", expense.category_id)
 
-    db.commit()
-    db.refresh(db_expense)
-    return db_expense
+        # Validate amount if provided
+        if expense.amount:
+            validate_amount(expense.amount, "amount")
+
+        for field, value in expense.dict(exclude_unset=True).items():
+            setattr(db_expense, field, value)
+
+        db.commit()
+        db.refresh(db_expense)
+        return db_expense
+    except (ResourceNotFoundError, ValueError) as e:
+        raise e
+    except Exception as e:
+        db.rollback()
+        raise FinancialValidationError(
+            error_code="EXPENSE_UPDATE_FAILED",
+            error_message="지출 수정 실패",
+            detail=str(e)
+        )
 
 
 @router.delete("/expenses/{expense_id}")
 async def delete_expense(expense_id: int, db: Session = Depends(get_db)):
     """Delete expense transaction"""
-    db_expense = db.query(Expense).filter(Expense.id == expense_id).first()
+    try:
+        db_expense = db.query(Expense).filter(Expense.id == expense_id).first()
 
-    if not db_expense:
-        raise ValueError(f"Expense {expense_id} not found")
+        if not db_expense:
+            raise ResourceNotFoundError("Expense", expense_id)
 
-    db.delete(db_expense)
-    db.commit()
-    return {"deleted": True, "id": expense_id}
+        db.delete(db_expense)
+        db.commit()
+        return {"deleted": True, "id": expense_id}
+    except ResourceNotFoundError as e:
+        raise e
+    except Exception as e:
+        db.rollback()
+        raise FinancialValidationError(
+            error_code="EXPENSE_DELETE_FAILED",
+            error_message="지출 삭제 실패",
+            detail=str(e)
+        )
 
 
 # ============================================================
@@ -210,23 +287,35 @@ async def set_budget(
     db: Session = Depends(get_db)
 ):
     """Create or update monthly budget"""
-    existing = db.query(Budget).filter(
-        Budget.year == budget.year,
-        Budget.month == budget.month
-    ).first()
+    try:
+        validate_year_month_period(budget.year, budget.month)
 
-    if existing:
-        for field, value in budget.dict().items():
-            setattr(existing, field, value)
+        existing = db.query(Budget).filter(
+            Budget.year == budget.year,
+            Budget.month == budget.month
+        ).first()
+
+        if existing:
+            for field, value in budget.dict().items():
+                setattr(existing, field, value)
+            db.commit()
+            db.refresh(existing)
+            return existing
+
+        new_budget = Budget(**budget.dict())
+        db.add(new_budget)
         db.commit()
-        db.refresh(existing)
-        return existing
-
-    new_budget = Budget(**budget.dict())
-    db.add(new_budget)
-    db.commit()
-    db.refresh(new_budget)
-    return new_budget
+        db.refresh(new_budget)
+        return new_budget
+    except (InvalidYearError, InvalidMonthError) as e:
+        raise e
+    except Exception as e:
+        db.rollback()
+        raise FinancialValidationError(
+            error_code="BUDGET_SET_FAILED",
+            error_message="예산 설정 실패",
+            detail=str(e)
+        )
 
 
 # ============================================================

@@ -72,6 +72,12 @@
       "namedRegex": "^/admin/companies(?:/)?$"
     },
     {
+      "page": "/admin/data-management",
+      "regex": "^/admin/data\\-management(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/data\\-management(?:/)?$"
+    },
+    {
       "page": "/admin/expense",
       "regex": "^/admin/expense(?:/)?$",
       "routeKeys": {},
@@ -112,6 +118,42 @@
       "regex": "^/admin/monthly\\-settlement(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/admin/monthly\\-settlement(?:/)?$"
+    },
+    {
+      "page": "/admin/payroll",
+      "regex": "^/admin/payroll(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/payroll(?:/)?$"
+    },
+    {
+      "page": "/admin/payroll/attendance",
+      "regex": "^/admin/payroll/attendance(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/payroll/attendance(?:/)?$"
+    },
+    {
+      "page": "/admin/payroll/cash-advance",
+      "regex": "^/admin/payroll/cash\\-advance(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/payroll/cash\\-advance(?:/)?$"
+    },
+    {
+      "page": "/admin/payroll/employees",
+      "regex": "^/admin/payroll/employees(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/payroll/employees(?:/)?$"
+    },
+    {
+      "page": "/admin/payroll/holidays",
+      "regex": "^/admin/payroll/holidays(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/payroll/holidays(?:/)?$"
+    },
+    {
+      "page": "/admin/payroll/records",
+      "regex": "^/admin/payroll/records(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/payroll/records(?:/)?$"
     },
     {
       "page": "/admin/policies",

@@ -311,12 +311,72 @@
     ]
   },
   {
+    "route": "/admin/payroll/records",
+    "firstLoadUncompressedJsBytes": 573782,
+    "firstLoadChunkPaths": [
+      ".next\\static\\chunks\\11gydt2orfe~2.js",
+      ".next\\static\\chunks\\0.slq9f~yn21d.js",
+      ".next\\static\\chunks\\01ynk_moiwrd2.js",
+      ".next\\static\\chunks\\0ze4gu236oq96.js",
+      ".next\\static\\chunks\\0ljq~s2.3n8zs.js",
+      ".next\\static\\chunks\\0n~dq4kpx9xxx.js",
+      ".next\\static\\chunks\\03bztafub850y.js",
+      ".next\\static\\chunks\\07uz2g0_38qia.js",
+      ".next\\static\\chunks\\turbopack-0s4k3q7~i3s_l.js"
+    ]
+  },
+  {
     "route": "/admin/billing",
     "firstLoadUncompressedJsBytes": 573699,
     "firstLoadChunkPaths": [
       ".next\\static\\chunks\\11gydt2orfe~2.js",
       ".next\\static\\chunks\\0.slq9f~yn21d.js",
       ".next\\static\\chunks\\0mnf8l99evboh.js",
+      ".next\\static\\chunks\\0ze4gu236oq96.js",
+      ".next\\static\\chunks\\0ljq~s2.3n8zs.js",
+      ".next\\static\\chunks\\0n~dq4kpx9xxx.js",
+      ".next\\static\\chunks\\03bztafub850y.js",
+      ".next\\static\\chunks\\07uz2g0_38qia.js",
+      ".next\\static\\chunks\\turbopack-0s4k3q7~i3s_l.js"
+    ]
+  },
+  {
+    "route": "/admin/data-management",
+    "firstLoadUncompressedJsBytes": 573544,
+    "firstLoadChunkPaths": [
+      ".next\\static\\chunks\\11gydt2orfe~2.js",
+      ".next\\static\\chunks\\0.slq9f~yn21d.js",
+      ".next\\static\\chunks\\0fwibmbh8okmz.js",
+      ".next\\static\\chunks\\0ze4gu236oq96.js",
+      ".next\\static\\chunks\\0ljq~s2.3n8zs.js",
+      ".next\\static\\chunks\\0n~dq4kpx9xxx.js",
+      ".next\\static\\chunks\\03bztafub850y.js",
+      ".next\\static\\chunks\\07uz2g0_38qia.js",
+      ".next\\static\\chunks\\turbopack-0s4k3q7~i3s_l.js"
+    ]
+  },
+  {
+    "route": "/admin/payroll/attendance",
+    "firstLoadUncompressedJsBytes": 572631,
+    "firstLoadChunkPaths": [
+      ".next\\static\\chunks\\11gydt2orfe~2.js",
+      ".next\\static\\chunks\\0.slq9f~yn21d.js",
+      ".next\\static\\chunks\\077__zyw66v._.js",
+      ".next\\static\\chunks\\0ze4gu236oq96.js",
+      ".next\\static\\chunks\\0ljq~s2.3n8zs.js",
+      ".next\\static\\chunks\\0n~dq4kpx9xxx.js",
+      ".next\\static\\chunks\\03bztafub850y.js",
+      ".next\\static\\chunks\\07uz2g0_38qia.js",
+      ".next\\static\\chunks\\turbopack-0s4k3q7~i3s_l.js"
+    ]
+  },
+  {
+    "route": "/admin/payroll/cash-advance",
+    "firstLoadUncompressedJsBytes": 572561,
+    "firstLoadChunkPaths": [
+      ".next\\static\\chunks\\11gydt2orfe~2.js",
+      ".next\\static\\chunks\\0.slq9f~yn21d.js",
+      ".next\\static\\chunks\\0~ggdz4hc6tli.js",
       ".next\\static\\chunks\\0ze4gu236oq96.js",
       ".next\\static\\chunks\\0ljq~s2.3n8zs.js",
       ".next\\static\\chunks\\0n~dq4kpx9xxx.js",
@@ -371,6 +431,21 @@
     ]
   },
   {
+    "route": "/admin/payroll/employees",
+    "firstLoadUncompressedJsBytes": 571591,
+    "firstLoadChunkPaths": [
+      ".next\\static\\chunks\\11gydt2orfe~2.js",
+      ".next\\static\\chunks\\0.slq9f~yn21d.js",
+      ".next\\static\\chunks\\0m~6v93i..vb-.js",
+      ".next\\static\\chunks\\0ze4gu236oq96.js",
+      ".next\\static\\chunks\\0ljq~s2.3n8zs.js",
+      ".next\\static\\chunks\\0n~dq4kpx9xxx.js",
+      ".next\\static\\chunks\\03bztafub850y.js",
+      ".next\\static\\chunks\\07uz2g0_38qia.js",
+      ".next\\static\\chunks\\turbopack-0s4k3q7~i3s_l.js"
+    ]
+  },
+  {
     "route": "/requirements",
     "firstLoadUncompressedJsBytes": 571412,
     "firstLoadChunkPaths": [
@@ -407,6 +482,21 @@
       ".next\\static\\chunks\\11gydt2orfe~2.js",
       ".next\\static\\chunks\\0.slq9f~yn21d.js",
       ".next\\static\\chunks\\00~ck00m5cld..js",
+      ".next\\static\\chunks\\0ze4gu236oq96.js",
+      ".next\\static\\chunks\\0ljq~s2.3n8zs.js",
+      ".next\\static\\chunks\\0n~dq4kpx9xxx.js",
+      ".next\\static\\chunks\\03bztafub850y.js",
+      ".next\\static\\chunks\\07uz2g0_38qia.js",
+      ".next\\static\\chunks\\turbopack-0s4k3q7~i3s_l.js"
+    ]
+  },
+  {
+    "route": "/admin/payroll/holidays",
+    "firstLoadUncompressedJsBytes": 569646,
+    "firstLoadChunkPaths": [
+      ".next\\static\\chunks\\11gydt2orfe~2.js",
+      ".next\\static\\chunks\\0.slq9f~yn21d.js",
+      ".next\\static\\chunks\\05t.e-oj0ylr_.js",
       ".next\\static\\chunks\\0ze4gu236oq96.js",
       ".next\\static\\chunks\\0ljq~s2.3n8zs.js",
       ".next\\static\\chunks\\0n~dq4kpx9xxx.js",
@@ -467,6 +557,21 @@
       ".next\\static\\chunks\\11gydt2orfe~2.js",
       ".next\\static\\chunks\\0.slq9f~yn21d.js",
       ".next\\static\\chunks\\03mb5m~vuqrw7.js",
+      ".next\\static\\chunks\\0ze4gu236oq96.js",
+      ".next\\static\\chunks\\0ljq~s2.3n8zs.js",
+      ".next\\static\\chunks\\0n~dq4kpx9xxx.js",
+      ".next\\static\\chunks\\03bztafub850y.js",
+      ".next\\static\\chunks\\07uz2g0_38qia.js",
+      ".next\\static\\chunks\\turbopack-0s4k3q7~i3s_l.js"
+    ]
+  },
+  {
+    "route": "/admin/payroll",
+    "firstLoadUncompressedJsBytes": 567789,
+    "firstLoadChunkPaths": [
+      ".next\\static\\chunks\\11gydt2orfe~2.js",
+      ".next\\static\\chunks\\0.slq9f~yn21d.js",
+      ".next\\static\\chunks\\0xqt7uq9ujgbv.js",
       ".next\\static\\chunks\\0ze4gu236oq96.js",
       ".next\\static\\chunks\\0ljq~s2.3n8zs.js",
       ".next\\static\\chunks\\0n~dq4kpx9xxx.js",

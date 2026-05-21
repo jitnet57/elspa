@@ -1108,7 +1108,56 @@ Message: ✨ Feat: Financial Dashboard Phase 4 Implementation (Parallel FE/BE)
 
 ### Task 수행 내용
 
-**구현 중...**
+#### 섹션 1: 백엔드 API 구현
+1. **파일**: `app/routers/admin_data_api.py` (275줄)
+   - Therapists API: GET/POST/PUT/DELETE + Excel 내보내기
+   - Bookings API: GET/POST/PUT/DELETE + Excel 내보내기
+   - Drivers API: GET/POST/PUT/DELETE + Excel 내보내기
+   - 총 **12개 엔드포인트** (3 × 4 CRUD)
+   - openpyxl 라이브러리로 Excel 생성
+   - Mock 데이터: 테라피스트 5명, 예약 4건, 드라이버 4명
+
+2. **파일 수정**: `main.py`
+   - 라우터 import: `from app.routers import admin_data_api`
+   - 라우터 등록: `app.include_router(admin_data_api.router)`
+
+#### 섹션 2: 프론트엔드 Admin 대시보드
+1. **파일**: `frontend/src/app/admin/data-management/page.tsx` (650줄)
+   - **React 18 상태 관리**: useState, useEffect
+   - **탭 UI**: 3개 섹션 (테라피스트 / 예약 / 드라이버)
+   - **기능**:
+     * 데이터 조회 (GET)
+     * 행별 인라인 수정 (PUT)
+     * 삭제 (DELETE)
+     * Excel 다운로드 (POST /export)
+   - **컴포넌트**: TherapistTable, BookingTable, DriverTable (재사용 가능)
+   - **스타일**: Tailwind CSS 4 (그래디언트, 반응형, 다크모드)
+
+### Result
+✅ **3개 파일 신규 생성 + 1개 파일 수정 완료**
+
+#### 생성된 파일
+1. `app/routers/admin_data_api.py` - FastAPI 라우터 (12개 엔드포인트)
+2. `frontend/src/app/admin/data-management/page.tsx` - Admin 대시보드
+3. `main.py` - 라우터 통합
+
+#### 기술 구현 상세
+- **백엔드**: FastAPI CRUD + openpyxl Excel 생성
+- **프론트엔드**: React hooks + Fetch API + Tailwind CSS
+- **엔드포인트**: `/api/admin/data/therapists|bookings|drivers` (CRUD + export)
+- **Excel 형식**: 컬러 헤더 + 자동 열 너비
+
+### Next
+- [ ] localhost:3000/admin/data-management 접속 테스트
+- [ ] 실제 데이터 편집 확인
+- [ ] Excel 다운로드 기능 테스트
+- [ ] 에러 핸들링 추가 (검증, 중복 처리)
+
+### 관련 Agent/MCP/Skill
+- **Skill**: dev-workflow-assistant (히스토리 기록)
+- **기술**: FastAPI, React, TypeScript, Tailwind CSS, openpyxl
+
+---
 
 
 ---
@@ -1460,5 +1509,313 @@ PayrollRecord (3개 + 계산):
 ⏳ Phase 7: QA 검증
   - 5개 샘플 케이스 정산 정확도 100%
   - 엣지케이스 검증 (OT 40분, 지각 10분 경계)
+
+---
+
+---
+## [2026-05-21 15:53] Order: 007 - Sprint 8: Financial Dashboard Data Validation
+
+**주제:** 경영지표자료 대시보드 입력 검증 및 에러 처리 시스템 구축
+
+### Plan
+✅ 백엔드 Pydantic 검증 강화 (Field constraints, custom validators)
+✅ 공유 검증 유틸리티 함수 작성 (validation.py)
+✅ 표준화된 에러 응답 시스템 (errors.py)
+✅ API 라우터 에러 핸들링 추가
+✅ 프론트엔드 폼 검증 훅 (useFormValidation)
+✅ 지출/예산 폼 컴포넌트 with real-time validation
+✅ 클라이언트 에러 핸들러 (FinancialErrorHandler)
+
+### Task 수행 내용
+
+#### 백엔드 검증 레이어 (Python)
+1. **app/utils/errors.py** (약 120줄)
+   - FinancialValidationError, ResourceNotFoundError 등 6개 커스텀 예외
+   - 표준화된 ErrorResponse 모델
+   - HTTP 상태 코드 + 에러 코드 매핑
+
+2. **app/utils/validation.py** (약 90줄)
+   - validate_date_range: 시작/종료 날짜 비교
+   - validate_month, validate_year: 범위 검증
+   - validate_amount: 금액 > 0 검증
+   - validate_budget_period: 미래 6개월 제한
+   - format_field_errors: 필드 에러 포맷팅
+
+3. **app/schemas/financial.py** 업데이트 (약 100줄 추가)
+   - ExpenseCreate: amount > 0, expense_date <= now 검증
+   - ExpenseUpdate: 선택적 필드 검증
+   - BudgetCreate: year (2000-2100), month (1-12), amount >= 0
+   - Pydantic @validator 데코레이터 6개 추가
+
+4. **app/routers/financial_api.py** 업데이트 (약 80줄 추가)
+   - GET /revenue: year, month 범위 검증
+   - POST /expenses: category 존재 확인, amount 검증
+   - PUT /expenses/{id}: update 시 category/amount 재검증
+   - DELETE /expenses/{id}: 404 에러 처리
+   - POST /budget: year-month 기간 검증, upsert 로직
+
+#### 프론트엔드 폼 검증 (TypeScript/React)
+1. **frontend/src/lib/errors/financial-errors.ts** (약 110줄)
+   - ErrorCode type: 10가지 에러 타입
+   - FinancialErrorHandler: 에러 파싱, 사용자 메시지 매핑
+   - getFieldErrorMessage: 필드 레벨 에러 번역
+
+2. **frontend/src/hooks/financial/useFormValidation.ts** (약 220줄)
+   - ValidationRule 인터페이스: required, minLength, max, pattern, custom
+   - useFormValidation 훅: 상태 관리 + 검증 로직
+   - handleChange, handleBlur: 필드별 이벤트 핸들러
+   - validateAll: 전체 폼 검증
+   - reset: 초기 상태로 리셋
+
+3. **frontend/src/components/financial/ExpenseForm.tsx** (약 180줄)
+   - 카테고리 선택, 금액 입력, 날짜, 설명
+   - 실시간 에러 표시 (빨간 테두리 + 에러 메시지)
+   - 제출 시 API 호출 (현재는 Zustand 직접 업데이트)
+   - useFormValidation 훅 적용
+
+4. **frontend/src/components/financial/BudgetForm.tsx** (약 200줄)
+   - 연도/월 선택, 목표 매출, 지출 한도
+   - 선택적 카테고리별 예산 (급여, 간접비, 복리후생, 기타)
+   - 동일 검증 패턴 적용
+   - setBudget 호출 (upsert)
+
+5. **frontend/src/hooks/financial/index.ts** 업데이트
+   - useFormValidation 내보내기 추가
+
+### Result
+✅ **8개 파일 생성/수정 완료**
+✅ **백엔드**: 290줄 (errors.py + validation.py + routers 업데이트)
+✅ **프론트엔드**: 710줄 (폼 검증 훅 + 2개 폼 컴포넌트)
+✅ **검증 규칙**: 12가지 (날짜, 금액, 월/연도, 커스텀)
+✅ **에러 타입**: 10가지 (Validation, Permission, NotFound, DateRange, Budget 등)
+✅ **빌드 성공**: TypeScript 검증 통과
+
+### 주요 구현 특징
+
+**1. Pydantic Validators**
+```python
+@validator("amount")
+def validate_amount(cls, v):
+    if v <= 0:
+        raise ValueError("금액은 0보다 커야 합니다")
+    return round(v, 2)
+```
+
+**2. 실시간 폼 검증**
+- onChange: 변경 시 에러 클리어
+- onBlur: 포커스 벗어날 때 검증 실행
+- 필드별 에러 메시지 표시
+
+**3. 에러 응답 표준화**
+```python
+{
+  "error_code": "INVALID_MONTH",
+  "error_message": "유효하지 않은 월: 13",
+  "detail": "월은 1~12 사이여야 합니다",
+  "field_errors": {"month": "..."}
+}
+```
+
+**4. 클라이언트 에러 처리**
+- API 에러 파싱 → 사용자 메시지 변환
+- 필드 에러 → 폼 필드 강조 (빨간 테두리)
+- 제출 에러 → 상단 알림 (🚫 색상)
+
+### Next
+⏳ Sprint 9: Permission Enforcement
+  - UI 컴포넌트에서 권한별 버튼 활성화/비활성화
+  - API 엔드포인트에 @require_permission 데코레이터
+  - Audit log 기록 (create/update/delete 시)
+
+⏳ Sprint 10: WebSocket Real-time Sync
+  - 백엔드 WebSocket 서버 구현
+  - 지출/예산 변경 시 모든 클라이언트에 broadcast
+
+⏳ Sprint 11: Advanced Features
+  - 예산 초과 알림/경고
+  - 오프라인 지원 (IndexedDB 캐싱)
+  - 가상 스크롤링 (대량 지출 목록)
+
+### 기술 스택 확인
+- **백엔드**: FastAPI + SQLAlchemy + Pydantic 검증
+- **프론트엔드**: Next.js 16 + React 19 + Zustand
+- **검증**: 클라이언트 (useFormValidation) + 서버 (Pydantic)
+- **에러 처리**: 표준 HTTP 상태코드 + 커스텀 에러코드
+
+---
+
+---
+## [2026-05-21 16:40] Order: 009 - Sprint 10: WebSocket Real-time Synchronization
+
+**주제:** 경영지표자료 대시보드 실시간 데이터 동기화
+
+### Plan
+✅ WebSocket Connection Manager (클라이언트 추적)
+✅ 재무 메시지 빌더 (표준화된 메시지 형식)
+✅ WebSocket API 엔드포인트
+✅ 브로드캐스트 로직 (지출, 예산, 카테고리)
+✅ 실시간 알림 컴포넌트 (프론트엔드)
+✅ 동기화 상태 표시기 (프론트엔드)
+
+### Task 수행 내용
+
+#### 백엔드 WebSocket 서버 (Python/FastAPI)
+1. **app/services/websocket_manager.py** (약 200줄)
+   - ConnectionManager: 활성 연결 추적 (Set, Dict)
+   - connect/disconnect: 연결 생명주기
+   - broadcast: 모든 클라이언트에 메시지 전송
+   - broadcast_to_user: 특정 사용자 연결에만 전송
+   - send_personal: 단일 연결에만 메시지 전송
+   - FinancialMessageBuilder: 8가지 메시지 타입 생성
+
+2. **app/routers/websocket_financial.py** (약 200줄)
+   - `/ws/financial`: WebSocket 엔드포인트
+     - 자동 하트비트 (30초마다)
+     - 메시지 수신 루프 (ping-pong, sync, period update)
+     - 120초 타임아웃
+   - POST `/api/financial/ws/broadcast/expense`: 지출 변경 브로드캐스트
+   - POST `/api/financial/ws/broadcast/budget`: 예산 변경 브로드캐스트
+   - GET `/api/financial/ws/status`: 연결 상태 조회
+
+3. **main.py** 업데이트
+   - websocket_financial 라우터 등록
+
+#### 프론트엔드 실시간 UI (TypeScript/React)
+1. **frontend/src/components/financial/RealtimeNotification.tsx** (약 180줄)
+   - RealtimeNotification: 토스트 알림 컴포넌트
+   - 8가지 알림 타입 (expense_added, budget_exceeded 등)
+   - 아이콘 + 색상 매핑
+   - 자동 사라짐 (기본 5초)
+   - 진행 표시줄 (shrink 애니메이션)
+   - useRealtimeNotifications: 알림 상태 관리 훅
+
+2. **frontend/src/components/financial/SyncStatus.tsx** (약 140줄)
+   - SyncStatus: 동기화 상태 표시기
+   - 연결 상태 (🟢 Connected / 🔴 Disconnected)
+   - 마지막 동기화 시간 (now, 10m ago, 2h ago)
+   - 활성 연결/사용자 수
+   - 실시간 시간 업데이트 (30초마다)
+   - SyncStatusSkeleton: 로딩 상태
+
+### Result
+✅ **5개 파일 생성/수정 완료**
+✅ **백엔드**: 400줄 (WebSocket manager + routes + main)
+✅ **프론트엔드**: 320줄 (notification + sync status)
+✅ **메시지 타입**: 8가지
+✅ **브로드캐스트 엔드포인트**: 2개 (expense, budget)
+✅ **빌드 성공**: Python 구문 + TypeScript 검증 통과
+
+### 주요 구현 특징
+
+**1. WebSocket 연결 흐름**
+```
+클라이언트 연결
+  ↓
+하트비트 30초마다 전송
+  ↓
+서버에서 변경 감지
+  ↓
+모든 클라이언트에 브로드캐스트
+  ↓
+클라이언트 WebSocket 훅에서 수신
+  ↓
+Zustand 스토어 업데이트
+  ↓
+컴포넌트 자동 리렌더링 + 알림 표시
+```
+
+**2. 메시지 구조**
+```json
+{
+  "type": "expense_added",
+  "timestamp": "2026-05-21T16:40:00.000Z",
+  "data": {
+    "id": 123,
+    "categoryId": 1,
+    "amount": 5000,
+    "description": "Office supplies"
+  }
+}
+```
+
+**3. 실시간 알림 컴포넌트**
+- 토스트 스타일 (우측 상단)
+- 애니메이션 (slideIn 0.3s)
+- 자동 사라짐 (shrink 진행 표시)
+- 액션 버튼 지원
+- 매뉴얼 닫기 버튼
+
+**4. 연결 상태 추적**
+- 활성 연결 수
+- 활성 사용자 수
+- 마지막 동기화 시간
+- 실시간 업데이트
+
+### 통합 포인트
+✅ **이미 존재하는 훅 활용**:
+  - useFinancialWebSocket (이미 구현됨)
+  - 메시지 수신 시 Zustand 자동 업데이트
+
+✅ **새로운 컴포넌트**:
+  - RealtimeNotification: 알림 표시
+  - SyncStatus: 상태 표시기
+  - PermissionGuard (Sprint 9): 권한 체크
+  - AuditLogViewer (Sprint 9): 감사 로그
+
+### 다음 단계
+✅ **Sprint 10 완료**: WebSocket Real-time Sync ✅
+⏳ **Sprint 11**: Advanced Features
+  - 예산 초과 알림 (budget_exceeded 메시지 활용)
+  - 오프라인 지원 (IndexedDB 캐싱)
+  - 가상 스크롤링 (대량 지출 목록)
+
+### 기술 검증
+- **WebSocket 프로토콜**: 양방향 통신, ping-pong, heartbeat
+- **메시지 형식**: JSON 표준화
+- **에러 처리**: 연결 해제 시 자동 제거
+- **성능**: 비동기 처리, 타임아웃 관리
+
+---
+
+## [2026-05-22 00:54] Order: 011 - Sprint 11: Advanced Features
+
+**주제**: 예산 모니터링 고급 기능 구현 (Backend API + Frontend 컴포넌트)
+
+### Plan
+✅ 백엔드: BudgetMonitor 서비스
+✅ 백엔드: budget_monitor_api 라우터 (4개 엔드포인트)
+✅ 프론트엔드: BudgetAlertPanel, useOfflineStorage, VirtualExpenseTable
+✅ main.py 라우터 등록
+✅ 빌드 검증
+
+### Task 수행 내용
+
+#### 섹션 1: 백엔드 (이미 완료)
+- app/services/budget_monitor.py (~280 lines)
+- app/routers/budget_monitor_api.py (~70 lines)
+
+#### 섹션 2: 프론트엔드
+- src/lib/api-client.ts - fetchFinancial<T>() 제네릭 함수
+- src/components/financial/BudgetAlertPanel.tsx - 예산 경고 패널
+- src/hooks/financial/useOfflineStorage.ts - IndexedDB 오프라인 저장
+- src/components/financial/VirtualExpenseTable.tsx - 페이지네이션 테이블
+
+#### 섹션 3: 통합 & 검증
+- main.py 라우터 등록
+- npm install react-window @types/react-window
+- TypeScript 빌드: ✅ 통과
+- Next.js 정적 생성: ✅ 50/50 페이지
+
+### Result
+✅ **9개 파일 생성/수정 완료**
+- 프론트엔드: 5개 파일 신규 (BudgetAlertPanel, useOfflineStorage, VirtualExpenseTable, api-client, package.json)
+- 백엔드: main.py 업데이트
+- 빌드: 0 에러, 0 경고
+
+### 주요 기능
+✅ 예산 경고 패널 (실시간 로드)
+✅ IndexedDB 오프라인 저장 (6개 메서드)
+✅ 대용량 지출 페이지네이션 (20개/페이지)
+✅ 타입 안정성 완성 (TypeScript)
 
 ---

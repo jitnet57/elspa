@@ -1,0 +1,2092 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "ElSpa Payroll System API",
+    "description": "Complete RESTful API for ElSpa payroll management system.\n\nFeatures:\n- Employee management (CRUD)\n- Cash Advance (CA) tracking and settlement\n- Attendance logging with OT/late calculations\n- Philippine holiday management\n- Payroll period management\n- Automated payroll calculation with detailed breakdown\n- Payroll approval workflow\n\n**Authentication:** JWT Bearer tokens (required for all endpoints in production)\n\n**Error Handling:** All endpoints return appropriate HTTP status codes with error messages\n\n**Pagination:** List endpoints support skip/limit parameters\n",
+    "version": "1.0.0",
+    "contact": {
+      "name": "ElSpa Development",
+      "email": "support@elspa.com"
+    },
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Development server"
+    },
+    {
+      "url": "https://api.elspa.com",
+      "description": "Production server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Employees",
+      "description": "Employee master data management"
+    },
+    {
+      "name": "Cash Advance",
+      "description": "Cash advance request and settlement"
+    },
+    {
+      "name": "Attendance",
+      "description": "Attendance logging and work hour tracking"
+    },
+    {
+      "name": "Holidays",
+      "description": "Philippine holiday management"
+    },
+    {
+      "name": "Payroll Periods",
+      "description": "Payroll period creation and management"
+    },
+    {
+      "name": "Payroll Records",
+      "description": "Payroll calculation and records retrieval"
+    }
+  ],
+  "paths": {
+    "/api/payroll/employees": {
+      "post": {
+        "tags": [
+          "Employees"
+        ],
+        "summary": "Create Employee",
+        "description": "Create a new employee record in the payroll system.\n\nEmployee types:\n- therapist: Service therapist (can have commission)\n- nail: Nail technician (can have commission)\n- driver: Transportation driver (eligible for meal allowance)\n- maintenance: Maintenance staff\n- hollys: Hollys Coffee staff\n- manager: Manager/admin\n\nPay groups:\n- weekly: Weekly payroll cycle\n- biweekly: Bi-weekly payroll cycle\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmployeeCreate"
+              },
+              "examples": {
+                "therapist": {
+                  "summary": "Create Therapist",
+                  "value": {
+                    "name": "Maria Santos",
+                    "phone": "0917-123-4567",
+                    "employee_type": "therapist",
+                    "pay_group": "weekly",
+                    "base_salary": 8000.0,
+                    "commission_rate": 10.0,
+                    "hire_date": "2025-01-15"
+                  }
+                },
+                "driver": {
+                  "summary": "Create Driver",
+                  "value": {
+                    "name": "Juan Cruz",
+                    "phone": "0917-234-5678",
+                    "employee_type": "driver",
+                    "pay_group": "biweekly",
+                    "base_salary": 10000.0,
+                    "commission_rate": 0,
+                    "hire_date": "2024-06-01"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Employee created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmployeeResponse"
+                },
+                "example": {
+                  "id": 1,
+                  "name": "Maria Santos",
+                  "phone": "0917-123-4567",
+                  "employee_type": "therapist",
+                  "pay_group": "weekly",
+                  "base_salary": 8000.0,
+                  "commission_rate": 10.0,
+                  "hire_date": "2025-01-15",
+                  "is_active": true,
+                  "created_at": "2026-05-21T10:30:00",
+                  "updated_at": "2026-05-21T10:30:00"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input (validation error)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "detail": "base_salary must be non-negative"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Employees"
+        ],
+        "summary": "List Employees",
+        "description": "Retrieve paginated list of employees with optional filtering by type",
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "description": "Number of records to skip"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100
+            },
+            "description": "Maximum number of records to return"
+          },
+          {
+            "name": "employee_type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "therapist",
+                "nail",
+                "driver",
+                "maintenance",
+                "hollys",
+                "manager"
+              ]
+            },
+            "description": "Filter by employee type"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of employees",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EmployeeResponse"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 1,
+                    "name": "Maria Santos",
+                    "phone": "0917-123-4567",
+                    "employee_type": "therapist",
+                    "pay_group": "weekly",
+                    "base_salary": 8000.0,
+                    "commission_rate": 10.0,
+                    "hire_date": "2025-01-15",
+                    "is_active": true,
+                    "created_at": "2026-05-21T10:30:00",
+                    "updated_at": "2026-05-21T10:30:00"
+                  }
+                ]
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payroll/employees/{employee_id}": {
+      "get": {
+        "tags": [
+          "Employees"
+        ],
+        "summary": "Get Employee",
+        "description": "Retrieve detailed information for a specific employee",
+        "parameters": [
+          {
+            "name": "employee_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Employee ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Employee details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmployeeResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Employee not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "detail": "\uc9c1\uc6d0\uc744 \ucc3e\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Employees"
+        ],
+        "summary": "Update Employee",
+        "description": "Update employee information",
+        "parameters": [
+          {
+            "name": "employee_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Employee ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmployeeCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Employee updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmployeeResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Employee not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Employees"
+        ],
+        "summary": "Delete Employee",
+        "description": "Soft delete an employee (marks is_active as false)",
+        "parameters": [
+          {
+            "name": "employee_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Employee ID"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Employee deleted successfully"
+          },
+          "404": {
+            "description": "Employee not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payroll/cash-advance": {
+      "post": {
+        "tags": [
+          "Cash Advance"
+        ],
+        "summary": "Request Cash Advance",
+        "description": "Create a new cash advance request.\n\nStatus transitions:\n- pending (initial) \u2192 approved (by manager) \u2192 settled (at payroll calculation)\n- pending \u2192 rejected (by manager)\n\n**Business Logic:**\n- Pending CA cannot be deducted from payroll\n- Only approved CA is eligible for deduction\n- CA is automatically marked as settled when included in payroll calculation\n- settled_payroll_id tracks which payroll record settled this CA\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CashAdvanceCreate"
+              },
+              "example": {
+                "employee_id": 1,
+                "amount": 2000.0,
+                "request_date": "2026-05-20",
+                "reason": "Medical emergency"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cash advance created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashAdvanceResponse"
+                },
+                "example": {
+                  "id": 1,
+                  "employee_id": 1,
+                  "amount": 2000.0,
+                  "request_date": "2026-05-20",
+                  "reason": "Medical emergency",
+                  "status": "pending",
+                  "settled_payroll_id": null,
+                  "created_at": "2026-05-20T14:30:00",
+                  "updated_at": "2026-05-20T14:30:00"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Cash Advance"
+        ],
+        "summary": "List Cash Advances",
+        "description": "Retrieve paginated list of cash advances with optional status filter",
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "description": "Number of records to skip"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100
+            },
+            "description": "Maximum number of records to return"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "approved",
+                "rejected",
+                "settled"
+              ]
+            },
+            "description": "Filter by CA status"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of cash advances",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CashAdvanceResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payroll/cash-advance/{ca_id}": {
+      "put": {
+        "tags": [
+          "Cash Advance"
+        ],
+        "summary": "Update Cash Advance Status",
+        "description": "Update the status of a cash advance request.\n\nValid status values:\n- pending: Initial state\n- approved: Approved by manager\n- rejected: Rejected by manager\n- settled: Automatically set during payroll calculation\n\n**Note:** Usually only pending \u2192 approved or pending \u2192 rejected transitions are manual.\nsettled is set automatically by the payroll calculation system.\n",
+        "parameters": [
+          {
+            "name": "ca_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Cash Advance ID"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "approved",
+                "rejected",
+                "settled"
+              ]
+            },
+            "description": "New status"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Status updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashAdvanceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "detail": "\uc720\ud6a8\ud558\uc9c0 \uc54a\uc740 \uc0c1\ud0dc\uc785\ub2c8\ub2e4"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cash advance not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "detail": "CA\ub97c \ucc3e\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payroll/attendance": {
+      "post": {
+        "tags": [
+          "Attendance"
+        ],
+        "summary": "Log Attendance",
+        "description": "Record work day attendance with clock-in/out times.\n\n**Automatic Calculations:**\n- late_minutes: Deducted if > 0 (10 pesos per minute if exceeds 10 min)\n- overtime_minutes: Calculated if >= 40 minutes (additional pay)\n- holiday_type: Affects pay multiplier (national=200%, special=130%)\n\n**Holiday Types:**\n- \"none\": Regular workday\n- \"national\": National holiday (200% pay rate)\n- \"special\": Special holiday (130% pay rate)\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttendanceLogCreate"
+              },
+              "examples": {
+                "regular_day": {
+                  "summary": "Regular workday",
+                  "value": {
+                    "employee_id": 1,
+                    "work_date": "2026-05-21",
+                    "clock_in": "08:00",
+                    "clock_out": "17:30",
+                    "late_minutes": 0,
+                    "overtime_minutes": 0,
+                    "is_absent": false,
+                    "holiday_type": "none"
+                  }
+                },
+                "holiday_with_ot": {
+                  "summary": "National holiday with overtime",
+                  "value": {
+                    "employee_id": 1,
+                    "work_date": "2026-06-12",
+                    "clock_in": "08:00",
+                    "clock_out": "19:00",
+                    "late_minutes": 0,
+                    "overtime_minutes": 120,
+                    "is_absent": false,
+                    "holiday_type": "national"
+                  }
+                },
+                "absent": {
+                  "summary": "Absent day",
+                  "value": {
+                    "employee_id": 2,
+                    "work_date": "2026-05-22",
+                    "clock_in": null,
+                    "clock_out": null,
+                    "late_minutes": 0,
+                    "overtime_minutes": 0,
+                    "is_absent": true,
+                    "holiday_type": "none"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Attendance logged successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttendanceLogResponse"
+                },
+                "example": {
+                  "id": 1,
+                  "employee_id": 1,
+                  "work_date": "2026-05-21",
+                  "clock_in": "08:00",
+                  "clock_out": "17:30",
+                  "late_minutes": 0,
+                  "overtime_minutes": 0,
+                  "is_absent": false,
+                  "holiday_type": "none",
+                  "created_at": "2026-05-21T18:00:00",
+                  "updated_at": "2026-05-21T18:00:00"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or duplicate record for same employee/date",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Attendance"
+        ],
+        "summary": "List Attendance Records",
+        "description": "Retrieve paginated attendance records with optional filters",
+        "parameters": [
+          {
+            "name": "work_date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Filter by specific work date (YYYY-MM-DD)"
+          },
+          {
+            "name": "employee_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by employee ID"
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "description": "Number of records to skip"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100
+            },
+            "description": "Maximum number of records to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of attendance records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AttendanceLogResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payroll/attendance/{log_id}": {
+      "put": {
+        "tags": [
+          "Attendance"
+        ],
+        "summary": "Update Attendance Record",
+        "description": "Update an existing attendance record",
+        "parameters": [
+          {
+            "name": "log_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Attendance Log ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttendanceLogCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Attendance updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttendanceLogResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Attendance record not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "detail": "\ucd9c\ud1f4\uadfc \uae30\ub85d\uc744 \ucc3e\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payroll/holidays": {
+      "post": {
+        "tags": [
+          "Holidays"
+        ],
+        "summary": "Create Philippine Holiday",
+        "description": "Register a Philippine holiday in the system.\n\n**Holiday Types and Rate Multipliers:**\n- national: 200% pay (full rate = 2.0)\n- special: 130% pay (full rate = 1.3)\n\nEmployees working on holidays receive additional pay at these rates.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PhilippineHolidayCreate"
+              },
+              "examples": {
+                "national_holiday": {
+                  "summary": "National Holiday",
+                  "value": {
+                    "holiday_date": "2026-06-12",
+                    "holiday_name": "Independence Day",
+                    "holiday_type": "national",
+                    "rate_multiplier": 2.0
+                  }
+                },
+                "special_holiday": {
+                  "summary": "Special Holiday",
+                  "value": {
+                    "holiday_date": "2026-11-01",
+                    "holiday_name": "All Saints' Day",
+                    "holiday_type": "special",
+                    "rate_multiplier": 1.3
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Holiday created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhilippineHolidayResponse"
+                },
+                "example": {
+                  "id": 1,
+                  "holiday_date": "2026-06-12",
+                  "holiday_name": "Independence Day",
+                  "holiday_type": "national",
+                  "rate_multiplier": 2.0,
+                  "created_at": "2026-05-21T10:00:00",
+                  "updated_at": "2026-05-21T10:00:00"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or duplicate holiday date",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Holidays"
+        ],
+        "summary": "List Philippine Holidays",
+        "description": "Retrieve paginated list of registered Philippine holidays",
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "description": "Number of records to skip"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100
+            },
+            "description": "Maximum number of records to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of holidays",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PhilippineHolidayResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payroll/holidays/{holiday_id}": {
+      "delete": {
+        "tags": [
+          "Holidays"
+        ],
+        "summary": "Delete Philippine Holiday",
+        "description": "Remove a registered Philippine holiday from the system",
+        "parameters": [
+          {
+            "name": "holiday_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Holiday ID"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Holiday deleted successfully"
+          },
+          "404": {
+            "description": "Holiday not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "detail": "\uacf5\ud734\uc77c\uc744 \ucc3e\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payroll/periods": {
+      "post": {
+        "tags": [
+          "Payroll Periods"
+        ],
+        "summary": "Create Payroll Period",
+        "description": "Create a new payroll period for processing employee salaries.\n\n**Business Rules:**\n- period_start < period_end (required)\n- Multiple employees can be processed in one period\n- Initial status is \"draft\"\n\n**Status Workflow:**\n- draft: Initial state, can calculate payroll\n- approved: Ready for payment\n- paid: Payment completed\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayrollPeriodCreate"
+              },
+              "examples": {
+                "weekly": {
+                  "summary": "Weekly payroll period",
+                  "value": {
+                    "period_start": "2026-05-19",
+                    "period_end": "2026-05-25",
+                    "pay_group": "weekly"
+                  }
+                },
+                "biweekly": {
+                  "summary": "Bi-weekly payroll period",
+                  "value": {
+                    "period_start": "2026-05-12",
+                    "period_end": "2026-05-25",
+                    "pay_group": "biweekly"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Payroll period created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayrollPeriodResponse"
+                },
+                "example": {
+                  "id": 1,
+                  "period_start": "2026-05-19",
+                  "period_end": "2026-05-25",
+                  "pay_group": "weekly",
+                  "status": "draft",
+                  "created_at": "2026-05-21T09:00:00",
+                  "updated_at": "2026-05-21T09:00:00"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid date range (start >= end)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "detail": "\uae30\uac04 \uc124\uc815\uc774 \uc798\ubabb\ub418\uc5c8\uc2b5\ub2c8\ub2e4"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Payroll Periods"
+        ],
+        "summary": "List Payroll Periods",
+        "description": "Retrieve paginated list of payroll periods",
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "description": "Number of records to skip"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100
+            },
+            "description": "Maximum number of records to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of payroll periods",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PayrollPeriodResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payroll/periods/{period_id}": {
+      "get": {
+        "tags": [
+          "Payroll Periods"
+        ],
+        "summary": "Get Payroll Period",
+        "description": "Retrieve detailed information for a specific payroll period",
+        "parameters": [
+          {
+            "name": "period_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Payroll Period ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payroll period details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayrollPeriodResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Payroll period not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "detail": "\uc815\uc0b0 \uae30\uac04\uc744 \ucc3e\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payroll/periods/{period_id}/approve": {
+      "post": {
+        "tags": [
+          "Payroll Periods"
+        ],
+        "summary": "Approve/Update Payroll Period Status",
+        "description": "Advance the payroll period through its workflow states.\n\n**Status Transitions (validation):**\n- draft \u2192 approved (payroll has been calculated)\n- approved \u2192 paid (payment has been processed)\n- paid (no further transitions allowed)\n\n**What happens:**\n1. Period status is updated\n2. All associated PayrollRecords status is also updated to match\n3. Returns updated period details\n\n**Error Cases:**\n- 404: Period not found\n- 409: Invalid transition (e.g., paid period cannot be re-approved)\n",
+        "parameters": [
+          {
+            "name": "period_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Payroll Period ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Period status updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayrollPeriodResponse"
+                },
+                "example": {
+                  "id": 1,
+                  "period_start": "2026-05-19",
+                  "period_end": "2026-05-25",
+                  "pay_group": "weekly",
+                  "status": "approved",
+                  "created_at": "2026-05-21T09:00:00",
+                  "updated_at": "2026-05-21T11:00:00"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Payroll period not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Invalid status transition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "detail": "\uc774\ubbf8 \uc9c0\uae09 \uc644\ub8cc\ub41c \uc815\uc0b0 \uae30\uac04\uc785\ub2c8\ub2e4 (\uc0c1\ud0dc: paid)"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid period status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payroll/records": {
+      "get": {
+        "tags": [
+          "Payroll Records"
+        ],
+        "summary": "List Payroll Records",
+        "description": "Retrieve paginated list of calculated payroll records.\n\n**Filters:**\n- payroll_period_id: Get records for a specific period\n- employee_id: Get records for a specific employee\n\nUse this to view calculated payroll details before approval.\n",
+        "parameters": [
+          {
+            "name": "payroll_period_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by payroll period"
+          },
+          {
+            "name": "employee_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by employee"
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "description": "Number of records to skip"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100
+            },
+            "description": "Maximum number of records to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of payroll records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PayrollRecordResponse"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 1,
+                    "payroll_period_id": 1,
+                    "employee_id": 1,
+                    "base_amount": 8000.0,
+                    "commission_amount": 1200.0,
+                    "overtime_amount": 500.0,
+                    "holiday_bonus": 800.0,
+                    "meal_allowance": 0.0,
+                    "late_deduction": 100.0,
+                    "absence_deduction": 0.0,
+                    "sss_deduction": 0.0,
+                    "ca_deduction": 2000.0,
+                    "health_check_deduction": 0.0,
+                    "thirteenth_month_deduction": 0.0,
+                    "gross_pay": 10500.0,
+                    "total_deductions": 2100.0,
+                    "net_pay": 8400.0,
+                    "status": "draft",
+                    "notes": null,
+                    "created_at": "2026-05-21T10:30:00",
+                    "updated_at": "2026-05-21T10:30:00"
+                  }
+                ]
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payroll/records/{record_id}": {
+      "get": {
+        "tags": [
+          "Payroll Records"
+        ],
+        "summary": "Get Payroll Record",
+        "description": "Retrieve detailed payroll calculation for a specific employee in a period",
+        "parameters": [
+          {
+            "name": "record_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Payroll Record ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detailed payroll record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayrollRecordResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Payroll record not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "detail": "\uc815\uc0b0 \uacb0\uacfc\ub97c \ucc3e\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payroll/periods/{period_id}/calculate": {
+      "post": {
+        "tags": [
+          "Payroll Records"
+        ],
+        "summary": "Calculate Payroll for Period",
+        "description": "Execute automated payroll calculation for all employees in a period.\n\n**What happens:**\n1. Retrieves all employees with matching pay_group\n2. Collects attendance logs for the period\n3. Calculates each employee's salary:\n   - Base salary (prorated if needed)\n   - Commission (if applicable)\n   - Overtime pay (40+ minutes)\n   - Holiday bonuses\n   - Deductions (late, absence, CA, etc.)\n4. Creates PayrollRecord entries for each employee\n5. Marks approved CA as \"settled\" and links to PayrollRecord\n\n**Income Components:**\n- base_amount: Regular salary\n- commission_amount: Performance-based (therapist/nail)\n- overtime_amount: Hours over 8/day\n- holiday_bonus: Premium pay on holidays\n- meal_allowance: Driver perks\n\n**Deduction Components:**\n- late_deduction: 10 pesos/minute if > 10 min\n- absence_deduction: Full day rate if absent\n- sss_deduction: Social security contribution\n- ca_deduction: Approved cash advances\n- health_check_deduction: Medical checkup cost\n- thirteenth_month_deduction: 13th month bonus advance\n\n**Returns:**\n- List of PayrollRecords with complete breakdown\n- Each record shows gross_pay, total_deductions, net_pay\n\n**Important:**\n- Calculates based on attendance data in the period\n- Missing attendance = absent day\n- Calling again on same period recalculates (overwrites previous)\n",
+        "parameters": [
+          {
+            "name": "period_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Payroll Period ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payroll calculated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PayrollRecordResponse"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 1,
+                    "payroll_period_id": 1,
+                    "employee_id": 1,
+                    "base_amount": 8000.0,
+                    "commission_amount": 1200.0,
+                    "overtime_amount": 500.0,
+                    "holiday_bonus": 800.0,
+                    "meal_allowance": 0.0,
+                    "late_deduction": 100.0,
+                    "absence_deduction": 0.0,
+                    "sss_deduction": 0.0,
+                    "ca_deduction": 2000.0,
+                    "health_check_deduction": 0.0,
+                    "thirteenth_month_deduction": 0.0,
+                    "gross_pay": 10500.0,
+                    "total_deductions": 2100.0,
+                    "net_pay": 8400.0,
+                    "status": "draft",
+                    "notes": null,
+                    "created_at": "2026-05-21T10:30:00",
+                    "updated_at": "2026-05-21T10:30:00"
+                  },
+                  {
+                    "id": 2,
+                    "payroll_period_id": 1,
+                    "employee_id": 2,
+                    "base_amount": 10000.0,
+                    "commission_amount": 0.0,
+                    "overtime_amount": 300.0,
+                    "holiday_bonus": 0.0,
+                    "meal_allowance": 500.0,
+                    "late_deduction": 0.0,
+                    "absence_deduction": 0.0,
+                    "sss_deduction": 0.0,
+                    "ca_deduction": 0.0,
+                    "health_check_deduction": 0.0,
+                    "thirteenth_month_deduction": 0.0,
+                    "gross_pay": 10800.0,
+                    "total_deductions": 0.0,
+                    "net_pay": 10800.0,
+                    "status": "draft",
+                    "notes": null,
+                    "created_at": "2026-05-21T10:30:00",
+                    "updated_at": "2026-05-21T10:30:00"
+                  }
+                ]
+              }
+            }
+          },
+          "404": {
+            "description": "Payroll period not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Calculation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string",
+            "description": "Error message"
+          }
+        },
+        "required": [
+          "detail"
+        ]
+      },
+      "EmployeeCreate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Employee full name"
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20,
+            "description": "Contact phone number"
+          },
+          "employee_type": {
+            "type": "string",
+            "enum": [
+              "therapist",
+              "nail",
+              "driver",
+              "maintenance",
+              "hollys",
+              "manager"
+            ],
+            "description": "Employee classification"
+          },
+          "pay_group": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "biweekly"
+            ],
+            "description": "Salary payment frequency"
+          },
+          "base_salary": {
+            "type": "number",
+            "format": "decimal",
+            "minimum": 0,
+            "description": "Monthly/period base salary"
+          },
+          "commission_rate": {
+            "type": "number",
+            "format": "decimal",
+            "minimum": 0,
+            "description": "Commission percentage (0-100, optional)"
+          },
+          "hire_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Employment start date (YYYY-MM-DD)"
+          }
+        },
+        "required": [
+          "name",
+          "phone",
+          "employee_type",
+          "pay_group",
+          "base_salary",
+          "hire_date"
+        ]
+      },
+      "EmployeeResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EmployeeCreate"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "Employee unique ID"
+              },
+              "is_active": {
+                "type": "boolean",
+                "description": "Active status"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Record creation timestamp"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Last update timestamp"
+              }
+            }
+          }
+        ]
+      },
+      "CashAdvanceCreate": {
+        "type": "object",
+        "properties": {
+          "employee_id": {
+            "type": "integer",
+            "description": "Employee requesting cash advance"
+          },
+          "amount": {
+            "type": "number",
+            "format": "decimal",
+            "exclusiveMinimum": 0,
+            "description": "Advance amount in PHP"
+          },
+          "request_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Request date (YYYY-MM-DD)"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Reason for cash advance (optional)"
+          }
+        },
+        "required": [
+          "employee_id",
+          "amount",
+          "request_date"
+        ]
+      },
+      "CashAdvanceResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CashAdvanceCreate"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "Cash advance unique ID"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "pending",
+                  "approved",
+                  "rejected",
+                  "settled"
+                ],
+                "description": "Current status"
+              },
+              "settled_payroll_id": {
+                "type": "integer",
+                "nullable": true,
+                "description": "Payroll record ID that settled this CA"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Record creation timestamp"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Last update timestamp"
+              }
+            }
+          }
+        ]
+      },
+      "AttendanceLogCreate": {
+        "type": "object",
+        "properties": {
+          "employee_id": {
+            "type": "integer",
+            "description": "Employee ID"
+          },
+          "work_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Work date (YYYY-MM-DD)"
+          },
+          "clock_in": {
+            "type": "string",
+            "pattern": "^\\d{2}:\\d{2}$",
+            "description": "Clock-in time (HH:MM format, 24-hour)"
+          },
+          "clock_out": {
+            "type": "string",
+            "pattern": "^\\d{2}:\\d{2}$",
+            "description": "Clock-out time (HH:MM format, 24-hour)"
+          },
+          "late_minutes": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0,
+            "description": "Minutes late from schedule"
+          },
+          "overtime_minutes": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0,
+            "description": "Minutes of overtime work"
+          },
+          "is_absent": {
+            "type": "boolean",
+            "default": false,
+            "description": "Absence flag"
+          },
+          "holiday_type": {
+            "type": "string",
+            "enum": [
+              "none",
+              "national",
+              "special"
+            ],
+            "default": "none",
+            "description": "Holiday classification"
+          }
+        },
+        "required": [
+          "employee_id",
+          "work_date"
+        ]
+      },
+      "AttendanceLogResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AttendanceLogCreate"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "Attendance log unique ID"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Record creation timestamp"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Last update timestamp"
+              }
+            }
+          }
+        ]
+      },
+      "PhilippineHolidayCreate": {
+        "type": "object",
+        "properties": {
+          "holiday_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Holiday date (YYYY-MM-DD)"
+          },
+          "holiday_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Official holiday name"
+          },
+          "holiday_type": {
+            "type": "string",
+            "enum": [
+              "national",
+              "special"
+            ],
+            "description": "Holiday classification"
+          },
+          "rate_multiplier": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Pay rate multiplier (2.0 for national, 1.3 for special)"
+          }
+        },
+        "required": [
+          "holiday_date",
+          "holiday_name",
+          "holiday_type",
+          "rate_multiplier"
+        ]
+      },
+      "PhilippineHolidayResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PhilippineHolidayCreate"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "Holiday unique ID"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Record creation timestamp"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Last update timestamp"
+              }
+            }
+          }
+        ]
+      },
+      "PayrollPeriodCreate": {
+        "type": "object",
+        "properties": {
+          "period_start": {
+            "type": "string",
+            "format": "date",
+            "description": "Period start date (YYYY-MM-DD)"
+          },
+          "period_end": {
+            "type": "string",
+            "format": "date",
+            "description": "Period end date (YYYY-MM-DD), must be after start"
+          },
+          "pay_group": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "biweekly"
+            ],
+            "description": "Payroll cycle type"
+          }
+        },
+        "required": [
+          "period_start",
+          "period_end",
+          "pay_group"
+        ]
+      },
+      "PayrollPeriodResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PayrollPeriodCreate"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "Payroll period unique ID"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "approved",
+                  "paid"
+                ],
+                "description": "Processing status"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Record creation timestamp"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Last update timestamp"
+              }
+            }
+          }
+        ]
+      },
+      "PayrollRecordResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Payroll record unique ID"
+          },
+          "payroll_period_id": {
+            "type": "integer",
+            "description": "Associated payroll period"
+          },
+          "employee_id": {
+            "type": "integer",
+            "description": "Associated employee"
+          },
+          "base_amount": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Base salary for the period"
+          },
+          "commission_amount": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Commission earned (therapist/nail)"
+          },
+          "overtime_amount": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Overtime pay (hours over 8/day)"
+          },
+          "holiday_bonus": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Additional pay for holiday work"
+          },
+          "meal_allowance": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Meal allowance (drivers)"
+          },
+          "late_deduction": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Deduction for tardiness (10 pesos/min if > 10min)"
+          },
+          "absence_deduction": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Deduction for absent days"
+          },
+          "sss_deduction": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Social Security contribution"
+          },
+          "ca_deduction": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Cash advance repayment"
+          },
+          "health_check_deduction": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Medical checkup cost"
+          },
+          "thirteenth_month_deduction": {
+            "type": "number",
+            "format": "decimal",
+            "description": "13th month bonus advance"
+          },
+          "gross_pay": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Total income (sum of all additions)"
+          },
+          "total_deductions": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Total deductions (sum of all deductions)"
+          },
+          "net_pay": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Final payment (gross_pay - total_deductions)"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "approved",
+              "paid"
+            ],
+            "description": "Payment processing status"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true,
+            "description": "Additional notes or remarks"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Record creation timestamp"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "payroll_period_id",
+          "employee_id",
+          "base_amount",
+          "gross_pay",
+          "total_deductions",
+          "net_pay",
+          "status",
+          "created_at",
+          "updated_at"
+        ]
+      }
+    }
+  }
+}

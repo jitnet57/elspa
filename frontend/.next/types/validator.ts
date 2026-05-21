@@ -81,6 +81,15 @@ type LayoutConfig<Route extends LayoutRoutes = LayoutRoutes> = {
   type __Unused = __Check
 }
 
+// Validate ../../src/app/admin/data-management/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/admin/data-management">> = Specific
+  const handler = {} as typeof import("../../src/app/admin/data-management/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/admin/expense/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/admin/expense">> = Specific
@@ -148,6 +157,60 @@ type LayoutConfig<Route extends LayoutRoutes = LayoutRoutes> = {
 {
   type __IsExpected<Specific extends AppPageConfig<"/admin">> = Specific
   const handler = {} as typeof import("../../src/app/admin/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/admin/payroll/attendance/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/admin/payroll/attendance">> = Specific
+  const handler = {} as typeof import("../../src/app/admin/payroll/attendance/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/admin/payroll/cash-advance/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/admin/payroll/cash-advance">> = Specific
+  const handler = {} as typeof import("../../src/app/admin/payroll/cash-advance/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/admin/payroll/employees/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/admin/payroll/employees">> = Specific
+  const handler = {} as typeof import("../../src/app/admin/payroll/employees/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/admin/payroll/holidays/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/admin/payroll/holidays">> = Specific
+  const handler = {} as typeof import("../../src/app/admin/payroll/holidays/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/admin/payroll/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/admin/payroll">> = Specific
+  const handler = {} as typeof import("../../src/app/admin/payroll/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/admin/payroll/records/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/admin/payroll/records">> = Specific
+  const handler = {} as typeof import("../../src/app/admin/payroll/records/page.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check
