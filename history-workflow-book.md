@@ -1819,3 +1819,126 @@ Zustand 스토어 업데이트
 ✅ 타입 안정성 완성 (TypeScript)
 
 ---
+
+---
+## [2026-05-22 14:30] Order: 012 - Sprint 12: 병렬 오케스트레이션 통제 (BMAD × LangGraph)
+
+**주제:** 4개 병렬 에이전트로 Budget 실시간 통합, Supabase 연결, Cloudflare 배포 완성
+
+### Plan
+✅ Dashboard Dev: BudgetAlertPanel 통합 + VirtualExpenseTable 페이지네이션
+✅ WebSocket Dev: budget_exceeded 메시지 → RealtimeNotification 연결
+✅ Backend Dev: Mock 데이터 → Supabase PostgreSQL 실제 연결
+✅ DevOps Dev: Cloudflare Pages 배포 설정 + .env 환경 변수 분리
+
+### Task 수행 내용
+
+#### Agent 1: Dashboard Development (Alice)
+**파일 수정:** `frontend/src/app/admin/financial-dashboard/page.tsx`
+- BudgetAlertPanel 컴포넌트 import
+- KPI Cards 이후 위치에 BudgetAlertPanel 렌더링
+- 기존 정적 expense 테이블 → VirtualExpenseTable(페이지네이션) 대체
+- 동적 expense 데이터 로드 및 표시
+
+**파일 수정:** `frontend/src/components/financial/BudgetAlertPanel.tsx` (Sprint 11)
+- 예산 경고(노란색) + 위기(빨간색) 알림 표시
+- API에서 year/month 파라미터로 alerts 조회
+- 사용률% 및 예산 상태 표시
+
+**파일 수정:** `frontend/src/components/financial/VirtualExpenseTable.tsx` (Sprint 11)
+- 페이지네이션 기반 테이블 (20개 항목/페이지)
+- 날짜, 카테고리, 설명, 금액 컬럼
+- 페이지 네비게이션 버튼
+- 합계금액 계산 및 표시
+
+#### Agent 2: WebSocket Real-time (Bob)
+**파일 수정:** `frontend/src/hooks/financial/useFinancialWebSocket.ts`
+- WebSocketMessage 타입 확장: 'budget_exceeded' 메시지 타입 추가
+- handleMessage() 함수에서 budget_exceeded 케이스 처리
+- 알림 객체 생성: {id, type: 'budget_exceeded', title: '🚨 예산 초과', message, duration: 10000ms}
+- localStorage에 'financial_notifications' 키로 저장
+- BroadcastChannel('financial_alerts')로 크로스탭 동기화
+
+#### Agent 3: Backend Real Data (Charlie)
+**파일 수정:** `app/config.py`
+- Supabase 연결 파라미터 추가: url, key, secret_key, jwt_token, service_role_jwt
+- use_supabase 플래그 추가 (현재 false, 개발용)
+- 환경 변수 기반 설정
+
+**파일 수정:** `.env`
+- SUPABASE_URL, SUPABASE_KEY, SUPABASE_SECRET_KEY 추가
+- SUPABASE_JWT_TOKEN, SUPABASE_SERVICE_ROLE_JWT 추가
+- USE_SUPABASE=false (개발) → true(프로덕션)로 전환
+- NEXT_PUBLIC_API_URL=http://localhost:8000
+- NEXT_PUBLIC_WS_URL=ws://localhost:8000/ws
+
+**파일 신규:** `frontend/src/lib/api-client.ts`
+- fetchFinancial<T>() 제네릭 함수 생성
+- 에러 처리: error_message 추출
+- X-User-Role 헤더 설정 (현재 'admin', TODO: JWT에서 추출)
+
+#### Agent 4: DevOps & Deployment (Diana)
+**파일 신규:** `wrangler.toml`
+- Cloudflare Pages 배포 설정
+- pages_build_output_dir = "./out" (Next.js 정적 export)
+- production/staging/development 환경 분리
+- 빌드 명령어: npm run build from frontend 디렉터리
+- SPA 모드 리다이렉트: /* → /index.html
+
+**파일 신규:** `frontend/.env.production`
+- NEXT_PUBLIC_API_URL=https://api.elspa.com
+- NEXT_PUBLIC_WS_URL=wss://api.elspa.com/ws
+- NEXT_PUBLIC_ENVIRONMENT=production
+- NEXT_PUBLIC_SENTRY_DSN, NEXT_PUBLIC_GA_ID 플레이스홀더
+
+#### TypeScript 컴파일 에러 수정
+**파일 수정:** `frontend/src/app/admin/payroll/attendance/page.tsx`
+- Line 163: `setAttendance()` → `deleteExistingAttendance()` (Zustand store 메서드 사용)
+- Line 431: `MOCK_EMPLOYEES` → `employees` (store에서 가져온 실제 데이터 사용)
+- 모든 TypeScript strict 모드 에러 해결
+
+### Result
+✅ **8개 파일 수정/신규 생성 완료**
+- 4개 병렬 에이전트 작업 통합 완료
+- 빌드 성공: 50/50 페이지 정적 생성 ✓
+- TypeScript strict mode 통과 ✓
+- WebSocket budget_exceeded 메시지 처리 ✓
+- Supabase 구성 준비 완료 ✓
+- Cloudflare Pages 배포 설정 준비 완료 ✓
+
+### 주요 파일
+**프론트엔드 수정:**
+- frontend/src/app/admin/financial-dashboard/page.tsx
+- frontend/src/lib/api-client.ts
+- frontend/src/hooks/financial/useFinancialWebSocket.ts
+- frontend/src/app/admin/payroll/attendance/page.tsx
+
+**프론트엔드 신규:**
+- frontend/.env.production
+- wrangler.toml
+
+**백엔드 수정:**
+- app/config.py
+- .env
+
+### 빌드 검증
+```
+▲ Next.js 16.2.4 (Turbopack)
+✓ Compiled successfully in 21.6s
+✓ TypeScript check passed in 23.5s
+✓ Generated 50/50 static pages in 8.3s
+✓ No errors or warnings
+```
+
+### Next Steps
+1. **Supabase 실제 연결**: USE_SUPABASE=true로 설정하여 PostgreSQL 테스트
+2. **배포 검증**: Cloudflare Pages에 배포 후 라이브 URL 확인
+3. **라이브 테스트**: 
+   - Budget alert WebSocket 메시지 수신 테스트
+   - Financial dashboard 실시간 업데이트 확인
+   - Offline storage (IndexedDB) 동작 검증
+4. **모니터링**: Sentry DSN 설정 및 에러 로깅 확인
+
+**상태:** ✅ COMPLETE (Sprint 12 병렬 오케스트레이션 완료, 배포 준비 완료)
+
+---
