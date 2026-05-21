@@ -1,0 +1,131 @@
+# ============================================================
+# 📌 Filebeat Configuration
+# 📋 목적: Elasticsearch로 로그 수집
+# 🔧 기능: 로그 파일 모니터링, 메타데이터 추가
+# 📅 작성일: 2026-05-22
+# ============================================================
+
+filebeat.inputs:
+  # FastAPI 애플리케이션 로그
+  - type: log
+    enabled: true
+    paths:
+      - /app/logs/app.log
+      - /app/logs/error.log
+    fields:
+      service: elspa-api
+      environment: production
+    # 멀티라인 로그 처리 (예: 스택 트레이스)
+    multiline.type: pattern
+    multiline.pattern: '^\['
+    multiline.negate: true
+    multiline.match: after
+
+  # JSON 포맷 로그
+  - type: log
+    enabled: true
+    paths:
+      - /app/logs/*.json
+    fields:
+      service: elspa-api
+      format: json
+    json.message_key: message
+    json.keys_under_root: true
+    json.add_error_key: true
+
+  # Docker 컨테이너 로그
+  - type: container
+    enabled: false
+    paths:
+      - /var/lib/docker/containers/*/*.log
+    processors:
+      - add_docker_metadata:
+          host: unix:///var/run/docker.sock
+      - decode_json_fields:
+          fields: ["message"]
+          process_array: true
+          max_depth: 2
+          target: ""
+          overwrite_keys: false
+
+
+# ============================================================
+# Processors - 로그 가공
+# ============================================================
+processors:
+  # 타임스탬프 정규화
+  - timestamp:
+      field: "@timestamp"
+      layouts:
+        - "2006-01-02T15:04:05Z07:00"
+        - "2006-01-02T15:04:05.999Z"
+      test: "2021-03-09T14:01:43.123Z"
+
+  # 호스트명 추가
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+
+  # 프로세스 정보 추가
+  - add_process_metadata:
+      match_pids: ["process.pid"]
+      target: "process"
+
+  # 에러 감지
+  - add_fields:
+      target: ""
+      when:
+        regexp:
+          message: "(?i)error|exception|failed"
+      fields:
+        alert: true
+        severity: high
+
+  # 성능 경고 감지
+  - add_fields:
+      target: ""
+      when:
+        regexp:
+          message: "slow|timeout|latency"
+      fields:
+        alert: true
+        severity: medium
+
+
+# ============================================================
+# 출력 설정
+# ============================================================
+output.elasticsearch:
+  hosts: ["${ELASTICSEARCH_HOSTS:elasticsearch:9200}"]
+  index: "elspa-logs-%{+yyyy.MM.dd}"
+
+  # 템플릿 설정
+  template.name: "elspa-logs"
+  template.pattern: "elspa-logs-*"
+  template.settings:
+    index.number_of_shards: 1
+    index.number_of_replicas: 0
+    index.refresh_interval: "5s"
+
+  # 인증 (필요시)
+  # username: "elastic"
+  # password: "${ELASTICSEARCH_PASSWORD}"
+
+
+# ============================================================
+# Logging (Filebeat 자체 로그)
+# ============================================================
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat.log
+  keepfiles: 7
+  permissions: 0644
+
+
+# ============================================================
+# 모니터링 설정
+# ============================================================
+monitoring.enabled: false
+# monitoring.elasticsearch:
+#   hosts: ["elasticsearch:9200"]

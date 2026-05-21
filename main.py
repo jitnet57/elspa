@@ -21,6 +21,7 @@ API 그룹:
 
 import logging
 import time
+import os
 from datetime import datetime
 from typing import Dict, Any
 
@@ -28,14 +29,34 @@ from fastapi import FastAPI, Request, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.config import settings
 from app.database import init_db, close_db
 
-# Logging 설정
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# ============================================================
+# 모니터링 & 로깅 설정 (Phase 10-2)
+# ============================================================
+from app.utils.logging_config import setup_logging, get_logger
+from app.middleware.apm import init_sentry, apm_middleware
+from app.middleware.error_tracking import (
+    general_exception_handler,
+    validation_exception_handler,
+    sqlalchemy_exception_handler,
+)
+from app.middleware.metrics import metrics_middleware, setup_metrics_endpoint
+
+# 로깅 초기화
+log_dir = os.getenv("LOG_DIR", "./logs")
+json_logs = os.getenv("JSON_LOGS", "true").lower() == "true"
+setup_logging(
+    log_level="INFO",
+    log_dir=log_dir,
+    json_format=json_logs,
+)
+
+logger = get_logger(__name__)
 
 # FastAPI 앱 생성
 app = FastAPI(
@@ -59,62 +80,27 @@ app.add_middleware(
 # GZIP 압축 미들웨어
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
+# ============================================================
+# Phase 10-2: 모니터링 & 로깅 미들웨어 등록
+# ============================================================
 
-# ============================================================
-# 요청/응답 로깅 미들웨어
-# ============================================================
+# 1. 메트릭 수집 미들웨어 (Prometheus)
+app.add_middleware(apm_middleware.__class__)  # APM 미들웨어는 직접 등록
+
+
+# 2. 사용자 정의 메트릭 엔드포인트
+setup_metrics_endpoint(app)
+
+# 3. 예외 핸들러 등록
+app.add_exception_handler(Exception, general_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(SQLAlchemyError, sqlalchemy_exception_handler)
+
+# 4. APM 미들웨어 (Sentry)
 @app.middleware("http")
-async def log_requests(request: Request, call_next):
-    """모든 요청 및 응답 로깅"""
-    start_time = time.time()
-    request_id = request.headers.get("X-Request-ID", f"req_{int(time.time()*1000)}")
-
-    logger.info(
-        f"📨 [{request_id}] {request.method} {request.url.path} "
-        f"(IP: {request.client.host if request.client else 'unknown'})"
-    )
-
-    try:
-        response = await call_next(request)
-        process_time = time.time() - start_time
-
-        response.headers["X-Response-Time"] = str(process_time)
-        response.headers["X-Request-ID"] = request_id
-
-        level = "✅" if 200 <= response.status_code < 300 else "⚠️" if response.status_code < 400 else "❌"
-        logger.info(
-            f"{level} [{request_id}] {response.status_code} "
-            f"{request.method} {request.url.path} "
-            f"({process_time:.3f}s)"
-        )
-
-        return response
-
-    except Exception as e:
-        process_time = time.time() - start_time
-        logger.error(
-            f"❌ [{request_id}] {request.method} {request.url.path} "
-            f"({process_time:.3f}s) - Error: {str(e)}"
-        )
-        raise
-
-
-# ============================================================
-# 예외 처리
-# ============================================================
-@app.exception_handler(SQLAlchemyError)
-async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError):
-    logger.error(f"Database error: {str(exc)}")
-    return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={
-            "error": "Database operation failed",
-            "error_ko": "데이터베이스 작업 실패",
-            "status_code": 500,
-            "error_code": "DB_ERROR",
-            "timestamp": datetime.utcnow().isoformat(),
-        }
-    )
+async def monitoring_middleware(request: Request, call_next):
+    """모니터링 및 성능 추적 미들웨어"""
+    return await apm_middleware(request, call_next)
 
 
 # ============================================================
@@ -124,11 +110,24 @@ async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError):
 async def startup_event():
     """애플리케이션 시작 이벤트"""
     logger.info("🚀 ElSpa API 시작 중...")
+
     try:
+        # Sentry 초기화 (Phase 10-2)
+        sentry_dsn = os.getenv("SENTRY_DSN")
+        sentry_env = os.getenv("SENTRY_ENVIRONMENT", "development")
+        if sentry_dsn:
+            init_sentry(dsn=sentry_dsn, environment=sentry_env)
+            logger.info(f"✅ Sentry APM 초기화 완료 ({sentry_env})")
+        else:
+            logger.info("⚠️ SENTRY_DSN 환경변수 미설정 (선택사항)")
+
+        # 데이터베이스 초기화
         await init_db()
         logger.info("✅ 데이터베이스 초기화 완료")
+
+        logger.info("🎉 ElSpa API 준비 완료")
     except Exception as e:
-        logger.error(f"❌ 데이터베이스 초기화 실패: {e}")
+        logger.error(f"❌ 시작 단계 실패: {e}", exc_info=True)
         raise
 
 
@@ -153,10 +152,14 @@ async def root():
 
 @app.get("/health", tags=["System"])
 async def health_check():
-    """헬스 체크"""
+    """헬스 체크 (상세)"""
     return {
         "status": "🟢 Healthy",
         "version": "1.0.0",
+        "environment": settings.env,
+        "api_version": settings.api_version,
+        "database": "✅ Connected",
+        "monitoring": "✅ Enabled (Phase 10-2)",
         "timestamp": datetime.utcnow().isoformat(),
     }
 
@@ -198,8 +201,10 @@ from app.routers import stamps
 from app.routers import sss
 # 💰 일일 지출 보고서 라우터
 from app.routers import expense
+# 🔐 인증 라우터 (신규 - Phase 8-2)
+from app.routers import auth
 # 💵 급여 정산 라우터 (신규)
-from app.routers import payroll
+from app.routers import payroll, payroll_analytics, messaging
 # 💹 financial_api — sync DB 패턴, async 전환 예정 (임시 비활성화)
 # from app.routers import financial_api
 # 📊 Admin 데이터 관리 라우터 (테라피스트, 예약, 드라이버)
@@ -239,6 +244,9 @@ app.include_router(audit_api.router)
 from app.routers import websocket_financial
 app.include_router(websocket_financial.router)
 
+# 🔐 인증 라우터 등록 (Phase 8-2)
+app.include_router(auth.router)
+
 # 📱 메신저 봇 라우터 등록
 app.include_router(kakao.router)
 app.include_router(whatsapp.router)
@@ -248,48 +256,16 @@ app.include_router(sss.router)
 app.include_router(expense.router)
 # 💵 급여 정산 라우터 등록
 app.include_router(payroll.router)
+app.include_router(payroll_analytics.router)
+app.include_router(messaging.router)  # 메시지 발송 시스템
 # 💹 예산 모니터링 라우터 등록
 from app.routers import budget_monitor_api
 app.include_router(budget_monitor_api.router)
 # app.include_router(financial_api.router)  # async 전환 후 재활성화
 
 
-@app.on_event("startup")
-async def startup():
-    """애플리케이션 시작"""
-    logger.info("🚀 ElSpa API 시작 중...")
-    await init_db()
-    logger.info("✅ 데이터베이스 초기화 완료")
-    logger.info(f"📊 Supabase 연결: {settings.supabase_url}")
 
 
-@app.on_event("shutdown")
-async def shutdown():
-    """애플리케이션 종료"""
-    logger.info("🛑 ElSpa API 종료 중...")
-    from app.database import close_db
-    await close_db()
-
-
-@app.get("/")
-async def root():
-    """헬스 체크"""
-    return {
-        "message": "ElSpa Manager API v0.1.0",
-        "status": "🟢 Ready",
-        "environment": settings.env,
-    }
-
-
-@app.get("/health")
-async def health():
-    """헬스 체크 (상세)"""
-    return {
-        "status": "🟢 Healthy",
-        "api_version": settings.api_version,
-        "database": "✅ Connected",
-        "supabase": settings.supabase_url,
-    }
 
 
 if __name__ == "__main__":

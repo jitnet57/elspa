@@ -1,0 +1,161 @@
+# ============================================================
+# 📌 Alertmanager Configuration
+# 📋 목적: 알림 라우팅 및 억제 설정
+# 🔧 기능: Slack, Email, PagerDuty 통합
+# 📅 작성일: 2026-05-22
+# ============================================================
+
+global:
+  resolve_timeout: 5m
+  # Slack 기본 설정
+  slack_api_url: "${SLACK_WEBHOOK_URL}"
+
+# ============================================================
+# 알림 템플릿
+# ============================================================
+templates:
+  - "/etc/alertmanager/templates/*.tmpl"
+
+# ============================================================
+# 라우트 설정
+# ============================================================
+route:
+  # 기본 수신자
+  receiver: "default"
+
+  # 라우팅 그룹 설정
+  group_by: ["alertname", "cluster", "service"]
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+
+  # 하위 라우트
+  routes:
+    # Critical 알림 - 즉시 처리
+    - matchers:
+        - severity: "critical"
+      receiver: "critical"
+      group_wait: 1s
+      group_interval: 5s
+      repeat_interval: 1h
+      continue: true
+
+    # Database 알림
+    - matchers:
+        - alert: "database_errors"
+      receiver: "database"
+      group_wait: 10s
+
+    # Performance 알림
+    - matchers:
+        - severity: "warning"
+        - alert: "api_slow_response"
+      receiver: "performance"
+      group_wait: 30s
+
+    # API 에러 알림
+    - matchers:
+        - alert: "high_request_error_rate"
+      receiver: "api"
+      group_wait: 5s
+
+# ============================================================
+# 수신자 설정
+# ============================================================
+receivers:
+  # 기본 수신자
+  - name: "default"
+    slack_configs:
+      - channel: "#alerts"
+        title: "AlertManager 알림"
+        text: "{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
+        send_resolved: true
+        color: "{{ if eq .Status \"firing\" }}danger{{ else }}good{{ end }}"
+
+  # Critical 수신자
+  - name: "critical"
+    slack_configs:
+      - channel: "#critical-alerts"
+        title: "🚨 CRITICAL 알림"
+        text: "{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
+        send_resolved: true
+        color: "danger"
+    email_configs:
+      - to: "devops@example.com"
+        headers:
+          Subject: "[CRITICAL] {{ .GroupLabels.alertname }}"
+        smarthost: "smtp.example.com:587"
+        auth_username: "alerting@example.com"
+        auth_password: "${SMTP_PASSWORD}"
+        from: "alerting@example.com"
+
+  # 데이터베이스 알림
+  - name: "database"
+    slack_configs:
+      - channel: "#database"
+        title: "🗄️ Database 알림"
+        text: "{{ .GroupLabels.alertname }}: {{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
+        send_resolved: true
+        color: "warning"
+
+  # 성능 알림
+  - name: "performance"
+    slack_configs:
+      - channel: "#performance"
+        title: "⚡ 성능 알림"
+        text: "{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
+        send_resolved: true
+        color: "warning"
+
+  # API 알림
+  - name: "api"
+    slack_configs:
+      - channel: "#api"
+        title: "🔌 API 알림"
+        text: "{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
+        send_resolved: true
+        color: "danger"
+
+  # PagerDuty 통합 (선택)
+  - name: "pagerduty"
+    pagerduty_configs:
+      - service_key: "${PAGERDUTY_SERVICE_KEY}"
+        description: "{{ .GroupLabels.alertname }}"
+        details:
+          firing: "{{ range .Alerts.Firing }}{{ .Labels.instance }} {{ .Annotations.summary }}\n{{ end }}"
+
+# ============================================================
+# 억제 규칙
+# ============================================================
+inhibit_rules:
+  # Critical 알림이 있으면 Warning 억제
+  - source_matchers:
+      - severity: "critical"
+    target_matchers:
+      - severity: "warning"
+    equal:
+      - alertname
+      - dev
+      - instance
+
+  # 이미 해결된 알림 억제
+  - source_matchers:
+      - alertstate: "resolved"
+    target_matchers:
+      - alertstate: "firing"
+    equal:
+      - alertname
+
+  # 동일 서비스의 중복 알림 억제
+  - source_matchers:
+      - severity: "critical"
+    target_matchers:
+      - severity: "warning"
+    equal:
+      - service
+
+  # 유지보수 시간대 억제 (비활성화)
+  # - source_matchers:
+  #     - maintenance: "true"
+  #   target_matchers:
+  #     - severity: "warning"

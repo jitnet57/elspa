@@ -1,0 +1,105 @@
+# ============================================================
+# 📌 Prometheus Configuration
+# 📋 목적: 메트릭 수집 설정
+# 🔧 기능: 스크래핑, 알림, 리텐션 정책
+# 📅 작성일: 2026-05-22
+# ============================================================
+
+global:
+  # 스크래핑 간격
+  scrape_interval: 15s
+  # 평가 간격
+  evaluation_interval: 15s
+  # 외부 라벨 (알림매니저에서 사용)
+  external_labels:
+    monitor: "elspa-monitor"
+    environment: "production"
+
+# ============================================================
+# 알림 규칙 파일
+# ============================================================
+rule_files:
+  - "/etc/prometheus/alert-rules.yml"
+
+# ============================================================
+# Alertmanager 설정
+# ============================================================
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# ============================================================
+# 스크래핑 설정
+# ============================================================
+scrape_configs:
+  # Prometheus 자체 메트릭
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+    scrape_interval: 15s
+
+  # ElSpa API 애플리케이션
+  - job_name: elspa-api
+    metrics_path: /metrics
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    static_configs:
+      - targets: ["localhost:8000"]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+      - source_labels: [__scheme__]
+        target_label: scheme
+
+  # Node Exporter (시스템 메트릭)
+  - job_name: node
+    static_configs:
+      - targets: ["node_exporter:9100"]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+
+  # Docker 컨테이너 메트릭 (cAdvisor)
+  - job_name: docker
+    static_configs:
+      - targets: ["localhost:8080"]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+
+  # Elasticsearch 메트릭
+  - job_name: elasticsearch
+    static_configs:
+      - targets: ["elasticsearch:9200"]
+    metrics_path: /_prometheus/metrics
+    scrape_interval: 30s
+
+  # Kubernetes (사용시)
+  # - job_name: kubernetes-apiservers
+  #   kubernetes_sd_configs:
+  #     - role: endpoints
+  #   scheme: https
+  #   tls_config:
+  #     ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+  #   bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+  #   relabel_configs:
+  #     - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+  #       action: keep
+  #       regex: default;kubernetes;https
+
+
+# ============================================================
+# 리모트 스토리지 (선택)
+# ============================================================
+# remote_write:
+#   - url: http://remote-storage:9009/api/v1/push
+#     write_relabel_configs:
+#       - source_labels: [__name__]
+#         regex: 'job:.*'
+#         action: keep
+
+# remote_read:
+#   - url: http://remote-storage:9009/api/v1/read
+#     read_recent: true

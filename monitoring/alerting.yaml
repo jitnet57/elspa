@@ -1,0 +1,271 @@
+# ============================================================
+# 📌 Alerting Rules Configuration
+# 📋 목적: Sentry, Prometheus 알림 규칙
+# 🔧 기능: 에러율, 응답시간, 성능 모니터링
+# 📅 작성일: 2026-05-22
+# ============================================================
+
+version: 1
+
+# ============================================================
+# Sentry 알림 규칙
+# ============================================================
+sentry_alerts:
+  # 높은 에러율 감지
+  - name: high_error_rate
+    description: "에러율이 높을 때 알림"
+    condition:
+      type: "error_rate"
+      threshold: 5  # 5% 이상
+      time_window: "5m"  # 5분 윈도우
+    actions:
+      - type: "slack"
+        channel: "#alerts"
+        mention: ["@devops"]
+    severity: "critical"
+
+  # 새로운 에러 타입 감지
+  - name: new_error_type
+    description: "새로운 에러 타입이 처음 감지되었을 때"
+    condition:
+      type: "regression"
+    actions:
+      - type: "slack"
+        channel: "#alerts"
+      - type: "email"
+        recipients: ["devops@example.com"]
+    severity: "high"
+
+  # 특정 사용자 영향
+  - name: user_impact_high
+    description: "많은 사용자가 영향을 받을 때"
+    condition:
+      type: "user_count"
+      threshold: 100  # 100명 이상
+    actions:
+      - type: "slack"
+        channel: "#critical"
+        mention: ["@devops", "@pm"]
+    severity: "critical"
+
+  # 데이터베이스 에러
+  - name: database_errors
+    description: "데이터베이스 관련 에러 증가"
+    condition:
+      type: "error_type"
+      error_code: "DATABASE_ERROR"
+      threshold: 10  # 10개 이상
+      time_window: "5m"
+    actions:
+      - type: "slack"
+        channel: "#database"
+      - type: "pagerduty"
+        service: "database-team"
+    severity: "critical"
+
+
+# ============================================================
+# Prometheus 알림 규칙
+# ============================================================
+prometheus_rules:
+  # API 응답 시간 (P95)
+  - name: api_slow_response_p95
+    description: "API 응답 시간(P95)이 2초 이상"
+    expr: |
+      histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+    for: "5m"
+    actions:
+      - type: "slack"
+        channel: "#performance"
+        message: "API 성능 저하: P95 응답시간이 {{$value}}초"
+    severity: "warning"
+
+  # 높은 요청 에러율
+  - name: high_request_error_rate
+    description: "요청 에러율이 5% 이상"
+    expr: |
+      (sum(rate(http_requests_total{status_code=~"5.."}[5m])) /
+       sum(rate(http_requests_total[5m]))) > 0.05
+    for: "5m"
+    actions:
+      - type: "slack"
+        channel: "#alerts"
+        message: "높은 에러율 감지: {{$value | humanizePercentage}}"
+    severity: "critical"
+
+  # 데이터베이스 쿼리 느려짐
+  - name: slow_database_queries
+    description: "데이터베이스 쿼리 평균 응답 시간이 1초 이상"
+    expr: |
+      histogram_quantile(0.95, rate(db_query_duration_seconds_bucket[5m])) > 1
+    for: "5m"
+    actions:
+      - type: "slack"
+        channel: "#database"
+        message: "느린 DB 쿼리 감지: {{$value}}초"
+    severity: "warning"
+
+  # 메모리 사용량
+  - name: high_memory_usage
+    description: "메모리 사용량이 80% 이상"
+    expr: |
+      process_resident_memory_bytes / 1024 / 1024 / 1024 > 0.8
+    for: "5m"
+    actions:
+      - type: "slack"
+        channel: "#alerts"
+        mention: ["@devops"]
+    severity: "warning"
+
+  # CPU 사용량
+  - name: high_cpu_usage
+    description: "CPU 사용량이 80% 이상"
+    expr: |
+      rate(process_cpu_seconds_total[5m]) > 0.8
+    for: "5m"
+    actions:
+      - type: "slack"
+        channel: "#alerts"
+        mention: ["@devops"]
+    severity: "warning"
+
+  # 진행 중인 요청 수
+  - name: too_many_in_flight_requests
+    description: "진행 중인 요청이 100개 이상"
+    expr: |
+      sum(http_requests_in_progress) > 100
+    for: "2m"
+    actions:
+      - type: "slack"
+        channel: "#alerts"
+    severity: "warning"
+
+
+# ============================================================
+# Slack 알림 설정
+# ============================================================
+slack_config:
+  webhook_url: "${SLACK_WEBHOOK_URL}"  # 환경변수에서 읽음
+  default_channel: "#alerts"
+  icon_emoji: ":warning:"
+  username: "ElSpa Monitor"
+
+  # 채널별 설정
+  channels:
+    alerts:
+      icon: ":red_circle:"
+      name: "General Alerts"
+    critical:
+      icon: ":large_red_circle:"
+      name: "Critical Issues"
+      notify: ["@devops", "@pm"]
+    database:
+      icon: ":database:"
+      name: "Database Alerts"
+      notify: ["@database-team"]
+    performance:
+      icon: ":rocket:"
+      name: "Performance Alerts"
+
+
+# ============================================================
+# Email 알림 설정
+# ============================================================
+email_config:
+  smtp_host: "${SMTP_HOST}"
+  smtp_port: 587
+  from_address: "alerts@elspa.io"
+  use_tls: true
+  authentication:
+    username: "${SMTP_USERNAME}"
+    password: "${SMTP_PASSWORD}"
+
+  # 수신자 그룹
+  recipients:
+    devops:
+      - "devops@elspa.io"
+    management:
+      - "pm@elspa.io"
+      - "cto@elspa.io"
+    database_team:
+      - "database@elspa.io"
+
+
+# ============================================================
+# PagerDuty 통합 (선택)
+# ============================================================
+pagerduty_config:
+  api_key: "${PAGERDUTY_API_KEY}"
+  services:
+    database_team:
+      service_id: "${PAGERDUTY_DATABASE_SERVICE_ID}"
+    api_team:
+      service_id: "${PAGERDUTY_API_SERVICE_ID}"
+
+
+# ============================================================
+# 알림 에스컬레이션
+# ============================================================
+escalation_policy:
+  # Level 1: Slack 알림 (즉시)
+  level_1:
+    delay_minutes: 0
+    channel: "slack"
+    actions: ["notify"]
+
+  # Level 2: Email + PagerDuty (5분 후)
+  level_2:
+    delay_minutes: 5
+    channels: ["email", "pagerduty"]
+    actions: ["notify", "create_incident"]
+    condition: "alert_not_resolved"
+
+  # Level 3: 관리자 호출 (15분 후)
+  level_3:
+    delay_minutes: 15
+    channels: ["pagerduty"]
+    actions: ["escalate"]
+    condition: "alert_not_resolved and severity >= critical"
+
+
+# ============================================================
+# 알림 억제 규칙 (노이즈 감소)
+# ============================================================
+suppression_rules:
+  # 유지보수 시간대
+  - name: maintenance_window
+    description: "유지보수 시간대에는 경고 억제"
+    time_range:
+      start: "22:00"
+      end: "23:00"
+      timezone: "Asia/Seoul"
+    days: ["Tuesday", "Thursday"]
+    suppressed_alerts:
+      - "api_slow_response_p95"
+      - "high_memory_usage"
+
+  # 알려진 문제
+  - name: known_issue_temporary_suppression
+    description: "알려진 문제로 인한 임시 억제"
+    start_time: "2026-05-22T00:00:00Z"
+    end_time: "2026-05-23T00:00:00Z"
+    suppressed_alerts:
+      - "high_cpu_usage"
+    reason: "Third-party service degradation"
+
+
+# ============================================================
+# 알림 그룹화
+# ============================================================
+grouping_rules:
+  # 같은 종류의 에러를 그룹화
+  - name: group_similar_errors
+    condition: "same error_code and within 5 minutes"
+    action: "combine_notifications"
+    display: "show_count_and_first_occurrence"
+
+  # 같은 엔드포인트의 에러
+  - name: group_by_endpoint
+    condition: "same endpoint and error_rate"
+    action: "combine_notifications"
+    summarize: "per_endpoint"

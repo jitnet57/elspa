@@ -1,0 +1,238 @@
+# ============================================================
+# 📌 Monitoring Stack Docker Compose
+# 📋 목적: ELK, Prometheus, Grafana 스택 구성
+# 🔧 기능: 로그 수집, 메트릭 저장, 시각화
+# 📅 작성일: 2026-05-22
+# ============================================================
+
+version: "3.8"
+
+services:
+  # ============================================================
+  # Elasticsearch - 로그 저장소
+  # ============================================================
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    container_name: elspa-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - http.cors.enabled=true
+      - http.cors.allow-origin=*
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - monitoring
+    healthcheck:
+      test: curl -s http://localhost:9200 >/dev/null || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ============================================================
+  # Kibana - 로그 시각화
+  # ============================================================
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.0
+    container_name: elspa-kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=changeme
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - monitoring
+    healthcheck:
+      test: curl -s http://localhost:5601/api/status >/dev/null || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ============================================================
+  # Filebeat - 로그 수집기
+  # ============================================================
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.13.0
+    container_name: elspa-filebeat
+    user: root
+    environment:
+      - ELASTICSEARCH_HOSTS=elasticsearch:9200
+    volumes:
+      - ./monitoring/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./logs:/app/logs:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: filebeat -e -strict.perms=false
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - monitoring
+
+  # ============================================================
+  # Prometheus - 메트릭 저장소
+  # ============================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: elspa-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+    networks:
+      - monitoring
+    healthcheck:
+      test: wget --quiet --tries=1 --spider http://localhost:9090/-/healthy || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ============================================================
+  # Alertmanager - 알림 관리
+  # ============================================================
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: elspa-alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--storage.path=/alertmanager"
+    networks:
+      - monitoring
+
+  # ============================================================
+  # Grafana - 메트릭 시각화
+  # ============================================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: elspa-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin  # 프로덕션에서는 변경 필수
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+    healthcheck:
+      test: curl -s http://localhost:3000/api/health >/dev/null || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ============================================================
+  # Node Exporter - 시스템 메트릭
+  # ============================================================
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: elspa-node-exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+    networks:
+      - monitoring
+
+  # ============================================================
+  # Sentry (선택) - 에러 추적
+  # ============================================================
+  sentry:
+    image: sentry:latest
+    container_name: elspa-sentry
+    ports:
+      - "9000:9000"
+    environment:
+      - SENTRY_SECRET_KEY=${SENTRY_SECRET_KEY:-changeme}
+      - SENTRY_POSTGRES_HOST=sentry-db
+      - SENTRY_POSTGRES_PASSWORD=sentry
+      - SENTRY_DB_NAME=sentry
+      - SENTRY_REDIS_HOST=sentry-redis
+    depends_on:
+      - sentry-db
+      - sentry-redis
+    networks:
+      - monitoring
+    volumes:
+      - sentry_data:/var/lib/sentry/files
+
+  sentry-db:
+    image: postgres:15
+    container_name: elspa-sentry-db
+    environment:
+      - POSTGRES_USER=sentry
+      - POSTGRES_PASSWORD=sentry
+      - POSTGRES_DB=sentry
+    networks:
+      - monitoring
+    volumes:
+      - sentry_postgres:/var/lib/postgresql/data
+
+  sentry-redis:
+    image: redis:7
+    container_name: elspa-sentry-redis
+    networks:
+      - monitoring
+    volumes:
+      - sentry_redis:/data
+
+
+# ============================================================
+# Volumes
+# ============================================================
+volumes:
+  elasticsearch_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  alertmanager_data:
+    driver: local
+  grafana_data:
+    driver: local
+  sentry_data:
+    driver: local
+  sentry_postgres:
+    driver: local
+  sentry_redis:
+    driver: local
+
+
+# ============================================================
+# Networks
+# ============================================================
+networks:
+  monitoring:
+    driver: bridge
