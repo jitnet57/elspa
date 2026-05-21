@@ -422,4 +422,6 @@ export default function PayrollAnalyticsPage() {
           </div>
         )}
       </div>
-    </di
+    </div>
+  );
+}

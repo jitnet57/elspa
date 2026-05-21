@@ -9,7 +9,6 @@
  */
 
 import React, { useState } from 'react';
-import { Download, Loader } from 'lucide-react';
 
 interface PayrollPdfButtonProps {
   recordId: number;
@@ -97,12 +96,12 @@ export function PayrollPdfButton({
       >
         {isLoading ? (
           <>
-            <Loader className="w-4 h-4 animate-spin" />
+            <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             생성 중...
           </>
         ) : (
           <>
-            <Download className="w-4 h-4" />
+            <span>⬇️</span>
             다운로드
           </>
         )}

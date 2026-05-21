@@ -12,31 +12,11 @@ const nextConfig: NextConfig = {
 
   // ✅ 성능 최적화
   compress: true,
-  swcMinify: true,
 
   // ✅ 번들 분석 및 최적화
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 5,
-  },
-
-  // ✅ Turbopack 설정 (Next.js 16)
-  turbopack: {
-    // 캐싱 활성화
-    cache: {
-      memoryLimit: 512,
-    },
-  },
-
-  // ✅ 웹팩 최적화
-  webpack: (config, { isServer }) => {
-    // Tree shaking 및 번들 크기 감소
-    config.optimization = {
-      ...config.optimization,
-      minimize: true,
-    };
-
-    return config;
   },
 
   // ✅ 성능 모니터링

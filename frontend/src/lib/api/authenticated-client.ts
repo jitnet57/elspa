@@ -59,17 +59,20 @@ export async function authenticatedFetch(
   // 401 응답 시 토큰 갱신 후 재시도
   if (response.status === 401 && !options.isRetry) {
     try {
-      await store.refreshToken();
+      // ✅ 토큰 갱신 시도
+      if (store && 'performTokenRefresh' in store && typeof (store as any).performTokenRefresh === 'function') {
+        await (store as any).performTokenRefresh();
+      }
+
       const newAccessToken = useAuthStore.getState().accessToken;
 
       if (newAccessToken) {
         // 새 토큰으로 재시도
         headers['Authorization'] = `Bearer ${newAccessToken}`;
+        const retryOptions = { ...options, headers };
         response = await fetch(url, {
-          ...options,
-          headers,
-          isRetry: true,
-        });
+          ...retryOptions,
+        } as RequestInit);
       } else {
         // 토큰 갱신 실패 → 로그인 페이지로
         window.location.href = '/auth/login';

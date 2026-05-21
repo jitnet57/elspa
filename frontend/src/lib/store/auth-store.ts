@@ -28,7 +28,7 @@ export interface AuthState {
   // Actions
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  refreshToken: () => Promise<void>;
+  performTokenRefresh: () => Promise<void>;  // ✅ 이름 변경 (refreshToken과 구분)
   setUser: (user: User | null) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
   clearError: () => void;
@@ -107,8 +107,8 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      // Refresh Token
-      refreshToken: async () => {
+      // ✅ Perform Token Refresh (메서드명 변경)
+      performTokenRefresh: async () => {
         const state = get();
         if (!state.refreshToken) {
           set({ error: 'No refresh token available' });

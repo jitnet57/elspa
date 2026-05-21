@@ -9,7 +9,6 @@
  */
 
 import React, { useState } from 'react';
-import { Download, Loader, Package } from 'lucide-react';
 
 interface PayrollBulkExportButtonProps {
   periodId: number;
@@ -109,12 +108,12 @@ export function PayrollBulkExportButton({
       >
         {isLoading ? (
           <>
-            <Loader className="w-4 h-4 animate-spin" />
+            <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             처리 중...
           </>
         ) : (
           <>
-            <Package className="w-4 h-4" />
+            <span>📦</span>
             일괄 내보내기 (ZIP)
           </>
         )}
