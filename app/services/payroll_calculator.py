@@ -6,10 +6,15 @@
 BUG FIX #2: mark_cash_advances_as_settled() 메서드 추가
 - 정산 계산 후 사용된 CA를 settled 상태로 변경
 - settled_payroll_id에 PayrollRecord.id 기록
+
+Phase 8-5: 13개월 보너스 기능 추가
+- calculate_months_employed(): 입사일부터 기준일까지 개월 수 계산
+- calculate_thirteenth_month_deduction(): 13개월 보너스 선지급액 계산
 """
 
 from decimal import Decimal
 from typing import List, Optional
+from datetime import date
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, update
@@ -118,6 +123,81 @@ class PayrollCalculator:
         return holiday.holiday_type if holiday else None
 
     @staticmethod
+    def calculate_months_employed(hire_date: date, reference_date: date) -> int:
+        """
+        입사일부터 기준일까지의 개월 수 계산
+
+        규칙:
+        - 정확한 개월 수 계산 (년/월 기반)
+        - 기간 내 첫 번째 일자 = 기여도 시작
+        - 예: 2025-01-15 입사, 2025-05-22 기준 = 4개월 (1월, 2월, 3월, 4월)
+
+        Args:
+            hire_date: 입사일
+            reference_date: 기준일 (정산 기간 종료일)
+
+        Returns:
+            개월 수 (최소 1개월)
+        """
+        if hire_date > reference_date:
+            return 0
+
+        # 년도 차이 * 12 + 월 차이
+        years_diff = reference_date.year - hire_date.year
+        months_diff = reference_date.month - hire_date.month
+        total_months = years_diff * 12 + months_diff
+
+        # 기준일이 입사일보다 늦은 날짜면 1개월 추가
+        if reference_date.day >= hire_date.day:
+            total_months += 1
+
+        return max(total_months, 1)  # 최소 1개월
+
+    @staticmethod
+    def calculate_thirteenth_month_deduction(
+        base_salary: Decimal,
+        hire_date: date,
+        reference_date: date
+    ) -> Decimal:
+        """
+        13개월 보너스 선지급액 계산
+
+        규칙:
+        - 월 금액 = 연간 기본급 / 12
+        - 누적액 = 월 금액 × (입사일부터 현재까지의 개월 수)
+
+        예시:
+        - 기본급: 12,000 Peso
+        - 월 금액: 12,000 / 12 = 1,000 Peso
+        - 1월 ~ 5월 근무 (5개월): 1,000 × 5 = 5,000 Peso
+
+        중도 입사자 처리:
+        - 입사일이 해당 월에 포함되면 1개월로 계산
+        - 정확한 일자 기반 개월 계산 (hire_date와 reference_date 비교)
+
+        Args:
+            base_salary: 월 기본급 (Decimal)
+            hire_date: 입사일
+            reference_date: 기준일 (정산 기간 종료일)
+
+        Returns:
+            13개월 보너스 선지급액 (Decimal)
+        """
+        if base_salary <= 0:
+            return Decimal(0)
+
+        # 개월 수 계산
+        months_employed = PayrollCalculator.calculate_months_employed(hire_date, reference_date)
+
+        # 월 금액 = 기본급 / 12
+        monthly_amount = base_salary / Decimal(12)
+
+        # 누적액 = 월 금액 × 개월 수
+        accrual = monthly_amount * Decimal(months_employed)
+
+        return accrual
+
+    @staticmethod
     async def calculate_payroll_for_period(
         payroll_period: PayrollPeriod,
         db: AsyncSession
@@ -206,7 +286,13 @@ class PayrollCalculator:
 
         sss_deduction = Decimal(0)
         ca_deduction = await calc.get_approved_ca_amount(employee.id, db)
-        thirteenth_month_deduction = Decimal(0)
+
+        # 13개월 보너스 선지급 계산
+        thirteenth_month_deduction = calc.calculate_thirteenth_month_deduction(
+            base_salary=base_amount,
+            hire_date=employee.hire_date,
+            reference_date=payroll_period.period_end
+        )
 
         # 보건소 검사비 차감 (Therapist, 분기별 1회)
         health_check_deduction = calc.calculate_health_check_deduction(
@@ -234,6 +320,7 @@ class PayrollCalculator:
             ca_deduction=ca_deduction,
             health_check_deduction=health_check_deduction,
             thirteenth_month_deduction=thirteenth_month_deduction,
+            thirteenth_month_accrual=thirteenth_month_deduction,  # 누적액과 동일 (참고용)
             gross_pay=gross_pay,
             total_deductions=total_deductions,
             net_pay=net_pay,

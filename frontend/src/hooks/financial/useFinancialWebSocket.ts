@@ -8,7 +8,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useFinancialStore } from '@/lib/store/financial';
 
 interface WebSocketMessage {
-  type: 'expense_added' | 'expense_updated' | 'budget_changed' | 'heartbeat';
+  type: 'expense_added' | 'expense_updated' | 'budget_changed' | 'budget_exceeded' | 'heartbeat';
   data?: any;
   timestamp?: string;
 }
@@ -79,6 +79,31 @@ export function useFinancialWebSocket(enabled: boolean = true) {
       case 'budget_changed':
         store.setBudget(message.data);
         console.log('✅ 예산 변경됨:', message.data);
+        break;
+
+      case 'budget_exceeded':
+        // 🚨 예산 초과 알림 (Sprint 12)
+        console.warn('🚨 예산 초과 경고:', message.data);
+        // LocalStorage에 알림 저장 (RealtimeNotification에서 읽음)
+        if (typeof window !== 'undefined') {
+          const notification = {
+            id: `budget_exceeded_${Date.now()}`,
+            type: 'budget_exceeded',
+            title: '🚨 예산 초과',
+            message: message.data?.message || '예산 한도를 초과했습니다.',
+            duration: 10000, // 10초 표시
+          };
+          const existingNotifications = JSON.parse(
+            localStorage.getItem('financial_notifications') || '[]'
+          );
+          localStorage.setItem(
+            'financial_notifications',
+            JSON.stringify([...existingNotifications, notification])
+          );
+          // BroadcastChannel로 다른 탭에 알림
+          const channel = new BroadcastChannel('financial_alerts');
+          channel.postMessage(notification);
+        }
         break;
 
       case 'heartbeat':

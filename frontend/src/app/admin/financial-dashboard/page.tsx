@@ -11,6 +11,8 @@ import { useFinancialStore } from '@/lib/store/financial';
 import { KPICards } from '@/components/financial/KPICards';
 import { ExpenseChart } from '@/components/financial/ExpenseChart';
 import { ExportButton } from '@/components/financial/ExportButton';
+import { BudgetAlertPanel } from '@/components/financial/BudgetAlertPanel';
+import { VirtualExpenseTable, ExpenseItem } from '@/components/financial/VirtualExpenseTable';
 import { useFinancialRevenue, useFinancialExpenses, useFinancialWebSocket } from '@/hooks/financial';
 
 export default function FinancialDashboardPage() {
@@ -187,6 +189,11 @@ export default function FinancialDashboardPage() {
         {/* KPI Cards */}
         <KPICards year={store.selectedYear} month={store.selectedMonth} />
 
+        {/* Budget Alert Panel (Sprint 11) */}
+        <div className="mb-8">
+          <BudgetAlertPanel year={store.selectedYear} month={store.selectedMonth} />
+        </div>
+
         {/* Charts grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Expense Chart */}
@@ -268,59 +275,26 @@ export default function FinancialDashboardPage() {
           </div>
         </div>
 
-        {/* Expense details table */}
+        {/* Expense details table (Virtual Scrolling) */}
         <div className="bg-white rounded-lg p-6 shadow-md border border-gray-200">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-gray-900">Recent Expenses</h3>
+            <h3 className="text-lg font-bold text-gray-900">📋 Expenses (Virtual Table)</h3>
             <ExportButton />
           </div>
 
           {store.expenses.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      Category
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      Date
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      Description
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                      Amount
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {store.expenses.map((expense) => {
-                    const category = store.categories.find(
-                      (c) => c.id === expense.categoryId
-                    );
-                    return (
-                      <tr key={expense.id} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                          {category?.name || 'Unknown'}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-600">
-                          {new Date(expense.expenseDate).toLocaleDateString('en-PH')}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-600">
-                          {expense.description || '-'}
-                        </td>
-                        <td className="px-4 py-3 text-sm font-bold text-right text-gray-900">
-                          ₱{expense.amount.toLocaleString('en-PH', {
-                            maximumFractionDigits: 0,
-                          })}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <VirtualExpenseTable
+              expenses={store.expenses.map((exp) => ({
+                id: exp.id,
+                categoryId: exp.categoryId,
+                categoryName: store.categories.find((c) => c.id === exp.categoryId)?.name || 'Unknown',
+                amount: exp.amount,
+                expenseDate: exp.expenseDate,
+                description: exp.description || '-',
+              })) as ExpenseItem[]}
+              height={400}
+              itemsPerPage={20}
+            />
           ) : (
             <p className="text-gray-500 text-center py-8">No expenses recorded</p>
           )}

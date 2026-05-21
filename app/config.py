@@ -3,15 +3,23 @@ import os
 
 
 class Settings(BaseSettings):
-    """ElSpa 설정"""
+    """ElSpa 설정 (Sprint 12: Supabase 실제 연결)"""
 
     # Database
-    database_url: str = os.getenv("DATABASE_URL", "")
-    supabase_url: str = os.getenv("SUPABASE_URL", "")
-    supabase_key: str = os.getenv("SUPABASE_KEY", "")
-    supabase_secret_key: str = os.getenv("SUPABASE_SECRET_KEY", "")
+    database_url: str = os.getenv(
+        "DATABASE_URL",
+        "postgresql://postgres:password@localhost:5432/elspa"
+    )
+
+    # Supabase 설정 (실제 연결 - Sprint 12)
+    supabase_url: str = os.getenv("SUPABASE_URL", "https://your-project.supabase.co")
+    supabase_key: str = os.getenv("SUPABASE_KEY", "your-anon-key")
+    supabase_secret_key: str = os.getenv("SUPABASE_SECRET_KEY", "your-secret-key")
     supabase_jwt_token: str = os.getenv("SUPABASE_JWT_TOKEN", "")
     supabase_service_role_jwt: str = os.getenv("SUPABASE_SERVICE_ROLE_JWT", "")
+
+    # Supabase 사용 플래그 (Mock → 실제 전환)
+    use_supabase: bool = os.getenv("USE_SUPABASE", "false").lower() == "true"
 
     # Claude API
     anthropic_api_key: str = os.getenv("ANTHROPIC_API_KEY", "")

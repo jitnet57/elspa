@@ -1,0 +1,156 @@
+================================================================================
+                    Phase 8-5: 13개월 보너스 구현 완료
+================================================================================
+
+작성일: 2026-05-22
+상태: ✅ 완료 (기능 + API + 테스트)
+위치: e:\elspa
+
+================================================================================
+📋 구현 현황
+================================================================================
+
+✅ 1. PayrollCalculator 메서드 추가 (app/services/payroll_calculator.py)
+   - calculate_months_employed(hire_date, reference_date) → int
+   - calculate_thirteenth_month_deduction(base_salary, hire_date, reference_date) → Decimal
+   - _calculate_employee_payroll() 메서드에 13개월 보너스 통합
+
+✅ 2. PayrollRecord 모델 확장 (app/models/payroll.py)
+   - thirteenth_month_accrual 컬럼 추가 (누적액 참고용)
+
+✅ 3. Pydantic 스키마 업데이트 (app/schemas/payroll.py)
+   - PayrollRecordResponse.thirteenth_month_accrual 필드 추가
+
+✅ 4. REST API 엔드포인트 (app/routers/payroll.py)
+   - GET /api/payroll/thirteenth-month/{employee_id}
+   - GET /api/payroll/thirteenth-month (전체 현황)
+
+✅ 5. 테스트 케이스 (tests/test_thirteenth_month_bonus.py)
+   - 15개 단위 + 통합 테스트
+
+================================================================================
+🧮 계산 로직
+================================================================================
+
+개월 수 계산:
+  months = (reference_year - hire_year) * 12 + (reference_month - hire_month)
+  if reference_day >= hire_day:
+    months += 1
+
+선지급액 계산:
+  monthly_amount = base_salary / 12
+  deduction = monthly_amount * months_employed
+
+예시:
+  기본급: 12,000 Peso, 2025-01-01 입사, 2025-05-31 기준
+  → 월 금액: 1,000 Peso
+  → 개월: 5개월
+  → 선지급액: 5,000 Peso
+
+================================================================================
+📁 수정된 파일 목록
+================================================================================
+
+1. app/services/payroll_calculator.py (369줄)
+   - 임포트: from datetime import date 추가
+   - 메서드: calculate_months_employed() 추가
+   - 메서드: calculate_thirteenth_month_deduction() 추가
+   - 메서드: _calculate_employee_payroll() 통합
+
+2. app/models/payroll.py (302줄)
+   - PayrollRecord.thirteenth_month_accrual 컬럼 추가 (라인 246)
+
+3. app/schemas/payroll.py (184줄)
+   - PayrollRecordResponse.thirteenth_month_accrual 필드 추가 (라인 162)
+
+4. app/routers/payroll.py (599줄)
+   - GET /api/payroll/thirteenth-month/{employee_id} 엔드포인트
+   - GET /api/payroll/thirteenth-month 엔드포인트
+
+5. tests/test_thirteenth_month_bonus.py (신규)
+   - 테스트 클래스: TestThirteenthMonthBonusCalculation (13개 테스트)
+   - 테스트 클래스: TestThirteenthMonthBonusIntegration (2개 테스트)
+
+================================================================================
+🧪 테스트 케이스 (15개)
+================================================================================
+
+단위 테스트 (개월 수 계산):
+  1. test_calculate_months_employed_full_years - 11개월
+  2. test_calculate_months_employed_same_day - 1개월
+  3. test_calculate_months_employed_before_day - 0개월 (입사 전)
+  4. test_calculate_months_employed_next_day - 1개월
+  5. test_calculate_months_employed_multiple_years - 26개월
+
+단위 테스트 (선지급액 계산):
+  6. test_thirteenth_month_deduction_base_case - 5,000 Peso
+  7. test_thirteenth_month_deduction_mid_hire - 3,750 Peso
+  8. test_thirteenth_month_deduction_one_month - 1,666.67 Peso
+  9. test_thirteenth_month_deduction_long_term - 60,416.67 Peso
+ 10. test_thirteenth_month_deduction_zero_salary - 0 (엣지 케이스)
+ 11. test_thirteenth_month_deduction_negative_salary - 0 (엣지 케이스)
+ 12. test_thirteenth_month_deduction_decimal_precision - 833.33 (정밀도)
+ 13. test_thirteenth_month_deduction_full_year - 12,000 Peso
+
+통합 테스트:
+ 14. test_payroll_record_includes_thirteenth_month - PayrollRecord 필드 확인
+ 15. test_thirteenth_month_accumulation_multiple_periods - 누적 추적
+
+================================================================================
+🚀 사용 방법
+================================================================================
+
+1. 급여 계산 실행:
+   curl -X POST http://localhost:8000/api/payroll/periods/1/calculate
+
+2. 직원별 13개월 보너스 조회:
+   curl http://localhost:8000/api/payroll/thirteenth-month/1
+
+3. 전체 현황 조회:
+   curl http://localhost:8000/api/payroll/thirteenth-month?status=draft
+
+================================================================================
+📖 문서
+================================================================================
+
+상세 문서: e:\elspa\THIRTEENTH_MONTH_BONUS_IMPLEMENTATION.md
+- 기능 개요
+- 구현 상세 (메서드별)
+- API 엔드포인트 정의
+- 테스트 케이스 설명
+- 설계 결정사항
+- 다음 단계
+
+================================================================================
+✨ 주요 특징
+================================================================================
+
+1. 정확한 개월 계산: 입사일과 기준일의 정확한 날짜 비교
+2. 중도 입사자 자동 처리: hire_date 컬럼으로 자동 계산
+3. Decimal 정밀도: 금융 계산 정확도 보장
+4. 누적 추적: 다중 정산 기간에 걸친 누적액 기록
+5. API 조회: RESTful 엔드포인트로 현황 조회
+6. 감사 추적: PayrollRecord에 모든 정보 기록
+
+================================================================================
+✅ 완료 항목 체크리스트
+================================================================================
+
+[✅] 1. 계산 메서드 추가 (calculate_thirteenth_month_deduction)
+[✅] 2. 개월 계산 메서드 추가 (calculate_months_employed)
+[✅] 3. PayrollRecord 모델 확장 (thirteenth_month_accrual)
+[✅] 4. API 엔드포인트 추가 (2개)
+[✅] 5. 테스트 케이스 작성 (15개)
+[✅] 6. 문서화 (THIRTEENTH_MONTH_BONUS_IMPLEMENTATION.md)
+
+================================================================================
+다음 단계 (Phase 8-6)
+================================================================================
+
+- [ ] 13개월 보너스 분할 지급 옵션
+- [ ] 정산 기간 재계산 정책 고도화
+- [ ] 중도 퇴사자 정산 처리
+- [ ] 월급 인상에 따른 소급 계산
+- [ ] Admin 대시보드에 13개월 보너스 현황 추가
+
+================================================================================

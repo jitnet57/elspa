@@ -18,6 +18,7 @@ export default function AttendancePage() {
   const [selectedEmployee, setSelectedEmployee] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Zustand store
   const {
@@ -105,32 +106,21 @@ export default function AttendancePage() {
     }
 
     try {
-      setLoading(true);
+      setIsLoading(true);
 
       const { late, overtime } = calculateMinutes(formData.clock_in, formData.clock_out);
-      const employee = MOCK_EMPLOYEES.find(e => e.id === formData.employee_id);
+      const employee = employees.find(e => e.id === formData.employee_id);
 
       if (isEditing) {
-        // Update existing
-        const existingIndex = attendance.findIndex(
-          a => a.employee_id === formData.employee_id && a.work_date === formData.work_date
-        );
-
-        if (existingIndex >= 0) {
-          const updated = [...attendance];
-          updated[existingIndex] = {
-            ...updated[existingIndex],
-            ...formData,
-            late_minutes: late,
-            overtime_minutes: overtime,
-            updated_at: new Date().toISOString(),
-          };
-          setAttendance(updated);
-        }
+        // Update existing via Zustand
+        updateExistingAttendance(formData.employee_id, {
+          ...formData,
+          late_minutes: late,
+          overtime_minutes: overtime,
+        });
       } else {
-        // Create new
-        const newLog: AttendanceLog = {
-          id: Math.max(...attendance.map(a => a.id), 0) + 1,
+        // Create new via Zustand
+        createNewAttendance({
           employee_id: formData.employee_id,
           employee_name: employee?.name,
           work_date: formData.work_date,
@@ -140,10 +130,7 @@ export default function AttendancePage() {
           overtime_minutes: formData.is_absent ? 0 : overtime,
           is_absent: formData.is_absent,
           holiday_type: formData.holiday_type,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-        setAttendance([...attendance, newLog]);
+        });
       }
 
       setShowModal(false);
@@ -152,7 +139,7 @@ export default function AttendancePage() {
       alert('Error saving attendance');
       console.error(err);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -173,7 +160,7 @@ export default function AttendancePage() {
     if (!window.confirm('Delete this attendance record?')) return;
 
     try {
-      setAttendance(attendance.filter(a => a.id !== logId));
+      deleteExistingAttendance(logId);
       alert('Attendance record deleted');
     } catch (err) {
       alert('Error deleting attendance');
@@ -441,7 +428,7 @@ export default function AttendancePage() {
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                 >
                   <option value={0}>-- Select Employee --</option>
-                  {MOCK_EMPLOYEES.map(emp => (
+                  {employees.map(emp => (
                     <option key={emp.id} value={emp.id}>
                       {emp.name}
                     </option>
