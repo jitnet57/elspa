@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>드라이버 대시보드 - ElSpa Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #fafbfc 100%);
+            color: #1a1f3a;
+        }
+
+        .header {
+            background: white;
+            padding: 16px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .menu-icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid #f0f1f3;
+        }
+
+        .revenue-section {
+            text-align: center;
+        }
+
+        .revenue-label {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .revenue-amount {
+            font-size: 48px;
+            font-weight: 700;
+            color: #1a1f3a;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .revenue-currency {
+            font-size: 24px;
+            color: #d4af37;
+            margin-right: 8px;
+        }
+
+        .mini-chart {
+            height: 60px;
+            background: linear-gradient(to right, #2563eb, #3b82f6);
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-end;
+            padding: 12px;
+            gap: 4px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            min-height: 8px;
+        }
+
+        .chart-bar.active {
+            background: white;
+        }
+
+        .status-section {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .status-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+        }
+
+        .status-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1f3a;
+            margin-bottom: 8px;
+        }
+
+        .status-detail {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 16px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(37,99,235,0.3);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #1a1f3a;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .reservations {
+            margin-top: 20px;
+        }
+
+        .reservations-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1f3a;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .reservation-card {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 1px solid #bae6fd;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reservation-info {
+            text-align: left;
+        }
+
+        .reservation-time {
+            font-size: 12px;
+            color: #0369a1;
+            font-weight: 600;
+        }
+
+        .reservation-location {
+            font-size: 13px;
+            color: #1a1f3a;
+            margin-top: 2px;
+        }
+
+        .reservation-distance {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .reservation-status {
+            background: #10b981;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-title">🏢 ElSpa Manager</div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <a href="demo-all-views.html" style="font-size: 20px; cursor: pointer; text-decoration: none;">📊</a>
+            <a href="customer-sample-premium.html" style="font-size: 20px; cursor: pointer; text-decoration: none;">👤</a>
+            <div class="menu-icon">≡</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 수익 섹션 -->
+        <div class="card">
+            <div class="revenue-section">
+                <div class="revenue-label">오늘 수익</div>
+                <div class="revenue-amount">
+                    <span class="revenue-currency">₩</span>285,000
+                </div>
+
+                <div class="mini-chart">
+                    <div class="chart-bar"></div>
+                    <div class="chart-bar"></div>
+                    <div class="chart-bar active"></div>
+                    <div class="chart-bar active"></div>
+                    <div class="chart-bar active"></div>
+                    <div class="chart-bar"></div>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">배송 완료</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">2</div>
+                    <div class="stat-label">진행중</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 상태 섹션 -->
+        <div class="card">
+            <div class="status-section">
+                <div class="status-circle">●</div>
+                <div class="status-text">운행 중</div>
+                <div class="status-detail">예상 배송: 5분</div>
+            </div>
+
+            <div class="buttons">
+                <a href="counter-location-tracking.html" class="btn btn-primary">
+                    📍 지도 보기
+                </a>
+                <button class="btn btn-secondary">💼 예약 현황</button>
+            </div>
+        </div>
+
+        <!-- 예약 현황 -->
+        <div class="card">
+            <div class="reservations-title">다음 예약</div>
+
+            <div class="reservation-card">
+                <div class="reservation-info">
+                    <div class="reservation-time">14:30 배송</div>
+                    <div class="reservation-location">📍 강남구 테헤란로 123</div>
+                    <div class="reservation-distance">거리: 2.3km</div>
+                </div>
+                <div class="reservation-status">예정</div>
+            </div>
+
+            <div class="reservation-card">
+                <div class="reservation-info">
+                    <div class="reservation-time">15:00 배송</div>
+                    <div class="reservation-location">📍 강남구 코엑스 근처</div>
+                    <div class="reservation-distance">거리: 1.8km</div>
+                </div>
+                <div class="reservation-status">예정</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

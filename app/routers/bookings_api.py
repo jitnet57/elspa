@@ -13,6 +13,7 @@ from typing import List
 
 from app.database import get_db
 from app.models.booking import Booking
+import app.services.stamp_service as stamp_svc
 from app.schemas.booking import (
     BookingResponse,
     BookingCreate,
@@ -94,12 +95,22 @@ async def update_booking(
             detail="예약을 찾을 수 없습니다"
         )
 
+    prev_status = booking.status
     update_data = booking_data.dict(exclude_unset=True)
     for key, value in update_data.items():
         setattr(booking, key, value)
 
     await db.commit()
     await db.refresh(booking)
+
+    # 완료 상태로 변경될 때 스탬프 자동 지급
+    if prev_status != "completed" and booking.status == "completed":
+        try:
+            await stamp_svc.award_stamp(booking.customer_id, booking.id, db)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Stamp award failed for booking {booking.id}: {e}")
+
     return booking
 
 

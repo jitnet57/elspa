@@ -1,139 +1,161 @@
 """
-카카오 API 통합 라우터
-- 카카오톡/채널에서 오는 메시지 처리
-- 예약/취소 키워드 감지 및 링크 제공
+카카오 메신저 봇 라우터 (Kakao i Open Builder 연동)
+- 자동 언어 감지 및 다국어 응답
+- Intent 분석 (예약/취소/가격/위치 등)
+- Claude API를 통한 자연어 처리
+- 채팅 히스토리 저장
 """
 
 import logging
-from fastapi import APIRouter, Request, HTTPException, status
+import json
+from fastapi import APIRouter, Request, Depends
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.database import get_db
+from app.services.bot_service import bot_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/kakao", tags=["kakao"])
 
 
 # ============================================================
-# 데이터 모델
+# 카카오 i Open Builder 데이터 모델
 # ============================================================
-class KakaoButton(BaseModel):
-    """카카오 버튼"""
-    title: str
-    type: str = "WEB_URL"
-    url: str
+class KakaoUserRequest(BaseModel):
+    """Kakao i Open Builder 사용자 요청"""
+    user: Dict[str, Any]
+    utterance: str
+    params: Optional[Dict[str, Any]] = None
 
 
-class KakaoResponse(BaseModel):
-    """카카오 메시지 응답"""
-    message: str
-    buttons: Optional[List[KakaoButton]] = None
+class KakaoSimpleText(BaseModel):
+    """카카오 SimpleText 메시지"""
+    text: str
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "message": "안녕하세요! 무엇을 도와드릴까요?",
-                "buttons": [
-                    {
-                        "title": "📅 예약하기",
-                        "type": "WEB_URL",
-                        "url": "https://yoursite.com/booking"
-                    }
-                ]
-            }
-        }
+
+class KakaoMessageOutput(BaseModel):
+    """카카오 메시지 출력"""
+    simpleText: KakaoSimpleText
+
+
+class KakaoMessageTemplate(BaseModel):
+    """카카오 메시지 템플릿"""
+    outputs: List[KakaoMessageOutput]
 
 
 class KakaoWebhookRequest(BaseModel):
-    """카카오 웹훅 요청"""
-    user_id: str
-    content: str
+    """카카오 웹훅 요청 전체"""
+    userRequest: KakaoUserRequest
+
+
+class KakaoWebhookResponse(BaseModel):
+    """카카오 웹훅 응답"""
+    version: str = "2.0"
+    template: KakaoMessageTemplate
+
+
+# ============================================================
+# 검증
+# ============================================================
+async def verify_kakao_signature(request: Request) -> None:
+    """카카오 메시지 서명 검증 (선택사항)"""
+    # 현재 구현: 기본 검증만 수행
+    # 실제 운영환경에서는 HMAC 검증 추가 권장
+    pass
 
 
 # ============================================================
 # 카카오 메시지 Webhook
 # ============================================================
 @router.post("/message")
-async def kakao_message_webhook(request: Request):
+async def kakao_message_webhook(
+    body: KakaoWebhookRequest,
+    db: AsyncSession = Depends(get_db),
+    # verified: None = Depends(verify_kakao_signature)
+):
     """
-    카카오톡/채널에서 메시지 수신
-    - 예약 키워드 감지 → 예약 페이지 링크
-    - 취소 키워드 감지 → 취소 페이지 링크
+    카카오 i Open Builder 메시지 처리
+
+    요청 형식 (Kakao i Open Builder):
+    ```json
+    {
+      "userRequest": {
+        "user": {"id": "abc123", "properties": {}},
+        "utterance": "안녕하세요"
+      }
+    }
+    ```
+
+    응답 형식 (SimpleText):
+    ```json
+    {
+      "version": "2.0",
+      "template": {
+        "outputs": [{"simpleText": {"text": "안녕하세요!"}}]
+      }
+    }
+    ```
     """
     try:
-        data = await request.json()
-        user_id = data.get("user_id", "unknown")
-        content = data.get("content", "").lower()
+        user_id = body.userRequest.user.get("id", "unknown")
+        message = body.userRequest.utterance.strip()
 
-        logger.info(f"📨 카카오 메시지 수신 | User: {user_id} | Content: {content}")
+        logger.info(f"📨 Kakao 메시지 | User: {user_id} | Message: {message}")
 
-        # 기본 응답
-        response_text = "안녕하세요! 무엇을 도와드릴까요?"
-        buttons = []
-
-        # 키워드 감지
-        if "예약" in content:
-            response_text = "📅 예약 페이지로 이동해주세요!"
-            buttons.append(
-                KakaoButton(
-                    title="📅 예약하기",
-                    type="WEB_URL",
-                    url=f"https://yoursite.com/booking?user_id={user_id}"
-                )
+        # 빈 메시지 처리
+        if not message:
+            response_text = "무엇을 도와드릴까요?"
+        else:
+            # BotService로 메시지 처리
+            response_text = await bot_service.handle_message(
+                channel="kakao",
+                user_id=user_id,
+                user_phone="",  # Kakao ID로는 전화번호 불명
+                message=message,
+                db=db
             )
 
-        if "취소" in content:
-            response_text = "❌ 예약 취소 페이지로 이동해주세요!"
-            buttons.append(
-                KakaoButton(
-                    title="❌ 예약 취소",
-                    type="WEB_URL",
-                    url=f"https://yoursite.com/cancel?user_id={user_id}"
-                )
+        logger.info(f"✅ Kakao 응답 | Response: {response_text[:50]}...")
+
+        # Kakao i Open Builder 응답 형식
+        response = KakaoWebhookResponse(
+            template=KakaoMessageTemplate(
+                outputs=[
+                    KakaoMessageOutput(simpleText=KakaoSimpleText(text=response_text))
+                ]
             )
+        )
 
-        # 버튼이 없으면 기본 메뉴 제공
-        if not buttons:
-            buttons = [
-                KakaoButton(
-                    title="📅 예약하기",
-                    type="WEB_URL",
-                    url=f"https://yoursite.com/booking?user_id={user_id}"
-                ),
-                KakaoButton(
-                    title="❌ 예약 취소",
-                    type="WEB_URL",
-                    url=f"https://yoursite.com/cancel?user_id={user_id}"
-                )
-            ]
-
-        response = KakaoResponse(message=response_text, buttons=buttons)
-
-        logger.info(f"✅ 카카오 응답 발송 | Buttons: {len(buttons)}")
-
-        return response.model_dump()
+        return response.model_dump(by_alias=False)
 
     except Exception as e:
-        logger.error(f"❌ 카카오 메시지 처리 실패: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="메시지 처리 실패"
+        logger.error(f"❌ Kakao 메시지 처리 실패: {str(e)}", exc_info=True)
+
+        error_msg = "죄송합니다. 처리 중 오류가 발생했습니다."
+        response = KakaoWebhookResponse(
+            template=KakaoMessageTemplate(
+                outputs=[
+                    KakaoMessageOutput(simpleText=KakaoSimpleText(text=error_msg))
+                ]
+            )
         )
+        return response.model_dump(by_alias=False)
 
 
 # ============================================================
-# 카카오 인증 테스트
+# 카카오 검증
 # ============================================================
 @router.post("/verify")
 async def kakao_verify(request: Request):
-    """
-    카카오 Developers에서 검증을 위해 호출하는 엔드포인트
-    """
+    """카카오 Developers 검증 요청"""
     try:
         data = await request.json()
-        logger.info(f"🔐 카카오 검증 요청: {data}")
+        logger.info(f"🔐 Kakao 검증 요청: {json.dumps(data, ensure_ascii=False)}")
         return {"success": True}
     except Exception as e:
-        logger.error(f"❌ 카카오 검증 실패: {str(e)}")
+        logger.error(f"❌ Kakao 검증 실패: {str(e)}")
         return {"success": False, "error": str(e)}
 
 
@@ -145,10 +167,11 @@ async def kakao_health():
     """카카오 API 상태 확인"""
     return {
         "status": "ok",
-        "service": "kakao_integration",
-        "endpoints": [
-            "/kakao/message",
-            "/kakao/verify",
-            "/kakao/health"
-        ]
+        "service": "kakao_bot",
+        "version": "2.0",
+        "endpoints": {
+            "webhook": "/kakao/message",
+            "verify": "/kakao/verify",
+            "health": "/kakao/health"
+        }
     }

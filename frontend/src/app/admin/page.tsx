@@ -84,6 +84,18 @@ export default function AdminPortal() {
       ],
     },
     {
+      category: '💰 Expense Management',
+      items: [
+        { name: 'Daily Expense Report', href: '/admin/expense', icon: '🧾' },
+      ],
+    },
+    {
+      category: '📋 SSS Management',
+      items: [
+        { name: 'SSS Scan to Excel', href: '/admin/sss', icon: '🔍' },
+      ],
+    },
+    {
       category: '📚 References',
       items: [
         { name: 'Deployment Guide', href: '/flowchart', icon: '📍' },

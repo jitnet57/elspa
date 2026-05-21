@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/therapist/layout,_N_T_/therapist/customer-locations/layout,_N_T_/therapist/customer-locations/page,_N_T_/therapist/customer-locations"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/therapist/customer-locations/__PAGE__",
+    "/therapist/customer-locations",
+    "/therapist",
+    "/_index",
+    "/_head"
+  ]
+}

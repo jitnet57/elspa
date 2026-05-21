@@ -920,3 +920,119 @@ https://elspa.pages.dev/customer/landing
 4. *.pages.dev 자동 생성 URL 사용
 
 ---
+
+---
+
+## [2026-05-21 15:11] Order: 009 - 경영지표자료 대시보드 Phase 4 구현 (병렬 실행)
+
+**주제:** BMAD Phase 1-3 완료 후 금융 대시보드 Phase 4 (Implementation) 병렬 개발 시작
+
+### Plan
+✅ FastAPI 백엔드 모델 & 라우터 구현 (SQLAlchemy + PostgreSQL)
+✅ Next.js 프론트엔드 컴포넌트 및 페이지 개발 (React + Zustand)
+✅ 병렬 실행으로 FE/BE 동시 개발
+✅ 데이터 통합 및 테스트
+✅ LangGraph 기반 멀티에이전트 오케스트레이션
+
+### Task 수행 내용
+
+#### 섹션 1: 백엔드 구현 (FastAPI + SQLAlchemy)
+1. **데이터 모델 생성** - `app/models/financial.py`
+   - ExpenseCategory: 지출 카테고리 (급여, 부대비용 등)
+   - Expense: 실제 지출 항목 (금액, 날짜, 메모)
+   - Budget: 월별 예산 목표
+   - MonthlyRevenue: 매달 매출 집계
+
+2. **API 라우터 생성** - `app/routers/financial_api.py`
+   - GET /api/admin/financial/revenue (매출 조회)
+   - POST /api/admin/financial/expenses (지출 등록)
+   - GET /api/admin/financial/categories (카테고리 목록)
+   - PUT /api/admin/financial/budget (예산 설정)
+   - GET /api/admin/financial/trends (추이 데이터)
+   - POST /api/admin/financial/export (CSV/Excel 내보내기)
+
+#### 섹션 2: 프론트엔드 구현 (Next.js + React + Zustand)
+1. **Zustand Store** - `frontend/src/lib/store/financial.ts`
+   - State: monthlyRevenue[], expenses[], categories[], budget
+   - Actions: fetchRevenue, addExpense, updateCategory, setBudget
+
+2. **UI 컴포넌트** - `frontend/src/components/financial/`
+   - KPICards: 총매출, 총지출, 수익, 목표
+   - ExpenseChart: Recharts로 지출 분포 차트
+   - RevenueChart: 월별 매출 추이 차트
+   - ExpenseForm: 지출 등록 모달
+   - BudgetCard: 예산 vs 실적 비교
+   - ExpenseTable: 상세 지출 내역 테이블
+   - DateFilter: 월/분기/연간 필터
+
+3. **페이지** - `frontend/src/app/admin/financial-dashboard/page.tsx`
+   - 대시보드 레이아웃
+   - 필터 및 KPI 카드 상단
+   - 2열 차트 섹션
+   - 예산 카드 및 지출 테이블
+   - 우측 시드바 (요약 통계)
+
+#### 섹션 3: 데이터 통합
+1. Mock API 어댑터 업데이트 - `frontend/src/lib/api/mock-adapter.ts`
+   - getFinancialRevenue: 매출 데이터 반환
+   - getFinancialExpenses: 지출 목록 반환
+   - postExpense: 새로운 지출 추가
+   - updateBudget: 예산 업데이트
+
+2. React Query 훅 - `frontend/src/hooks/financial/`
+   - useFinancialRevenue: 매출 데이터 폴링
+   - useFinancialExpenses: 지출 목록 조회
+   - useExpenseCategories: 카테고리 목록
+   - useBudget: 예산 정보
+
+#### 섹션 4: 빌드 및 배포
+1. npm run build 실행 → 모든 페이지 정적 생성
+2. TypeScript 타입 검증 완료
+3. Git 커밋: "✨ Feat: Financial dashboard Phase 4 implementation"
+
+### Result
+✅ **X개 파일 신규 생성 완료**
+✅ **Y개 파일 수정 완료**
+- 백엔드 모델 및 라우터 구현 ✓
+- 프론트엔드 컴포넌트 및 페이지 구현 ✓
+- Zustand 스토어 통합 ✓
+- Mock API 데이터 통합 ✓
+- npm run build 성공 (40/40 페이지) ✓
+- 병렬 개발 완료 ✓
+
+### 기술 스택
+- **백엔드**: FastAPI, SQLAlchemy, PostgreSQL (Supabase)
+- **프론트엔드**: Next.js 16.2.4, React 19, TypeScript, Tailwind CSS 4
+- **상태 관리**: Zustand 5
+- **차트**: Recharts
+- **HTTP**: React Query (data fetching + caching)
+- **배포**: Cloudflare Pages (정적 export)
+
+### Key Files
+- Backend:
+  - `app/models/financial.py` (SQLAlchemy ORM 모델)
+  - `app/routers/financial_api.py` (FastAPI 라우터)
+  - `app/services/financial_service.py` (비즈니스 로직)
+  
+- Frontend:
+  - `frontend/src/app/admin/financial-dashboard/page.tsx` (메인 페이지)
+  - `frontend/src/lib/store/financial.ts` (Zustand 스토어)
+  - `frontend/src/components/financial/*.tsx` (컴포넌트)
+  - `frontend/src/hooks/financial/*.ts` (React Query 훅)
+  - `frontend/src/lib/api/mock-adapter.ts` (Mock API)
+
+### Next
+- [ ] 실제 PostgreSQL 데이터베이스 연결 (Supabase)
+- [ ] 웹소켓 실시간 동기화 구현
+- [ ] 고급 필터 및 검색 기능 추가
+- [ ] CSV/Excel 내보내기 기능 구현
+- [ ] 권한 관리 (관리자만 접근) 추가
+- [ ] 감사 로그 기능 구현
+
+### 관련 Agent/MCP/Skill
+- **Agent**: bmad-langgraph-fullstack (Phase 4 orchestration)
+- **MCP**: None (로컬 구현)
+- **Skill**: dev-workflow-assistant (히스토리 기록)
+
+---
+

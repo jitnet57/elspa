@@ -190,10 +190,20 @@ async def api_info():
 # ============================================================
 # 🎯 고객 중심 API 라우터 (신규)
 from app.routers import therapists_api, bookings_api, reviews_api, settlement
+# 📱 메신저 봇 라우터 (신규)
+from app.routers import kakao, whatsapp
+# 🎫 스탬프 & 쿠폰 라우터
+from app.routers import stamps
+# 📋 SSS 스캔 라우터
+from app.routers import sss
+# 💰 일일 지출 보고서 라우터
+from app.routers import expense
+# 💹 경영지표자료 대시보드 라우터
+from app.routers import financial_api
 
 # 기존 라우터들 (일부 호환성 문제로 주석 처리)
 # from app.routers import beds, therapists, bookings, matching
-# from app.routers import settlements, predictions, dashboard, admin, services, customers, chats, kakao, location
+# from app.routers import settlements, predictions, dashboard, admin, services, customers, chats, location
 
 # API 라우터 등록
 # app.include_router(beds.router, prefix="/api")
@@ -215,6 +225,16 @@ app.include_router(therapists_api.router)
 app.include_router(bookings_api.router)
 app.include_router(reviews_api.router)
 app.include_router(settlement.router)  # Settlement API (Mock Data)
+
+# 📱 메신저 봇 라우터 등록
+app.include_router(kakao.router)
+app.include_router(whatsapp.router)
+# 🎫 스탬프 & 쿠폰 라우터 등록
+app.include_router(stamps.router)
+app.include_router(sss.router)
+app.include_router(expense.router)
+# 💹 경영지표자료 대시보드 라우터 등록
+app.include_router(financial_api.router)
 
 
 @app.on_event("startup")
