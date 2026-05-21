@@ -198,6 +198,8 @@ from app.routers import stamps
 from app.routers import sss
 # 💰 일일 지출 보고서 라우터
 from app.routers import expense
+# 💵 급여 정산 라우터 (신규)
+from app.routers import payroll
 # 💹 financial_api — sync DB 패턴, async 전환 예정 (임시 비활성화)
 # from app.routers import financial_api
 # 📊 Admin 데이터 관리 라우터 (테라피스트, 예약, 드라이버)
@@ -236,6 +238,8 @@ app.include_router(whatsapp.router)
 app.include_router(stamps.router)
 app.include_router(sss.router)
 app.include_router(expense.router)
+# 💵 급여 정산 라우터 등록
+app.include_router(payroll.router)
 # app.include_router(financial_api.router)  # async 전환 후 재활성화
 
 
