@@ -48,6 +48,12 @@ class Settings(BaseSettings):
     api_title: str = "ElSpa Manager API"
     api_version: str = "0.1.0"
 
+    # JWT 설정
+    jwt_secret_key: str = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
+    jwt_algorithm: str = os.getenv("JWT_ALGORITHM", "HS256")
+    access_token_expire_minutes: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15"))
+    refresh_token_expire_days: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
+
     class Config:
         env_file = ".env"
         case_sensitive = False

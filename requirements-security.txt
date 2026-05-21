@@ -1,0 +1,38 @@
+# ============================================================
+# Security Testing & Monitoring Dependencies
+# ============================================================
+
+# Testing Framework
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+
+# Security Testing
+safety==3.0.1              # 취약한 패키지 검사
+bandit==1.7.5              # Python 보안 검사 (SAST)
+semgrep==1.45.0            # 정적 분석
+
+# Input Validation & Sanitization
+bleach==6.1.0              # HTML 정제
+email-validator==2.1.0     # 이메일 검증
+phonenumbers==8.13.0       # 전화번호 검증
+
+# Password Hashing
+passlib==1.7.4             # 기본 설치됨
+bcrypt==4.1.1              # bcrypt 알고리즘
+
+# Rate Limiting
+slowapi==0.1.9             # FastAPI Rate Limiting
+
+# Monitoring & Logging
+python-json-logger==2.0.7  # JSON 로깅
+
+# Database Security
+sqlalchemy==2.1.1          # 기본 설치됨
+
+# HTTP Security
+secure==0.3.0              # 보안 헤더
+
+# JWT
+python-jose==3.3.0         # 기본 설치됨
+PyJWT==2.8.1               # JWT 검증

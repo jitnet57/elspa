@@ -37,10 +37,31 @@
       "Bash(Select-Object FullName)",
       "Bash(git checkout *)",
       "Bash(Select-String -Pattern \"error|Error|ERROR|TypeScript|✓|✖\")",
-      "Bash(Select-Object -Last 50)"
+      "Bash(Select-Object -Last 50)",
+      "Bash(python -m py_compile app/auth/jwt.py app/auth/dependencies.py app/routers/auth.py)",
+      "Bash(Get-ChildItem -Path e:\\\\elspa -Directory)",
+      "Bash(Select-Object -ExpandProperty Name)",
+      "Bash(grep -E \"\\\\.py$\")",
+      "Bash(powershell -Command \"Get-ChildItem -Path 'e:\\\\elspa\\\\app\\\\schemas' -File | Select-Object Name\")",
+      "Bash(python -m py_compile app/routers/payroll_analytics.py)",
+      "Bash(python samples/generate_sample_pdf.py)",
+      "Bash(python -c \"from app.routers import payroll_analytics; print\\('✅ Import successful'\\)\")",
+      "Bash(python -m py_compile tests/test_payroll_analytics.py)",
+      "Bash(vercel --prod)",
+      "Bash(git reset *)",
+      "Bash(git add *)",
+      "Bash(python -m py_compile app/utils/payroll_audit_helpers.py)",
+      "Bash(cat > *)",
+      "Bash(Get-ChildItem -Path \"e:\\\\elspa\" -Directory)",
+      "Bash(xargs grep -l \"dangerouslySetInnerHTML\\\\|innerHTML\")",
+      "Bash(chmod +x \"e:\\\\elspa\\\\scripts\\\\run_migrations.sh\")",
+      "Bash(vercel --prod --force)",
+      "Bash(grep -E \"\\\\.\\(py|md|yml|yaml|txt\\)$\")",
+      "Read(//e/elspa/.github/workflows/**)"
     ],
     "additionalDirectories": [
-      "C:\\Users\\jitne\\Desktop"
+      "C:\\Users\\jitne\\Desktop",
+      "\\tmp"
     ]
   }
 }

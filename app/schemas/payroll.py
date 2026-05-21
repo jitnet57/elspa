@@ -181,3 +181,41 @@ class PayrollRecordDetailResponse(PayrollRecordResponse):
     """정산 상세 (직원 정보 포함)"""
     employee: Optional[EmployeeResponse] = None
     payroll_period: Optional[PayrollPeriodResponse] = None
+
+
+# ============================================================
+# MessageLog (메시지 발송 기록)
+# ============================================================
+
+class MessageLogCreate(BaseModel):
+    """메시지 로그 생성"""
+    payroll_record_id: Optional[int] = None
+    employee_id: Optional[int] = None
+    message_type: str  # payroll_notification, settlement_approved
+    channel: str  # whatsapp, kakao, sms
+    recipient_phone: str
+    recipient_kakao_id: Optional[str] = None
+    subject: Optional[str] = None
+    body: str
+    amount: Optional[Decimal] = None
+    payment_date: Optional[date] = None
+
+
+class MessageLogResponse(MessageLogCreate):
+    """메시지 로그 응답"""
+    id: int
+    status: str  # pending, sent, failed, bounced
+    message_sid: Optional[str] = None
+    error_message: Optional[str] = None
+    sent_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class MessageLogDetailResponse(MessageLogResponse):
+    """메시지 로그 상세"""
+    payroll_record: Optional[PayrollRecordResponse] = None
+    employee: Optional[EmployeeResponse] = None

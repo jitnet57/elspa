@@ -299,3 +299,70 @@ class PhilippineHoliday(Base):
     __table_args__ = (
         Index("idx_holiday_date", "holiday_date"),
     )
+
+
+# ============================================================
+# 모델 7: MessageLog (메시지 발송 기록)
+# ============================================================
+class MessageLog(Base):
+    """
+    메시지 발송 기록 (WhatsApp, 카카오톡 등)
+
+    목적:
+      - 정산 알림 발송 추적
+      - 발송 실패 모니터링
+      - 감사(Audit) 기록
+
+    제약 조건:
+      - (payroll_record_id, channel) UNIQUE - 같은 정산에 채널별 1회만 발송
+
+    인덱스:
+      - (payroll_record_id) - 정산별 메시지 조회
+      - (status) - 실패/대기 메시지 조회
+      - (created_at) - 시간순 조회
+    """
+    __tablename__ = "message_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    # 외래키
+    payroll_record_id = Column(Integer, ForeignKey("payroll_records.id", ondelete="CASCADE"), nullable=True)
+    employee_id = Column(Integer, ForeignKey("employees.id", ondelete="CASCADE"), nullable=True)
+
+    # 기본 정보
+    message_type = Column(String(50), nullable=False)  # payroll_notification, settlement_approved, etc.
+    channel = Column(String(50), nullable=False)  # whatsapp, kakao, sms
+    recipient_phone = Column(String(20), nullable=False)  # 수신자 전화번호
+    recipient_kakao_id = Column(String(255), nullable=True)  # 카카오 User ID (선택)
+
+    # 메시지 내용
+    subject = Column(String(255), nullable=True)
+    body = Column(String(2000), nullable=False)
+
+    # 발송 정보
+    status = Column(String(50), nullable=False, default="pending")  # pending, sent, failed, bounced
+    message_sid = Column(String(255), nullable=True)  # Twilio/Kakao 메시지 ID
+    error_message = Column(String(1000), nullable=True)  # 에러 메시지
+
+    # 추적 정보
+    amount = Column(Numeric(10, 2), nullable=True)  # 발송 대상 금액
+    payment_date = Column(Date, nullable=True)  # 지급일
+
+    # 타임스탐프
+    sent_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # 제약 조건 및 인덱스
+    __table_args__ = (
+        UniqueConstraint("payroll_record_id", "channel", name="uk_payroll_channel"),
+        Index("idx_message_payroll_record", "payroll_record_id"),
+        Index("idx_message_employee", "employee_id"),
+        Index("idx_message_status", "status"),
+        Index("idx_message_channel", "channel"),
+        Index("idx_message_created_at", "created_at"),
+    )
+
+    # 관계
+    payroll_record = relationship("PayrollRecord", backref="message_logs")
+    employee = relationship("Employee", backref="message_logs")

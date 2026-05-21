@@ -12,6 +12,7 @@ from app.database import Base
 
 class AuditActionEnum(str, enum.Enum):
     """감사 로그 작업 타입"""
+    # Financial (지출, 예산)
     EXPENSE_CREATED = "expense_created"
     EXPENSE_UPDATED = "expense_updated"
     EXPENSE_DELETED = "expense_deleted"
@@ -21,6 +22,35 @@ class AuditActionEnum(str, enum.Enum):
     BUDGET_UPDATED = "budget_updated"
     REVENUE_RECORDED = "revenue_recorded"
     EXPORT_GENERATED = "export_generated"
+
+    # Payroll - Employee (직원)
+    EMPLOYEE_CREATED = "employee_created"
+    EMPLOYEE_UPDATED = "employee_updated"
+    EMPLOYEE_DELETED = "employee_deleted"
+
+    # Payroll - Cash Advance (선지급)
+    CASH_ADVANCE_CREATED = "cash_advance_created"
+    CASH_ADVANCE_APPROVED = "cash_advance_approved"
+    CASH_ADVANCE_REJECTED = "cash_advance_rejected"
+    CASH_ADVANCE_SETTLED = "cash_advance_settled"
+
+    # Payroll - Attendance (출퇴근)
+    ATTENDANCE_CREATED = "attendance_created"
+    ATTENDANCE_UPDATED = "attendance_updated"
+
+    # Payroll - PayrollPeriod (정산 기간)
+    PAYROLL_PERIOD_CREATED = "payroll_period_created"
+    PAYROLL_PERIOD_APPROVED = "payroll_period_approved"
+    PAYROLL_PERIOD_PAID = "payroll_period_paid"
+
+    # Payroll - PayrollRecord (개인별 정산)
+    PAYROLL_RECORD_CALCULATED = "payroll_record_calculated"
+    PAYROLL_RECORD_UPDATED = "payroll_record_updated"
+    PAYROLL_RECORD_APPROVED = "payroll_record_approved"
+
+    # Payroll - Holiday (공휴일)
+    HOLIDAY_CREATED = "holiday_created"
+    HOLIDAY_DELETED = "holiday_deleted"
 
 
 class AuditLog(Base):

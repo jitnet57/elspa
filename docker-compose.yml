@@ -1,21 +1,101 @@
+# ============================================================
+# 📌 docker-compose.yml - ElSpa Multi-Container Orchestration
+# 📋 목적: 백엔드, 프론트엔드, 데이터베이스 통합 운영
+# 🔧 개발/테스트 환경용 오케스트레이션
+# 📅 작성일: 2026-05-22
+# ============================================================
+
 version: '3.8'
 
 services:
-  redis:
-    image: redis:7-alpine
+  # ==========================================
+  # Database: PostgreSQL (Supabase 호환)
+  # ==========================================
+  db:
+    image: postgres:15-alpine
+    container_name: elspa-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-elspa_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-elspa_password}
+      POSTGRES_DB: ${DB_NAME:-elspa_dev}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=en_US.UTF-8"
     ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+      - "5432:5432"
     volumes:
-      - redis_data:/data
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-elspa_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - elspa_network
+
+  # ==========================================
+  # Backend API: FastAPI + uvicorn
+  # ==========================================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: elspa-backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-elspa_user}:${DB_PASSWORD:-elspa_password}@db:5432/${DB_NAME:-elspa_dev}
+      DEBUG: ${DEBUG:-false}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:3001}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-secret-key-change-in-production}
+      JWT_ALGORITHM: HS256
+      JWT_EXPIRATION_HOURS: 24
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    volumes:
+      - ./app:/app/app
+      - ./main.py:/app/main.py
+      - ./scripts:/app/scripts
+
+    networks:
+      - elspa_network
+
+    restart: unless-stopped
+
+  # ==========================================
+  # Frontend: Next.js (Port 3000)
+  # ==========================================
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: elspa-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: ${NEXT_ENV:-development}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      NEXT_PUBLIC_APP_NAME: ElSpa Manager
+
+    depends_on:
+      - backend
+
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+
+    networks:
+      - elspa_network
+
+    restart: unless-stopped
 
 volumes:
-  redis_data:
+  postgres_data:
+    driver: local
 
 networks:
-  default:
-    name: elspa-network
+  elspa_network:
+    driver: bridge

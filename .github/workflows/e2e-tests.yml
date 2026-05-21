@@ -1,0 +1,175 @@
+name: E2E Tests - Cypress
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  cypress-run:
+    name: Cypress E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      matrix:
+        # Node version
+        node-version: [20.x]
+
+    steps:
+      # 1. 코드 체크아웃
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Node.js 설정
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      # 3. 프론트엔드 의존성 설치
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      # 4. 프론트엔드 빌드
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'http://localhost:8000' }}
+
+      # 5. 백엔드 의존성 설치 (Python)
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      # 6. 백엔드 의존성 설치
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 7. 백엔드 서버 시작 (백그라운드)
+      - name: Start backend server
+        run: |
+          python main.py &
+          sleep 5
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://user:password@localhost:5432/test_db' }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY || 'test-secret-key' }}
+
+      # 8. 프론트엔드 개발 서버 시작 (백그라운드)
+      - name: Start frontend development server
+        working-directory: frontend
+        run: npm run dev &
+        env:
+          NEXT_PUBLIC_API_URL: 'http://localhost:8000'
+
+      # 9. 서버 상태 확인 (대기)
+      - name: Wait for servers to be ready
+        run: |
+          echo "Waiting for servers to start..."
+          for i in {1..30}; do
+            if curl -s http://localhost:3000 > /dev/null && curl -s http://localhost:8000/docs > /dev/null; then
+              echo "Servers are ready!"
+              exit 0
+            fi
+            echo "Attempt $i: Waiting for servers..."
+            sleep 2
+          done
+          echo "Servers did not start in time"
+          exit 1
+
+      # 10. Cypress E2E 테스트 실행
+      - name: Run Cypress E2E tests
+        working-directory: frontend
+        run: npm run cypress:run
+        env:
+          CYPRESS_baseUrl: http://localhost:3000
+          NEXT_PUBLIC_API_URL: http://localhost:8000
+
+      # 11. 테스트 결과 업로드 (실패 시)
+      - name: Upload Cypress screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: frontend/cypress/screenshots/
+          retention-days: 7
+
+      # 12. 테스트 비디오 업로드 (선택)
+      - name: Upload Cypress videos on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos
+          path: frontend/cypress/videos/
+          retention-days: 7
+
+      # 13. 테스트 리포트 생성
+      - name: Generate test report
+        if: always()
+        working-directory: frontend
+        run: |
+          if [ -f "cypress/results/cypress.json" ]; then
+            npm run cypress:report
+          fi
+
+      # 14. 테스트 리포트 업로드
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-report
+          path: frontend/cypress-report.html
+          retention-days: 30
+
+      # 15. 슬랙 알림 (선택)
+      - name: Notify Slack on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "text": "❌ E2E Tests Failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*E2E Tests Failed* ❌\n*Branch:* ${{ github.ref }}\n*Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>"
+                  }
+                }
+              ]
+            }
+
+      # 16. 슬랙 알림 (성공)
+      - name: Notify Slack on success
+        if: success()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "text": "✅ E2E Tests Passed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*E2E Tests Passed* ✅\n*Branch:* ${{ github.ref }}\n*All tests completed successfully*"
+                  }
+                }
+              ]
+            }

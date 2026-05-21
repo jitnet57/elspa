@@ -1,0 +1,51 @@
+{
+  "employee": {
+    "id": 1,
+    "name": "김철수",
+    "email": "kim@elspa.test",
+    "phone": "010-1234-5678",
+    "position": "Therapist",
+    "base_salary": 2500000,
+    "status": "active",
+    "hired_date": "2020-01-01"
+  },
+  "payroll_record": {
+    "id": 1,
+    "period_id": 1,
+    "employee_id": 1,
+    "base_salary": 2500000,
+    "allowances": {
+      "night_shift": 150000,
+      "weekend": 150000
+    },
+    "deductions": {
+      "national_pension": 125000,
+      "health_insurance": 125000
+    },
+    "net_amount": 2550000,
+    "work_days": 20,
+    "late_count": 1,
+    "overtime_hours": 5,
+    "cash_advance": 500000,
+    "status": "completed"
+  },
+  "cash_advance": {
+    "id": 1,
+    "employee_id": 1,
+    "amount": 500000,
+    "status": "pending",
+    "reason": "의료비",
+    "requested_date": "2026-05-20"
+  },
+  "attendance": {
+    "id": 1,
+    "employee_id": 1,
+    "date": "2026-05-22",
+    "start_time": "09:00",
+    "end_time": "18:00",
+    "work_hours": 9,
+    "late_minutes": 0,
+    "overtime_hours": 1,
+    "status": "recorded"
+  }
+}

@@ -23,6 +23,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
+from sqlalchemy.orm import joinedload, selectinload, defer
 
 logger = logging.getLogger(__name__)
 
@@ -85,13 +86,26 @@ async def list_employees(
     skip: int = 0,
     limit: int = 100,
     employee_type: Optional[str] = None,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    response: Response = None
 ):
+    """
+    직원 목록 조회 (페이지네이션)
+
+    ✅ 최적화:
+    - Cache-Control 헤더: 5분 캐싱
+    - 페이지네이션으로 성능 개선
+    """
     stmt = select(Employee)
     if employee_type:
         stmt = stmt.where(Employee.employee_type == employee_type)
     stmt = stmt.offset(skip).limit(limit)
     result = await db.execute(stmt)
+
+    # ✅ HTTP 캐싱 헤더
+    if response:
+        response.headers["Cache-Control"] = "public, max-age=300"  # 5분
+
     return result.scalars().all()
 
 
@@ -374,8 +388,13 @@ async def create_holiday(
 async def list_holidays(
     skip: int = 0,
     limit: int = 100,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    response: Response = None
 ):
+    # ✅ HTTP 캐싱 헤더 (24시간 - 공휴일은 변경 빈도가 낮음)
+    if response:
+        response.headers["Cache-Control"] = "public, max-age=86400"
+
     result = await db.execute(select(PhilippineHoliday).offset(skip).limit(limit))
     return result.scalars().all()
 
@@ -436,8 +455,13 @@ async def create_payroll_period(
 async def list_payroll_periods(
     skip: int = 0,
     limit: int = 100,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    response: Response = None
 ):
+    # ✅ HTTP 캐싱 헤더 (5분)
+    if response:
+        response.headers["Cache-Control"] = "public, max-age=300"
+
     result = await db.execute(select(PayrollPeriod).offset(skip).limit(limit))
     return result.scalars().all()
 
@@ -509,8 +533,14 @@ async def calculate_payroll(
             user_email=current_user.get("email")
         )
 
+    # ✅ 최적화: JOIN으로 연관 객체 한 번에 로드
     result = await db.execute(
-        select(PayrollRecord).where(PayrollRecord.payroll_period_id == period_id)
+        select(PayrollRecord)
+        .where(PayrollRecord.payroll_period_id == period_id)
+        .options(
+            joinedload(PayrollRecord.payroll_period),
+            joinedload(PayrollRecord.employee)
+        )
     )
     return result.scalars().all()
 
@@ -523,7 +553,11 @@ async def list_payroll_records(
     limit: int = 100,
     db: AsyncSession = Depends(get_db)
 ):
-    stmt = select(PayrollRecord)
+    # ✅ 최적화: JOIN으로 연관 객체 한 번에 로드
+    stmt = select(PayrollRecord).options(
+        joinedload(PayrollRecord.payroll_period),
+        joinedload(PayrollRecord.employee)
+    )
     if payroll_period_id:
         stmt = stmt.where(PayrollRecord.payroll_period_id == payroll_period_id)
     if employee_id:
@@ -547,6 +581,10 @@ async def get_health_check_schedule(db: AsyncSession = Depends(get_db)):
     """
     테라피스트별 보건소 검사비 차감 일정 조회
 
+    ✅ 최적화: joinedload를 사용하여 N+1 쿼리 문제 제거
+    - PayrollRecord와 PayrollPeriod를 한 번에 JOIN하여 로드
+    - 루프에서 PayrollRecord 조회 시 추가 쿼리 없음
+
     반환 값:
     - therapist_id: 테라피스트 ID
     - therapist_name: 테라피스트 이름
@@ -559,25 +597,22 @@ async def get_health_check_schedule(db: AsyncSession = Depends(get_db)):
     - pending: 차감 예정
     - deducted: 차감 완료
     """
-    # 활성화된 Therapist 조회
+    # 활성화된 Therapist 조회 (조인으로 한 번에 가져오기)
     result = await db.execute(
-        select(Employee).where(
+        select(Employee)
+        .where(
             Employee.employee_type == EmployeeType.THERAPIST,
             Employee.is_active == True
         )
+        .options(selectinload(Employee.payroll_records).joinedload(PayrollRecord.payroll_period))
     )
     therapists = result.scalars().all()
 
     schedule = []
 
     for therapist in therapists:
-        # 각 테라피스트의 분기별 정산 기록 조회
-        payroll_result = await db.execute(
-            select(PayrollRecord).where(
-                PayrollRecord.employee_id == therapist.id
-            )
-        )
-        records = payroll_result.scalars().all()
+        # ✅ 최적화: 이미 로드된 payroll_records 사용 (추가 쿼리 없음)
+        records = therapist.payroll_records
 
         # 분기별 차감 여부 판정
         quarters = {"Q1": False, "Q2": False, "Q3": False, "Q4": False}
