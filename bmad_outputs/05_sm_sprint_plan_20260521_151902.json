@@ -1,0 +1,196 @@
+{
+  "sprint_name": "Payroll Settlement MVP - Sprint 1",
+  "duration": "1주 (Mon-Fri)",
+  "goal": "Employee/CashAdvance/AttendanceLog/Holiday 모델 + 계산 엔진 완성",
+
+  "mvp_tasks": [
+    {
+      "task_id": "BE-001",
+      "task_name": "Employee 모델 구현",
+      "owner": "backend",
+      "duration": "4 hours",
+      "dependencies": [],
+      "description": "SQLAlchemy Employee 모델 + migration",
+      "status": "pending"
+    },
+    {
+      "task_id": "BE-002",
+      "task_name": "CashAdvance 모델 구현",
+      "owner": "backend",
+      "duration": "3 hours",
+      "dependencies": ["BE-001"],
+      "description": "CA 선지급 모델 + 상태 관리",
+      "status": "pending"
+    },
+    {
+      "task_id": "BE-003",
+      "task_name": "AttendanceLog 모델 구현",
+      "owner": "backend",
+      "duration": "4 hours",
+      "dependencies": ["BE-001"],
+      "description": "출퇴근 기록 모델 + 자동 계산 (late, OT)",
+      "status": "pending"
+    },
+    {
+      "task_id": "BE-004",
+      "task_name": "PayrollPeriod/PayrollRecord 모델",
+      "owner": "backend",
+      "duration": "3 hours",
+      "dependencies": ["BE-001"],
+      "description": "정산 기간 및 결과 모델",
+      "status": "pending"
+    },
+    {
+      "task_id": "BE-005",
+      "task_name": "PhilippineHoliday 모델",
+      "owner": "backend",
+      "duration": "2 hours",
+      "dependencies": [],
+      "description": "공휴일 관리 모델 + 2026 데이터",
+      "status": "pending"
+    },
+    {
+      "task_id": "BE-006",
+      "task_name": "급여 계산 엔진 구현",
+      "owner": "backend",
+      "duration": "8 hours",
+      "dependencies": ["BE-001", "BE-003", "BE-004", "BE-005"],
+      "description": "calculate_payroll 함수 + 모든 공식",
+      "status": "pending"
+    },
+    {
+      "task_id": "BE-007",
+      "task_name": "Payroll API 라우터",
+      "owner": "backend",
+      "duration": "6 hours",
+      "dependencies": ["BE-006"],
+      "description": "/api/payroll/* 모든 CRUD 엔드포인트",
+      "status": "pending"
+    },
+    {
+      "task_id": "FE-001",
+      "task_name": "/admin/payroll/ 대시보드",
+      "owner": "frontend",
+      "duration": "5 hours",
+      "dependencies": ["BE-007"],
+      "description": "메인 대시보드 UI + 정산 계산 버튼",
+      "status": "pending"
+    },
+    {
+      "task_id": "FE-002",
+      "task_name": "/admin/payroll/employees/",
+      "owner": "frontend",
+      "duration": "5 hours",
+      "dependencies": ["BE-007"],
+      "description": "직원 마스터 CRUD UI",
+      "status": "pending"
+    },
+    {
+      "task_id": "FE-003",
+      "task_name": "/admin/payroll/cash-advance/",
+      "owner": "frontend",
+      "duration": "4 hours",
+      "dependencies": ["BE-007"],
+      "description": "CA 관리 UI",
+      "status": "pending"
+    },
+    {
+      "task_id": "FE-004",
+      "task_name": "/admin/payroll/attendance/",
+      "owner": "frontend",
+      "duration": "6 hours",
+      "dependencies": ["BE-007"],
+      "description": "출퇴근 입력 UI + 테이블",
+      "status": "pending"
+    },
+    {
+      "task_id": "FE-005",
+      "task_name": "/admin/payroll/holidays/",
+      "owner": "frontend",
+      "duration": "4 hours",
+      "dependencies": ["BE-007"],
+      "description": "공휴일 관리 UI + 캘린더",
+      "status": "pending"
+    },
+    {
+      "task_id": "FE-006",
+      "task_name": "/admin/payroll/records/",
+      "owner": "frontend",
+      "duration": "5 hours",
+      "dependencies": ["BE-007"],
+      "description": "정산 결과 조회 UI + 상세 정산서",
+      "status": "pending"
+    },
+    {
+      "task_id": "QA-001",
+      "task_name": "계산 정확도 테스트",
+      "owner": "qa",
+      "duration": "4 hours",
+      "dependencies": ["BE-006"],
+      "description": "5개 샘플 케이스 수동 검증",
+      "status": "pending"
+    },
+    {
+      "task_id": "QA-002",
+      "task_name": "엣지케이스 검증",
+      "owner": "qa",
+      "duration": "3 hours",
+      "dependencies": ["BE-006"],
+      "description": "OT 40분/39분, 지각 9분/11분 경계값",
+      "status": "pending"
+    }
+  ],
+
+  "parallel_tracks": [
+    {
+      "track": "Backend Development",
+      "tasks": ["BE-001", "BE-002", "BE-003", "BE-004", "BE-005", "BE-006", "BE-007"],
+      "estimated_hours": 30,
+      "critical_path": "BE-001 → BE-003 → BE-006 → BE-007"
+    },
+    {
+      "track": "Frontend Development",
+      "tasks": ["FE-001", "FE-002", "FE-003", "FE-004", "FE-005", "FE-006"],
+      "estimated_hours": 29,
+      "dependency": "BE-007 must complete before FE tasks"
+    },
+    {
+      "track": "QA & Testing",
+      "tasks": ["QA-001", "QA-002"],
+      "estimated_hours": 7,
+      "dependency": "BE-006 must complete first"
+    }
+  ],
+
+  "risks": [
+    {
+      "risk_id": "R-001",
+      "risk": "Anthropic API 지연",
+      "impact": "high",
+      "probability": "medium",
+      "mitigation": "캐싱 및 배치 처리로 API 호출 최소화"
+    },
+    {
+      "risk_id": "R-002",
+      "risk": "OT/공휴일 계산 복잡도",
+      "impact": "high",
+      "probability": "medium",
+      "mitigation": "단위 테스트 충분히 작성, 샘플 케이스 미리 검증"
+    },
+    {
+      "risk_id": "R-003",
+      "risk": "기존 모델과 충돌",
+      "impact": "medium",
+      "probability": "low",
+      "mitigation": "마이그레이션 스크립트 사전 테스트"
+    }
+  ],
+
+  "success_criteria": [
+    "모든 API 엔드포인트 구현 완료",
+    "5개 샘플 케이스 정산 결과 100% 정확",
+    "TypeScript 빌드 에러 0",
+    "FastAPI 테스트 100% 통과",
+    "프론트엔드 UI 반응형 동작 확인"
+  ]
+}

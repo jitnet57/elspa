@@ -1036,3 +1036,77 @@ https://elspa.pages.dev/customer/landing
 
 ---
 
+
+### Result
+✅ **11개 파일 신규 생성 + 2개 파일 수정 완료**
+
+#### 백엔드 구현 완료
+1. `app/models/financial.py` - SQLAlchemy ORM 모델 (ExpenseCategory, Expense, Budget, MonthlyRevenue)
+2. `app/routers/financial_api.py` - FastAPI 라우터 (6개 엔드포인트)
+3. `app/schemas/financial.py` - Pydantic 스키마 (Request/Response)
+4. `app/models/__init__.py` - 모델 내보내기 업데이트
+5. `main.py` - Financial API router 통합
+
+#### 프론트엔드 구현 완료
+1. `frontend/src/lib/store/financial.ts` - Zustand 스토어 (상태 관리 + 계산 함수)
+2. `frontend/src/components/financial/KPICards.tsx` - KPI 카드 컴포넌트
+3. `frontend/src/components/financial/ExpenseChart.tsx` - Recharts 차트 (Pie & Bar)
+4. `frontend/src/app/admin/financial-dashboard/page.tsx` - 메인 대시보드 페이지
+
+#### 빌드 결과
+- ✅ npm run build 성공 (43/43 페이지 정적 생성)
+- ✅ TypeScript 타입 검증 통과
+- ✅ 모든 Recharts 컴포넌트 타입 안정화
+- ✅ 샘플 데이터 초기화 완료
+
+### 기술 구현 상세
+
+#### 백엔드 API 엔드포인트
+1. **GET /api/admin/financial/revenue** - 월별 매출 조회
+2. **POST /api/admin/financial/expenses** - 지출 등록
+3. **GET /api/admin/financial/categories** - 카테고리 목록
+4. **PUT /api/admin/financial/budget** - 예산 설정
+5. **GET /api/admin/financial/trends/expenses-by-category** - 지출 추이
+6. **GET /api/admin/financial/comparison** - 예산 vs 실적 비교
+
+#### 프론트엔드 Zustand Store 함수
+- `getTotalExpenses()` - 월별 총 지출
+- `getTotalRevenue()` - 월별 총 매출
+- `getExpensesByCategory()` - 카테고리별 지출 집계
+- `getProfitMargin()` - 수익률 계산
+
+#### 대시보드 UI 컴포넌트
+- 📊 KPI 카드 (4개: 매출, 지출, 수익, 수익률)
+- 📈 Expense Chart (Pie/Bar 전환 가능)
+- 💾 Budget vs Actual (Progress bar + 통계)
+- 📋 Expense Table (상세 내역 + 필터)
+
+### Next
+- [ ] PostgreSQL Supabase 실제 데이터 연결
+- [ ] WebSocket 실시간 동기화 구현
+- [ ] React Query 데이터 폴링 훅 구현
+- [ ] CSV/Excel 내보내기 기능
+- [ ] 권한 관리 (Admin-only 접근)
+- [ ] 감사 로그 (Audit trail) 구현
+
+### Commit Hash
+commit 11f1dfc
+Message: ✨ Feat: Financial Dashboard Phase 4 Implementation (Parallel FE/BE)
+
+---
+
+## [2026-05-21 14:30] Order: 006 - 통합 데이터 관리 대시보드 (Admin 관리 페이지)
+
+**주제:** 테라피스트, 예약, 드라이버 정보를 웹에서 보고 수정 가능하며 엑셀 다운로드 기능이 있는 관리자 대시보드
+
+### Plan
+✅ FastAPI 백엔드: 3개 라우터 구현 (therapists, bookings, drivers)
+✅ 프론트엔드: Admin 대시보드 페이지 (탭 기반 UI)
+✅ 데이터 테이블: 입력/수정/삭제 기능
+✅ 엑셀 내보내기: xlsx 라이브러리 사용
+✅ 브라우저 테스트 및 확인
+
+### Task 수행 내용
+
+**구현 중...**
+

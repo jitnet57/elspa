@@ -198,8 +198,10 @@ from app.routers import stamps
 from app.routers import sss
 # 💰 일일 지출 보고서 라우터
 from app.routers import expense
-# 💹 경영지표자료 대시보드 라우터
-from app.routers import financial_api
+# 💹 financial_api — sync DB 패턴, async 전환 예정 (임시 비활성화)
+# from app.routers import financial_api
+# 📊 Admin 데이터 관리 라우터 (테라피스트, 예약, 드라이버)
+from app.routers import admin_data_api
 
 # 기존 라우터들 (일부 호환성 문제로 주석 처리)
 # from app.routers import beds, therapists, bookings, matching
@@ -223,6 +225,7 @@ from app.routers import financial_api
 # 고객 중심 API 라우터 등록
 app.include_router(therapists_api.router)
 app.include_router(bookings_api.router)
+app.include_router(admin_data_api.router)
 app.include_router(reviews_api.router)
 app.include_router(settlement.router)  # Settlement API (Mock Data)
 
@@ -233,8 +236,7 @@ app.include_router(whatsapp.router)
 app.include_router(stamps.router)
 app.include_router(sss.router)
 app.include_router(expense.router)
-# 💹 경영지표자료 대시보드 라우터 등록
-app.include_router(financial_api.router)
+# app.include_router(financial_api.router)  # async 전환 후 재활성화
 
 
 @app.on_event("startup")

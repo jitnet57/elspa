@@ -10,7 +10,9 @@
       "PowerShell(Get-ChildItem -Path \"..\\\\health\\\\pt-therapy-platform\" -File | ForEach-Object { $_.Name })",
       "PowerShell(Get-ChildItem -Path \"..\\\\health\\\\pt-therapy-platform\" -Directory | ForEach-Object { $_.Name })",
       "Bash(curl -s http://localhost:5173)",
-      "PowerShell(Start-Process \"http://localhost:3000\")"
+      "PowerShell(Start-Process \"http://localhost:3000\")",
+      "PowerShell(Start-Process -FilePath \"cmd\" -ArgumentList \"/c\", \"cd /d e:\\\\elspa && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload > backend.log 2>&1\" -WindowStyle Minimized)",
+      "Bash(powershell -Command \"Get-Date -Format 'yyyy-MM-dd HH:mm'\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\jitne\\Desktop"

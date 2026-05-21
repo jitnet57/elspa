@@ -3,23 +3,42 @@
 /**
  * 📌 Financial Dashboard Page
  * 📋 목적: 경영지표자료 대시보드 - 총매출, 지출, 수익, 예산 추적
- * 🔧 포함: KPI 카드, 차트, 지출 테이블, 필터, 예산 설정
+ * 🔧 포함: KPI 카드, 차트, 지출 테이블, 필터, 예산 설정, 실시간 동기화
  */
 
 import { useState, useEffect } from 'react';
 import { useFinancialStore } from '@/lib/store/financial';
 import { KPICards } from '@/components/financial/KPICards';
 import { ExpenseChart } from '@/components/financial/ExpenseChart';
+import { ExportButton } from '@/components/financial/ExportButton';
+import { useFinancialRevenue, useFinancialExpenses, useFinancialWebSocket } from '@/hooks/financial';
 
 export default function FinancialDashboardPage() {
   const store = useFinancialStore();
   const [isLoading, setIsLoading] = useState(true);
 
+  // React Query 데이터 폴링
+  const revenueQuery = useFinancialRevenue(store.selectedYear, store.selectedMonth);
+  const expensesQuery = useFinancialExpenses(store.selectedYear, store.selectedMonth);
+
+  // WebSocket 실시간 동기화
+  useFinancialWebSocket(true);
+
   useEffect(() => {
-    // Initialize with sample data
+    // 1차: 샘플 데이터로 초기화
     initializeSampleData();
+
+    // 2차: React Query 데이터 동기화
+    if (!revenueQuery.isLoading && revenueQuery.data) {
+      store.setMonthlyRevenues(revenueQuery.data);
+    }
+
+    if (!expensesQuery.isLoading && expensesQuery.data) {
+      store.setExpenses(expensesQuery.data);
+    }
+
     setIsLoading(false);
-  }, []);
+  }, [revenueQuery.data, expensesQuery.data]);
 
   const initializeSampleData = () => {
     // Sample expense categories
@@ -112,10 +131,21 @@ export default function FinancialDashboardPage() {
     store.setSelectedPeriod(now.getFullYear(), now.getMonth() + 1);
   };
 
-  if (isLoading) {
+  const isDataLoading = isLoading || revenueQuery.isLoading || expensesQuery.isLoading;
+
+  if (isDataLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Loading financial dashboard...</p>
+        <div className="text-center">
+          <div className="animate-spin mb-4">⏳</div>
+          <p className="text-gray-500">Loading financial dashboard...</p>
+          {revenueQuery.isError && (
+            <p className="text-red-500 text-sm mt-2">Revenue data fetch error</p>
+          )}
+          {expensesQuery.isError && (
+            <p className="text-red-500 text-sm mt-2">Expenses data fetch error</p>
+          )}
+        </div>
       </div>
     );
   }
@@ -240,7 +270,10 @@ export default function FinancialDashboardPage() {
 
         {/* Expense details table */}
         <div className="bg-white rounded-lg p-6 shadow-md border border-gray-200">
-          <h3 className="text-lg font-bold text-gray-900 mb-6">Recent Expenses</h3>
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-bold text-gray-900">Recent Expenses</h3>
+            <ExportButton />
+          </div>
 
           {store.expenses.length > 0 ? (
             <div className="overflow-x-auto">
