@@ -62,6 +62,41 @@ class PayrollCalculator:
         return Decimal(session_count) * session_price
 
     @staticmethod
+    def calculate_health_check_deduction(employee_type: str, payroll_period: PayrollPeriod) -> Decimal:
+        """
+        보건소 검사비 차감 (분기별 1회)
+        - Therapist만 적용
+        - 금액: 500 Peso (필리핀 기준)
+        - 차감 시점: 분기 말 정산 (Q1=3월, Q2=6월, Q3=9월, Q4=12월)
+
+        분기 판정:
+          - 1-3월 → Q1
+          - 4-6월 → Q2
+          - 7-9월 → Q3
+          - 10-12월 → Q4
+
+        Args:
+            employee_type: 직원 유형
+            payroll_period: 정산 기간
+
+        Returns:
+            차감액 (500 Peso 또는 0)
+        """
+        # Therapist만 적용
+        if employee_type != EmployeeType.THERAPIST:
+            return Decimal(0)
+
+        # 분기 판정 (payroll_period.period_end의 월 기반)
+        month = payroll_period.period_end.month
+
+        # 분기 말인지 확인
+        is_quarter_end = month in [3, 6, 9, 12]
+
+        if is_quarter_end:
+            return Decimal(500)  # 500 Peso
+        return Decimal(0)
+
+    @staticmethod
     async def get_approved_ca_amount(employee_id: int, db: AsyncSession) -> Decimal:
         """승인된 CA 합계"""
         result = await db.execute(
@@ -172,7 +207,11 @@ class PayrollCalculator:
         sss_deduction = Decimal(0)
         ca_deduction = await calc.get_approved_ca_amount(employee.id, db)
         thirteenth_month_deduction = Decimal(0)
-        health_check_deduction = Decimal(0)
+
+        # 보건소 검사비 차감 (Therapist, 분기별 1회)
+        health_check_deduction = calc.calculate_health_check_deduction(
+            employee.employee_type, payroll_period
+        )
 
         total_deductions = (
             late_deduction + absence_deduction + sss_deduction +

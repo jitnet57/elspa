@@ -243,6 +243,7 @@ class PayrollRecord(Base):
     ca_deduction = Column(Numeric(10, 2), default=0)  # CA 차감
     health_check_deduction = Column(Numeric(10, 2), default=0)  # 보건소 검사비
     thirteenth_month_deduction = Column(Numeric(10, 2), default=0)  # 13개월 보너스 선지급
+    thirteenth_month_accrual = Column(Numeric(10, 2), default=0)  # 13개월 보너스 누적액 (참고용)
 
     # 최종 금액
     gross_pay = Column(Numeric(10, 2), default=0)  # 총 수입

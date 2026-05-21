@@ -2,62 +2,15 @@
 
 /**
  * 📌 Cash Advance Management Page
- * 📋 목적: CA 신청 목록 조회, 상태 필터, 승인/거절 처리
+ * 📋 목적: CA 신청 목록 조회, 상태 필터, 승인/거절 처리 (API 연동)
  * 🔧 포함: CA 테이블, 상태 필터, 승인/거절 버튼, 상세 모달
- * 📅 작성일: 2026-05-21
+ * 📌 개선: Zustand store 사용, API 연동, Retry logic
+ * 📅 작성일: 2026-05-22
  */
 
 import { useState, useEffect } from 'react';
-
-interface CashAdvance {
-  id: number;
-  employee_id: number;
-  employee_name?: string;
-  amount: number;
-  request_date: string;
-  reason?: string;
-  status: 'pending' | 'approved' | 'rejected' | 'settled';
-  settled_payroll_id?: number | null;
-  created_at: string;
-  updated_at: string;
-}
-
-const MOCK_CASH_ADVANCES: CashAdvance[] = [
-  {
-    id: 1,
-    employee_id: 1,
-    employee_name: 'Maria Santos',
-    amount: 5000,
-    request_date: '2026-05-20',
-    reason: 'Medical emergency',
-    status: 'pending',
-    created_at: '2026-05-20T14:30:00',
-    updated_at: '2026-05-20T14:30:00',
-  },
-  {
-    id: 2,
-    employee_id: 2,
-    employee_name: 'Jose Garcia',
-    amount: 8000,
-    request_date: '2026-05-19',
-    reason: 'Car repair',
-    status: 'approved',
-    created_at: '2026-05-19T10:15:00',
-    updated_at: '2026-05-19T16:45:00',
-  },
-  {
-    id: 3,
-    employee_id: 3,
-    employee_name: 'Carmen Reyes',
-    amount: 3000,
-    request_date: '2026-05-18',
-    reason: 'Personal needs',
-    status: 'settled',
-    settled_payroll_id: 2,
-    created_at: '2026-05-18T11:20:00',
-    updated_at: '2026-05-21T09:00:00',
-  },
-];
+import { usePayrollStore } from '@/lib/store/payroll-store';
+import { CashAdvance } from '@/lib/api/payroll-client';
 
 const STATUS_CONFIG = {
   pending: {
@@ -87,16 +40,23 @@ const STATUS_CONFIG = {
 };
 
 export default function CashAdvancePage() {
-  const [cashAdvances, setCashAdvances] = useState<CashAdvance[]>(MOCK_CASH_ADVANCES);
-  const [filteredCAs, setFilteredCAs] = useState<CashAdvance[]>(MOCK_CASH_ADVANCES);
+  const [filteredCAs, setFilteredCAs] = useState<CashAdvance[]>([]);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [selectedCA, setSelectedCA] = useState<CashAdvance | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showActionModal, setShowActionModal] = useState(false);
   const [actionType, setActionType] = useState<'approve' | 'reject' | null>(null);
   const [actionNotes, setActionNotes] = useState('');
-  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Zustand store
+  const { cashAdvances, loading, error, fetchCashAdvances, updateCAStatus, clearError } =
+    usePayrollStore();
+
+  // Load cash advances on mount
+  useEffect(() => {
+    fetchCashAdvances();
+  }, [fetchCashAdvances]);
 
   // Filter CAs when status or search changes
   useEffect(() => {
@@ -121,26 +81,14 @@ export default function CashAdvancePage() {
     if (!selectedCA) return;
 
     try {
-      setLoading(true);
-      setCashAdvances(
-        cashAdvances.map(ca =>
-          ca.id === selectedCA.id
-            ? {
-                ...ca,
-                status: 'approved',
-                updated_at: new Date().toISOString(),
-              }
-            : ca
-        )
-      );
+      await updateCAStatus(selectedCA.id, 'approved');
       setShowActionModal(false);
       setActionNotes('');
       setActionType(null);
       alert('Cash advance approved successfully');
     } catch (err) {
-      alert('Error approving cash advance');
-    } finally {
-      setLoading(false);
+      const errorMsg = err instanceof Error ? err.message : 'Error approving cash advance';
+      alert(errorMsg);
     }
   };
 
@@ -148,26 +96,14 @@ export default function CashAdvancePage() {
     if (!selectedCA) return;
 
     try {
-      setLoading(true);
-      setCashAdvances(
-        cashAdvances.map(ca =>
-          ca.id === selectedCA.id
-            ? {
-                ...ca,
-                status: 'rejected',
-                updated_at: new Date().toISOString(),
-              }
-            : ca
-        )
-      );
+      await updateCAStatus(selectedCA.id, 'rejected');
       setShowActionModal(false);
       setActionNotes('');
       setActionType(null);
       alert('Cash advance rejected');
     } catch (err) {
-      alert('Error rejecting cash advance');
-    } finally {
-      setLoading(false);
+      const errorMsg = err instanceof Error ? err.message : 'Error rejecting cash advance';
+      alert(errorMsg);
     }
   };
 

@@ -32,7 +32,10 @@
       "Bash(Get-ChildItem -Path \"e:\\\\elspa\\\\docs\" -File)",
       "Bash(Select-Object Name, Length)",
       "PowerShell(Get-ChildItem -Path \"e:\\\\elspa\\\\docs\" -File | Select-Object Name, Length, @{n=\"Size\\(KB\\)\";e={[math]::Round\\($_.Length/1KB, 2\\)}} | Format-Table -AutoSize)",
-      "PowerShell(python -m py_compile \"e:\\\\elspa\\\\main.py\" \"e:\\\\elspa\\\\app\\\\services\\\\budget_monitor.py\" \"e:\\\\elspa\\\\app\\\\routers\\\\budget_monitor_api.py\")"
+      "PowerShell(python -m py_compile \"e:\\\\elspa\\\\main.py\" \"e:\\\\elspa\\\\app\\\\services\\\\budget_monitor.py\" \"e:\\\\elspa\\\\app\\\\routers\\\\budget_monitor_api.py\")",
+      "Bash(Get-ChildItem -Path \"e:\\\\elspa\\\\frontend\\\\src\\\\app\\\\admin\\\\payroll\" -Recurse -Filter \"*.tsx\")",
+      "Bash(Select-Object FullName)",
+      "Bash(git checkout *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\jitne\\Desktop"

@@ -2,25 +2,16 @@
 
 /**
  * 📌 Payroll Main Dashboard
- * 📋 목적: 정산 기간 관리, 주간/격주 탭 구분, 진행 상황 표시
+ * 📋 목적: 정산 기간 관리, 주간/격주 탭 구분, 진행 상황 표시 (API 연동)
  * 🔧 포함: 탭 필터, 기간 선택, 정산 계산 시작 버튼, 진행률 카드
- * 📅 작성일: 2026-05-21
+ * 📌 개선: Zustand store로 상태 관리, Retry logic 포함, API 연동
+ * 📅 작성일: 2026-05-22
  */
 
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-
-interface PayrollPeriod {
-  id: number;
-  period_start: string;
-  period_end: string;
-  pay_group: 'weekly' | 'biweekly';
-  status: 'draft' | 'approved' | 'paid';
-  created_at: string;
-  updated_at: string;
-  employeeCount?: number;
-  processedCount?: number;
-}
+import { usePayrollStore } from '@/lib/store/payroll-store';
+import { PayrollPeriod } from '@/lib/api/payroll-client';
 
 interface PayrollStats {
   totalPeriods: number;
@@ -33,7 +24,6 @@ interface PayrollStats {
 
 export default function PayrollDashboard() {
   const [payGroup, setPayGroup] = useState<'weekly' | 'biweekly'>('weekly');
-  const [periods, setPeriods] = useState<PayrollPeriod[]>([]);
   const [stats, setStats] = useState<PayrollStats>({
     totalPeriods: 0,
     draftCount: 0,
@@ -45,99 +35,48 @@ export default function PayrollDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState<PayrollPeriod | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  // Mock data generator
+  // Zustand store
+  const { periods, loading, error, fetchPeriods, startCalculation, approvePeriodAction, clearError } =
+    usePayrollStore();
+
+  // Load payroll periods on mount
   useEffect(() => {
-    const loadPayrollPeriods = async () => {
-      try {
-        setLoading(true);
-        // Mock API call - replace with actual fetch
-        const mockPeriods: PayrollPeriod[] = [
-          {
-            id: 1,
-            period_start: '2026-05-01',
-            period_end: '2026-05-07',
-            pay_group: 'weekly',
-            status: 'paid',
-            created_at: '2026-04-30T10:00:00',
-            updated_at: '2026-05-08T15:30:00',
-            employeeCount: 45,
-            processedCount: 45,
-          },
-          {
-            id: 2,
-            period_start: '2026-05-08',
-            period_end: '2026-05-14',
-            pay_group: 'weekly',
-            status: 'approved',
-            created_at: '2026-05-07T10:00:00',
-            updated_at: '2026-05-14T18:00:00',
-            employeeCount: 45,
-            processedCount: 45,
-          },
-          {
-            id: 3,
-            period_start: '2026-05-15',
-            period_end: '2026-05-21',
-            pay_group: 'weekly',
-            status: 'draft',
-            created_at: '2026-05-14T10:00:00',
-            updated_at: '2026-05-21T09:00:00',
-            employeeCount: 45,
-            processedCount: 32,
-          },
-        ];
+    fetchPeriods({ pay_group: payGroup });
+  }, [payGroup, fetchPeriods]);
 
-        setPeriods(mockPeriods);
-        setStats({
-          totalPeriods: mockPeriods.length,
-          draftCount: mockPeriods.filter(p => p.status === 'draft').length,
-          approvedCount: mockPeriods.filter(p => p.status === 'approved').length,
-          paidCount: mockPeriods.filter(p => p.status === 'paid').length,
-          totalGrossPay: 450000,
-          averageNetPay: 35000,
-        });
-      } catch (err) {
-        setError('Failed to load payroll periods');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadPayrollPeriods();
-  }, []);
+  // Update stats when periods change
+  useEffect(() => {
+    setStats({
+      totalPeriods: periods.length,
+      draftCount: periods.filter(p => p.status === 'draft').length,
+      approvedCount: periods.filter(p => p.status === 'approved').length,
+      paidCount: periods.filter(p => p.status === 'paid').length,
+      totalGrossPay: periods.reduce((sum, p) => sum + (p.employeeCount || 0) * 10000, 0),
+      averageNetPay: 35000,
+    });
+  }, [periods]);
 
   const handleCalculatePayroll = async (periodId: number) => {
     try {
       setIsCalculating(true);
-      // Mock API call
-      setTimeout(() => {
-        setPeriods(periods.map(p =>
-          p.id === periodId
-            ? { ...p, status: 'draft', processedCount: p.employeeCount || 0 }
-            : p
-        ));
-        setIsCalculating(false);
-        alert('Payroll calculation started successfully');
-      }, 2000);
+      await startCalculation(periodId);
+      alert('Payroll calculation started successfully');
     } catch (err) {
-      setError('Failed to calculate payroll');
+      const errorMsg = err instanceof Error ? err.message : 'Failed to calculate payroll';
+      alert(errorMsg);
+    } finally {
       setIsCalculating(false);
     }
   };
 
   const handleApprovePeriod = async (periodId: number) => {
     try {
-      // Mock API call
-      setPeriods(periods.map(p =>
-        p.id === periodId ? { ...p, status: 'approved' } : p
-      ));
+      await approvePeriodAction(periodId);
       alert('Period approved successfully');
     } catch (err) {
-      setError('Failed to approve period');
+      const errorMsg = err instanceof Error ? err.message : 'Failed to approve period';
+      alert(errorMsg);
     }
   };
 
@@ -186,7 +125,7 @@ export default function PayrollDashboard() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-4xl mb-4">⏳</div>
+          <div className="text-4xl mb-4 animate-spin">⏳</div>
           <p className="text-gray-600 font-semibold">Loading payroll data...</p>
         </div>
       </div>
@@ -203,8 +142,14 @@ export default function PayrollDashboard() {
 
       {/* Error Message */}
       {error && (
-        <div className="mx-4 mt-4 p-4 bg-red-50 border-l-4 border-red-500 rounded">
+        <div className="mx-4 mt-4 p-4 bg-red-50 border-l-4 border-red-500 rounded flex justify-between items-center">
           <p className="text-red-700 font-semibold">{error}</p>
+          <button
+            onClick={clearError}
+            className="text-red-700 hover:text-red-900 font-bold text-lg"
+          >
+            ✕
+          </button>
         </div>
       )}
 

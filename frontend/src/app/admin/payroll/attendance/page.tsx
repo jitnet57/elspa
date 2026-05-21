@@ -2,78 +2,42 @@
 
 /**
  * 📌 Attendance Input Page
- * 📋 목적: 출퇴근 시간 입력, 지각/OT 자동 계산
+ * 📋 목적: 출퇴근 시간 입력, 지각/OT 자동 계산 (API 연동)
  * 🔧 포함: 날짜 선택, 시간 입력, 자동 계산, 기록 테이블
- * 📅 작성일: 2026-05-21
+ * 📌 개선: Zustand store 사용, API 연동, Retry logic
+ * 📅 작성일: 2026-05-22
  */
 
 import { useState, useEffect } from 'react';
-
-interface AttendanceLog {
-  id: number;
-  employee_id: number;
-  employee_name?: string;
-  work_date: string;
-  clock_in?: string;
-  clock_out?: string;
-  late_minutes: number;
-  overtime_minutes: number;
-  is_absent: boolean;
-  holiday_type: 'none' | 'national' | 'special';
-  created_at: string;
-  updated_at: string;
-}
-
-interface Employee {
-  id: number;
-  name: string;
-}
-
-const MOCK_EMPLOYEES: Employee[] = [
-  { id: 1, name: 'Maria Santos' },
-  { id: 2, name: 'Jose Garcia' },
-  { id: 3, name: 'Carmen Reyes' },
-];
-
-const MOCK_ATTENDANCE: AttendanceLog[] = [
-  {
-    id: 1,
-    employee_id: 1,
-    employee_name: 'Maria Santos',
-    work_date: '2026-05-21',
-    clock_in: '08:15',
-    clock_out: '17:00',
-    late_minutes: 15,
-    overtime_minutes: 0,
-    is_absent: false,
-    holiday_type: 'none',
-    created_at: '2026-05-21T08:15:00',
-    updated_at: '2026-05-21T17:00:00',
-  },
-  {
-    id: 2,
-    employee_id: 2,
-    employee_name: 'Jose Garcia',
-    work_date: '2026-05-21',
-    clock_in: '08:00',
-    clock_out: '18:30',
-    late_minutes: 0,
-    overtime_minutes: 90,
-    is_absent: false,
-    holiday_type: 'none',
-    created_at: '2026-05-21T08:00:00',
-    updated_at: '2026-05-21T18:30:00',
-  },
-];
+import { usePayrollStore } from '@/lib/store/payroll-store';
+import { AttendanceLog, Employee } from '@/lib/api/payroll-client';
 
 export default function AttendancePage() {
-  const [attendance, setAttendance] = useState<AttendanceLog[]>(MOCK_ATTENDANCE);
-  const [filteredAttendance, setFilteredAttendance] = useState<AttendanceLog[]>(MOCK_ATTENDANCE);
+  const [filteredAttendance, setFilteredAttendance] = useState<AttendanceLog[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedEmployee, setSelectedEmployee] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(false);
+
+  // Zustand store
+  const {
+    attendance,
+    employees,
+    loading,
+    error,
+    fetchAttendance,
+    fetchEmployees,
+    createNewAttendance,
+    updateExistingAttendance,
+    deleteExistingAttendance,
+    clearError,
+  } = usePayrollStore();
+
+  // Load data on mount
+  useEffect(() => {
+    fetchAttendance({ work_date: selectedDate });
+    fetchEmployees();
+  }, [selectedDate, fetchAttendance, fetchEmployees]);
 
   // Form data
   const [formData, setFormData] = useState({

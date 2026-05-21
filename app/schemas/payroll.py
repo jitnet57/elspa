@@ -160,6 +160,7 @@ class PayrollRecordResponse(BaseModel):
     ca_deduction: Decimal
     health_check_deduction: Decimal
     thirteenth_month_deduction: Decimal
+    thirteenth_month_accrual: Decimal
 
     # 최종
     gross_pay: Decimal

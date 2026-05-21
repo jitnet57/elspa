@@ -2,26 +2,15 @@
 
 /**
  * 📌 Employee Management Page
- * 📋 목적: 직원 목록 조회, 검색, 필터링, CRUD 작업
+ * 📋 목적: 직원 목록 조회, 검색, 필터링, CRUD 작업 (API 연동)
  * 🔧 포함: 직원 테이블, 타입 필터, 추가/수정/삭제 버튼, 모달
- * 📅 작성일: 2026-05-21
+ * 📌 개선: Zustand store로 상태 관리, API 연동, Retry logic
+ * 📅 작성일: 2026-05-22
  */
 
 import { useState, useEffect } from 'react';
-
-interface Employee {
-  id: number;
-  name: string;
-  phone: string;
-  employee_type: 'therapist' | 'driver' | 'manager';
-  pay_group: 'weekly' | 'biweekly';
-  base_salary: number;
-  commission_rate: number;
-  hire_date: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import { usePayrollStore } from '@/lib/store/payroll-store';
+import { Employee } from '@/lib/api/payroll-client';
 
 const EMPLOYEE_TYPES = [
   { value: 'therapist', label: '👨‍⚕️ Therapist', color: 'bg-blue-100 text-blue-700' },
@@ -29,58 +18,31 @@ const EMPLOYEE_TYPES = [
   { value: 'manager', label: '👔 Manager', color: 'bg-purple-100 text-purple-700' },
 ];
 
-const MOCK_EMPLOYEES: Employee[] = [
-  {
-    id: 1,
-    name: 'Maria Santos',
-    phone: '+63-917-1234-5678',
-    employee_type: 'therapist',
-    pay_group: 'weekly',
-    base_salary: 15000,
-    commission_rate: 30,
-    hire_date: '2024-01-15',
-    is_active: true,
-    created_at: '2024-01-15T10:00:00',
-    updated_at: '2026-05-20T15:30:00',
-  },
-  {
-    id: 2,
-    name: 'Jose Garcia',
-    phone: '+63-917-2345-6789',
-    employee_type: 'driver',
-    pay_group: 'biweekly',
-    base_salary: 18000,
-    commission_rate: 15,
-    hire_date: '2024-02-01',
-    is_active: true,
-    created_at: '2024-02-01T10:00:00',
-    updated_at: '2026-05-19T14:20:00',
-  },
-  {
-    id: 3,
-    name: 'Carmen Reyes',
-    phone: '+63-917-3456-7890',
-    employee_type: 'therapist',
-    pay_group: 'weekly',
-    base_salary: 16000,
-    commission_rate: 35,
-    hire_date: '2023-06-10',
-    is_active: true,
-    created_at: '2023-06-10T10:00:00',
-    updated_at: '2026-05-21T09:00:00',
-  },
-];
-
 export default function EmployeesPage() {
-  const [employees, setEmployees] = useState<Employee[]>(MOCK_EMPLOYEES);
-  const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>(MOCK_EMPLOYEES);
+  const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [filterType, setFilterType] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<Partial<Employee>>({});
   const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState<Partial<Employee>>({});
+
+  // Zustand store
+  const {
+    employees,
+    loading,
+    error,
+    fetchEmployees,
+    createNewEmployee,
+    updateExistingEmployee,
+    deleteExistingEmployee,
+    clearError,
+  } = usePayrollStore();
+
+  // Load employees on mount
+  useEffect(() => {
+    fetchEmployees();
+  }, [fetchEmployees]);
 
   // Filter employees when type or search changes
   useEffect(() => {
@@ -126,46 +88,27 @@ export default function EmployeesPage() {
     }
 
     try {
-      setLoading(true);
       if (isEditing && selectedEmployee) {
-        // Update existing
-        setEmployees(
-          employees.map(e =>
-            e.id === selectedEmployee.id
-              ? {
-                  ...e,
-                  ...formData,
-                  updated_at: new Date().toISOString(),
-                }
-              : e
-          )
-        );
+        await updateExistingEmployee(selectedEmployee.id, formData);
         alert('Employee updated successfully');
       } else {
-        // Create new
-        const newEmployee: Employee = {
-          id: Math.max(...employees.map(e => e.id), 0) + 1,
+        await createNewEmployee({
           name: formData.name || '',
           phone: formData.phone || '',
-          employee_type: (formData.employee_type as any) || 'therapist',
-          pay_group: (formData.pay_group as any) || 'weekly',
+          employee_type: formData.employee_type || 'therapist',
+          pay_group: formData.pay_group || 'weekly',
           base_salary: formData.base_salary || 0,
           commission_rate: formData.commission_rate || 0,
           hire_date: formData.hire_date || '',
           is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-        setEmployees([...employees, newEmployee]);
+        });
         alert('Employee created successfully');
       }
       setShowModal(false);
       setFormData({});
     } catch (err) {
-      alert('Error saving employee');
-      console.error(err);
-    } finally {
-      setLoading(false);
+      const errorMsg = err instanceof Error ? err.message : 'Error saving employee';
+      alert(errorMsg);
     }
   };
 
@@ -173,16 +116,11 @@ export default function EmployeesPage() {
     if (!window.confirm('Are you sure you want to deactivate this employee?')) return;
 
     try {
-      setEmployees(
-        employees.map(e =>
-          e.id === employeeId
-            ? { ...e, is_active: false, updated_at: new Date().toISOString() }
-            : e
-        )
-      );
+      await deleteExistingEmployee(employeeId);
       alert('Employee deactivated successfully');
     } catch (err) {
-      alert('Error deactivating employee');
+      const errorMsg = err instanceof Error ? err.message : 'Error deactivating employee';
+      alert(errorMsg);
     }
   };
 
