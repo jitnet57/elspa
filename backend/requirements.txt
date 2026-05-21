@@ -13,11 +13,16 @@ sqlalchemy
 psycopg2-binary
 supabase
 python-dotenv
+python-jose[cryptography]
+passlib[bcrypt]
 
 # AI & Agents
 langchain
 langchain-anthropic
 langgraph
+
+# PDF Generation (Phase 8-3)
+reportlab
 
 # Utils
 pydantic-settings
