@@ -9,7 +9,7 @@
 
 from typing import Optional, Dict, Any
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthCredentials
+from fastapi.security import HTTPBearer
 
 from app.auth.jwt import verify_token, decode_token
 
@@ -42,7 +42,7 @@ class TokenUser:
         }
 
 
-async def get_current_user(credentials: HTTPAuthCredentials = Depends(security)) -> TokenUser:
+async def get_current_user(credentials: Any = Depends(security)) -> TokenUser:
     """
     Authorization 헤더에서 토큰을 추출하고 검증
 
@@ -111,7 +111,7 @@ async def require_admin(user: TokenUser = Depends(get_current_user)) -> TokenUse
     return user
 
 
-async def get_optional_user(credentials: Optional[HTTPAuthCredentials] = Depends(security)) -> Optional[TokenUser]:
+async def get_optional_user(credentials: Optional[Any] = Depends(security)) -> Optional[TokenUser]:
     """
     선택적 인증 (토큰이 없으면 None 반환)
 

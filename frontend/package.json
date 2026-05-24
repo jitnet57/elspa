@@ -39,4 +39,10 @@
     "cypress": "^15.15.0",
     "cypress-file-upload": "^5.0.8",
     "eslint": "^9",
-    "
+    "eslint-config-next": "16.2.4",
+    "sharp": "^0.34.5",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "wrangler": "^3.114.17"
+  }
+}

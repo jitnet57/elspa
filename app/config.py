@@ -54,6 +54,14 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15"))
     refresh_token_expire_days: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
 
+    # API Host/Port
+    api_host: str = os.getenv("API_HOST", "0.0.0.0")
+    api_port: int = int(os.getenv("API_PORT", "8000"))
+
+    # Frontend 환경 변수
+    next_public_api_url: str = os.getenv("NEXT_PUBLIC_API_URL", "http://localhost:8000")
+    next_public_ws_url: str = os.getenv("NEXT_PUBLIC_WS_URL", "ws://localhost:8000/ws")
+
     class Config:
         env_file = ".env"
         case_sensitive = False

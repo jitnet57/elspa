@@ -6,7 +6,7 @@
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from app.config import get_db
+from app.database import get_db_sync
 from app.models.audit_log import AuditLog, AuditActionEnum
 from app.services.audit_service import AuditService
 from app.utils.permissions import require_audit_access
@@ -47,7 +47,7 @@ async def get_audit_logs(
     entity_id: Optional[int] = Query(None, description="필터: 엔티티 ID"),
     limit: int = Query(100, ge=1, le=1000, description="반환 행 수"),
     skip: int = Query(0, ge=0, description="건너뛸 행 수"),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_sync),
 ):
     """감사 로그 조회 (필터 지원)"""
     try:
@@ -80,7 +80,7 @@ async def get_audit_logs(
 async def get_user_actions(
     user_id: str = Query(..., description="사용자 ID"),
     limit: int = Query(50, ge=1, le=500),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_sync),
 ):
     """특정 사용자의 모든 작업 조회"""
     try:
@@ -94,7 +94,7 @@ async def get_user_actions(
 async def get_entity_history(
     entity_type: str = Query(..., description="엔티티 유형 (expense, budget, category)"),
     entity_id: int = Query(..., description="엔티티 ID"),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_sync),
 ):
     """특정 엔티티의 변경 이력"""
     try:
@@ -107,7 +107,7 @@ async def get_entity_history(
 @router.get("/logs/recent")
 async def get_recent_actions(
     limit: int = Query(20, ge=1, le=100),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_sync),
 ):
     """최근 감사 로그"""
     try:
@@ -119,7 +119,7 @@ async def get_recent_actions(
 
 @router.get("/stats")
 async def get_audit_stats(
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_sync),
 ):
     """감사 로그 통계"""
     try:

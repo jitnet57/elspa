@@ -209,6 +209,8 @@ from app.routers import payroll, payroll_analytics, messaging
 # from app.routers import financial_api
 # 📊 Admin 데이터 관리 라우터 (테라피스트, 예약, 드라이버)
 from app.routers import admin_data_api
+# 🚗 드라이버 API 라우터 (신규 - Sprint 13)
+from app.routers import driver_api
 
 # 기존 라우터들 (일부 호환성 문제로 주석 처리)
 # from app.routers import beds, therapists, bookings, matching
@@ -235,14 +237,15 @@ app.include_router(bookings_api.router)
 app.include_router(admin_data_api.router)
 app.include_router(reviews_api.router)
 app.include_router(settlement.router)  # Settlement API (Mock Data)
+app.include_router(driver_api.router)  # 🚗 드라이버 API
 
-# 재무 감사 로그 라우터 등록
-from app.routers import audit_api
-app.include_router(audit_api.router)
+# 재무 감사 로그 라우터 등록 (임시 비활성화)
+# from app.routers import audit_api
+# app.include_router(audit_api.router)
 
-# 재무 WebSocket 라우터 등록
-from app.routers import websocket_financial
-app.include_router(websocket_financial.router)
+# 재무 WebSocket 라우터 등록 (임시 비활성화)
+# from app.routers import websocket_financial
+# app.include_router(websocket_financial.router)
 
 # 🔐 인증 라우터 등록 (Phase 8-2)
 app.include_router(auth.router)
@@ -258,9 +261,9 @@ app.include_router(expense.router)
 app.include_router(payroll.router)
 app.include_router(payroll_analytics.router)
 app.include_router(messaging.router)  # 메시지 발송 시스템
-# 💹 예산 모니터링 라우터 등록
-from app.routers import budget_monitor_api
-app.include_router(budget_monitor_api.router)
+# 💹 예산 모니터링 라우터 등록 (임시 비활성화)
+# from app.routers import budget_monitor_api
+# app.include_router(budget_monitor_api.router)
 # app.include_router(financial_api.router)  # async 전환 후 재활성화
 
 

@@ -7552,3 +7552,304 @@ Traceback (most recent call last):
   File "<frozen os>", line 1076, in fdopen
   File "<frozen codecs>", line 312, in __init__
 KeyboardInterrupt
+Process SpawnProcess-135:
+Traceback (most recent call last):
+  File "C:\Python314\Lib\multiprocessing\process.py", line 320, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "C:\Python314\Lib\multiprocessing\process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+    ~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\server.py", line 75, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+  File "C:\Python314\Lib\asyncio\runners.py", line 204, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "C:\Python314\Lib\asyncio\runners.py", line 127, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Python314\Lib\asyncio\base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\server.py", line 79, in serve
+    await self._serve(sockets)
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\server.py", line 86, in _serve
+    config.load()
+    ~~~~~~~~~~~^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\config.py", line 441, in load
+    self.loaded_app = import_from_string(self.app)
+                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+  File "C:\Python314\Lib\importlib\__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "e:\elspa\main.py", line 35, in <module>
+    from app.config import settings
+  File "e:\elspa\app\config.py", line 62, in <module>
+    settings = Settings()
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\pydantic_settings\main.py", line 242, in __init__
+    super().__init__(**__pydantic_self__.__class__._settings_build_values(sources, init_kwargs))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\pydantic\main.py", line 263, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+pydantic_core._pydantic_core.ValidationError: 4 validation errors for Settings
+api_host
+  Extra inputs are not permitted [type=extra_forbidden, input_value='0.0.0.0', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden
+api_port
+  Extra inputs are not permitted [type=extra_forbidden, input_value='8000', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden
+next_public_api_url
+  Extra inputs are not permitted [type=extra_forbidden, input_value='http://localhost:8000', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden
+next_public_ws_url
+  Extra inputs are not permitted [type=extra_forbidden, input_value='ws://localhost:8000/ws', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden
+WARNING:  WatchFiles detected changes in 'app\config.py'. Reloading...
+ Process SpawnProcess-136:
+Traceback (most recent call last):
+  File "C:\Python314\Lib\multiprocessing\process.py", line 320, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "C:\Python314\Lib\multiprocessing\process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+    ~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\server.py", line 75, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+  File "C:\Python314\Lib\asyncio\runners.py", line 204, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "C:\Python314\Lib\asyncio\runners.py", line 127, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Python314\Lib\asyncio\base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\server.py", line 79, in serve
+    await self._serve(sockets)
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\server.py", line 86, in _serve
+    config.load()
+    ~~~~~~~~~~~^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\config.py", line 441, in load
+    self.loaded_app = import_from_string(self.app)
+                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+  File "C:\Python314\Lib\importlib\__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "e:\elspa\main.py", line 205, in <module>
+    from app.routers import auth
+  File "e:\elspa\app\routers\auth.py", line 20, in <module>
+    from app.auth.jwt import create_access_token, create_refresh_token, verify_token, decode_token
+  File "e:\elspa\app\auth\__init__.py", line 16, in <module>
+    from app.auth.dependencies import (
+    ...<4 lines>...
+    )
+  File "e:\elspa\app\auth\dependencies.py", line 12, in <module>
+    from fastapi.security import HTTPBearer, HTTPAuthCredentials
+ImportError: cannot import name 'HTTPAuthCredentials' from 'fastapi.security' (C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\fastapi\security\__init__.py)
+WARNING:  WatchFiles detected changes in 'app\auth\dependencies.py'. Reloading...
+ WARNING:  WatchFiles detected changes in 'app\auth\dependencies.py'. Reloading...
+ Process SpawnProcess-137:
+Traceback (most recent call last):
+  File "C:\Python314\Lib\multiprocessing\process.py", line 320, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "C:\Python314\Lib\multiprocessing\process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+    ~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\server.py", line 75, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+  File "C:\Python314\Lib\asyncio\runners.py", line 204, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "C:\Python314\Lib\asyncio\runners.py", line 127, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Python314\Lib\asyncio\base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\server.py", line 79, in serve
+    await self._serve(sockets)
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\server.py", line 86, in _serve
+    config.load()
+    ~~~~~~~~~~~^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\config.py", line 441, in load
+    self.loaded_app = import_from_string(self.app)
+                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+  File "C:\Python314\Lib\importlib\__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1398, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1371, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1342, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 938, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 759, in exec_module
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "e:\elspa\main.py", line 240, in <module>
+    from app.routers import audit_api
+  File "e:\elspa\app\routers\audit_api.py", line 9, in <module>
+    from app.config import get_db
+ImportError: cannot import name 'get_db' from 'app.config' (e:\elspa\app\config.py)
+WARNING:  WatchFiles detected changes in 'app\auth\dependencies.py'. Reloading...
+ WARNING:  WatchFiles detected changes in 'main.py', 'app\routers\audit_api.py', 'app\auth\dependencies.py', 'app\utils\permissions.py'. Reloading...
+ Process SpawnProcess-139:
+Traceback (most recent call last):
+  File "C:\Python314\Lib\multiprocessing\process.py", line 320, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "C:\Python314\Lib\multiprocessing\process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\_subprocess.py", line 76, in subprocess_started
+    config.configure_logging()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\config.py", line 372, in configure_logging
+    logging.config.dictConfig(self.log_config)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\logging\config.py", line 946, in dictConfig
+    dictConfigClass(config).configure()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Python314\Lib\logging\config.py", line 575, in configure
+    disable_existing = config.pop('disable_existing_loggers', True)
+  File "C:\Python314\Lib\logging\config.py", line 350, in pop
+    return self.convert_with_key(key, value, replace=False)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\logging\config.py", line 307, in convert_with_key
+    def convert_with_key(self, key, value, replace=True):
+    
+KeyboardInterrupt
+INFO:     Started server process [9628]
+INFO:     Waiting for application startup.
+INFO:     ASGI 'lifespan' protocol appears unsupported.
+INFO:     Application startup complete.
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\protocols\http\httptools_impl.py", line 420, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\fastapi\applications.py", line 1159, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\starlette\applications.py", line 106, in __call__
+    self.middleware_stack = self.build_middleware_stack()
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\fastapi\applications.py", line 1065, in build_middleware_stack
+    app = cls(app, *args, **kwargs)
+TypeError: function() missing required argument 'globals' (pos 2)
+INFO:     127.0.0.1:59402 - "GET / HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\protocols\http\httptools_impl.py", line 420, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\fastapi\applications.py", line 1159, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\starlette\applications.py", line 106, in __call__
+    self.middleware_stack = self.build_middleware_stack()
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\fastapi\applications.py", line 1065, in build_middleware_stack
+    app = cls(app, *args, **kwargs)
+TypeError: function() missing required argument 'globals' (pos 2)
+INFO:     127.0.0.1:58290 - "GET /api/payroll/employees HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\protocols\http\httptools_impl.py", line 420, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\fastapi\applications.py", line 1159, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\starlette\applications.py", line 106, in __call__
+    self.middleware_stack = self.build_middleware_stack()
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\fastapi\applications.py", line 1065, in build_middleware_stack
+    app = cls(app, *args, **kwargs)
+TypeError: function() missing required argument 'globals' (pos 2)
+INFO:     127.0.0.1:57511 - "GET / HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\protocols\http\httptools_impl.py", line 420, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\fastapi\applications.py", line 1159, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\starlette\applications.py", line 106, in __call__
+    self.middleware_stack = self.build_middleware_stack()
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\fastapi\applications.py", line 1065, in build_middleware_stack
+    app = cls(app, *args, **kwargs)
+TypeError: function() missing required argument 'globals' (pos 2)
+INFO:     127.0.0.1:52971 - "GET / HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\protocols\http\httptools_impl.py", line 420, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\fastapi\applications.py", line 1159, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\starlette\applications.py", line 106, in __call__
+    self.middleware_stack = self.build_middleware_stack()
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\jitne\AppData\Roaming\Python\Python314\site-packages\fastapi\applications.py", line 1065, in build_middleware_stack
+    app = cls(app, *args, **kwargs)
+TypeError: function() missing required argument 'globals' (pos 2)
+INFO:     127.0.0.1:59019 - "GET /health HTTP/1.1" 500 Internal Server Error

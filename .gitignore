@@ -1,42 +1,40 @@
-.vercel
-
-# ==========================================
-# Environment & Secrets (Phase 10-1 CI/CD)
-# ==========================================
-.env
-.env.production
-.env.production.local
-.env.local
-.env.*.local
-
-# ==========================================
-# Node & Python caches
-# ==========================================
-node_modules/
-.next/
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
 .pytest_cache/
 .coverage
 
-# ==========================================
-# IDE & Build artifacts
-# ==========================================
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-dist/
-build/
 
-# ==========================================
-# Docker & Container
-# ==========================================
-*.tar
-*.tar.gz
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/node_modules/
 
-# ==========================================
 # Logs
-# ==========================================
 *.log
 logs/
+
+# Database
+*.db
+test.db
+
+# Backups
+backups/
+
+# OS
+.DS_Store
+Thumbs.db
