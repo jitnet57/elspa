@@ -251,7 +251,6 @@ class PayrollRecord(Base):
 
     status = Column(String(50), nullable=False, default="draft")  # draft, approved, paid
     notes = Column(String(1000))
-    is_obsolete = Column(Boolean, default=False)  # 소프트 삭제 플래그
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

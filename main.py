@@ -202,7 +202,7 @@ from app.routers import sss
 # 💰 일일 지출 보고서 라우터
 from app.routers import expense
 # 🔐 인증 라우터 (신규 - Phase 8-2)
-from app.routers import auth
+from app.routers import auth, mock_data
 # 💵 급여 정산 라우터 (신규)
 from app.routers import payroll, payroll_analytics, messaging
 # 💹 financial_api — sync DB 패턴, async 전환 예정 (임시 비활성화)
@@ -261,6 +261,7 @@ app.include_router(expense.router)
 app.include_router(payroll.router)
 app.include_router(payroll_analytics.router)
 app.include_router(messaging.router)  # 메시지 발송 시스템
+app.include_router(mock_data.router)  # Mock Data 생성 API (테스트용)
 # 💹 예산 모니터링 라우터 등록 (임시 비활성화)
 # from app.routers import budget_monitor_api
 # app.include_router(budget_monitor_api.router)

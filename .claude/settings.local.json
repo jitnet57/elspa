@@ -76,7 +76,12 @@
       "Bash(python -m pytest app/tests/test_payroll_integration.py -v --tb=short)",
       "Bash(bash deploy.sh)",
       "Bash(ls -lah e:\\\\elspa/*.db)",
-      "Bash(wait)"
+      "Bash(wait)",
+      "Bash(curl -X POST http://localhost:8000/api/mock/create-sample -H 'Content-Type: application/json')",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s -X POST http://localhost:8000/api/mock/create-sample -H 'Content-Type: application/json')",
+      "Bash(curl -s -X POST http://localhost:8000/api/mock/create-sample -H \"Content-Type: application/json\" -w \"\\\\nStatus: %{http_code}\\\\n\")",
+      "Bash(python test_mock_data_and_payroll.py)"
     ],
     "additionalDirectories": [
       "C:\\Users\\jitne\\Desktop",
