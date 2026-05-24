@@ -74,7 +74,9 @@
       "Bash(python -m pytest app/tests/test_payroll_edge_cases.py -v --tb=short)",
       "Bash(awk '{print \"  \" $9 \" \\(\" $5 \"\\)\"}')",
       "Bash(python -m pytest app/tests/test_payroll_integration.py -v --tb=short)",
-      "Bash(bash deploy.sh)"
+      "Bash(bash deploy.sh)",
+      "Bash(ls -lah e:\\\\elspa/*.db)",
+      "Bash(wait)"
     ],
     "additionalDirectories": [
       "C:\\Users\\jitne\\Desktop",

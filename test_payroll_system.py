@@ -16,7 +16,7 @@
 
 import asyncio
 import sys
-from datetime import datetime, date, timedelta
+from datetime import date, timedelta
 from decimal import Decimal
 from typing import List
 
@@ -255,9 +255,11 @@ async def create_holidays(db):
 
     await db.commit()
 
-    # Refresh objects to get committed state
-    for hol in created_holidays:
-        await db.refresh(hol)
+    # 새로 쿼리하여 ORM 객체 재획득 (refresh가 dict로 변환하는 버그 회피)
+    from sqlalchemy import select
+    stmt = select(PhilippineHoliday).order_by(PhilippineHoliday.holiday_date)
+    result = await db.execute(stmt)
+    created_holidays = result.scalars().all()
 
     print(f"✅ {len(created_holidays)}개의 공휴일 설정 완료")
     for hol in created_holidays:
@@ -315,6 +317,12 @@ async def create_payroll_period_and_calculate(db):
             payroll_period=weekly_period,
             db=db
         )
+        # 계산된 레코드를 DB에 추가하고 커밋
+        for record in weekly_records:
+            db.add(record)
+        await db.commit()
+
+        # 직원 정보 로드 후 출력
         for record in weekly_records:
             await db.refresh(record, ["employee"])
             print(f"   ✅ {record.employee.name}: 총액 {record.gross_pay} Peso -> 순액 {record.net_pay} Peso")
@@ -328,6 +336,12 @@ async def create_payroll_period_and_calculate(db):
             payroll_period=biweekly_period,
             db=db
         )
+        # 계산된 레코드를 DB에 추가하고 커밋
+        for record in biweekly_records:
+            db.add(record)
+        await db.commit()
+
+        # 직원 정보 로드 후 출력
         for record in biweekly_records:
             await db.refresh(record, ["employee"])
             print(f"   ✅ {record.employee.name}: 총액 {record.gross_pay} Peso -> 순액 {record.net_pay} Peso")

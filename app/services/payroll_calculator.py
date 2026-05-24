@@ -320,7 +320,6 @@ class PayrollCalculator:
             ca_deduction=ca_deduction,
             health_check_deduction=health_check_deduction,
             thirteenth_month_deduction=thirteenth_month_deduction,
-            thirteenth_month_accrual=thirteenth_month_deduction,  # 누적액과 동일 (참고용)
             gross_pay=gross_pay,
             total_deductions=total_deductions,
             net_pay=net_pay,
