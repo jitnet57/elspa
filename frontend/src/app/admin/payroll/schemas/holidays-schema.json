@@ -1,0 +1,75 @@
+{
+  "page": "HolidayManagement",
+  "layout": "list-with-search",
+  "sections": {
+    "header": {
+      "type": "topAppBar",
+      "title": "ElSpa Payroll",
+      "compact": true
+    },
+    "pageHeader": {
+      "type": "sectionHeader",
+      "title": "Holidays",
+      "subtitle": "Manage Philippine national and special non-working days.",
+      "action": {
+        "type": "button",
+        "icon": "add",
+        "label": "Add Holiday",
+        "variant": "primary"
+      }
+    },
+    "search": {
+      "type": "searchInput",
+      "placeholder": "Search holidays by name...",
+      "icon": "search"
+    },
+    "holidaysList": {
+      "type": "cardList",
+      "cardTemplate": {
+        "layout": "flex-col-to-row",
+        "sections": [
+          {
+            "type": "dateBox",
+            "fields": ["month", "day"]
+          },
+          {
+            "type": "holidayInfo",
+            "fields": ["name", "date"]
+          },
+          {
+            "type": "badgeGroup",
+            "fields": ["type", "multiplier"]
+          },
+          {
+            "type": "actions",
+            "buttons": ["edit", "delete"]
+          }
+        ]
+      }
+    },
+    "illustration": {
+      "type": "imageSection",
+      "height": "12rem",
+      "caption": "Total 12 National Holidays in 2024"
+    },
+    "bottomNav": {
+      "type": "bottomNavBar",
+      "mobileOnly": true
+    }
+  },
+  "design": {
+    "colors": {
+      "primary": "#004e9f",
+      "secondary": "#505f76",
+      "error": "#ba1a1a",
+      "surface": "#f9f9f9"
+    },
+    "spacing": {
+      "container-margin": "24px",
+      "stack-lg": "24px",
+      "stack-md": "12px",
+      "gutter": "16px",
+      "base": "8px"
+    }
+  }
+}

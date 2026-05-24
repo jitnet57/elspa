@@ -1,0 +1,142 @@
+{
+  "page": "PayrollRecords",
+  "layout": "list-with-filters",
+  "sections": {
+    "header": {
+      "type": "topAppBar",
+      "title": "ElSpa Payroll",
+      "actions": ["menu", "profile"],
+      "navLinks": ["Dashboard", "Staff", "Records"]
+    },
+    "pageHeader": {
+      "type": "sectionHeader",
+      "title": "Payroll Records",
+      "subtitle": "Manage and audit finalized salary distributions.",
+      "actions": [
+        { "icon": "download", "label": "Download ZIP" },
+        { "icon": "print", "label": "Print" }
+      ]
+    },
+    "filters": {
+      "type": "filterSection",
+      "layout": "grid-4-cols",
+      "fields": [
+        {
+          "name": "period",
+          "label": "Period",
+          "type": "select",
+          "options": ["October 2023", "September 2023", "August 2023", "Custom Range..."]
+        },
+        {
+          "name": "employeeType",
+          "label": "Employee Type",
+          "type": "select",
+          "options": ["All Types", "Full-time", "Part-time", "Contractor"]
+        },
+        {
+          "name": "status",
+          "label": "Status",
+          "type": "select",
+          "options": ["All Status", "Draft", "Approved", "Paid"]
+        },
+        {
+          "name": "applyFilters",
+          "label": "Apply Filters",
+          "type": "button",
+          "variant": "primary"
+        }
+      ]
+    },
+    "recordsList": {
+      "type": "cardList",
+      "cardTemplate": {
+        "layout": "flex-row-responsive",
+        "sections": [
+          {
+            "type": "employeeInfo",
+            "fields": ["avatar", "name", "employeeType", "period"]
+          },
+          {
+            "type": "payAmounts",
+            "layout": "grid-3-cols",
+            "fields": [
+              { "label": "Gross Pay", "value": "grossPay", "color": "tertiary" },
+              { "label": "Deductions", "value": "deductions", "color": "error" },
+              { "label": "Net Pay", "value": "netPay", "color": "success" }
+            ]
+          },
+          {
+            "type": "statusBadge",
+            "field": "status",
+            "variants": {
+              "Paid": "blue-100/blue-800",
+              "Approved": "green-100/green-800",
+              "Draft": "surface-variant/on-surface-variant"
+            }
+          }
+        ]
+      }
+    },
+    "pagination": {
+      "type": "loadMore",
+      "label": "Load More Records"
+    },
+    "bottomNav": {
+      "type": "bottomNavBar",
+      "mobileOnly": true,
+      "items": [
+        { "icon": "dashboard", "label": "Dashboard" },
+        { "icon": "group", "label": "Staff" },
+        { "icon": "payments", "label": "Advances" },
+        { "icon": "event_busy", "label": "Attendance" },
+        { "icon": "history_edu", "label": "Records", "active": true }
+      ]
+    }
+  },
+  "design": {
+    "colors": {
+      "primary": "#004e9f",
+      "secondary": "#505f76",
+      "tertiary": "#485066",
+      "error": "#ba1a1a",
+      "success": "#2e7d32",
+      "surface": "#f9f9f9",
+      "outline": "#727784"
+    },
+    "typography": {
+      "headline-md": { "size": "24px", "weight": 600, "family": "Hanken Grotesk" },
+      "headline-sm": { "size": "20px", "weight": 600, "family": "Hanken Grotesk" },
+      "body-lg": { "size": "16px", "weight": 400, "family": "Inter" },
+      "body-md": { "size": "14px", "weight": 400, "family": "Inter" },
+      "label-sm": { "size": "12px", "weight": 500, "family": "Inter" },
+      "data-mono": { "size": "14px", "weight": 600, "family": "Inter" }
+    },
+    "spacing": {
+      "container-margin": "24px",
+      "stack-lg": "24px",
+      "stack-md": "12px",
+      "gutter": "16px",
+      "base": "8px"
+    },
+    "borderRadius": {
+      "lg": "0.25rem",
+      "xl": "0.5rem",
+      "full": "0.75rem"
+    }
+  },
+  "responsiveness": {
+    "breakpoint": "md",
+    "mobile": {
+      "layout": "single-column",
+      "bottomNav": "visible",
+      "filters": "full-width",
+      "cardLayout": "stacked"
+    },
+    "desktop": {
+      "layout": "multi-column",
+      "bottomNav": "hidden",
+      "filters": "grid-4",
+      "cardLayout": "flex-row"
+    }
+  }
+}
