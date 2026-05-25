@@ -1,75 +1,16 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Printer, Download, CheckCircle, XCircle } from 'lucide-react';
-
-interface PayrollDetail {
-  id: string;
-  name: string;
-  employeeId: string;
-  status: 'Permanent Staff' | 'Part-time' | 'Contractor';
-  hireDate: string;
-  department: string;
-  period: string;
-  earnings: {
-    baseSalary: number;
-    commission: number;
-    overtime: number;
-    holidayBonus: number;
-    mealAllowance: number;
-  };
-  deductions: {
-    late: number;
-    absence: number;
-    sssLoan: number;
-    cashAdvance: number;
-    healthCheck: number;
-    thirteenthMonth: number;
-  };
-}
-
-const mockDetail: PayrollDetail = {
-  id: '2024-0082',
-  name: 'Maria Christina Santos',
-  employeeId: '2024-0082',
-  status: 'Permanent Staff',
-  hireDate: 'Jan 12, 2022',
-  department: 'Therapy & Wellness',
-  period: 'Oct 1, 2024 – Oct 15, 2024',
-  earnings: {
-    baseSalary: 15500,
-    commission: 4250.5,
-    overtime: 1120.25,
-    holidayBonus: 0,
-    mealAllowance: 750,
-  },
-  deductions: {
-    late: 145,
-    absence: 0,
-    sssLoan: 500,
-    cashAdvance: 1000,
-    healthCheck: 0,
-    thirteenthMonth: 0,
-  },
-};
+import { payrollRecords, employees } from '../mockData/payrollData';
 
 export default function PayrollRecordDetail() {
-  const [record] = useState(mockDetail);
+  const payrollRecord = payrollRecords[0]; // 첫 번째 기록 (Maria Christina Santos)
+  const employee = employees.find(e => e.id === payrollRecord.employeeId) || employees[0];
 
-  const grossPay =
-    record.earnings.baseSalary +
-    record.earnings.commission +
-    record.earnings.overtime +
-    record.earnings.holidayBonus +
-    record.earnings.mealAllowance;
+  const [record] = useState(payrollRecord);
 
-  const totalDeductions =
-    record.deductions.late +
-    record.deductions.absence +
-    record.deductions.sssLoan +
-    record.deductions.cashAdvance +
-    record.deductions.healthCheck +
-    record.deductions.thirteenthMonth;
-
-  const netPay = grossPay - totalDeductions;
+  const grossPay = record.grossPay;
+  const totalDeductions = record.totalDeductions;
+  const netPay = record.netPay;
 
   return (
     <div className="min-h-screen bg-surface pb-16">
@@ -97,20 +38,20 @@ export default function PayrollRecordDetail() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <span className="px-2 py-0.5 bg-primary-container text-on-primary-container text-label-sm font-bold rounded uppercase">
-                {record.status}
+                {employee.displayType}
               </span>
-              <span className="text-label-sm text-outline">ID: {record.employeeId}</span>
+              <span className="text-label-sm text-outline">ID: {payrollRecord.employeeId}</span>
             </div>
-            <h2 className="text-4xl font-bold text-on-surface mb-2">{record.name}</h2>
+            <h2 className="text-4xl font-bold text-on-surface mb-2">{payrollRecord.name}</h2>
             <p className="text-body-lg text-on-surface-variant flex items-center gap-1">
-              <span>📅</span> Pay Period: {record.period}
+              <span>📅</span> Pay Period: {payrollRecord.period}
             </p>
           </div>
           <div className="border-l md:border-l-0 md:border-r border-outline-variant pl-4 md:pl-0 md:pr-4 text-right">
             <p className="text-label-sm text-outline uppercase tracking-widest">Hire Date</p>
-            <p className="text-body-lg font-bold mb-3">{record.hireDate}</p>
+            <p className="text-body-lg font-bold mb-3">{employee.hireDate}</p>
             <p className="text-label-sm text-outline uppercase tracking-widest">Department</p>
-            <p className="text-body-md">{record.department}</p>
+            <p className="text-body-md">{employee.department}</p>
           </div>
         </section>
 
@@ -133,36 +74,44 @@ export default function PayrollRecordDetail() {
                       ₱{record.earnings.baseSalary.toLocaleString()}
                     </td>
                   </tr>
-                  <tr className="border-b border-outline-variant even:bg-surface">
-                    <td className="px-4 py-3">Commission (Service)</td>
-                    <td className="px-4 py-3 text-right font-data-mono font-bold">
-                      ₱{record.earnings.commission.toLocaleString('en-PH', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </td>
-                  </tr>
-                  <tr className="border-b border-outline-variant even:bg-surface">
-                    <td className="px-4 py-3">Overtime (8.5 hrs)</td>
-                    <td className="px-4 py-3 text-right font-data-mono font-bold">
-                      ₱{record.earnings.overtime.toLocaleString('en-PH', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </td>
-                  </tr>
-                  <tr className="border-b border-outline-variant even:bg-surface">
-                    <td className="px-4 py-3">Holiday Bonus</td>
-                    <td className="px-4 py-3 text-right font-data-mono font-bold">
-                      ₱{record.earnings.holidayBonus.toLocaleString()}
-                    </td>
-                  </tr>
-                  <tr className="even:bg-surface">
-                    <td className="px-4 py-3">Meal Allowance</td>
-                    <td className="px-4 py-3 text-right font-data-mono font-bold">
-                      ₱{record.earnings.mealAllowance.toLocaleString()}
-                    </td>
-                  </tr>
+                  {record.earnings.commission > 0 && (
+                    <tr className="border-b border-outline-variant even:bg-surface">
+                      <td className="px-4 py-3">Commission (Service)</td>
+                      <td className="px-4 py-3 text-right font-data-mono font-bold">
+                        ₱{record.earnings.commission.toLocaleString('en-PH', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                    </tr>
+                  )}
+                  {record.earnings.overtime > 0 && (
+                    <tr className="border-b border-outline-variant even:bg-surface">
+                      <td className="px-4 py-3">Overtime</td>
+                      <td className="px-4 py-3 text-right font-data-mono font-bold">
+                        ₱{record.earnings.overtime.toLocaleString('en-PH', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                    </tr>
+                  )}
+                  {record.earnings.holidayBonus > 0 && (
+                    <tr className="border-b border-outline-variant even:bg-surface">
+                      <td className="px-4 py-3">Holiday Bonus</td>
+                      <td className="px-4 py-3 text-right font-data-mono font-bold">
+                        ₱{record.earnings.holidayBonus.toLocaleString()}
+                      </td>
+                    </tr>
+                  )}
+                  {record.earnings.mealAllowance > 0 && (
+                    <tr className="even:bg-surface">
+                      <td className="px-4 py-3">Meal Allowance</td>
+                      <td className="px-4 py-3 text-right font-data-mono font-bold">
+                        ₱{record.earnings.mealAllowance.toLocaleString()}
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -185,42 +134,54 @@ export default function PayrollRecordDetail() {
             <div className="flex-1 overflow-x-auto">
               <table className="w-full text-left text-body-md">
                 <tbody>
-                  <tr className="border-b border-outline-variant even:bg-surface">
-                    <td className="px-4 py-3">Late / Tardy</td>
-                    <td className="px-4 py-3 text-right font-data-mono font-bold text-error">
-                      ₱{record.deductions.late.toLocaleString()}
-                    </td>
-                  </tr>
-                  <tr className="border-b border-outline-variant even:bg-surface">
-                    <td className="px-4 py-3">Absence (1 Day)</td>
-                    <td className="px-4 py-3 text-right font-data-mono font-bold text-error">
-                      ₱{record.deductions.absence.toLocaleString()}
-                    </td>
-                  </tr>
-                  <tr className="border-b border-outline-variant even:bg-surface">
-                    <td className="px-4 py-3">SSS Loan Payment</td>
-                    <td className="px-4 py-3 text-right font-data-mono font-bold text-error">
-                      ₱{record.deductions.sssLoan.toLocaleString()}
-                    </td>
-                  </tr>
-                  <tr className="border-b border-outline-variant even:bg-surface">
-                    <td className="px-4 py-3">Cash Advance Repay</td>
-                    <td className="px-4 py-3 text-right font-data-mono font-bold text-error">
-                      ₱{record.deductions.cashAdvance.toLocaleString()}
-                    </td>
-                  </tr>
-                  <tr className="border-b border-outline-variant even:bg-surface">
-                    <td className="px-4 py-3">Health Check Surcharge</td>
-                    <td className="px-4 py-3 text-right font-data-mono font-bold text-error">
-                      ₱{record.deductions.healthCheck.toLocaleString()}
-                    </td>
-                  </tr>
-                  <tr className="even:bg-surface">
-                    <td className="px-4 py-3">13th Month Adjustment</td>
-                    <td className="px-4 py-3 text-right font-data-mono font-bold text-error">
-                      ₱{record.deductions.thirteenthMonth.toLocaleString()}
-                    </td>
-                  </tr>
+                  {record.deductions.late > 0 && (
+                    <tr className="border-b border-outline-variant even:bg-surface">
+                      <td className="px-4 py-3">Late / Tardy</td>
+                      <td className="px-4 py-3 text-right font-data-mono font-bold text-error">
+                        ₱{record.deductions.late.toLocaleString()}
+                      </td>
+                    </tr>
+                  )}
+                  {record.deductions.absence > 0 && (
+                    <tr className="border-b border-outline-variant even:bg-surface">
+                      <td className="px-4 py-3">Absence</td>
+                      <td className="px-4 py-3 text-right font-data-mono font-bold text-error">
+                        ₱{record.deductions.absence.toLocaleString()}
+                      </td>
+                    </tr>
+                  )}
+                  {record.deductions.sssLoan > 0 && (
+                    <tr className="border-b border-outline-variant even:bg-surface">
+                      <td className="px-4 py-3">SSS Loan Payment</td>
+                      <td className="px-4 py-3 text-right font-data-mono font-bold text-error">
+                        ₱{record.deductions.sssLoan.toLocaleString()}
+                      </td>
+                    </tr>
+                  )}
+                  {record.deductions.cashAdvance > 0 && (
+                    <tr className="border-b border-outline-variant even:bg-surface">
+                      <td className="px-4 py-3">Cash Advance Repay</td>
+                      <td className="px-4 py-3 text-right font-data-mono font-bold text-error">
+                        ₱{record.deductions.cashAdvance.toLocaleString()}
+                      </td>
+                    </tr>
+                  )}
+                  {record.deductions.healthCheck > 0 && (
+                    <tr className="border-b border-outline-variant even:bg-surface">
+                      <td className="px-4 py-3">Health Check Surcharge</td>
+                      <td className="px-4 py-3 text-right font-data-mono font-bold text-error">
+                        ₱{record.deductions.healthCheck.toLocaleString()}
+                      </td>
+                    </tr>
+                  )}
+                  {record.deductions.thirteenthMonth > 0 && (
+                    <tr className="even:bg-surface">
+                      <td className="px-4 py-3">13th Month Adjustment</td>
+                      <td className="px-4 py-3 text-right font-data-mono font-bold text-error">
+                        ₱{record.deductions.thirteenthMonth.toLocaleString()}
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -275,19 +236,26 @@ export default function PayrollRecordDetail() {
         </div>
 
         {/* Approval Section (if not paid) */}
-        <div className="mt-8 p-6 bg-surface-container-low rounded-2xl border border-outline-variant">
-          <p className="text-body-md text-on-surface-variant mb-4">Record Status: <span className="font-bold text-primary">Pending Approval</span></p>
-          <div className="flex gap-3">
-            <button className="flex items-center justify-center gap-2 px-6 h-11 bg-green-600 text-white rounded-2xl hover:opacity-90 transition font-bold">
-              <CheckCircle size={18} />
-              Approve
-            </button>
-            <button className="flex items-center justify-center gap-2 px-6 h-11 bg-error text-on-error rounded-2xl hover:opacity-90 transition font-bold">
-              <XCircle size={18} />
-              Reject
-            </button>
+        {record.status !== 'Paid' && (
+          <div className="mt-8 p-6 bg-surface-container-low rounded-2xl border border-outline-variant">
+            <p className="text-body-md text-on-surface-variant mb-4">Record Status: <span className={`font-bold ${record.status === 'Draft' ? 'text-orange-600' : 'text-green-600'}`}>{record.status}</span></p>
+            {record.status === 'Draft' && (
+              <div className="flex gap-3">
+                <button className="flex items-center justify-center gap-2 px-6 h-11 bg-green-600 text-white rounded-2xl hover:opacity-90 transition font-bold">
+                  <CheckCircle size={18} />
+                  Approve
+                </button>
+                <button className="flex items-center justify-center gap-2 px-6 h-11 bg-error text-on-error rounded-2xl hover:opacity-90 transition font-bold">
+                  <XCircle size={18} />
+                  Reject
+                </button>
+              </div>
+            )}
+            {record.status === 'Approved' && (
+              <div className="text-green-600 font-bold">✓ Record has been approved and is ready for payment</div>
+            )}
           </div>
-        </div>
+        )}
       </main>
     </div>
   );

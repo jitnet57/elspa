@@ -1,54 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Edit2, Trash2, Search } from 'lucide-react';
-
-interface Holiday {
-  id: string;
-  date: string;
-  month: string;
-  day: string;
-  name: string;
-  type: 'National' | 'Special';
-  multiplier: number;
-}
-
-const mockHolidays: Holiday[] = [
-  {
-    id: '1',
-    date: 'Dec 25, 2024',
-    month: 'Dec',
-    day: '25',
-    name: 'Christmas Day',
-    type: 'National',
-    multiplier: 200,
-  },
-  {
-    id: '2',
-    date: 'Dec 30, 2024',
-    month: 'Dec',
-    day: '30',
-    name: 'Rizal Day',
-    type: 'National',
-    multiplier: 200,
-  },
-  {
-    id: '3',
-    date: 'Nov 01, 2024',
-    month: 'Nov',
-    day: '01',
-    name: "All Saints' Day",
-    type: 'Special',
-    multiplier: 130,
-  },
-  {
-    id: '4',
-    date: 'Nov 02, 2024',
-    month: 'Nov',
-    day: '02',
-    name: "All Souls' Day",
-    type: 'Special',
-    multiplier: 130,
-  },
-];
+import { holidays } from '../mockData/payrollData';
 
 const typeColors = {
   National: 'bg-red-100 text-red-700',
@@ -56,15 +8,15 @@ const typeColors = {
 };
 
 export default function HolidayManagement() {
-  const [holidays, setHolidays] = useState(mockHolidays);
+  const [holidayList, setHolidayList] = useState(holidays);
   const [search, setSearch] = useState('');
 
-  const filteredHolidays = holidays.filter((h) =>
+  const filteredHolidays = holidayList.filter((h) =>
     h.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleDelete = (id: string) => {
-    setHolidays(holidays.filter((h) => h.id !== id));
+    setHolidayList(holidayList.filter((h) => h.id !== id));
   };
 
   return (
@@ -168,7 +120,7 @@ export default function HolidayManagement() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-surface to-transparent flex items-end p-6">
             <p className="text-body-md font-bold text-on-surface-variant">
-              Total 12 National Holidays in 2024
+              Total {holidayList.length} Holidays in 2024 ({holidayList.filter(h => h.type === 'National').length} National, {holidayList.filter(h => h.type === 'Special').length} Special)
             </p>
           </div>
         </div>

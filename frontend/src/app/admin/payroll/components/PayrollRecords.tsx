@@ -1,59 +1,12 @@
 import React, { useState } from 'react';
 import { ChevronRight, Download, Printer, Menu } from 'lucide-react';
-
-interface PayrollRecord {
-  id: string;
-  name: string;
-  employeeType: 'Full-time' | 'Part-time' | 'Contractor';
-  period: string;
-  grossPay: number;
-  deductions: number;
-  netPay: number;
-  status: 'Paid' | 'Approved' | 'Draft';
-  avatar: string;
-}
+import { payrollRecords } from '../mockData/payrollData';
 
 interface Filters {
   period: string;
   employeeType: string;
   status: string;
 }
-
-const mockRecords: PayrollRecord[] = [
-  {
-    id: '1',
-    name: 'John Dela Cruz',
-    employeeType: 'Full-time',
-    period: 'Oct 01 - Oct 15, 2023',
-    grossPay: 45000,
-    deductions: 4250,
-    netPay: 40750,
-    status: 'Paid',
-    avatar: 'JD',
-  },
-  {
-    id: '2',
-    name: 'Maria Santos',
-    employeeType: 'Part-time',
-    period: 'Oct 01 - Oct 15, 2023',
-    grossPay: 22500,
-    deductions: 1120,
-    netPay: 21380,
-    status: 'Approved',
-    avatar: 'MS',
-  },
-  {
-    id: '3',
-    name: 'Antonio Reyes',
-    employeeType: 'Contractor',
-    period: 'Oct 01 - Oct 15, 2023',
-    grossPay: 18000,
-    deductions: 500,
-    netPay: 17500,
-    status: 'Draft',
-    avatar: 'AR',
-  },
-];
 
 const statusColors = {
   Paid: 'bg-blue-100 text-blue-800',
@@ -69,11 +22,11 @@ const statusIcons = {
 
 export default function PayrollRecords() {
   const [filters, setFilters] = useState<Filters>({
-    period: 'October 2023',
+    period: 'Oct 16-31, 2024',
     employeeType: 'All Types',
     status: 'All Status',
   });
-  const [records, setRecords] = useState(mockRecords);
+  const [records, setRecords] = useState(payrollRecords);
 
   const handleFilterChange = (key: keyof Filters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -138,9 +91,10 @@ export default function PayrollRecords() {
               onChange={(e) => handleFilterChange('period', e.target.value)}
               className="px-3 py-2 border border-outline-variant rounded-lg text-body-md focus:ring-2 focus:ring-primary focus:border-transparent"
             >
-              <option>October 2023</option>
-              <option>September 2023</option>
-              <option>August 2023</option>
+              <option>Oct 01-15, 2024</option>
+              <option>Oct 16-31, 2024</option>
+              <option>September 2024</option>
+              <option>August 2024</option>
               <option>Custom Range...</option>
             </select>
           </div>
