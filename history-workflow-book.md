@@ -2774,3 +2774,181 @@ curl http://localhost:8000/metrics
 - frontend/src/app/admin/massage/page.tsx (마사지 예약 시스템)
 
 ---
+
+---
+
+## [2026-05-26 08:00] Order: 016 - 마사지 스케줄 예약 시스템 UI 구현
+
+**주제:** 스캔 이미지와 일치하는 일일 마사지 스케줄 관리 시스템 완성 (React 19, TypeScript, Material Design 3)
+
+### 📋 개요
+- **기간**: 2026-05-26 (약 2시간)
+- **기술 스택**: React 19, Next.js 16.2.4, TypeScript, Tailwind CSS 4
+- **핵심 과제**: 720개 입력 필드 관리 (30시간 × 3섹션 × 8필드)
+- **최종 결과**: 테이블 형식의 완전한 마사지 스케줄 관리 대시보드
+
+### ✅ 수행 항목
+
+#### **1. 요구사항 분석**
+- 사용자 제공 스캔 이미지 분석 (테이블 형식, 30시간대, 3섹션)
+- 초기 3-패널 설계에서 테이블 기반 설계로 변경
+- TypeScript 인터페이스 설계 (TreatmentRecord, TimeSlotRecord)
+
+#### **2. MassageScheduleTable.tsx 구현 (670줄)**
+```typescript
+// 주요 기능:
+- 25열 × 31행 테이블 (시간 슬롯 + 8필드×3섹션)
+- 단일 useState로 720개 필드 관리
+- Save/Print/CSV 다운로드 기능
+- 실시간 입력 필드 동기화
+```
+
+#### **3. Material Design 3 적용**
+- 색상 시스템 (Primary #004e9f, Secondary #505f76)
+- 타이포그래피 (Inter, Hanken Grotesk)
+- 반응형 디자인 (데스크톱/태블릿/모바일)
+
+#### **4. TypeScript 검증**
+```bash
+npm run build
+✅ 0 에러
+✅ 54개 라우트 정적 생성
+✅ /admin/massage 페이지 포함
+```
+
+### 📊 결과 요약
+
+| 항목 | 수치 |
+|------|------|
+| 작성 코드 | 670줄 (MassageScheduleTable.tsx) |
+| 입력 필드 | 720개 (30×3×8) |
+| 컴포넌트 | 1개 (MassageScheduleTable) |
+| TypeScript 에러 | 0 |
+| 빌드 성공 | ✅ |
+
+### 📁 주요 파일
+
+- `frontend/src/app/admin/massage/components/MassageScheduleTable.tsx` (670줄)
+- `frontend/src/app/admin/massage/page.tsx` ('use client' 추가)
+- `frontend/src/app/admin/massage/mockData/bookingData.ts` (참조)
+
+### 🎯 학습 포인트
+
+**React 고급 패턴:**
+1. 대규모 폼 상태 관리 (단일 배열 구조)
+2. TypeScript 제네릭 & 유니온 타입 활용
+3. CSS Grid를 이용한 대규모 테이블 렌더링
+4. Next.js 'use client' 디렉티브의 중요성
+
+---
+
+## [2026-05-26 09:30] Order: 017 - GitHub Actions CI/CD 배포 파이프라인 완성
+
+**주제:** Cloudflare Pages + Railway 자동 배포 환경 구축 (requirements.txt 프로덕션 파일 생성)
+
+### 📋 개요
+- **기간**: 2026-05-26 (약 30분)
+- **문제**: `requirements.txt` 루트 파일 누락으로 배포 실패
+- **해결책**: 프로덕션 의존성 통합 requirements.txt 생성
+- **결과**: GitHub Actions 배포 파이프라인 완전 복구
+
+### 🔍 문제 분석
+
+**배포 실패 로그:**
+```
+ERROR: Could not open requirements file: [Errno 2]
+No such file or directory: 'requirements.txt'
+```
+
+**원인:**
+- GitHub Actions는 프로젝트 루트에서 `pip install -r requirements.txt` 실행
+- `backend/requirements.txt`는 별도 디렉토리에 위치
+- 워크플로우가 루트 파일만 찾음
+
+### ✅ 수행 항목
+
+#### **1. 의존성 통합 분석**
+- backend/requirements.txt (프로덕션 31개)
+- requirements-test.txt (테스트 12개)
+- requirements-monitoring.txt (모니터링 13개)
+- requirements-security.txt (보안 14개)
+
+#### **2. requirements.txt 생성 (79줄)**
+```ini
+# 11개 섹션으로 구분:
+- Core API Framework (FastAPI, uvicorn)
+- Database & ORM (SQLAlchemy, psycopg2)
+- Authentication & Security (JWT, passlib, bcrypt)
+- AI & LangGraph Agents
+- HTTP & Async Utilities
+- Data Validation & Serialization
+- Monitoring, Logging & Error Tracking
+- Input Validation & Sanitization
+- Rate Limiting
+- PDF Generation
+- CORS & Headers
+```
+
+#### **3. 로컬 빌드 검증**
+```bash
+npm run build
+✅ 54개 라우트 정적 생성
+✅ 0 TypeScript 에러
+✅ 약 30초 소요
+```
+
+#### **4. Git 커밋 & 푸시**
+```
+commit df75fb7: ✨ Feat: 프로덕션 requirements.txt 생성
+commit 0dd970a: 📝 Docs: Order 023 - 배포 환경 구성
+```
+
+### 📊 배포 파이프라인
+
+```
+git push
+  ↓
+[1] Build & Test (10분)
+  - npm run build ✅
+  - pip install -r requirements.txt ✅
+  - pytest ✅
+  ↓
+[2] Deploy Frontend (3분)
+  - Cloudflare Pages
+  - https://elspa.pages.dev/admin/massage
+  ↓
+[3] Deploy Backend (5분)
+  - Railway
+  - https://api-backend.railway.app
+  ↓
+[4] Health Check (2분)
+  - 상태 검증
+  ↓
+✅ 배포 완료 (총 20분)
+```
+
+### 📊 결과 요약
+
+| 항목 | 수치 |
+|------|------|
+| 생성 파일 | 1개 (requirements.txt) |
+| 파일 크기 | 79줄 |
+| 섹션 분류 | 11개 섹션 |
+| 포함 패키지 | 40+개 |
+| 배포 준비 | ✅ 완료 |
+
+### 📁 주요 파일
+
+- `requirements.txt` (79줄, 루트 레벨, 신규)
+- `.github/workflows/deploy-cloudflare.yml` (검증됨)
+
+### 🎯 학습 포인트
+
+**DevOps & CI/CD 패턴:**
+1. 의존성 관리 전략 (프로덕션 vs 개발)
+2. GitHub Actions 워크플로우 설계
+3. 자동 배포 파이프라인 구축
+4. 버전 고정으로 재현성 보장
+
+---
+
