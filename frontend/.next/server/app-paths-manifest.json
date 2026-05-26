@@ -13,6 +13,7 @@
   "/admin/financial-dashboard/page": "app/admin/financial-dashboard/page.js",
   "/admin/guide-referral-fee/page": "app/admin/guide-referral-fee/page.js",
   "/admin/guides/page": "app/admin/guides/page.js",
+  "/admin/massage/page": "app/admin/massage/page.js",
   "/admin/matching/page": "app/admin/matching/page.js",
   "/admin/monthly-settlement/page": "app/admin/monthly-settlement/page.js",
   "/admin/page": "app/admin/page.js",
