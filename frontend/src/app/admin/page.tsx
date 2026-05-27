@@ -462,9 +462,10 @@ export default function AdminPortal() {
                   <p className="text-indigo-200/50 text-xs mt-0.5 font-semibold">Financial distribution & auditing systems</p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-[10px] font-black tracking-widest">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-[10px] font-black tracking-widest">
                 <a className="px-4 py-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-[#8aebff]/40 transition-all text-center" href="/admin/companies.html">COMPANIES</a>
                 <a className="px-4 py-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-[#8aebff]/40 transition-all text-center" href="/admin/payroll.html">PAYROLL</a>
+                <a className="px-4 py-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-[#8aebff]/40 transition-all text-center" href="/therapist-settlement.html">THERAPIST</a>
                 <a className="px-4 py-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-[#8aebff]/40 transition-all text-center" href="/admin/guide-referral-fee.html">GUIDE FEE</a>
                 <a className="px-4 py-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-[#8aebff]/40 transition-all text-center" href="/admin/settlement-report.html">REPORTS</a>
               </div>
