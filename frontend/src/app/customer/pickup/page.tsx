@@ -25,30 +25,19 @@ export default function CustomerPickupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // GPS 위치 감지 (Step 1)
+  // GPS 위치 감지 (Step 1) - WiFi 불필요 (GPS 좌표만 사용)
   useEffect(() => {
     if (step === 1 && !pickupLocation) {
       setLoading(true);
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-          async (position) => {
+          (position) => {
             const { latitude, longitude } = position.coords;
-            try {
-              // Nominatim reverse geocoding (API 키 없음)
-              const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-              const data = await response.json();
-              setPickupLocation({
-                lat: latitude,
-                lng: longitude,
-                address: data.address?.city || data.address?.town || '현재 위치',
-              });
-            } catch (err) {
-              setPickupLocation({
-                lat: latitude,
-                lng: longitude,
-                address: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
-              });
-            }
+            setPickupLocation({
+              lat: latitude,
+              lng: longitude,
+              address: `위도 ${latitude.toFixed(4)}, 경도 ${longitude.toFixed(4)}`,
+            });
             setLoading(false);
           },
           () => {
@@ -56,7 +45,7 @@ export default function CustomerPickupPage() {
             setPickupLocation({
               lat: 37.497,
               lng: 127.027,
-              address: '서울시 강남구',
+              address: '위도 37.4970, 경도 127.0270',
             });
             setLoading(false);
           }
