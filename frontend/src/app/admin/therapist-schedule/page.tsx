@@ -1,7 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import React from 'react';
 
+// ============================================================
+// 📌 인터페이스 정의 (TypeScript Schedule Models)
+// ============================================================
 interface ScheduleSession {
   id: string;
   therapistId: number;
@@ -19,28 +23,33 @@ interface ScheduleTherapist {
   title: string;
   status: 'available' | 'in_session' | 'break' | 'off_duty';
   avatarColor: string;
+  avatarUrl?: string;
   sessions: ScheduleSession[];
 }
 
+// ============================================================
+// 📌 상수 및 설정 시스템 (Service & Status Configs)
+// ============================================================
 const SERVICE_CONFIG = {
-  swedish:   { label: 'Swedish Massage', bg: 'bg-blue-100 border-blue-300 text-blue-700', icon: '💆' },
-  thai:      { label: 'Thai Massage', bg: 'bg-green-100 border-green-300 text-green-700', icon: '🙏' },
-  hotstone:  { label: 'Hot Stone Therapy', bg: 'bg-orange-100 border-orange-300 text-orange-700', icon: '🪨' },
-  foot:      { label: 'Foot Massage', bg: 'bg-teal-100 border-teal-300 text-teal-700', icon: '🦶' },
-  aroma:     { label: 'Aromatherapy', bg: 'bg-purple-100 border-purple-300 text-purple-700', icon: '🌸' },
-  break:     { label: 'Break', bg: 'bg-yellow-200 border-yellow-400 text-yellow-800', icon: '☕' },
-  available: { label: 'Available', bg: 'bg-green-50 border-green-200 text-green-600', icon: '' },
+  swedish:   { label: 'Swedish Massage', border: 'border-l-cyan-400', text: 'text-cyan-400', icon: '💆', bg: 'bg-cyan-400/5' },
+  thai:      { label: 'Thai Massage', border: 'border-l-emerald-400', text: 'text-emerald-400', icon: '🙏', bg: 'bg-emerald-400/5' },
+  hotstone:  { label: 'Hot Stone Therapy', border: 'border-l-orange-400', text: 'text-orange-400', icon: '🪨', bg: 'bg-orange-400/5' },
+  foot:      { label: 'Foot Massage', border: 'border-l-indigo-400', text: 'text-indigo-400', icon: '🦶', bg: 'bg-indigo-400/5' },
+  aroma:     { label: 'Aromatherapy', border: 'border-l-pink-400', text: 'text-pink-400', icon: '🌸', bg: 'bg-pink-400/5' },
+  break:     { label: 'Break', border: 'border-dashed border-white/10', text: 'text-slate-400', icon: '☕', bg: 'bg-white/5' },
+  available: { label: 'Available', border: 'border-l-slate-600', text: 'text-slate-600', icon: '', bg: 'bg-transparent' },
 } as const;
 
 const STATUS_CONFIG = {
-  available: { label: 'Available', dot: '●', color: 'text-green-500' },
-  in_session: { label: 'In Session', dot: '●', color: 'text-blue-500' },
-  break: { label: 'Break', dot: '◑', color: 'text-yellow-500' },
-  off_duty: { label: 'Off Duty', dot: '◌', color: 'text-gray-400' },
+  available: { label: 'AVAILABLE', dot: 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]', color: 'text-green-500' },
+  in_session: { label: 'IN SESSION', dot: 'bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]', color: 'text-cyan-400' },
+  break: { label: 'BREAK', dot: 'bg-yellow-500', color: 'text-yellow-500' },
+  off_duty: { label: 'OFF DUTY', dot: 'bg-slate-500', color: 'text-slate-500' },
 } as const;
 
-// 60 Philippine English names
+// 60명의 필리핀 및 아시안 로컬라이즈드 인력 네이밍
 const PHILIPPINE_NAMES = [
+  'Elena Santos', 'David Cruz', 'Sophie Reyes', 'Jose Garcia', 'Carmen Flores',
   'Maria Santos', 'Jose Garcia', 'Carmen Reyes', 'Antonio Flores', 'Rosa Cruz',
   'Francisco Rodriguez', 'Ana Maria', 'Juan Santos', 'Luz Garcia', 'Miguel Mendoza',
   'Jennifer Cruz', 'Michael Santos', 'Mary Ann Garcia', 'Christopher Reyes', 'Patricia Flores',
@@ -55,78 +64,126 @@ const PHILIPPINE_NAMES = [
   'Jonathan Mendoza', 'Stephen Cruz', 'Betty Flores', 'Larry Garcia', 'Helen Reyes',
 ];
 
-const AVATAR_COLORS = [
-  'from-indigo-400 to-indigo-600',
-  'from-blue-400 to-blue-600',
-  'from-green-400 to-green-600',
-  'from-pink-400 to-pink-600',
-  'from-amber-400 to-amber-600',
-  'from-purple-400 to-purple-600',
-  'from-cyan-400 to-cyan-600',
-  'from-rose-400 to-rose-600',
-  'from-lime-400 to-lime-600',
-  'from-sky-400 to-sky-600',
-];
-
 const ROOM_NUMBERS = Array.from({ length: 20 }, (_, i) => `Room ${String(i + 1).padStart(2, '0')}`);
 
-const SERVICE_TYPES: Array<'swedish' | 'thai' | 'hotstone' | 'foot' | 'aroma' | 'break'> = [
+const SERVICE_TYPES: Array<'swedish' | 'thai' | 'hotstone' | 'foot' | 'aroma'> = [
   'swedish', 'thai', 'hotstone', 'foot', 'aroma',
 ];
 
-// Random utility functions
+// 난수 생성 유틸리티 함수
 const getRandomElement = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 const getRandomInt = (min: number, max: number): number => Math.floor(Math.random() * (max - min + 1)) + min;
 
-// Generate 60 therapists
+// ============================================================
+// 📌 60명 치료사 초기 시드 데이터 자동 생성기
+// ============================================================
 const generateMockTherapists = (): ScheduleTherapist[] => {
   return PHILIPPINE_NAMES.map((name, index) => {
     const id = index + 1;
-    const statuses: Array<'available' | 'in_session' | 'break' | 'off_duty'> = ['available', 'in_session']; // All working for testing
-    const status = 'available'; // All checked in as available
-    const isManager = id === 1 || id === 2; // First 2 are managers
+    const isManager = id <= 3; // Elena, David, Sophie는 1, 2, 3번으로 고정 매핑
 
-    // Generate random sessions per therapist (0-5)
-    const sessionCount = getRandomInt(0, 5);
+    // 초기 상태 정의
+    let status: 'available' | 'in_session' | 'break' | 'off_duty' = 'available';
+    if (id === 2) status = 'in_session';
+    if (id === 3) status = 'break';
+
     const sessions: ScheduleSession[] = [];
 
-    for (let i = 0; i < sessionCount; i++) {
-      const startHour = getRandomInt(9, 19);
-      const serviceType = getRandomElement(SERVICE_TYPES);
-      const duration = serviceType === 'aroma' || serviceType === 'thai' ? 1.5 : 1;
-      const endHour = Math.min(startHour + duration, 21);
-
+    // Elena S. 고정 더미 세션 매핑
+    if (id === 1) {
       sessions.push({
-        id: `s${id}-${i}`,
+        id: `s${id}-1`,
         therapistId: id,
-        serviceType,
-        startHour,
-        endHour,
-        customerName: `Guest ${getRandomInt(1000, 9999)}`,
-        roomNumber: getRandomElement(ROOM_NUMBERS),
-        status: getRandomElement(['scheduled', 'in_progress', 'completed'] as const),
+        serviceType: 'swedish',
+        startHour: 10,
+        endHour: 12,
+        customerName: 'James Cooper',
+        roomNumber: 'Room 03',
+        status: 'scheduled',
       });
-    }
-
-    // Add break time (30% probability)
-    if (Math.random() < 0.3) {
-      const breakHour = getRandomInt(12, 14);
+      sessions.push({
+        id: `s${id}-2`,
+        therapistId: id,
+        serviceType: 'aroma',
+        startHour: 14,
+        endHour: 15,
+        customerName: 'Sarah L.',
+        roomNumber: 'Room 08',
+        status: 'scheduled',
+      });
+    } 
+    // David K. 고정 더미 세션 매핑
+    else if (id === 2) {
+      sessions.push({
+        id: `s${id}-1`,
+        therapistId: id,
+        serviceType: 'thai',
+        startHour: 9,
+        endHour: 10.5,
+        customerName: 'Marcus V.',
+        roomNumber: 'Room 01',
+        status: 'in_progress',
+      });
+      sessions.push({
+        id: `s${id}-2`,
+        therapistId: id,
+        serviceType: 'hotstone',
+        startHour: 12,
+        endHour: 14,
+        customerName: 'Olivia Chen',
+        roomNumber: 'Room 05',
+        status: 'scheduled',
+      });
+    } 
+    // Sophie R. 고정 더미 세션 매핑
+    else if (id === 3) {
       sessions.push({
         id: `s${id}-break`,
         therapistId: id,
         serviceType: 'break',
-        startHour: breakHour,
-        endHour: breakHour + 1,
+        startHour: 11,
+        endHour: 12,
         status: 'scheduled',
       });
+      sessions.push({
+        id: `s${id}-1`,
+        therapistId: id,
+        serviceType: 'foot',
+        startHour: 15,
+        endHour: 16,
+        customerName: 'Kevin Smith',
+        roomNumber: 'Room 12',
+        status: 'scheduled',
+      });
+    } 
+    // 나머지 57명은 랜덤 스케줄 자동 시뮬레이션
+    else {
+      const sessionCount = getRandomInt(0, 3);
+      for (let i = 0; i < sessionCount; i++) {
+        const startHour = getRandomInt(9, 18);
+        const serviceType = getRandomElement(SERVICE_TYPES);
+        const duration = serviceType === 'aroma' || serviceType === 'thai' ? 1.5 : 1;
+        const endHour = Math.min(startHour + duration, 21);
+
+        sessions.push({
+          id: `s${id}-${i}`,
+          therapistId: id,
+          serviceType,
+          startHour,
+          endHour,
+          customerName: `Guest ${getRandomInt(1000, 9999)}`,
+          roomNumber: getRandomElement(ROOM_NUMBERS),
+          status: getRandomElement(['scheduled', 'in_progress', 'completed'] as const),
+        });
+      }
     }
 
     return {
       id,
       name,
-      title: isManager ? 'Manager' : 'Therapist',
+      title: isManager ? 'Senior Therapist' : 'Therapist',
       status,
-      avatarColor: AVATAR_COLORS[index % AVATAR_COLORS.length],
+      avatarColor: 'from-slate-700 to-slate-800',
       sessions: sessions.sort((a, b) => a.startHour - b.startHour),
     };
   });
@@ -136,41 +193,68 @@ const MOCK_THERAPISTS: ScheduleTherapist[] = generateMockTherapists();
 
 const START_HOUR = 9;
 const END_HOUR = 21;
-const COLUMN_WIDTH = 100;
+const COLUMN_WIDTH = 120; // 1시간당 120px (HTML Mockup 규격 일치)
 
 export default function TherapistSchedulePage() {
   const [therapists, setTherapists] = useState<ScheduleTherapist[]>(MOCK_THERAPISTS);
-  const [selectedDate, setSelectedDate] = useState(new Date(2026, 4, 18));
-  const [selectedTherapistId, setSelectedTherapistId] = useState(1);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date(2026, 4, 18)); // 5월 18일 기준
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // 3대 인터랙티브 모달 상태 제어
   const [selectedSession, setSelectedSession] = useState<ScheduleSession | null>(null);
-  const [isNewSessionModalOpen, setIsNewSessionModalOpen] = useState(false);
   const [bookingSlot, setBookingSlot] = useState<{ therapistId: number; hour: number } | null>(null);
-  const [bookingForm, setBookingForm] = useState({ customerName: '', serviceType: 'swedish', roomNumber: '' });
-  const [manualBookingForm, setManualBookingForm] = useState({
+  const [isManualModalOpen, setIsManualModalOpen] = useState(false);
+
+  // 예약 폼 상태 제어
+  const [quickForm, setQuickForm] = useState({ customerName: '', serviceType: 'swedish' as const, roomNumber: '' });
+  const [manualForm, setManualForm] = useState({
     therapistId: 1,
-    date: new Date(2026, 4, 18),
-    hour: 10,
-    customerName: '',
+    startHour: 9,
+    duration: 60, // 60, 90, 120 Min
     serviceType: 'swedish' as const,
+    customerName: '',
     roomNumber: '',
   });
 
+  const timeIndicatorRef = useRef<HTMLDivElement | null>(null);
+
+  // ============================================================
+  // 📌 현재 시간 인디케이터 실시간 시뮬레이터 (Nebula Red Line)
+  // ============================================================
+  useEffect(() => {
+    const updateIndicator = () => {
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinutes = now.getMinutes();
+
+      if (timeIndicatorRef.current) {
+        if (currentHour >= START_HOUR && currentHour < END_HOUR) {
+          // Left offset: 200px (이름셀 너비) + ((현재시간 - 9) * 120px) + (분 비율 * 120px)
+          const offset = 200 + (currentHour - START_HOUR) * COLUMN_WIDTH + (currentMinutes / 60) * COLUMN_WIDTH;
+          timeIndicatorRef.current.style.left = `${offset}px`;
+          timeIndicatorRef.current.style.display = 'block';
+        } else {
+          timeIndicatorRef.current.style.display = 'none';
+        }
+      }
+    };
+
+    updateIndicator();
+    const interval = setInterval(updateIndicator, 60000); // 1분 주기 갱신
+    return () => clearInterval(interval);
+  }, []);
+
   const formatTime = (hour: number) => {
-    return `${Math.floor(hour)}:${String((hour % 1) * 60).padStart(2, '0')}`;
+    const hh = Math.floor(hour);
+    const mm = Math.round((hour % 1) * 60);
+    return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
   };
 
   const getDurationMinutes = (session: ScheduleSession) => {
     return Math.round((session.endHour - session.startHour) * 60);
   };
 
-  const getNextDays = (baseDate: Date, count: number) => {
-    return Array.from({ length: count }).map((_, i) => {
-      const date = new Date(baseDate);
-      date.setDate(date.getDate() + i);
-      return date;
-    });
-  };
-
+  // 날짜 변경 컨트롤러
   const handlePrevDay = () => {
     const newDate = new Date(selectedDate);
     newDate.setDate(newDate.getDate() - 1);
@@ -183,347 +267,643 @@ export default function TherapistSchedulePage() {
     setSelectedDate(newDate);
   };
 
-  const selectedTherapist = therapists.find(t => t.id === selectedTherapistId);
-  const sortedSessions = selectedTherapist?.sessions.sort((a, b) => a.startHour - b.startHour) || [];
-  const nextDays = getNextDays(selectedDate, 6);
-  const completedCount = sortedSessions.filter(s => s.status === 'completed').length;
-
-  const formatDateLong = (d: Date) => {
-    return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', weekday: 'short' });
+  // 6개 날짜 칩 생성용 데이터
+  const getNextDays = (baseDate: Date, count: number) => {
+    return Array.from({ length: count }).map((_, i) => {
+      const date = new Date(baseDate);
+      date.setDate(date.getDate() + i);
+      return date;
+    });
   };
+  const nextDays = getNextDays(selectedDate, 6);
+
+  // 검색어가 있을 경우 치료사 필터링
+  const filteredTherapists = therapists.filter(t => 
+    t.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    t.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* ===== Mobile View (less than lg) ===== */}
-      <div className="lg:hidden flex justify-center items-start p-2 min-h-screen">
-        <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-          {/* Top header */}
-          <header className="bg-indigo-600 p-6 text-white rounded-b-3xl">
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <p className="text-xs text-indigo-200 uppercase font-semibold tracking-wider">
-                  {selectedDate.toLocaleDateString('en-US')}
-                </p>
-                <h1 className="text-2xl font-bold">Session Progress</h1>
-              </div>
-              <span className="bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
-                {completedCount} Completed
-              </span>
-            </div>
+    <div className="min-h-screen bg-[#0c1324] bg-[radial-gradient(ellipse_at_top,_#1e293b,_#0c1324)] text-[#dce1fb] font-sans antialiased relative pb-16">
+      
+      {/* 구글 폰트 및 아이콘 다이나믹 인젝션 */}
+      <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Hanken+Grotesk:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+      <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 
-            {/* Mini Calendar */}
-            <div className="flex justify-between text-center mt-2 gap-1">
-              <div className="p-2 w-10 text-indigo-200 text-xs">DATES</div>
-              {nextDays.map((date, i) => (
-                <button
-                  key={i}
-                  onClick={() => setSelectedDate(date)}
-                  className={`p-2 w-10 rounded-2xl font-bold transition-all ${
-                    date.toDateString() === selectedDate.toDateString()
-                      ? 'bg-white text-indigo-600 shadow-md'
-                      : 'text-indigo-200 text-xs'
-                  }`}
-                >
-                  <div className={date.toDateString() === selectedDate.toDateString() ? 'text-xs' : ''}>
-                    {['S', 'M', 'T', 'W', 'T', 'F', 'S'][date.getDay()]}
-                  </div>
-                  <div className={date.toDateString() === selectedDate.toDateString() ? 'text-base' : 'text-sm font-medium text-white'}>
-                    {date.getDate()}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </header>
+      {/* 우주 은하수 안개 배경 (Nebula Layer Effects) */}
+      <div className="absolute top-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-cyan-500/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-indigo-500/5 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
 
-          {/* Therapist Selection */}
-          <section className="p-4 border-b border-gray-100 max-h-[280px] overflow-y-auto">
-            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 sticky top-0 bg-white">Select Therapist ({therapists.length} total)</h2>
-            <div className="grid grid-cols-2 gap-2">
-              {therapists.map(therapist => (
-                <button
-                  key={therapist.id}
-                  onClick={() => setSelectedTherapistId(therapist.id)}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all text-left ${
-                    selectedTherapistId === therapist.id
-                      ? 'bg-indigo-50 border-2 border-indigo-500 shadow-sm'
-                      : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'
-                  }`}
-                >
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                    selectedTherapistId === therapist.id
-                      ? 'bg-indigo-200 text-indigo-700'
-                      : 'bg-gray-200 text-gray-600'
-                  }`}>
-                    {therapist.name[0]}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className={`text-xs font-bold truncate ${
-                      selectedTherapistId === therapist.id
-                        ? 'text-indigo-900'
-                        : 'text-gray-700'
-                    }`}>
-                      {therapist.name}
-                    </div>
-                    <div className="text-[10px] text-gray-500">{therapist.status === 'available' ? '✓ Available' : therapist.status === 'in_session' ? 'In Session' : therapist.status === 'break' ? 'Break' : 'Off Duty'}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </section>
-
-          {/* Session List */}
-          <main className="p-4 space-y-4 max-h-[500px] overflow-y-auto">
-            {sortedSessions.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="text-4xl mb-2">😌</div>
-                <p className="text-gray-400 font-medium">No sessions scheduled for today</p>
-              </div>
-            ) : (
-              sortedSessions.map(session => (
-                <div key={session.id}>
-                  {session.serviceType === 'break' ? (
-                    <div className="flex space-x-4 items-center">
-                      <div className="w-12 text-right">
-                        <span className="text-sm font-medium text-gray-400">{formatTime(session.startHour)}</span>
-                      </div>
-                      <div className="flex-1 bg-gray-100 rounded-xl p-2 text-center border border-dashed border-gray-300">
-                        <span className="text-xs font-medium text-gray-500">Break & Equipment Cleaning</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div
-                      className="flex space-x-4 cursor-pointer"
-                      onClick={() => setSelectedSession(session)}
-                    >
-                      <div className="w-12 text-right pt-2">
-                        <span className="text-sm font-bold text-gray-800">{formatTime(session.startHour)}</span>
-                        <span className="block text-xs text-gray-400">{getDurationMinutes(session)}min</span>
-                      </div>
-
-                      <div className={`flex-1 rounded-xl p-4 shadow-sm relative transition-all hover:shadow-md ${
-                        session.status === 'in_progress'
-                          ? 'bg-green-50 border-l-4 border-green-500'
-                          : session.status === 'scheduled'
-                          ? 'bg-blue-50 border-l-4 border-blue-500'
-                          : 'bg-gray-50 border-l-4 border-gray-300 opacity-70'
-                      }`}>
-                        <span className={`absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          session.status === 'in_progress'
-                            ? 'bg-green-500 text-white animate-pulse'
-                            : session.status === 'scheduled'
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'bg-gray-200 text-gray-600'
-                        }`}>
-                          {session.status === 'in_progress' ? 'In Progress' : session.status === 'scheduled' ? 'Scheduled' : 'Completed'}
-                        </span>
-
-                        <h3 className={`font-bold text-sm ${
-                          session.status === 'completed'
-                            ? 'text-gray-500 line-through'
-                            : 'text-gray-900'
-                        }`}>
-                          {SERVICE_CONFIG[session.serviceType as keyof typeof SERVICE_CONFIG].icon} {SERVICE_CONFIG[session.serviceType as keyof typeof SERVICE_CONFIG].label}
-                        </h3>
-
-                        {session.customerName && (
-                          <p className={`text-xs mt-1 ${
-                            session.status === 'completed' ? 'text-gray-400' : 'text-gray-600'
-                          }`}>
-                            Guest: {session.customerName}
-                          </p>
-                        )}
-
-                        {session.roomNumber && (
-                          <div className={`mt-3 flex items-center text-[11px] font-medium ${
-                            session.status === 'in_progress'
-                              ? 'text-green-700'
-                              : session.status === 'scheduled'
-                              ? 'text-blue-700'
-                              : 'text-gray-400'
-                          }`}>
-                            <span>{session.roomNumber}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))
-            )}
-          </main>
+      {/* ============================================================
+          📌 Top Navigation Shell (Shared Component)
+          ============================================================ */}
+      <header className="bg-slate-950/40 backdrop-blur-md text-cyan-400 flex justify-between items-center px-6 py-4 w-full sticky top-0 z-50 border-b border-indigo-500/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+        <div className="flex items-center gap-4">
+          <a className="flex items-center gap-2 hover:bg-white/10 p-2 rounded-full transition-all active:scale-95 text-[#8aebff]" href="/admin.html">
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>arrow_back</span>
+          </a>
+          <h1 className="text-xl sm:text-2xl font-black tracking-tighter text-[#8aebff] drop-shadow-[0_0_8px_rgba(138,235,255,0.4)]">
+            ELSPA CONTROL
+          </h1>
         </div>
-      </div>
+        <div className="flex items-center gap-6">
+          <div className="hidden md:flex gap-4 text-xs font-black tracking-wider uppercase items-center">
+            <span className="text-[#8aebff] font-bold">Therapist Schedule</span>
+            <span className="text-indigo-300/40">v2.0.4</span>
+          </div>
+          <div className="w-10 h-10 rounded-full border border-cyan-500/30 overflow-hidden shadow-[0_0_10px_rgba(34,211,238,0.2)]">
+            <img alt="Admin" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-Zy8obKMQ4KCOYGq9VIYlInzuOjEWliz7MAm1b9M5EEj61q1lo_2sCRiGkqfcKFDnZjkwYMvbTZHOg2smiDIkZDWTwUpaCQk-oX6O0iXV1zHd1WgoZFvVOp48yI6TmwNqLqIIqVWp_S_QBwxAPp62YS_LzVshm44scATwlDBlPFAtUD82Uo44NHlxPnEPZFBXmYfzAZJcRzB7KKQ9mII2ooy_6pSlDZHBruhDIHh_RkDrzvLV2QPWnD4iw7G2YybILo_B44PhxT-d"/>
+          </div>
+        </div>
+      </header>
 
-      {/* ===== Desktop View (lg and above) ===== */}
-      <div className="hidden lg:block min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-8">
-        <div className="max-w-full">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center gap-8 text-sm md:text-base">
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold">1</span>
-                  <span className="text-gray-600">Select Date</span>
-                </div>
-                <div className="hidden sm:flex items-center gap-1 text-gray-400">→</div>
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold">2</span>
-                  <span className="text-gray-900 font-bold">Daily Therapist Schedule</span>
-                </div>
-                <div className="hidden sm:flex items-center gap-1 text-gray-400">→</div>
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold">3</span>
-                  <span className="text-gray-600">Start New Massage</span>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsNewSessionModalOpen(true)}
-                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-lg shadow-lg transition-all text-sm"
+      {/* ============================================================
+          📌 Main Shell Grid (Sidebar + Content Area)
+          ============================================================ */}
+      <div className="flex min-h-screen">
+        
+        {/* Navigation Sidebar Shell */}
+        <aside className="hidden lg:flex flex-col h-screen p-6 fixed left-0 top-0 h-full w-[280px] bg-slate-900/40 backdrop-blur-xl border-r border-indigo-500/10 shadow-2xl shadow-black/50 z-40 pt-24 justify-between">
+          <div className="flex flex-col gap-2">
+            <a className="flex items-center gap-4 px-4 py-3 rounded-xl text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all" href="/admin.html">
+              <span className="material-symbols-outlined">dashboard</span>
+              <span className="font-semibold text-sm">Dashboard</span>
+            </a>
+            <a className="flex items-center gap-4 px-4 py-3 rounded-xl text-cyan-400 bg-white/10 border-r-2 border-cyan-400 font-bold shadow-[0_0_15px_rgba(34,211,238,0.2)] transition-all" href="/admin/therapists.html">
+              <span className="material-symbols-outlined">groups</span>
+              <span className="font-bold text-sm">Therapists</span>
+            </a>
+            <a className="flex items-center gap-4 px-4 py-3 rounded-xl text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all" href="/admin/payroll.html">
+              <span className="material-symbols-outlined">payments</span>
+              <span className="font-semibold text-sm">Payroll</span>
+            </a>
+            <a className="flex items-center gap-4 px-4 py-3 rounded-xl text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all" href="/admin/policies.html">
+              <span className="material-symbols-outlined">settings</span>
+              <span className="font-semibold text-sm">Settings</span>
+            </a>
+          </div>
+          
+          <div className="bg-slate-950/50 backdrop-blur-md border border-cyan-500/20 p-4 rounded-2xl shadow-inner">
+            <div className="flex items-center gap-3">
+              <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></div>
+              <span className="text-[10px] font-black tracking-widest text-cyan-400 uppercase">SYSTEM ONLINE</span>
+            </div>
+            <p className="text-[9px] text-indigo-300/40 mt-1 uppercase font-bold tracking-wider">ENCRYPTION: AES-256 ACTIVE</p>
+          </div>
+        </aside>
+
+        {/* Content Canvas */}
+        <section className="flex-grow lg:ml-[280px] p-4 sm:p-6 lg:p-8 space-y-8 overflow-x-hidden">
+          
+          {/* Date Navigator & Search */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-indigo-500/10 pb-6">
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <button 
+                onClick={handlePrevDay}
+                className="bg-white/5 border border-indigo-500/10 hover:border-indigo-500/30 p-3 rounded-xl hover:bg-white/10 active:scale-95 transition-all text-[#8aebff]"
               >
-                + Start New Massage
+                <span className="material-symbols-outlined">chevron_left</span>
+              </button>
+              
+              {/* Date Chips */}
+              <div className="flex gap-2.5 overflow-x-auto py-1 max-w-[280px] sm:max-w-none">
+                {nextDays.map((date, i) => {
+                  const isSelected = date.toDateString() === selectedDate.toDateString();
+                  const isSat = date.getDay() === 6;
+                  return (
+                    <div
+                      key={i}
+                      onClick={() => setSelectedDate(date)}
+                      className={`flex flex-col items-center justify-center min-w-[65px] py-2 px-1.5 rounded-xl cursor-pointer active:scale-95 transition-all duration-300 border ${
+                        isSelected 
+                          ? 'bg-white/5 border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.25)]' 
+                          : 'bg-white/2 border-white/5 opacity-55 hover:opacity-100'
+                      }`}
+                    >
+                      <span className={`text-[9px] font-black tracking-widest ${isSelected ? 'text-cyan-400' : isSat ? 'text-rose-400' : 'text-indigo-200'}`}>
+                        {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][date.getDay()]}
+                      </span>
+                      <span className="text-lg font-black text-white mt-0.5">{date.getDate()}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <button 
+                onClick={handleNextDay}
+                className="bg-white/5 border border-indigo-500/10 hover:border-indigo-500/30 p-3 rounded-xl hover:bg-white/10 active:scale-95 transition-all text-[#8aebff]"
+              >
+                <span className="material-symbols-outlined">chevron_right</span>
               </button>
             </div>
 
-            {/* Date Navigator */}
-            <div className="flex items-center justify-between bg-white rounded-lg p-4 border border-gray-200">
-              <button onClick={handlePrevDay} className="text-2xl text-gray-600 hover:text-gray-900">&lt;</button>
-              <span className="text-lg font-bold text-gray-900">{formatDateLong(selectedDate)}</span>
-              <button onClick={handleNextDay} className="text-2xl text-gray-600 hover:text-gray-900">&gt;</button>
+            {/* Live Search Box */}
+            <div className="relative w-full md:w-64">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                placeholder="치료사 이름 또는 직무 검색..."
+                className="w-full px-4 py-2.5 bg-slate-950/80 border border-indigo-500/20 rounded-xl text-xs focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 transition-all text-white placeholder-indigo-300/30"
+              />
             </div>
           </div>
 
-          {/* Schedule Grid */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
-            <div className="inline-block min-w-full">
-              {/* Table Header */}
-              <div className="flex border-b border-gray-200">
-                <div className="w-40 flex-shrink-0 px-4 py-3 font-bold text-gray-900 bg-gray-50 sticky left-0 z-10">
-                  Therapists ({therapists.length})
+          {/* ============================================================
+              📌 Schedule Timeline Canvas (Bento-like Grid Layout)
+              ============================================================ */}
+          <div className="bg-slate-900/30 backdrop-blur-md border border-indigo-500/20 rounded-2xl overflow-hidden relative shadow-[0_0_40px_rgba(99,102,241,0.1)]">
+            
+            {/* Timeline Horizontal Scroll Board */}
+            <div className="overflow-x-auto custom-scrollbar" id="schedule-scroll-container">
+              <div 
+                className="min-w-[1640px] relative" 
+                style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: `200px repeat(${END_HOUR - START_HOUR}, ${COLUMN_WIDTH}px)` 
+                }}
+              >
+                
+                {/* 📌 Real-time Red Nebula Indicator Line */}
+                <div 
+                  ref={timeIndicatorRef} 
+                  className="absolute top-0 bottom-0 w-0.5 bg-cyan-400 z-20 shadow-[0_0_10px_#8aebff] pointer-events-none transition-all duration-300"
+                  style={{ display: 'none' }}
+                ></div>
+
+                {/* Top-Left Corner */}
+                <div className="bg-slate-900/60 p-4 border-b border-r border-indigo-500/20 sticky left-0 z-30 flex items-center justify-center backdrop-blur-md">
+                  <span className="material-symbols-outlined text-cyan-400/40">schedule</span>
+                  <span className="text-[10px] font-black tracking-widest text-indigo-300/50 ml-1.5 uppercase">SCHEDULE</span>
                 </div>
-                <div className="flex bg-gray-50">
+
+                {/* Hours Columns */}
+                <div className="flex bg-slate-900/40 border-b border-indigo-500/20 h-14 col-span-12">
                   {Array.from({ length: END_HOUR - START_HOUR }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="flex-shrink-0 px-2 py-3 text-center text-sm font-bold text-gray-700 border-r border-gray-200"
+                    <div 
+                      key={i} 
+                      className="border-r border-indigo-500/10 flex items-center justify-center text-[10px] font-black tracking-widest text-indigo-300/60 font-mono"
                       style={{ width: COLUMN_WIDTH }}
                     >
                       {String(START_HOUR + i).padStart(2, '0')}:00
                     </div>
                   ))}
                 </div>
-              </div>
 
-              {/* Therapist Rows */}
-              {therapists.map(therapist => (
-                <div key={therapist.id} className="flex border-b border-gray-200 hover:bg-gray-50 transition">
-                  {/* Therapist Info */}
-                  <div className="w-40 flex-shrink-0 px-4 py-4 bg-white sticky left-0 z-5 border-r border-gray-200 flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${therapist.avatarColor} flex items-center justify-center text-white font-bold text-sm`}>
-                      {therapist.name[0]}
-                    </div>
-                    <div>
-                      <div className="font-bold text-gray-900 text-sm">{therapist.name}</div>
-                      <div className={`text-xs ${STATUS_CONFIG[therapist.status].color}`}>
-                        {STATUS_CONFIG[therapist.status].dot} {STATUS_CONFIG[therapist.status].label}
-                      </div>
-                    </div>
-                  </div>
+                {/* Rows Mapping */}
+                <div className="contents">
+                  {filteredTherapists.length > 0 ? (
+                    filteredTherapists.map((therapist) => (
+                      <React.Fragment key={therapist.id}>
+                        
+                        {/* Therapist Profile Sticky Left Column */}
+                        <div className="w-[200px] p-4 bg-slate-900/60 border-b border-r border-indigo-500/20 sticky left-0 z-30 flex items-center gap-3 backdrop-blur-md">
+                          <div className="relative flex-shrink-0">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-600/30 border border-indigo-500/40 flex items-center justify-center text-white font-black text-sm uppercase">
+                              {therapist.name[0]}
+                            </div>
+                            <div className={`absolute -bottom-1 -right-1 w-3 h-3 border-2 border-slate-900 rounded-full ${STATUS_CONFIG[therapist.status].dot}`}></div>
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-black text-white truncate">{therapist.name}</p>
+                            <p className={`text-[9px] font-black tracking-wider ${STATUS_CONFIG[therapist.status].color}`}>{STATUS_CONFIG[therapist.status].label}</p>
+                          </div>
+                        </div>
 
-                  {/* Time Grid */}
-                  <div className="flex relative flex-1">
-                    {Array.from({ length: END_HOUR - START_HOUR }).map((_, colIndex) => {
-                      const hourStart = START_HOUR + colIndex;
-                      const hourEnd = hourStart + 1;
-                      const cellSessions = therapist.sessions.filter(
-                        s => !(s.endHour <= hourStart || s.startHour >= hourEnd)
-                      );
-
-                      return (
-                        <div
-                          key={colIndex}
-                          className="flex-shrink-0 px-1 py-4 border-r border-gray-200 relative bg-gray-50 hover:bg-blue-50 transition cursor-pointer group"
-                          style={{ width: COLUMN_WIDTH }}
+                        {/* Interactive Timeline Grid Row */}
+                        <div 
+                          className="flex relative h-20 border-b border-indigo-500/10 bg-white/[0.01] hover:bg-indigo-500/5 transition-colors cursor-pointer group"
                           onClick={() => {
                             if (therapist.status === 'off_duty') return;
-                            const cellSessions = therapist.sessions.filter(
-                              s => !(s.endHour <= hourStart || s.startHour >= hourEnd)
-                            );
-                            if (cellSessions.length === 0) {
-                              setBookingSlot({ therapistId: therapist.id, hour: hourStart });
-                              setBookingForm({ customerName: '', serviceType: 'swedish', roomNumber: '' });
-                            }
+                            setBookingSlot({ therapistId: therapist.id, hour: 9 });
                           }}
                         >
-                          {cellSessions.length === 0 && (
-                            <div className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 text-center">Click to add</div>
-                          )}
-                          {cellSessions.map(session => (
-                            <div
-                              key={session.id}
-                              className={`absolute rounded-md border-2 text-xs p-1 cursor-pointer hover:shadow-lg transition ${SERVICE_CONFIG[session.serviceType as keyof typeof SERVICE_CONFIG].bg}`}
-                              style={{
-                                left: `calc(${((session.startHour - hourStart) * COLUMN_WIDTH) / 1}px + 2px)`,
-                                width: `${(session.endHour - Math.max(session.startHour, hourStart)) * COLUMN_WIDTH - 4}px`,
-                                top: `${(MOCK_THERAPISTS.findIndex(t => t.id === therapist.id) % 2) * 28}px`,
-                                zIndex: 2,
-                              }}
-                              onClick={e => {
-                                e.stopPropagation();
-                                setSelectedSession(session);
-                              }}
-                            >
-                              <div className="font-bold whitespace-nowrap">
-                                {SERVICE_CONFIG[session.serviceType as keyof typeof SERVICE_CONFIG].icon}{' '}
-                                {formatTime(session.startHour)}
+                          {/* Empty hour cells for background grid mapping */}
+                          {Array.from({ length: END_HOUR - START_HOUR }).map((_, colIndex) => {
+                            const hourStart = START_HOUR + colIndex;
+                            return (
+                              <div
+                                key={colIndex}
+                                className="h-full border-r border-indigo-500/5 flex-shrink-0 relative group/cell"
+                                style={{ width: COLUMN_WIDTH }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (therapist.status === 'off_duty') return;
+                                  // 해당 칸에 스케줄이 중복되지 않는지 검사
+                                  const isOverlap = therapist.sessions.some(s => !(s.endHour <= hourStart || s.startHour >= hourStart + 1));
+                                  if (!isOverlap) {
+                                    setBookingSlot({ therapistId: therapist.id, hour: hourStart });
+                                    setQuickForm({ customerName: '', serviceType: 'swedish', roomNumber: '' });
+                                  }
+                                }}
+                              >
+                                <div className="absolute inset-0 bg-cyan-400/5 opacity-0 group-hover/cell:opacity-100 transition-opacity flex items-center justify-center text-[10px] font-black text-cyan-400 uppercase tracking-widest select-none">
+                                  + BOOK
+                                </div>
                               </div>
-                              {session.customerName && session.serviceType !== 'available' && (
-                                <div className="text-xs opacity-75">{session.customerName}</div>
-                              )}
-                            </div>
-                          ))}
+                            );
+                          })}
+
+                          {/* Render Active Sessions absolutely positioned */}
+                          {therapist.sessions.map((session) => {
+                            const conf = SERVICE_CONFIG[session.serviceType as keyof typeof SERVICE_CONFIG];
+                            const startOffset = (session.startHour - START_HOUR) * COLUMN_WIDTH;
+                            const durationWidth = (session.endHour - session.startHour) * COLUMN_WIDTH;
+                            
+                            return (
+                              <div
+                                key={session.id}
+                                className={`absolute top-2 bottom-2 rounded-xl border-l-4 ${conf.border} ${conf.bg} p-2.5 cursor-pointer hover:scale-[1.02] active:scale-98 transition-all duration-300 z-10 flex flex-col justify-between shadow-sm overflow-hidden`}
+                                style={{
+                                  left: `${startOffset + 4}px`,
+                                  width: `${durationWidth - 8}px`
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedSession(session);
+                                }}
+                              >
+                                <div>
+                                  <span className={`text-[9px] font-black tracking-widest ${conf.text} uppercase flex items-center gap-1`}>
+                                    <span>{conf.icon}</span> {session.serviceType.toUpperCase()}
+                                  </span>
+                                  {session.customerName && (
+                                    <p className="text-xs font-black text-white truncate mt-0.5">{session.customerName}</p>
+                                  )}
+                                </div>
+                                {session.roomNumber && (
+                                  <div className="flex justify-between items-center text-[9px] text-indigo-300/60 font-bold">
+                                    <span>{session.roomNumber}</span>
+                                    <span>{formatTime(session.startHour)} - {formatTime(session.endHour)}</span>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
-                      );
-                    })}
-                  </div>
+                        
+                      </React.Fragment>
+                    ))
+                  ) : (
+                    <div className="col-span-13 text-center py-16 text-indigo-300/30 font-black text-sm uppercase">치료사를 찾을 수 없습니다.</div>
+                  )}
                 </div>
-              ))}
+
+              </div>
+            </div>
+          </div>
+
+          {/* ============================================================
+              📌 Quick Action Floating Bento Grid
+              ============================================================ */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* Quick Action: Quick Booking */}
+            <div 
+              onClick={() => {
+                setBookingSlot({ therapistId: 1, hour: 9 });
+                setQuickForm({ customerName: '', serviceType: 'swedish', roomNumber: '' });
+              }}
+              className="bg-slate-900/40 backdrop-blur-sm border border-cyan-500/20 p-6 rounded-2xl hover:translate-y-[-4px] active:scale-95 transition-all cursor-pointer group flex items-center gap-6 shadow-md hover:bg-slate-900/70"
+            >
+              <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400 group-hover:bg-cyan-500 group-hover:text-slate-950 transition-colors shadow-[0_0_15px_rgba(34,211,238,0.2)]">
+                <span className="material-symbols-outlined">add_circle</span>
+              </div>
+              <div>
+                <h3 className="font-black text-white text-base">Quick Booking</h3>
+                <p className="text-xs text-indigo-300/40 font-bold mt-0.5 uppercase tracking-wide">Instant AI-assisted slotting</p>
+              </div>
+            </div>
+
+            {/* Quick Action: Manual Entry */}
+            <div 
+              onClick={() => setIsManualModalOpen(true)}
+              className="bg-slate-900/40 backdrop-blur-sm border border-indigo-500/10 p-6 rounded-2xl hover:translate-y-[-4px] active:scale-95 transition-all cursor-pointer group flex items-center gap-6 shadow-md hover:bg-slate-900/70"
+            >
+              <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-colors">
+                <span className="material-symbols-outlined">edit_calendar</span>
+              </div>
+              <div>
+                <h3 className="font-black text-white text-base">Manual Entry</h3>
+                <p className="text-xs text-indigo-300/40 font-bold mt-0.5 uppercase tracking-wide">Custom schedule overriding</p>
+              </div>
+            </div>
+
+            {/* Quick Action: Dashboard Link */}
+            <a 
+              href="/admin/test-data.html"
+              className="bg-slate-900/40 backdrop-blur-sm border border-indigo-500/10 p-6 rounded-2xl hover:translate-y-[-4px] active:scale-95 transition-all cursor-pointer group flex items-center gap-6 shadow-md hover:bg-slate-900/70"
+            >
+              <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-white/40 group-hover:bg-white/20 group-hover:text-white transition-colors">
+                <span className="material-symbols-outlined">analytics</span>
+              </div>
+              <div>
+                <h3 className="font-black text-white text-base">Validation Matrix</h3>
+                <p className="text-xs text-indigo-300/40 font-bold mt-0.5 uppercase tracking-wide">Staff Load & Settlement Audit</p>
+              </div>
+            </a>
+          </div>
+
+        </section>
+      </div>
+
+      {/* ============================================================
+          📌 모달 윈도우 3종 세트 (Embedded Glassmorphism Modals)
+          ============================================================ */}
+      
+      {/* 1. Quick Booking Modal (타임 슬롯 터치) */}
+      {bookingSlot && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-fadeIn">
+          <div className="bg-slate-900/80 backdrop-blur-xl border border-cyan-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-md shadow-[0_0_50px_-12px_rgba(34,211,238,0.3)] transition-transform transform scale-100">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-black text-white flex items-center gap-2">
+                ⚡ Quick Book Massage
+              </h3>
+              <button 
+                onClick={() => setBookingSlot(null)}
+                className="text-indigo-300/50 hover:text-white transition-colors"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <div className="space-y-5">
+              <div className="bg-cyan-500/5 border border-cyan-500/20 rounded-xl p-3 text-xs">
+                <p className="text-indigo-300/60 font-bold uppercase tracking-wider">Target Slot</p>
+                <p className="text-base font-black text-white mt-1">
+                  {formatTime(bookingSlot.hour)} - {formatTime(bookingSlot.hour + 1)} ({therapists.find(t => t.id === bookingSlot.therapistId)?.name})
+                </p>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black tracking-widest text-indigo-300/60 block mb-2 uppercase">Guest Name</label>
+                <input
+                  type="text"
+                  value={quickForm.customerName}
+                  onChange={e => setQuickForm({ ...quickForm, customerName: e.target.value })}
+                  placeholder="e.g. James Cooper"
+                  className="w-full px-4 py-3 bg-slate-950/80 border border-indigo-500/30 rounded-xl text-xs focus:outline-none focus:border-cyan-400 text-white"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black tracking-widest text-indigo-300/60 block mb-2 uppercase">Service Type</label>
+                <select
+                  value={quickForm.serviceType}
+                  onChange={e => setQuickForm({ ...quickForm, serviceType: e.target.value as any })}
+                  className="w-full px-4 py-3 bg-slate-950/80 border border-indigo-500/30 rounded-xl text-xs focus:outline-none focus:border-cyan-400 text-white font-bold"
+                >
+                  <option value="swedish">💆 Swedish Massage</option>
+                  <option value="thai">🙏 Thai Massage</option>
+                  <option value="hotstone">🪨 Hot Stone Therapy</option>
+                  <option value="foot">🦶 Foot Massage</option>
+                  <option value="aroma">🌸 Aromatherapy</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black tracking-widest text-indigo-300/60 block mb-2 uppercase">Room Assignment</label>
+                <select
+                  value={quickForm.roomNumber}
+                  onChange={e => setQuickForm({ ...quickForm, roomNumber: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-950/80 border border-indigo-500/30 rounded-xl text-xs focus:outline-none focus:border-cyan-400 text-white font-bold"
+                >
+                  <option value="">Select Room...</option>
+                  {ROOM_NUMBERS.map(room => (
+                    <option key={room} value={room}>{room}</option>
+                  ))}
+                </select>
+              </div>
+
+              <button
+                onClick={() => {
+                  if (!quickForm.customerName.trim()) {
+                    alert('고객 이름을 입력해 주세요! 💡');
+                    return;
+                  }
+                  const newSession: ScheduleSession = {
+                    id: `s${bookingSlot.therapistId}-${Date.now()}`,
+                    therapistId: bookingSlot.therapistId,
+                    serviceType: quickForm.serviceType,
+                    startHour: bookingSlot.hour,
+                    endHour: bookingSlot.hour + 1,
+                    customerName: quickForm.customerName,
+                    roomNumber: quickForm.roomNumber || undefined,
+                    status: 'scheduled',
+                  };
+
+                  setTherapists(prev =>
+                    prev.map(t =>
+                      t.id === bookingSlot.therapistId
+                        ? { ...t, sessions: [...t.sessions, newSession].sort((a, b) => a.startHour - b.startHour) }
+                        : t
+                    )
+                  );
+                  setBookingSlot(null);
+                }}
+                className="w-full mt-4 bg-cyan-400 text-slate-950 font-bold py-3.5 rounded-xl shadow-[0_0_20px_rgba(34,211,238,0.4)] hover:scale-[1.02] active:scale-98 transition-all text-xs tracking-wider"
+              >
+                CONFIRM QUICK RESERVATION
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Session Details Modal */}
-      {selectedSession && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Session Details</h3>
-            <div className="space-y-3 mb-6">
+      {/* 2. Manual Booking Modal */}
+      {isManualModalOpen && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-fadeIn">
+          <div className="bg-slate-900/80 backdrop-blur-xl border border-indigo-500/20 rounded-3xl p-6 sm:p-8 w-full max-w-md shadow-2xl scale-100">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-black text-white">Manual Booking</h2>
+              <button 
+                onClick={() => setIsManualModalOpen(false)}
+                className="text-indigo-300/50 hover:text-white transition-colors"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <div className="space-y-4">
               <div>
-                <label className="text-sm text-gray-600">Time</label>
-                <p className="font-bold text-gray-900">
-                  {formatTime(selectedSession.startHour)} ~ {formatTime(selectedSession.endHour)} ({getDurationMinutes(selectedSession)}min)
-                </p>
+                <label className="text-[10px] font-black tracking-widest text-indigo-300/60 mb-2 block uppercase">Select Therapist</label>
+                <select
+                  value={manualForm.therapistId}
+                  onChange={e => setManualForm({ ...manualForm, therapistId: parseInt(e.target.value) })}
+                  className="w-full bg-slate-950/85 border border-indigo-500/20 rounded-xl px-4 py-3 text-white font-bold outline-none"
+                >
+                  {therapists.map(t => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </select>
               </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] font-black tracking-widest text-indigo-300/60 mb-2 block uppercase">Start Time</label>
+                  <select
+                    value={manualForm.startHour}
+                    onChange={e => setManualForm({ ...manualForm, startHour: parseInt(e.target.value) })}
+                    className="w-full bg-slate-950/85 border border-indigo-500/20 rounded-xl px-4 py-3 text-white font-mono"
+                  >
+                    {Array.from({ length: END_HOUR - START_HOUR }).map((_, i) => (
+                      <option key={i} value={START_HOUR + i}>{String(START_HOUR + i).padStart(2, '0')}:00</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] font-black tracking-widest text-indigo-300/60 mb-2 block uppercase">Duration</label>
+                  <select
+                    value={manualForm.duration}
+                    onChange={e => setManualForm({ ...manualForm, duration: parseInt(e.target.value) })}
+                    className="w-full bg-slate-950/85 border border-indigo-500/20 rounded-xl px-4 py-3 text-white"
+                  >
+                    <option value={60}>60 Min</option>
+                    <option value={90}>90 Min</option>
+                    <option value={120}>120 Min</option>
+                  </select>
+                </div>
+              </div>
+
               <div>
-                <label className="text-sm text-gray-600">Service</label>
-                <p className="font-bold text-gray-900">
+                <label className="text-[10px] font-black tracking-widest text-indigo-300/60 mb-2 block uppercase">Guest Name</label>
+                <input
+                  type="text"
+                  value={manualForm.customerName}
+                  onChange={e => setManualForm({ ...manualForm, customerName: e.target.value })}
+                  placeholder="e.g. Sarah L."
+                  className="w-full bg-slate-950/85 border border-indigo-500/20 rounded-xl px-4 py-3 text-white outline-none focus:border-cyan-400/50"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black tracking-widest text-indigo-300/60 mb-2 block uppercase">Service Type</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {(['swedish', 'thai', 'hotstone', 'foot', 'aroma'] as const).map(type => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setManualForm({ ...manualForm, serviceType: type })}
+                      className={`px-2.5 py-2 rounded-xl border text-[10px] font-black transition-all ${
+                        manualForm.serviceType === type
+                          ? 'border-cyan-400 text-cyan-400 bg-cyan-400/10'
+                          : 'border-white/5 text-indigo-300/40 hover:bg-white/5'
+                      }`}
+                    >
+                      {type.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black tracking-widest text-indigo-300/60 mb-2 block uppercase">Room Assignment</label>
+                <select
+                  value={manualForm.roomNumber}
+                  onChange={e => setManualForm({ ...manualForm, roomNumber: e.target.value })}
+                  className="w-full bg-slate-950/85 border border-indigo-500/20 rounded-xl px-4 py-3 text-white font-bold"
+                >
+                  <option value="">Select Room...</option>
+                  {ROOM_NUMBERS.map(room => (
+                    <option key={room} value={room}>{room}</option>
+                  ))}
+                </select>
+              </div>
+
+              <button
+                onClick={() => {
+                  if (!manualForm.customerName.trim()) {
+                    alert('고객 이름을 입력해 주세요! 💡');
+                    return;
+                  }
+                  const endHour = manualForm.startHour + (manualForm.duration / 60);
+                  const newSession: ScheduleSession = {
+                    id: `s${manualForm.therapistId}-${Date.now()}`,
+                    therapistId: manualForm.therapistId,
+                    serviceType: manualForm.serviceType,
+                    startHour: manualForm.startHour,
+                    endHour: Math.min(endHour, 21),
+                    customerName: manualForm.customerName,
+                    roomNumber: manualForm.roomNumber || undefined,
+                    status: 'scheduled',
+                  };
+
+                  setTherapists(prev =>
+                    prev.map(t =>
+                      t.id === manualForm.therapistId
+                        ? { ...t, sessions: [...t.sessions, newSession].sort((a, b) => a.startHour - b.startHour) }
+                        : t
+                    )
+                  );
+                  setIsManualModalOpen(false);
+                  setManualForm({
+                    therapistId: 1,
+                    startHour: 9,
+                    duration: 60,
+                    serviceType: 'swedish',
+                    customerName: '',
+                    roomNumber: '',
+                  });
+                }}
+                className="w-full mt-4 bg-cyan-400 text-slate-950 font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(34,211,238,0.4)] hover:scale-[1.02] active:scale-95 transition-all text-xs tracking-wider"
+              >
+                CONFIRM RESERVATION
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Session Details & Management Modal */}
+      {selectedSession && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-fadeIn">
+          <div className="bg-slate-900/80 backdrop-blur-xl border border-indigo-500/20 rounded-3xl p-6 sm:p-8 w-full max-w-md shadow-2xl scale-100">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-black text-white">Session Control Panel</h3>
+              <button 
+                onClick={() => setSelectedSession(null)}
+                className="text-indigo-300/50 hover:text-white transition-colors"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <div className="space-y-4 mb-6 text-xs">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] text-indigo-300/40 font-bold block uppercase">Start Time</label>
+                  <p className="font-black text-white mt-1 text-sm">{formatTime(selectedSession.startHour)}</p>
+                </div>
+                <div>
+                  <label className="text-[10px] text-indigo-300/40 font-bold block uppercase">End Time</label>
+                  <p className="font-black text-white mt-1 text-sm">{formatTime(selectedSession.endHour)}</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] text-indigo-300/40 font-bold block uppercase">Service Type</label>
+                <p className="font-black text-white mt-1 text-sm flex items-center gap-1.5">
+                  {SERVICE_CONFIG[selectedSession.serviceType as keyof typeof SERVICE_CONFIG].icon}{' '}
                   {SERVICE_CONFIG[selectedSession.serviceType as keyof typeof SERVICE_CONFIG].label}
                 </p>
               </div>
+
               {selectedSession.customerName && (
                 <div>
-                  <label className="text-sm text-gray-600">Guest Name</label>
-                  <p className="font-bold text-gray-900">{selectedSession.customerName}</p>
+                  <label className="text-[10px] text-indigo-300/40 font-bold block uppercase">Guest Name</label>
+                  <p className="font-black text-white mt-1 text-sm">{selectedSession.customerName}</p>
                 </div>
               )}
+
               {selectedSession.roomNumber && (
                 <div>
-                  <label className="text-sm text-gray-600">Room</label>
-                  <p className="font-bold text-gray-900">{selectedSession.roomNumber}</p>
+                  <label className="text-[10px] text-indigo-300/40 font-bold block uppercase">Room Assignment</label>
+                  <p className="font-black text-white mt-1 text-sm">{selectedSession.roomNumber}</p>
                 </div>
               )}
+
               <div>
-                <label className="text-sm text-gray-600">Status</label>
+                <label className="text-[10px] text-indigo-300/40 font-bold block mb-2 uppercase">Status Control</label>
                 <select
                   value={selectedSession.status}
                   onChange={e => {
@@ -532,17 +912,17 @@ export default function TherapistSchedulePage() {
                       prev.map(t =>
                         t.id === selectedSession.therapistId
                           ? {
-                            ...t,
-                            sessions: t.sessions.map(s =>
-                              s.id === selectedSession.id ? { ...s, status: newStatus } : s
-                            ),
-                          }
+                              ...t,
+                              sessions: t.sessions.map(s =>
+                                s.id === selectedSession.id ? { ...s, status: newStatus } : s
+                              ),
+                            }
                           : t
                       )
                     );
                     setSelectedSession({ ...selectedSession, status: newStatus });
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 font-bold text-gray-900"
+                  className="w-full px-4 py-3 bg-slate-950/80 border border-indigo-500/20 rounded-xl text-white font-bold focus:outline-none"
                 >
                   <option value="scheduled">Scheduled</option>
                   <option value="in_progress">In Progress</option>
@@ -550,10 +930,11 @@ export default function TherapistSchedulePage() {
                 </select>
               </div>
             </div>
-            <div className="flex gap-2">
+
+            <div className="flex gap-3 text-xs">
               <button
                 onClick={() => setSelectedSession(null)}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-900 font-bold rounded-lg hover:bg-gray-50 transition"
+                className="flex-1 px-4 py-3 border border-indigo-500/20 text-white font-black rounded-xl hover:bg-white/5 transition-all text-center"
               >
                 Close
               </button>
@@ -568,272 +949,55 @@ export default function TherapistSchedulePage() {
                   );
                   setSelectedSession(null);
                 }}
-                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition"
+                className="flex-1 px-4 py-3 bg-rose-500 hover:bg-rose-600 text-slate-950 font-black rounded-xl transition-all text-center shadow-lg"
               >
-                Delete
+                Delete Session
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Manual Booking Modal - Start New Massage Button */}
-      {isNewSessionModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full flex flex-col max-h-[90vh]">
-            <div className="p-6 border-b border-gray-200 flex-shrink-0">
-              <h3 className="text-xl font-bold text-gray-900">🧘 Start New Massage Session</h3>
-            </div>
+      {/* ============================================================
+          📌 Mobile Bottom Navigation (fixed at bottom)
+          ============================================================ */}
+      <nav className="lg:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-slate-950/80 backdrop-blur-lg border-t border-cyan-500/20 shadow-[0_-10px_40px_rgba(0,0,0,0.6)]">
+        <a className="flex flex-col items-center justify-center text-indigo-300/40" href="/monitor.html">
+          <span className="material-symbols-outlined">home_max</span>
+          <span className="text-[9px] font-black mt-0.5 tracking-wider">HOME</span>
+        </a>
+        <a className="flex flex-col items-center justify-center text-cyan-400 drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]" href="/admin/therapists.html">
+          <span className="material-symbols-outlined">group</span>
+          <span className="text-[9px] font-black mt-0.5 tracking-wider">STAFF</span>
+        </a>
+        <a className="flex flex-col items-center justify-center text-indigo-300/40" href="/admin/payroll.html">
+          <span className="material-symbols-outlined">receipt_long</span>
+          <span className="text-[9px] font-black mt-0.5 tracking-wider">PAY</span>
+        </a>
+      </nav>
 
-            <div className="space-y-4 p-6 overflow-y-auto flex-1">
-              {/* Therapist Selection */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Select Therapist</label>
-                <select
-                  value={manualBookingForm.therapistId}
-                  onChange={e => setManualBookingForm({ ...manualBookingForm, therapistId: parseInt(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
-                >
-                  {therapists.map(t => (
-                    <option key={t.id} value={t.id}>
-                      {t.name} ({t.status === 'available' ? '✓ Available' : t.status})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Date Selection */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Select Date</label>
-                <input
-                  type="date"
-                  value={manualBookingForm.date.toISOString().split('T')[0]}
-                  onChange={e => {
-                    const newDate = new Date(e.target.value);
-                    setManualBookingForm({ ...manualBookingForm, date: newDate });
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
-                />
-              </div>
-
-              {/* Time Selection */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Select Time</label>
-                <select
-                  value={manualBookingForm.hour}
-                  onChange={e => setManualBookingForm({ ...manualBookingForm, hour: parseInt(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
-                >
-                  {Array.from({ length: END_HOUR - START_HOUR }).map((_, i) => {
-                    const hour = START_HOUR + i;
-                    return (
-                      <option key={hour} value={hour}>
-                        {String(hour).padStart(2, '0')}:00 - {String(hour + 1).padStart(2, '0')}:00
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-
-              {/* Customer Name */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Guest/Customer Name *</label>
-                <input
-                  type="text"
-                  value={manualBookingForm.customerName}
-                  onChange={e => setManualBookingForm({ ...manualBookingForm, customerName: e.target.value })}
-                  placeholder="e.g., John Smith"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
-                />
-              </div>
-
-              {/* Service Type */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Service Type</label>
-                <select
-                  value={manualBookingForm.serviceType}
-                  onChange={e => setManualBookingForm({ ...manualBookingForm, serviceType: e.target.value as any })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
-                >
-                  <option value="swedish">{SERVICE_CONFIG.swedish.icon} Swedish Massage</option>
-                  <option value="thai">{SERVICE_CONFIG.thai.icon} Thai Massage</option>
-                  <option value="hotstone">{SERVICE_CONFIG.hotstone.icon} Hot Stone Therapy</option>
-                  <option value="foot">{SERVICE_CONFIG.foot.icon} Foot Massage</option>
-                  <option value="aroma">{SERVICE_CONFIG.aroma.icon} Aromatherapy</option>
-                </select>
-              </div>
-
-              {/* Room Number */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Room Assignment</label>
-                <select
-                  value={manualBookingForm.roomNumber}
-                  onChange={e => setManualBookingForm({ ...manualBookingForm, roomNumber: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
-                >
-                  <option value="">Select Room</option>
-                  {ROOM_NUMBERS.map(room => (
-                    <option key={room} value={room}>{room}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="flex gap-2 p-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
-              <button
-                onClick={() => setIsNewSessionModalOpen(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-900 font-bold rounded-lg hover:bg-white transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  if (!manualBookingForm.customerName.trim()) {
-                    alert('Please enter customer name');
-                    return;
-                  }
-                  const newSession: ScheduleSession = {
-                    id: `s${manualBookingForm.therapistId}-${Date.now()}`,
-                    therapistId: manualBookingForm.therapistId,
-                    serviceType: manualBookingForm.serviceType,
-                    startHour: manualBookingForm.hour,
-                    endHour: manualBookingForm.hour + 1,
-                    customerName: manualBookingForm.customerName,
-                    roomNumber: manualBookingForm.roomNumber || undefined,
-                    status: 'scheduled',
-                  };
-
-                  setTherapists(prev =>
-                    prev.map(t =>
-                      t.id === manualBookingForm.therapistId
-                        ? { ...t, sessions: [...t.sessions, newSession].sort((a, b) => a.startHour - b.startHour) }
-                        : t
-                    )
-                  );
-                  setIsNewSessionModalOpen(false);
-                  setManualBookingForm({
-                    therapistId: 1,
-                    date: new Date(2026, 4, 18),
-                    hour: 10,
-                    customerName: '',
-                    serviceType: 'swedish',
-                    roomNumber: '',
-                  });
-                }}
-                className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition"
-              >
-                Start Session
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Quick Booking Modal - Click Time Slot */}
-      {bookingSlot && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full flex flex-col max-h-[90vh]">
-            <div className="p-6 border-b border-gray-200 flex-shrink-0">
-              <h3 className="text-xl font-bold text-gray-900">⚡ Quick Book Massage</h3>
-            </div>
-
-            <div className="space-y-4 p-6 overflow-y-auto flex-1">
-              {/* Time Info */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <p className="text-xs text-blue-600 font-semibold">SELECTED TIME SLOT</p>
-                <p className="text-lg font-bold text-blue-900 mt-1">
-                  {String(bookingSlot.hour).padStart(2, '0')}:00 - {String(bookingSlot.hour + 1).padStart(2, '0')}:00
-                </p>
-                <p className="text-sm text-blue-700 mt-1">
-                  {therapists.find(t => t.id === bookingSlot.therapistId)?.name}
-                </p>
-              </div>
-
-              {/* Customer Name */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Guest/Customer Name</label>
-                <input
-                  type="text"
-                  value={bookingForm.customerName}
-                  onChange={e => setBookingForm({ ...bookingForm, customerName: e.target.value })}
-                  placeholder="e.g., John Smith"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
-                />
-              </div>
-
-              {/* Service Type */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Service Type</label>
-                <select
-                  value={bookingForm.serviceType}
-                  onChange={e => setBookingForm({ ...bookingForm, serviceType: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
-                >
-                  <option value="swedish">{SERVICE_CONFIG.swedish.icon} Swedish Massage</option>
-                  <option value="thai">{SERVICE_CONFIG.thai.icon} Thai Massage</option>
-                  <option value="hotstone">{SERVICE_CONFIG.hotstone.icon} Hot Stone Therapy</option>
-                  <option value="foot">{SERVICE_CONFIG.foot.icon} Foot Massage</option>
-                  <option value="aroma">{SERVICE_CONFIG.aroma.icon} Aromatherapy</option>
-                </select>
-              </div>
-
-              {/* Room Number */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Room Assignment</label>
-                <select
-                  value={bookingForm.roomNumber}
-                  onChange={e => setBookingForm({ ...bookingForm, roomNumber: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900"
-                >
-                  <option value="">Select Room</option>
-                  {ROOM_NUMBERS.map(room => (
-                    <option key={room} value={room}>{room}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="flex gap-2 p-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
-              <button
-                onClick={() => setBookingSlot(null)}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-900 font-bold rounded-lg hover:bg-gray-50 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  if (!bookingForm.customerName.trim()) {
-                    alert('Please enter customer name');
-                    return;
-                  }
-                  const newSession: ScheduleSession = {
-                    id: `s${bookingSlot.therapistId}-${Date.now()}`,
-                    therapistId: bookingSlot.therapistId,
-                    serviceType: bookingForm.serviceType as any,
-                    startHour: bookingSlot.hour,
-                    endHour: bookingSlot.hour + 1,
-                    customerName: bookingForm.customerName,
-                    roomNumber: bookingForm.roomNumber || undefined,
-                    status: 'scheduled',
-                  };
-
-                  setTherapists(prev =>
-                    prev.map(t =>
-                      t.id === bookingSlot.therapistId
-                        ? { ...t, sessions: [...t.sessions, newSession].sort((a, b) => a.startHour - b.startHour) }
-                        : t
-                    )
-                  );
-                  setBookingSlot(null);
-                }}
-                className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition"
-              >
-                Book Massage
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Custom Scrollbars and Animations Injection */}
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          height: 6px;
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.02);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(34, 211, 238, 0.3);
+          border-radius: 10px;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.25s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 }
+
