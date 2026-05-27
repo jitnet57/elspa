@@ -239,6 +239,16 @@ class PayrollCalculator:
         payroll_period: PayrollPeriod,
         db: AsyncSession
     ) -> PayrollRecord:
+        # ============================================================
+        # 📌 함수명: _calculate_employee_payroll
+        # 📋 목적: 한 직원의 개별 급여 정보를 계산하고 상세 명세(적요)를 생성합니다.
+        # 🔧 매개변수: employee (Employee) - 직원 객체
+        #             attendance_logs (List[AttendanceLog]) - 근태 기록 리스트
+        #             payroll_period (PayrollPeriod) - 정산 기간
+        #             db (AsyncSession) - DB 세션
+        # 📤 반환값: 계산 및 적요 작성이 완료된 PayrollRecord 객체
+        # 📅 작성일: 2026-05-27
+        # ============================================================
         calc = PayrollCalculator
 
         base_amount = Decimal(str(employee.base_salary))
@@ -248,6 +258,11 @@ class PayrollCalculator:
         meal_allowance = Decimal(0)
         late_deduction = Decimal(0)
         absence_deduction = Decimal(0)
+
+        # 근태 관련 통계값 초기화
+        session_count = 0
+        total_ot = 0
+        absent_count = 0
 
         # 커미션 (Therapist/Nail)
         if employee.employee_type in [EmployeeType.THERAPIST, EmployeeType.NAIL]:
@@ -306,6 +321,62 @@ class PayrollCalculator:
 
         net_pay = max(gross_pay - total_deductions, Decimal(0))
 
+        # 정산체계 요약 및 세부 내역을 적요(notes)에 상세히 기록 (한국어)
+        note_lines = []
+        note_lines.append("=" * 60)
+        note_lines.append(f"📌 ElSpa 급여 정산 명세서 (적요) - {employee.name} ({employee.employee_type.upper()})")
+        note_lines.append(f"📅 정산 기간: {payroll_period.period_start} ~ {payroll_period.period_end}")
+        note_lines.append("=" * 60)
+        note_lines.append(f"1. 수입 항목 (Gross Pay): {gross_pay:,.2f} PHP")
+        note_lines.append(f"   • 기본급 (Base Salary): {base_amount:,.2f} PHP")
+
+        if employee.employee_type in [EmployeeType.THERAPIST, EmployeeType.NAIL]:
+            note_lines.append(f"   • 커미션 (Commission): {commission_amount:,.2f} PHP")
+            note_lines.append(f"     [정산체계: Therapist/Nail 전용 - 출근 일수(세션 수) {session_count}일 × 세션 단가 100 PHP]")
+        else:
+            if overtime_amount > 0 or total_ot > 0:
+                note_lines.append(f"   • 초과근무 수당 (Overtime): {overtime_amount:,.2f} PHP")
+                note_lines.append(f"     [정산체계: 정직원 전용 - 총 {total_ot}분 초과근무, 40분 이상 시 1시간 단위 70 PHP 올림 계산]")
+            if holiday_bonus > 0:
+                note_lines.append(f"   • 공휴일 가산 수당 (Holiday): {holiday_bonus:,.2f} PHP")
+                note_lines.append("     [정산체계: 국가 공휴일 200%, 특정 공휴일 130% 지급]")
+            if meal_allowance > 0:
+                note_lines.append(f"   • 식대 지원금 (Meal Allowance): {meal_allowance:,.2f} PHP")
+                note_lines.append("     [정산체계: Driver 전용 - 2주당 200 PHP 정액 지급]")
+
+        note_lines.append("")
+        note_lines.append(f"2. 차감 항목 (Total Deductions): {total_deductions:,.2f} PHP")
+
+        if late_deduction > 0:
+            total_late_mins = sum(log.late_minutes for log in attendance_logs)
+            note_lines.append(f"   • 지각 차감 (Late Deduction): -{late_deduction:,.2f} PHP")
+            note_lines.append(f"     [정산체계: 총 {total_late_mins}분 지각, 10분 이상 지각 시 9분 제외 후 1분당 10 PHP 차감]")
+
+        if absence_deduction > 0 or absent_count > 0:
+            note_lines.append(f"   • 결근 차감 (Absence Deduction): -{absence_deduction:,.2f} PHP")
+            note_lines.append(f"     [정산체계: Manager 전용 - 결근 {absent_count}일, 1일당 기본급의 1/15 차감]")
+
+        if ca_deduction > 0:
+            note_lines.append(f"   • 선지급금 차감 (Cash Advance): -{ca_deduction:,.2f} PHP")
+            note_lines.append("     [정산체계: APPROVED 상태의 CA 전액 차감]")
+
+        if health_check_deduction > 0:
+            note_lines.append(f"   • 보건소 검사비 (Health Check): -{health_check_deduction:,.2f} PHP")
+            note_lines.append("     [정산체계: Therapist 전용 - 분기말(3, 6, 9, 12월) 정산 시 500 PHP 일괄 차감]")
+
+        if thirteenth_month_deduction > 0:
+            months_employed = calc.calculate_months_employed(employee.hire_date, payroll_period.period_end)
+            note_lines.append(f"   • 13개월 보너스 선지급 (13th Month): -{thirteenth_month_deduction:,.2f} PHP")
+            note_lines.append(f"     [정산체계: 기본급의 1/12 × 입사 후 누적 근무 {months_employed}개월 누적액 차감]")
+
+        note_lines.append("")
+        note_lines.append(f"3. 최종 실지급액 (Net Pay): {net_pay:,.2f} PHP")
+        note_lines.append("   • 실지급액은 수입(Gross Pay)에서 차감(Deductions)을 제하며,")
+        note_lines.append("     음수 지급 방지를 위한 안전장치(Minimum 0 PHP)가 적용되었습니다.")
+        note_lines.append("=" * 60)
+
+        notes = "\n".join(note_lines)
+
         return PayrollRecord(
             payroll_period_id=payroll_period.id,
             employee_id=employee.id,
@@ -323,6 +394,7 @@ class PayrollCalculator:
             gross_pay=gross_pay,
             total_deductions=total_deductions,
             net_pay=net_pay,
+            notes=notes,
             status="draft"
         )
 

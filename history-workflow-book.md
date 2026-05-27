@@ -1,4 +1,4 @@
-﻿# ELSPA Manager - 개발 히스토리 & 워크플로우
+# ELSPA Manager - 개발 히스토리 & 워크플로우
 
 ---
 
@@ -2952,3 +2952,105 @@ git push
 
 ---
 
+
+---
+## [2026-05-27 21:38] Order: 024 - Mafia Codereview Harness 설치 완료
+
+**Plan:** GitHub 리포지토리(https://github.com/jitnet57/mafia-codereview-harness)를 `e:\elspa\mafia-codereview-harness` 디렉터리에 클론하고 관련 의존성을 설치하여 개발 환경을 셋업합니다.
+**Task:** 
+1. `git clone https://github.com/jitnet57/mafia-codereview-harness` 실행 완료.
+2. `plugin/docs/` 폴더 내의 `adr.yaml`, `code-convention.yaml` 템플릿 파일을 프로젝트의 `docs/` 디렉터리에 성공적으로 복사.
+3. Windows 환경의 Claude Code 백슬래시 이스케이프 버그(`JSON Parse error: Invalid escape character U`)를 디버깅하고, `C:\Users\jitne\.claude\plugins\known_marketplaces.json` 내의 잘못된 백슬래시를 수동으로 수정(이스케이프 처리)하여 우회 완료.
+4. `claude plugin marketplace`에 `jitnet57/mafia-codereview-harness`를 마켓플레이스로 추가 등록 완료.
+5. `claude plugin install mafia-codereview` 명령어를 실행하여 플러그인을 최종적으로 안전하게 설치 완료.
+**Result:** 
+- `mafia-codereview` 플러그인(Version 0.1.0) 설치 및 활성화 성공!
+- 프로젝트 루트에 `docs/adr.yaml` 및 `docs/code-convention.yaml` 추가 완료.
+**Next:** 사용자가 Feature 브랜치에서 작업 후 Claude Code를 통해 `claude /mafia-codereview:auto` 명령어를 수행하여 코드 리뷰 파이프라인 작동 가능.
+**Agent:** Antigravity CLI Agent
+**Tokens:** ~25,000 tokens
+---
+
+---
+## [2026-05-27 21:15] Order: 025 - 급여 정산 테스트 필수 데이터 준비 가이드 (@advisor)
+
+**Plan:** 급여 정산 시스템을 테스트하기 위해 준비해야 할 가장 기본적인 자료를 종합 분석하여 보고합니다.
+**Task:** 
+1. 기존 코드베이스 전체 분석 (payroll_calculator.py, payroll.py 모델, 기존 테스트 파일 5개, 검증 보고서, DB 스키마 가이드)
+2. 6가지 직원 유형(Therapist/Nail/Driver/Manager/Maintenance/Hollys)별 급여 계산 규칙 차이 정리
+3. 6가지 필수 데이터 계층 도출 (직원 마스터, 출퇴근 기록, CA 선지급, 공휴일, 정산 기간, 검증 기준)
+4. 최소 테스트 직원 세트 12명 설계
+5. 10가지 핵심 엣지 케이스 정리
+6. 수작업 계산표 예시 작성
+**Result:** 종합 가이드 문서 `payroll_test_preparation_guide.md` 생성 완료
+**Next:** 가이드에 따라 12명 최소 테스트 세트 + 수작업 계산표 3~5건 준비 후 정산 테스트 실행
+**Agent:** Antigravity @advisor Agent (Claude Opus 4.6 Thinking)
+**Tokens:** ~50,000 tokens
+---
+
+---
+## [2026-05-27 21:50] Order: 026
+
+**Plan:** 급여 정산 서비스에서 각 직원의 개별 정산 레코드를 생성할 때, 해당 직원의 정산 체계(수입/차감 규정)와 세부 명세를 정리하여 `notes` (적요란) 필드에 자동으로 기록하는 기능을 추가합니다.
+**Task:** `app/services/payroll_calculator.py`에서 `_calculate_employee_payroll`을 수정하여, 계산에 참여한 세부 지표(지각 분, 결근 일, 커미션 산출 근거, CA 상태 등)를 반영한 친절한 한국어/필리핀 현지식 정산 명세를 생성하고 `PayrollRecord`의 `notes` 필드에 반영합니다.
+**Result:** 
+- `app/services/payroll_calculator.py`의 `_calculate_employee_payroll` 수정 완료.
+- 각 직원 유형에 맞는 세션 수(Therapist/Nail), 초과근무 시간(정직원), 지각 시간, 결근 일수(Manager), CA 상태, 보건소 검사비, 13개월 보너스 적립금 등 모든 수입/차감 항목을 정산체계 규정과 매칭하여 훌륭한 한국어 적요(notes) 템플릿으로 실시간 작성 및 대입 완료.
+- `tests/test_payroll_minimum_set.py`를 보강하여 적요란 생성 명세를 터미널에 예시 출력하도록 함.
+- 32개 시나리오 & 10개 엣지 케이스 테스트를 실행하여 정확도 100% 검증 성공 및 아름다운 한글 정산 명세 출력 확인 완료!
+**Next:** 사용자의 추가 기능 요청 처리 또는 프론트엔드 연동 확인.
+**Agent:** Antigravity CLI Agent (Gemini 3.5 Flash)
+**Tokens:** ~12,000 tokens
+---
+## [2026-05-27 22:00] Order: 027
+
+**Plan:** 사용자의 요청에 따라 5월 16일부터 오늘(5월 27일)까지 테라피스트 10명의 마사지 근무 내역, 고객 추천 수, 가이드 배정 데이터 및 다양한 직무군(Driver, Manager, Maintenance, Hollys)의 정직원 근태 샘플(11일/14일 근무, 공휴일 적용 스케줄, 결근, 초과근무)과 CA/13개월 보너스/보건소 검사비를 포함하는 다중 탭 방식의 Excel 데이터 시트 생성 스크립트를 작성하고 실행하여 실제 엑셀 파일(.xlsx)을 완성합니다.
+**Task:** `20260527-2200-generate-historical-sheets.py` 스크립트를 새로 작성하여 Pandas 및 Openpyxl을 통해 고품질의 엑셀 데이터 파일 `elspa_historical_test_data.xlsx`를 생성합니다.
+**Result:** 
+- `20260527-2200-generate-historical-sheets.py` 작성 및 실행 성공.
+- 테라피스트 10명의 일일 세션 수, 고객 소개 수, 가이드 배정, 정직원 10명의 풍부한 근태 샘플(11일/14일 근무자, 결근, OT, 지각 및 10일 공휴일 근무)을 담은 다중 탭 통합 데이터 생성 완료.
+- CA 선지급금 내역(Approved, Pending, Settled), 보건소 검사비(Therapist 대상 500 PHP 차감), 13개월 보너스 누적액 등 정산 연계를 위한 계산식 시뮬레이션 적용.
+- `elspa_historical_test_data.xlsx` 파일을 성공적으로 루트 디렉터리에 생성 완료!
+**Next:** 사용자에게 데이터셋의 탭 구조와 실제 활용 팁을 안내하고 마무리.
+**Agent:** Antigravity CLI Agent (Gemini 3.5 Flash)
+**Tokens:** ~18,000 tokens
+---
+## [2026-05-27 22:10] Order: 028
+
+**Plan:** 피드백된 비즈니스 요구사항(매니저만 결근 차감 적용, 가이드는 직원이 아닌 '업체/에이전시' 개념으로 전환, 테라피스트 소개건 전면 제거 및 가이드 업체의 송객 유치 이력으로 변경)에 맞추어 Excel 데이터 생성 스크립트를 리팩토링하고 엑셀 파일(.xlsx)을 재생성합니다.
+**Task:** `20260527-2200-generate-historical-sheets.py`를 업데이트하여 가이드 업체 마스터(Agency Master) 및 업체 송객 이력(Agency Booking History) 탭을 도입하고 테라피스트의 소개건을 제거한 뒤, 매니저(EMP-01)의 1일 결근 차감(2000 PHP) 로직과 근태를 정확하게 연결하고 엑셀을 다시 빌드합니다.
+**Result:** 
+- `20260527-2200-generate-historical-sheets.py`를 비즈니스 룰에 맞게 리팩토링 및 덮어쓰기 완료.
+- '가이드=업체' 개념으로 변경하여 `Agency Master` 및 `Agency Booking History` (송객 이력) 탭 구축 완료.
+- 테라피스트의 개인 소개건 및 수수료 지급 이력을 데이터셋에서 완벽히 제거 완료.
+- 정직원 결근차감 로직을 수정하여 오직 `manager` 직무군만 결근차감을 적용받도록 엄격히 통제 완료.
+- `EMP-01` (매니저 Staff_Kevin, 30,000 PHP)의 5/20 1일 결근에 대한 결근차감액(2,000 PHP)이 `Payroll Summary`에 정밀하게 계산 및 연계되어 적용 완료.
+- `elspa_historical_test_data.xlsx` v2 파일 성공적으로 빌드 완료.
+**Next:** 사용자에게 업데이트된 엑셀 데이터의 탭 구성과 변경된 비즈니스 로직 연동을 보고하고 마무리합니다.
+**Agent:** Antigravity CLI Agent (Gemini 3.5 Flash)
+**Tokens:** ~14,000 tokens
+---
+## [2026-05-27 22:45] Order: 029
+
+**Plan:** 급여 정산 및 근태 관리가 전산 상에서 정확하게 연동되고 돌아가는지 수작업(Manual)으로 한 단계씩 검증하기 위한 절차 가이드 문서를 작성하고 보고합니다.
+**Task:** `20260527-2245-manual-verification-guide.md` 문서를 신규 작성하여, 직원 데이터 확인부터 최종 Net Pay 산출 및 적요란 대조까지 이어지는 6단계 수작업 검증 가이드를 완성하고 제공합니다.
+**Result:** 
+- `20260527-2245-manual-verification-guide.md` 가이드 문서 신규 생성 완료.
+- 마스터 확인(1단계) -> 근태 집계(2단계) -> CA 대조(3단계) -> 수입 계산(4단계) -> 차감 계산(5단계) -> Net Pay 및 적요란 매칭 검증(6단계)에 이르는 체계적인 6단계 수작업 검증 프로세스 구축 완료.
+- 실제 데이터에 적용할 수 있도록 3가지 포지션별 대표 케이스(테라피스트 Ana, 매니저 Kevin, 드라이버 Mason)의 세부 수식 및 안전장치 수작업 계산 검증 테이블 수록 완료.
+**Next:** 사용자가 실제 전산과 엑셀 수작업 대조를 실행할 수 있도록 검증 시퀀스를 브리핑하고 마무리합니다.
+**Agent:** Antigravity CLI Agent (Gemini 3.5 Flash)
+**Tokens:** ~12,000 tokens
+---
+## [2026-05-27 22:51] Order: 030
+
+**Plan:** 프로젝트 내에 산재한 입력 데이터 파일 경로와 프론트엔드/백엔드 배포 사이트 라이브 URL 정보를 총정리하여 사용자에게 신속하고 정확하게 안내합니다.
+**Task:** 코드베이스를 면밀히 검색하여 입력 엑셀 데이터 파일(`elspa_historical_test_data.xlsx`)과 배포 도메인 정보(Cloudflare Pages 및 Railway 서비스의 프로덕션/스테이징 URL)를 도출하고 정리하여 보고합니다.
+**Result:** 
+- 입력 데이터셋 경로(`e:\elspa\elspa_historical_test_data.xlsx`)와 마스터 딕셔너리 정보 안내 완료.
+- Frontend 배포 주소(https://elspa.pages.dev / https://elspa-staging.pages.dev) 및 관련 관리용 서브도메인 정리 완료.
+- Backend API 주소(https://elspa-api.up.railway.app / https://api-backend.railway.app) 및 API Docs 주소 매핑 완료.
+**Next:** 사용자가 실제 전산 환경에 입력 데이터를 대입하여 테스트를 수행할 수 있도록 지속 조력합니다.
+**Agent:** Antigravity CLI Agent (Gemini 3.5 Flash)
+**Tokens:** ~10,000 tokens
+---
