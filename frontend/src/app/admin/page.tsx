@@ -445,7 +445,6 @@ export default function AdminPortal() {
               <div className="flex gap-2 mt-auto text-[10px] font-black tracking-widest">
                 <a className="flex-1 text-center py-2.5 bg-white/5 hover:bg-[#8aebff]/20 hover:text-[#8aebff] rounded-lg transition-all" href="/admin/therapists.html">DIRECTORY</a>
                 <a className="flex-1 text-center py-2.5 bg-white/5 hover:bg-[#8aebff]/20 hover:text-[#8aebff] rounded-lg transition-all" href="/admin/therapist-schedule.html">SCHEDULE</a>
-                <a className="flex-1 text-center py-2.5 bg-white/5 hover:bg-[#8aebff]/20 hover:text-[#8aebff] rounded-lg transition-all" href="/admin/book-massage.html">BOOKING</a>
               </div>
             </div>
 
