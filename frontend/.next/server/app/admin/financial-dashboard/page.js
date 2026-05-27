@@ -1,7 +1,7 @@
 var R=require("../../../chunks/ssr/[turbopack]_runtime.js")("server/app/admin/financial-dashboard/page.js")
 R.c("server/chunks/ssr/[root-of-the-server]__0d_84~_._.js")
 R.c("server/chunks/ssr/node_modules_0vtdjw7._.js")
-R.c("server/chunks/ssr/node_modules_next_dist_esm_build_templates_app-page_010i2ay.js")
+R.c("server/chunks/ssr/node_modules_next_dist_esm_build_templates_app-page_0aoea0t.js")
 R.c("server/chunks/ssr/[root-of-the-server]__0_c5pv8._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__09z7o2x._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__07y_2ah._.js")
@@ -9,6 +9,7 @@ R.c("server/chunks/ssr/node_modules_next_dist_client_components_0inhx6q._.js")
 R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_forbidden_0ghu-f7.js")
 R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_unauthorized_0cjv-23.js")
 R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_global-error_0lgvd_..js")
+R.c("server/chunks/ssr/src_app_admin_layout_tsx_09lym7.._.js")
 R.c("server/chunks/ssr/_next-internal_server_app_admin_financial-dashboard_page_actions_0c71f5n.js")
-R.m(72418)
-module.exports=R.m(72418).exports
+R.m(29770)
+module.exports=R.m(29770).exports

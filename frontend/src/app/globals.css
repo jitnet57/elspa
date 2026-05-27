@@ -113,3 +113,56 @@ input, textarea, select {
 .will-animate {
   will-change: transform, opacity;
 }
+
+/* Admin Dashboard Keyframes */
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes scanline {
+  0% {
+    top: 0%;
+  }
+  100% {
+    top: 100%;
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-8px);
+  }
+  75% {
+    transform: translateX(8px);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes borderGlow {
+  0%, 100% {
+    border-color: rgba(138, 235, 255, 0.3);
+    box-shadow: 0 0 20px rgba(138, 235, 255, 0.1);
+  }
+  50% {
+    border-color: rgba(138, 235, 255, 0.6);
+    box-shadow: 0 0 40px rgba(138, 235, 255, 0.2);
+  }
+}

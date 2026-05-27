@@ -1,7 +1,7 @@
 var R=require("../../../../chunks/ssr/[turbopack]_runtime.js")("server/app/admin/payroll/holidays/page.js")
 R.c("server/chunks/ssr/[root-of-the-server]__0d99exz._.js")
 R.c("server/chunks/ssr/node_modules_0vtdjw7._.js")
-R.c("server/chunks/ssr/node_modules_next_dist_esm_build_templates_app-page_08-ny.4.js")
+R.c("server/chunks/ssr/node_modules_next_dist_esm_build_templates_app-page_0bxotrr.js")
 R.c("server/chunks/ssr/[root-of-the-server]__0_c5pv8._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__09z7o2x._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__07y_2ah._.js")
@@ -9,6 +9,7 @@ R.c("server/chunks/ssr/node_modules_next_dist_client_components_0inhx6q._.js")
 R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_forbidden_0ghu-f7.js")
 R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_unauthorized_0cjv-23.js")
 R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_global-error_0lgvd_..js")
+R.c("server/chunks/ssr/src_app_admin_layout_tsx_09lym7.._.js")
 R.c("server/chunks/ssr/_next-internal_server_app_admin_payroll_holidays_page_actions_0hlx64q.js")
-R.m(61017)
-module.exports=R.m(61017).exports
+R.m(83778)
+module.exports=R.m(83778).exports
