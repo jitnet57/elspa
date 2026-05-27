@@ -3137,7 +3137,20 @@ git push
 **Plan:** 사용자의 요청("payroll을 어드민 사이트 안에 같이 넣어줘")을 반영하여, 라우팅 404 문제를 근본적으로 우회하고 즉시 한 페이지에서 검증할 수 있도록 **어드민 포털 메인 대시보드(`admin/page.tsx`) 하단에 급여 정산 테이블(Embedded Payroll Summary Panel)을 인터랙티브하게 내장(Embed)**합니다.
 **Task:** `frontend/src/app/admin/page.tsx`에 10명 테라피스트 + 10명 정직원의 급여 정산 Mock 데이터셋(Gross, Deductions [Late, Absence, CA, Health, 13th Month], Net, Notes)을 탑재하고, 직군 필터 및 개별 적요(Notes)의 아코디언 토글 뷰를 제공하는 고품질 급여 관리 컴포넌트를 UI에 추가합니다.
 **Result:** 
-**Next:** 갱신된 코드를 빌드 테스트하고 커밋 푸시하여 실서버 배포에 반영하고 사용자에게 완료 보고를 합니다.
+- `frontend/src/app/admin/page.tsx` 리팩토링 및 덮어쓰기 완료.
+- 사번, 이름, 직무 태그, 기본급, Gross Pay, Deductions, Net Pay가 깔끔하게 렌더링되는 실시간 급여 정산 테이블 내장 완료.
+- 직원 ID 및 이름 실시간 검색, 직군 필터(전체, 테라피스트, 정직원), 개별 한글 적요란 상세 내용 아코디언 토글 확장("열기 ▼" / "닫기 ▲") 기능 등 완벽한 인터랙티브 UX 구현 완료.
+- 변경 코드를 `6a2658c` 커밋으로 원격 저장소 푸시 완료.
+**Next:** 사용자가 어드민 로그인 직후 메인 페이지에서 스크롤을 내려 즉각적으로 급여 명세 및 적요란 수작업 검증을 수행할 수 있도록 안내합니다.
 **Agent:** Antigravity CLI Agent (Gemini 3.5 Flash)
-**Tokens:** ~12,000 tokens
+**Tokens:** ~14,000 tokens
+---
+## [2026-05-27 23:56] Order: 039
+
+**Plan:** 사용자의 요청("어드민 사이트를 리뱀프하자")에 따라, 어드민 로그인 및 메인 포털 화면(`admin/page.tsx`)을 최신 웹 트렌드(Glassmorphism, Vibrant Midnight theme, Glow elements, Micro-animations)가 고도로 반영된 **초프리미엄급 하이엔드 어드민 스페이스**로 전면 리뱀프(Revamp)합니다.
+**Task:** `frontend/src/app/admin/page.tsx`에 글래스모피즘 기반의 반투명 프로스트 카드 디자인, 미드나잇 퍼플 및 네이비 우주 그래디언트 배경, 네온 이펙트가 장착된 급여 정산 테이블 컴포넌트, 그리고 스무스한 트랜지션 애니메이션을 완벽 결합하여 UI/UX를 최고 퀄리티로 리팩토링합니다.
+**Result:** 
+**Next:** 리뱀프된 코드를 빌드하고 깃허브에 푸시하여 실서버 자동 배포를 최종 완료하고 아름답게 완료 보고를 합니다.
+**Agent:** Antigravity CLI Agent (Gemini 3.5 Flash)
+**Tokens:** ~15,000 tokens
 ---
