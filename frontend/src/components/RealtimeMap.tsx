@@ -14,6 +14,20 @@ interface Location {
   created_at?: string;
 }
 
+// ============================================================
+// 📌 정적 마커 인터페이스
+// 📋 목적: enableWebSocket=false일 때 mock 데이터로 마커 표시
+// ============================================================
+interface StaticMarker {
+  id: string;
+  entity_type: 'driver' | 'customer';
+  entity_id: number;
+  latitude: number;
+  longitude: number;
+  label?: string;
+  address?: string;
+}
+
 interface RealtimeMapProps {
   entityType?: 'driver' | 'customer' | 'admin';
   entityId?: number;
@@ -21,6 +35,9 @@ interface RealtimeMapProps {
   targetEntityType?: string;
   targetEntityId?: number;
   apiUrl?: string;
+  enableWebSocket?: boolean; // default: true - WebSocket 활성화 여부
+  staticMarkers?: StaticMarker[]; // enableWebSocket=false일 때 표시할 정적 마커
+  onMarkerClick?: (marker: StaticMarker) => void; // 마커 클릭 콜백
 }
 
 export function RealtimeMap({
@@ -30,6 +47,9 @@ export function RealtimeMap({
   targetEntityType,
   targetEntityId,
   apiUrl = 'http://localhost:8000',
+  enableWebSocket = true,
+  staticMarkers,
+  onMarkerClick,
 }: RealtimeMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
@@ -91,7 +111,7 @@ export function RealtimeMap({
 
   // WebSocket 연결
   useEffect(() => {
-    if (!map.current) return;
+    if (!map.current || !enableWebSocket) return;
 
     const wsUrl =
       watchMode === 'all'
@@ -165,7 +185,52 @@ export function RealtimeMap({
         websocket.current.close();
       }
     };
-  }, [watchMode, entityType, entityId, targetEntityType, targetEntityId, apiUrl]);
+  }, [watchMode, entityType, entityId, targetEntityType, targetEntityId, apiUrl, enableWebSocket]);
+
+  // 정적 마커 표시 (WebSocket 비활성화 모드)
+  useEffect(() => {
+    if (!map.current || enableWebSocket || !staticMarkers) return;
+
+    staticMarkers.forEach((markerData) => {
+      const markerKey = `${markerData.entity_type}:${markerData.entity_id}`;
+
+      // 기존 마커 제거 (업데이트)
+      if (markers.current.has(markerKey)) {
+        const oldMarker = markers.current.get(markerKey);
+        map.current!.removeLayer(oldMarker!);
+      }
+
+      const latLng = L.latLng(markerData.latitude, markerData.longitude);
+      const iconType = markerData.entity_type === 'driver' ? 'driver' : 'target';
+
+      const marker = L.marker(latLng, {
+        icon: createMarkerIcon(iconType as any),
+      })
+        .bindPopup(
+          `
+          <strong>${markerData.entity_type === 'driver' ? '🚗 드라이버' : '👤 손님'}</strong><br>
+          ${markerData.label ? `이름: ${markerData.label}<br>` : ''}
+          위도: ${markerData.latitude.toFixed(5)}<br>
+          경도: ${markerData.longitude.toFixed(5)}<br>
+          ${markerData.address ? `주소: ${markerData.address}<br>` : ''}
+        `
+        )
+        .addTo(map.current!);
+
+      // 마커 클릭 콜백
+      if (onMarkerClick) {
+        marker.on('click', () => onMarkerClick(markerData));
+      }
+
+      markers.current.set(markerKey, marker);
+    });
+
+    // 첫 번째 마커 위치로 맵 중심 설정
+    if (staticMarkers.length > 0) {
+      const firstMarker = staticMarkers[0];
+      map.current!.setView([firstMarker.latitude, firstMarker.longitude], 15);
+    }
+  }, [staticMarkers, enableWebSocket, onMarkerClick]);
 
   return (
     <div className="w-full h-full flex flex-col">

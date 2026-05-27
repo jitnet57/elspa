@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const RealtimeMap = dynamic(() => import('@/components/RealtimeMap').then(m => ({ default: m.RealtimeMap })), {
   ssr: false
@@ -9,8 +9,15 @@ const RealtimeMap = dynamic(() => import('@/components/RealtimeMap').then(m => (
 
 export default function DriverTrackingPage() {
   const [sessionId, setSessionId] = useState<number | null>(null);
-  const [driverId, setDriverId] = useState<number>(1); // 실제로는 할당된 드라이버 ID를 사용
+  const [driverId, setDriverId] = useState<number>(1);
   const [pickupStatus, setPickupStatus] = useState<'waiting' | 'driver_on_way' | 'arrived' | 'service_start' | 'completed'>('waiting');
+
+  useEffect(() => {
+    const savedId = sessionStorage.getItem('assignedDriverId');
+    if (savedId) {
+      setDriverId(parseInt(savedId, 10));
+    }
+  }, []);
 
   const statusMessages = {
     waiting: '🔍 드라이버를 찾는 중입니다...',
