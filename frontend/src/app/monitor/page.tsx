@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { MOCK_PICKUP_REQUESTS, MOCK_DRIVERS, MOCK_ACTIVE_TRIPS, MOCK_STATS, MOCK_STATIC_MAP_MARKERS } from '@/lib/mock/pickup-mock';
 import type { PickupRequest, DriverSummary, ActiveTrip, StaticMarker } from '@/lib/types/pickup-types';
 
-const RealtimeMap = dynamic(() => import('@/components/RealtimeMap').then(m => m.RealtimeMap), { ssr: false });
+const RealtimeMap = dynamic(() => import('@/components/RealtimeMap').then(m => m.RealtimeMap), { ssr: false, loading: () => <div className="w-full h-full bg-gray-800 animate-pulse"></div> });
 
 type TabType = 'queue' | 'trips' | 'drivers';
 

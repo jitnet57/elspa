@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { MOCK_AVAILABLE_DRIVERS, MOCK_STATIC_MAP_MARKERS } from '@/lib/mock/pickup-mock';
 import type { StaticMarker } from '@/lib/types/pickup-types';
 
-const RealtimeMap = dynamic(() => import('@/components/RealtimeMap').then(m => m.RealtimeMap), { ssr: false });
+const RealtimeMap = dynamic(() => import('@/components/RealtimeMap').then(m => m.RealtimeMap), { ssr: false, loading: () => <div className="w-full h-full bg-gray-200 animate-pulse"></div> });
 
 type Step = 1 | 2 | 3 | 4;
 
