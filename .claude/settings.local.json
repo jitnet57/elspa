@@ -97,7 +97,13 @@
       "PowerShell(Start-Sleep -Seconds 8; try { $response = \\(Invoke-WebRequest -Uri http://localhost:3000/admin/therapist-schedule.html -UseBasicParsing\\).StatusCode; if \\($response -eq 200\\) { \"✅ Server ready at http://localhost:3000\" } } catch { \"⏳ Server still starting...\" })",
       "PowerShell(try { $response = \\(Invoke-WebRequest -Uri http://localhost:3002/admin/therapist-schedule.html -UseBasicParsing\\).StatusCode; \"✅ Page accessible \\(HTTP $response\\)\" } catch { \"✅ Server responding \\(will load in browser\\)\" })",
       "Bash(pkill -f \"next dev\")",
-      "PowerShell(Start-Sleep -Seconds 6; try { $response = \\(Invoke-WebRequest -Uri http://localhost:3002/admin/therapist-schedule.html -UseBasicParsing -TimeoutSec 5\\).StatusCode; \"✅ Server ready \\(HTTP $response\\)\" } catch { \"⏳ Server starting...\" })"
+      "PowerShell(Start-Sleep -Seconds 6; try { $response = \\(Invoke-WebRequest -Uri http://localhost:3002/admin/therapist-schedule.html -UseBasicParsing -TimeoutSec 5\\).StatusCode; \"✅ Server ready \\(HTTP $response\\)\" } catch { \"⏳ Server starting...\" })",
+      "PowerShell(Start-Sleep -Seconds 5; try { $response = \\(Invoke-WebRequest -Uri http://localhost:3002/admin/book-massage.html -UseBasicParsing\\).StatusCode; \"✅ Book Massage page ready at http://localhost:3002/admin/book-massage.html\" } catch { \"⏳ Still loading...\" })",
+      "PowerShell(try { $response = \\(Invoke-WebRequest -Uri http://localhost:3000/admin/book-massage.html -UseBasicParsing\\).StatusCode; \"✅ Book Massage page ready at http://localhost:3000/admin/book-massage.html\" } catch { \"⏳ Still loading...\" })",
+      "PowerShell(Start-Sleep -Seconds 8; try { $response = \\(Invoke-WebRequest -Uri http://localhost:3000/admin -UseBasicParsing\\).StatusCode; \"✅ Admin dashboard responding \\(HTTP $response\\)\" } catch { \"Server still initializing...\" })",
+      "PowerShell(Stop-Process -Force)",
+      "PowerShell(\"✅ Old dev server stopped\")",
+      "PowerShell(Start-Sleep -Seconds 5; try { $response = \\(Invoke-WebRequest -Uri http://localhost:3000/admin/book-massage.html -UseBasicParsing -TimeoutSec 5\\).StatusCode; \"✅ Page loaded \\(HTTP $response\\) - Go to: http://localhost:3000/admin/book-massage.html\" } catch { \"⏳ Server loading...\" })"
     ],
     "additionalDirectories": [
       "C:\\Users\\jitne\\Desktop",

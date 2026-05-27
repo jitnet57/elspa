@@ -199,7 +199,7 @@ export default function TherapistSchedulePage() {
   const [therapists, setTherapists] = useState<ScheduleTherapist[]>(MOCK_THERAPISTS);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(2026, 4, 18)); // 5월 18일 기준
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'timeline' | 'table' | 'sheet'>('timeline');
+  const [viewMode, setViewMode] = useState<'timeline' | 'table' | 'sheet' | 'book'>('timeline');
 
   // 3대 인터랙티브 모달 상태 제어
   const [selectedSession, setSelectedSession] = useState<ScheduleSession | null>(null);
@@ -432,6 +432,17 @@ export default function TherapistSchedulePage() {
                   >
                     <span className="material-symbols-outlined inline mr-1.5" style={{fontSize: '16px', verticalAlign: 'middle'}}>sheets_rtl</span>
                     Sheet
+                  </button>
+                  <button
+                    onClick={() => setViewMode('book')}
+                    className={`px-4 py-2 rounded-lg font-bold text-xs transition-all ${
+                      viewMode === 'book'
+                        ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                        : 'text-indigo-300/60 hover:text-white'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined inline mr-1.5" style={{fontSize: '16px', verticalAlign: 'middle'}}>spa</span>
+                    Book
                   </button>
                 </div>
 
@@ -702,6 +713,19 @@ export default function TherapistSchedulePage() {
           <div className="bg-slate-900/30 backdrop-blur-md border border-indigo-500/20 rounded-2xl overflow-hidden relative shadow-[0_0_40px_rgba(99,102,241,0.1)]">
             <iframe
               src="https://docs.google.com/spreadsheets/d/1-WRjYvp33RQ3vJBSJ7RIW1g6P5pZjKqy_vPeVtA7mf8/edit?usp=sharing&rm=minimal"
+              width="100%"
+              height="900"
+              style={{border: 'none', borderRadius: '1rem'}}
+              allowFullScreen
+            ></iframe>
+          </div>
+          )}
+
+          {/* Book Massage View - Google Sheet Booking Form */}
+          {viewMode === 'book' && (
+          <div className="bg-slate-900/30 backdrop-blur-md border border-indigo-500/20 rounded-2xl overflow-hidden relative shadow-[0_0_40px_rgba(99,102,241,0.1)]">
+            <iframe
+              src="https://docs.google.com/spreadsheets/d/1-WRjYvp33RQ3vJBSJ7RIW1g6P5pZjKqy_vPeVtA7mf8/edit?gid=4&usp=sharing&rm=minimal"
               width="100%"
               height="900"
               style={{border: 'none', borderRadius: '1rem'}}
