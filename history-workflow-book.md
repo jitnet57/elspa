@@ -3218,3 +3218,63 @@ git push
 **Tokens:** ~14,000 tokens
 ---
 
+
+---
+## [2026-05-28 04:37] Order: 044
+
+**Plan:** Grab-like 드라이버 픽업 디스패치 시스템 구현
+1. 공항 픽업/드롭 서비스 타입 추가
+2. 비행기 착륙 시간, 탑승객 수, 짐 개수 필드 추가
+3. Monitor 페이지 → 디스패치 센터 (지도 60% + 제어 패널 40%)
+4. Customer Pickup 페이지 → 4-step Grab 스타일 부킹 플로우
+5. 실시간 추적 통합 (sessionStorage)
+
+**Task:** 
+**백엔드/타입:**
+- `frontend/src/lib/types/pickup-types.ts`: PickupRequest에 flightNumber, flightArrivalTime, passengerCount, luggageCount 필드 추가
+- `frontend/src/lib/mock/pickup-mock.ts`: 인천공항(KE789), 세부 공항(PR412) Mock 데이터 추가, 7개 픽업 요청으로 확대
+
+**프론트엔드:**
+- `frontend/src/components/RealtimeMap.tsx`: enableWebSocket, staticMarkers, onMarkerClick props 추가 (기존 기능 유지)
+- `frontend/src/app/monitor/page.tsx`: 마사지 침대 모니터링 → 드라이버 디스패치 센터로 전면 교체
+  * Header (시계, 브랜드명)
+  * Stats bar (4개 glassmorphism 카드)
+  * Split layout: 지도(60%) + 제어 패널(40%)
+  * 3개 탭: Pickup Queue (배정 드롭다운), Active Trips (읽기전용), Drivers (상태 카드)
+  * Midnight glassmorphism 테마
+  
+- `frontend/src/app/customer/pickup/layout.tsx`: 뷰포트 고립 레이아웃 (h-screen overflow-hidden)
+- `frontend/src/app/customer/pickup/page.tsx`: 4-step Grab 스타일 페이지
+  * Step 1: GPS 자동 감지 + Nominatim reverse geocoding
+  * Step 2: 서비스 선택 (4가지)
+  * Step 3: 드라이버 선택 (평점, 차량 정보)
+  * Step 4: 확인 + 실시간 추적 시작
+  * Full-screen 지도 + White bottom sheet (z-[100]/[110])
+  * sessionStorage에 assignedDriverId 저장
+  
+- `frontend/src/app/customer/driver-tracking/page.tsx`: sessionStorage 읽기 통합 (3줄 useEffect)
+
+**Result:**
+✅ 공항 픽업/드롭 서비스 타입 추가 완료
+✅ 비행기 정보 추적 필드 완료 (편번, 착륙시간, 탑승객, 짐)
+✅ Monitor 디스패치 센터 완성 (지도 + 제어 패널)
+✅ Customer Pickup 4-step 부킹 플로우 완성
+✅ 빌드 성공 (0 오류)
+✅ Cloudflare 배포 완료
+✅ Git 커밋 완료 (Commit: 2205a92)
+
+**Files Modified/Created:**
+- 생성: frontend/src/app/customer/pickup/layout.tsx
+- 생성: frontend/src/app/customer/pickup/page.tsx
+- 생성: frontend/src/lib/types/pickup-types.ts
+- 생성: frontend/src/lib/mock/pickup-mock.ts
+- 수정: frontend/src/app/monitor/page.tsx (마사지 침대 모니터 → 드라이버 디스패치)
+- 수정: frontend/src/app/customer/driver-tracking/page.tsx (sessionStorage 통합)
+- 수정: frontend/src/components/RealtimeMap.tsx (정적 마커 지원 추가)
+
+**Next:** 라이브 환경에서 /monitor, /customer/pickup, /customer/driver-tracking 페이지 동작 검증 및 UI/UX 테스트
+
+**Agent:** Claude Haiku 4.5
+
+**Tokens:** ~8,500 tokens (타입/Mock + Monitor 페이지 + Pickup 페이지)
+---

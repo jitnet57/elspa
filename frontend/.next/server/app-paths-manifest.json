@@ -39,6 +39,7 @@
   "/customer/driver-tracking/page": "app/customer/driver-tracking/page.js",
   "/customer/mypage/page": "app/customer/mypage/page.js",
   "/customer/page": "app/customer/page.js",
+  "/customer/pickup/page": "app/customer/pickup/page.js",
   "/customer/reviews/page": "app/customer/reviews/page.js",
   "/customer/services/page": "app/customer/services/page.js",
   "/driver/customer-locations/page": "app/driver/customer-locations/page.js",

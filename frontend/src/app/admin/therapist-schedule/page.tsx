@@ -251,9 +251,6 @@ export default function TherapistSchedulePage() {
     return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
   };
 
-  const getDurationMinutes = (session: ScheduleSession) => {
-    return Math.round((session.endHour - session.startHour) * 60);
-  };
 
   // 날짜 변경 컨트롤러
   const handlePrevDay = () => {
@@ -629,7 +626,7 @@ export default function TherapistSchedulePage() {
                 </thead>
                 <tbody>
                   {filteredTherapists.length > 0 ? (
-                    filteredTherapists.slice(0, 30).map((therapist, idx) => {
+                    filteredTherapists.slice(0, 30).map((therapist) => {
                       const [session1, session2] = therapist.sessions.sort((a, b) => a.startHour - b.startHour);
                       return (
                         <tr
@@ -700,13 +697,13 @@ export default function TherapistSchedulePage() {
           </div>
           )}
 
-          {/* Google Sheet View */}
+          {/* Google Sheet View with Booking Functionality */}
           {viewMode === 'sheet' && (
           <div className="bg-slate-900/30 backdrop-blur-md border border-indigo-500/20 rounded-2xl overflow-hidden relative shadow-[0_0_40px_rgba(99,102,241,0.1)]">
             <iframe
-              src="https://docs.google.com/spreadsheets/d/1ex1teZu6GAo98NciOfF2aITCR9LzFnxJoGZiel3MtUc/edit?usp=sharing&rm=minimal"
+              src="https://docs.google.com/spreadsheets/d/1-WRjYvp33RQ3vJBSJ7RIW1g6P5pZjKqy_vPeVtA7mf8/edit?usp=sharing&rm=minimal"
               width="100%"
-              height="800"
+              height="900"
               style={{border: 'none', borderRadius: '1rem'}}
               allowFullScreen
             ></iframe>
