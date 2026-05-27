@@ -9,6 +9,7 @@ import { RealtimeNotification } from '@/components/driver/RealtimeNotification';
 import { LocationTracker } from '@/components/driver/LocationTracker';
 import { WithdrawalPanel } from '@/components/driver/WithdrawalPanel';
 import { useDriverWebSocket } from '@/hooks/useDriverWebSocket';
+import { MOCK_PICKUP_REQUESTS } from '@/lib/mock/pickup-mock';
 
 // ============================================================
 // 📌 Driver Dashboard: 드라이버 메인 대시보드
@@ -18,8 +19,9 @@ import { useDriverWebSocket } from '@/hooks/useDriverWebSocket';
 // ============================================================
 
 export default function DriverDashboard() {
-  const [activeTab, setActiveTab] = useState<'today' | 'earnings' | 'schedule' | 'withdrawal'>('today');
+  const [activeTab, setActiveTab] = useState<'today' | 'earnings' | 'schedule' | 'withdrawal' | 'pickups'>('today');
   const [driverId, setLocalDriverId] = useState<number | null>(null);
+  const [pickupRequests, setPickupRequests] = useState(MOCK_PICKUP_REQUESTS.filter(r => r.status === 'pending'));
 
   // Zustand store
   const {
@@ -65,6 +67,22 @@ export default function DriverDashboard() {
 
     return () => clearInterval(interval);
   }, [sendPing]);
+
+  const pendingPickupRequests = pickupRequests.filter(r => r.status === 'pending');
+
+  const handlePickupResponse = (pickupId: string, accepted: boolean) => {
+    if (accepted) {
+      setPickupRequests(prev =>
+        prev.map(req =>
+          req.id === pickupId
+            ? { ...req, status: 'assigned' as const, assignedDriverId: driverId || 1 }
+            : req
+        )
+      );
+    } else {
+      setPickupRequests(prev => prev.filter(req => req.id !== pickupId));
+    }
+  };
 
   const weekSchedule = [
     { day: '월', time: '08:00 - 20:00', status: '근무' },
@@ -187,6 +205,16 @@ export default function DriverDashboard() {
         >
           💸 출금
         </button>
+        <button
+          onClick={() => setActiveTab('pickups')}
+          className={`pb-4 px-4 font-semibold transition-colors whitespace-nowrap ${
+            activeTab === 'pickups'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          🚗 픽업 요청 ({pendingPickupRequests.length})
+        </button>
       </div>
 
       {/* 탭 컨텐츠 */}
@@ -264,6 +292,52 @@ export default function DriverDashboard() {
               </div>
             ))}
           </div>
+        </section>
+      )}
+
+      {activeTab === 'pickups' && (
+        <section className="space-y-4">
+          <h2 className="text-2xl font-bold text-gray-900">픽업 요청</h2>
+          {pendingPickupRequests.length === 0 ? (
+            <div className="text-center py-12 bg-gray-50 rounded-lg">
+              <p className="text-gray-500">대기 중인 픽업 요청이 없습니다.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {pendingPickupRequests.map(req => (
+                <div key={req.id} className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900">{req.customerName}</p>
+                      <p className="text-sm text-gray-600 mt-1">{req.serviceType}</p>
+                      {req.flightNumber && (
+                        <p className="text-sm text-blue-600 mt-1">✈️ {req.flightNumber} ({new Date(req.flightArrivalTime || '').toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })})</p>
+                      )}
+                      {req.passengerCount && (
+                        <p className="text-sm text-gray-600 mt-1">👥 {req.passengerCount}명 / 🧳 {req.luggageCount}개</p>
+                      )}
+                      <p className="text-xs text-gray-500 mt-2">📍 {req.pickupAddress}</p>
+                    </div>
+                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded whitespace-nowrap">신청 대기</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handlePickupResponse(req.id, true)}
+                      className="flex-1 bg-green-100 hover:bg-green-200 text-green-800 border border-green-300 rounded-lg py-2 font-semibold transition-all"
+                    >
+                      수락
+                    </button>
+                    <button
+                      onClick={() => handlePickupResponse(req.id, false)}
+                      className="flex-1 bg-red-100 hover:bg-red-200 text-red-800 border border-red-300 rounded-lg py-2 font-semibold transition-all"
+                    >
+                      거절
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       )}
 
