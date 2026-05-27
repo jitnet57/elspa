@@ -83,6 +83,11 @@ export default function MonitorPage() {
     return `${req.flightNumber} (${arrivalTime})`;
   };
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <div className="h-screen bg-slate-950 text-white flex flex-col">
       {/* Header */}
@@ -123,11 +128,17 @@ export default function MonitorPage() {
       <div className="flex-1 flex gap-4 px-6 py-4 overflow-hidden">
         {/* Map Section (60%) */}
         <div className="w-3/5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden">
-          <RealtimeMap
-            enableWebSocket={false}
-            staticMarkers={MOCK_STATIC_MAP_MARKERS}
-            onMarkerClick={() => {}}
-          />
+          {mounted ? (
+            <RealtimeMap
+              enableWebSocket={false}
+              staticMarkers={MOCK_STATIC_MAP_MARKERS}
+              onMarkerClick={() => {}}
+            />
+          ) : (
+            <div className="w-full h-full bg-slate-900 flex items-center justify-center">
+              <p className="text-gray-400">🗺️ 지도 로딩 중...</p>
+            </div>
+          )}
         </div>
 
         {/* Control Panel (40%) */}

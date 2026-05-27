@@ -19,11 +19,16 @@ interface PickupLocation {
 export default function CustomerPickupPage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>(1);
+  const [mounted, setMounted] = useState(false);
   const [pickupLocation, setPickupLocation] = useState<PickupLocation | null>(null);
   const [serviceType, setServiceType] = useState<'home_visit' | 'transport_to_spa' | 'airport_pickup' | 'airport_dropoff' | null>(null);
   const [selectedDriverId, setSelectedDriverId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // GPS 위치 감지 (Step 1) - WiFi 불필요 (GPS 좌표만 사용)
   useEffect(() => {
@@ -104,7 +109,13 @@ export default function CustomerPickupPage() {
     <div className="h-screen overflow-hidden relative">
       {/* Full-screen Map */}
       <div className="absolute inset-0 z-[100]">
-        <RealtimeMap enableWebSocket={false} staticMarkers={mapMarkers} onMarkerClick={() => {}} />
+        {mounted ? (
+          <RealtimeMap enableWebSocket={false} staticMarkers={mapMarkers} onMarkerClick={() => {}} />
+        ) : (
+          <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+            <p className="text-gray-600">🗺️ 지도 로딩 중...</p>
+          </div>
+        )}
       </div>
 
       {/* Bottom Sheet */}
