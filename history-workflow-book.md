@@ -3054,3 +3054,23 @@ git push
 **Agent:** Antigravity CLI Agent (Gemini 3.5 Flash)
 **Tokens:** ~10,000 tokens
 ---
+## [2026-05-27 22:55] Order: 031
+
+**Plan:** 사용자가 겪고 있는 `https://elspa.pages.dev/admin/payroll` 404 (Not Found) 에러의 기술적 원인을 규명하고 즉각 해결할 수 있는 우회 접속 방안을 도출해 제공합니다.
+**Task:** 프론트엔드 라우트(`/admin/payroll`)의 폴더 구조가 정확히 빌드에 포함되어 있는지 확인하고, Cloudflare Pages의 정적 배포 구조상 발생하는 Clean URLs 환경 차이를 디버깅하여 해결 대안을 작성합니다.
+**Result:** 
+- `frontend/src/app/admin/payroll` 폴더의 page.tsx 라우트 실재성 검증 완료.
+- Cloudflare Pages 정적 export 환경에 따른 `.html` 확장자 누락 또는 배포 분리 이슈(staging vs production) 원인 도출 및 우회 솔루션(확장자 명시 및 스테이징 접속 경로) 제공 완료.
+**Next:** 사용자가 정상적으로 급여 정산 화면에 접근하도록 지속 가이드합니다.
+**Agent:** Antigravity CLI Agent (Gemini 3.5 Flash)
+**Tokens:** ~8,000 tokens
+---
+## [2026-05-27 23:01] Order: 032
+
+**Plan:** 사용자의 요청에 따라 관리자 포털 포털 페이지(`admin/page.tsx`) 내에 급여 정산 대시보드로 쉽게 건너갈 수 있는 **"Payroll Management" 카드**를 추가하여 정합성 높고 매끄러운 UX 네비게이션 환경을 구현합니다.
+**Task:** `frontend/src/app/admin/page.tsx`을 수정하여 `Settlement Management` 카테고리 내에 `Payroll Management` 아이템 카드(href: `/admin/payroll`, icon: `💵`)를 추가하고, 빌드 및 배포 무결성을 점검합니다.
+**Result:** 
+**Next:** 수정 완료 후 빌드 테스트 및 배포 커밋을 푸시하여 클라우드 환경에 즉각 배포 완료합니다.
+**Agent:** Antigravity CLI Agent (Gemini 3.5 Flash)
+**Tokens:** ~10,000 tokens
+---

@@ -70,6 +70,7 @@ export default function AdminPortal() {
         { name: 'Therapist Settlement', href: '/therapist-settlement', icon: '👨‍⚕️' },
         { name: 'Company Settlement', href: '/admin/monthly-settlement', icon: '🏢' },
         { name: 'Guide Referral Fee', href: '/admin/guide-referral-fee', icon: '🎯' },
+        { name: 'Payroll Management', href: '/admin/payroll', icon: '💵' },
         { name: 'Settlement Report', href: '/admin/settlement-report', icon: '📊' },
         { name: 'Settlement Guide', href: '/settlement-management', icon: '📚' },
       ],
