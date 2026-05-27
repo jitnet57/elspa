@@ -38,3 +38,4 @@ backups/
 # OS
 .DS_Store
 Thumbs.db
+mafia-codereview-harness
