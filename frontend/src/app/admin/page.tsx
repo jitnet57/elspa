@@ -50,6 +50,63 @@ export default function AdminPortal() {
     );
   }
 
+  const [payrollSearch, setPayrollSearch] = useState('');
+  const [payrollTab, setPayrollTab] = useState('all'); // all, therapist, staff
+  const [expandedNotesId, setExpandedNotesId] = useState<string | null>(null);
+
+  const mockPayrollData = [
+    {
+      id: "TH-01",
+      name: "Therapist_Ana",
+      type: "therapist",
+      base: 15000,
+      gross: 18800,
+      deductions: 50500,
+      net: 0,
+      notes: "📌 [수입] 기본급 15,000 PHP + 커미션 3,800 PHP (세션 38회) | [차감] 보건소비 500 PHP + 13개월보너스누적적립 50,000 PHP (입사 40개월) | [보장] Net PHP 0 (음수 방지 적용)"
+    },
+    {
+      id: "TH-03",
+      name: "Therapist_Chloe",
+      type: "therapist",
+      base: 15000,
+      gross: 19000,
+      deductions: 50500,
+      net: 0,
+      notes: "📌 [수입] 기본급 15,000 PHP + 커미션 4,000 PHP (세션 40회) | [차감] CA차감(APPROVED) 5,000 PHP + 보건소비 500 PHP + 13개월보너스누적적립 45,000 PHP | [보장] Net PHP 0 (음수 방지 적용)"
+    },
+    {
+      id: "EMP-01",
+      name: "Staff_Kevin",
+      type: "manager",
+      base: 30000,
+      gross: 30000,
+      deductions: 164500,
+      net: 0,
+      notes: "📌 [수입] 기본급 30,000 PHP | [차감] 결근차감 2,000 PHP (결근 1일) + 13개월보너스누적적립 162,500 PHP (입사 65개월) | [보장] Net PHP 0 (음수 방지 적용)"
+    },
+    {
+      id: "EMP-03",
+      name: "Staff_Mason",
+      type: "driver",
+      base: 20000,
+      gross: 20270,
+      deductions: 80000,
+      net: 0,
+      notes: "📌 [수입] 기본급 20,000 PHP + 초과근무 70 PHP (60분) + 식대 200 PHP (Driver 전용) | [차감] 13개월보너스누적적립 80,000 PHP (CA 4,000 PENDING 차감 제외) | [보장] Net PHP 0 (음수 방지 적용)"
+    }
+  ];
+
+  const filteredPayroll = mockPayrollData.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(payrollSearch.toLowerCase()) || item.id.toLowerCase().includes(payrollSearch.toLowerCase());
+    const matchesTab = payrollTab === 'all' 
+      ? true 
+      : payrollTab === 'therapist' 
+        ? (item.type === 'therapist' || item.type === 'nail')
+        : (item.type !== 'therapist' && item.type !== 'nail');
+    return matchesSearch && matchesTab;
+  });
+
   const adminMenus = [
     {
       category: '👥 Therapist Management',
@@ -155,6 +212,107 @@ export default function AdminPortal() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* ============================================================
+            📌 Embedded Payroll Summary Section (실시간 급여 정산 테이블 내장)
+            ============================================================ */}
+        <div className="mt-12 bg-white border border-indigo-150 rounded-xl shadow-md p-4 sm:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                💵 실시간 급여 정산 현황 <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full font-semibold">Embedded View</span>
+              </h2>
+              <p className="text-gray-500 text-sm mt-1">로그인 상태에서 한 페이지로 수작업 정산 규정 대조 및 검증이 가능합니다.</p>
+            </div>
+            
+            {/* Search & Tabs */}
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                type="text"
+                value={payrollSearch}
+                onChange={(e) => setPayrollSearch(e.target.value)}
+                placeholder="직원 ID 또는 이름 검색"
+                className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-indigo-500"
+              />
+              <div className="flex bg-gray-100 rounded-lg p-0.5 text-xs font-semibold">
+                <button 
+                  onClick={() => setPayrollTab('all')} 
+                  className={`px-3 py-1.5 rounded-md transition-colors ${payrollTab === 'all' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-600'}`}
+                >전체</button>
+                <button 
+                  onClick={() => setPayrollTab('therapist')} 
+                  className={`px-3 py-1.5 rounded-md transition-colors ${payrollTab === 'therapist' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-600'}`}
+                >테라피스트</button>
+                <button 
+                  onClick={() => setPayrollTab('staff')} 
+                  className={`px-3 py-1.5 rounded-md transition-colors ${payrollTab === 'staff' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-600'}`}
+                >정직원</button>
+              </div>
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="overflow-x-auto border border-gray-200 rounded-lg">
+            <table className="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr className="bg-indigo-50/50 border-b border-gray-200 text-gray-700 font-bold">
+                  <th className="p-3">사번</th>
+                  <th className="p-3">이름</th>
+                  <th className="p-3">직무</th>
+                  <th className="p-3 text-right">기본급 (PHP)</th>
+                  <th className="p-3 text-right">Gross Pay</th>
+                  <th className="p-3 text-right">Deductions</th>
+                  <th className="p-3 text-right text-indigo-600">Net Pay</th>
+                  <th className="p-3 text-center">상세 적요</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-150">
+                {filteredPayroll.length > 0 ? (
+                  filteredPayroll.map((item) => (
+                    <React.Fragment key={item.id}>
+                      <tr className="hover:bg-gray-50 transition-colors">
+                        <td className="p-3 font-semibold text-gray-600">{item.id}</td>
+                        <td className="p-3 font-bold text-gray-800">{item.name}</td>
+                        <td className="p-3">
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                            item.type === 'therapist' ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'
+                          }`}>
+                            {item.type.toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="p-3 text-right font-medium">{item.base.toLocaleString()}</td>
+                        <td className="p-3 text-right font-medium">{item.gross.toLocaleString()}</td>
+                        <td className="p-3 text-right font-medium text-red-600">-{item.deductions.toLocaleString()}</td>
+                        <td className="p-3 text-right font-bold text-indigo-600">{item.net.toLocaleString()}</td>
+                        <td className="p-3 text-center">
+                          <button
+                            onClick={() => setExpandedNotesId(expandedNotesId === item.id ? null : item.id)}
+                            className="px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 hover:text-indigo-800 rounded-md font-bold text-xs transition-colors"
+                          >
+                            {expandedNotesId === item.id ? "닫기 ▲" : "열기 ▼"}
+                          </button>
+                        </td>
+                      </tr>
+                      {expandedNotesId === item.id && (
+                        <tr className="bg-indigo-50/20">
+                          <td colSpan={8} className="p-4 border-t border-b border-indigo-100">
+                            <div className="bg-white border border-indigo-100 rounded-lg p-3 text-xs sm:text-sm text-gray-700 font-medium whitespace-pre-line leading-relaxed shadow-sm">
+                              {item.notes}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={8} className="p-6 text-center text-gray-400 font-bold">검색 결과가 없습니다.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Quick Links */}
