@@ -81,7 +81,18 @@
       "Bash(python3 -m json.tool)",
       "Bash(curl -s -X POST http://localhost:8000/api/mock/create-sample -H 'Content-Type: application/json')",
       "Bash(curl -s -X POST http://localhost:8000/api/mock/create-sample -H \"Content-Type: application/json\" -w \"\\\\nStatus: %{http_code}\\\\n\")",
-      "Bash(python test_mock_data_and_payroll.py)"
+      "Bash(python test_mock_data_and_payroll.py)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://elspa.pages.dev/admin/payroll)",
+      "Bash(curl -I https://elspa.pages.dev/admin/payroll)",
+      "Bash(curl -I https://elspa.pages.dev/admin/payroll.html)",
+      "Bash(curl -s https://elspa.pages.dev/)",
+      "Bash(curl -s http://localhost:3000/admin/therapist-schedule)",
+      "Bash(curl -I https://elspa.pages.dev/admin)",
+      "Bash(curl -s https://elspa.pages.dev/admin/payroll)",
+      "Bash(python /tmp/capture_pages.py)",
+      "Bash(python /tmp/capture.py)",
+      "Bash(curl *)",
+      "mcp__claude_ai_Google_Drive__create_file"
     ],
     "additionalDirectories": [
       "C:\\Users\\jitne\\Desktop",

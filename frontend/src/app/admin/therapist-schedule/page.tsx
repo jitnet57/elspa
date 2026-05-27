@@ -199,7 +199,7 @@ export default function TherapistSchedulePage() {
   const [therapists, setTherapists] = useState<ScheduleTherapist[]>(MOCK_THERAPISTS);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(2026, 4, 18)); // 5월 18일 기준
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'timeline' | 'table'>('timeline');
+  const [viewMode, setViewMode] = useState<'timeline' | 'table' | 'sheet'>('timeline');
 
   // 3대 인터랙티브 모달 상태 제어
   const [selectedSession, setSelectedSession] = useState<ScheduleSession | null>(null);
@@ -425,6 +425,17 @@ export default function TherapistSchedulePage() {
                     <span className="material-symbols-outlined inline mr-1.5" style={{fontSize: '16px', verticalAlign: 'middle'}}>table_chart</span>
                     Table
                   </button>
+                  <button
+                    onClick={() => setViewMode('sheet')}
+                    className={`px-4 py-2 rounded-lg font-bold text-xs transition-all ${
+                      viewMode === 'sheet'
+                        ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                        : 'text-indigo-300/60 hover:text-white'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined inline mr-1.5" style={{fontSize: '16px', verticalAlign: 'middle'}}>sheets_rtl</span>
+                    Sheet
+                  </button>
                 </div>
 
                 {/* Live Search Box */}
@@ -618,7 +629,7 @@ export default function TherapistSchedulePage() {
                 </thead>
                 <tbody>
                   {filteredTherapists.length > 0 ? (
-                    filteredTherapists.map((therapist, idx) => {
+                    filteredTherapists.slice(0, 30).map((therapist, idx) => {
                       const [session1, session2] = therapist.sessions.sort((a, b) => a.startHour - b.startHour);
                       return (
                         <tr
@@ -686,6 +697,19 @@ export default function TherapistSchedulePage() {
                 </tbody>
               </table>
             </div>
+          </div>
+          )}
+
+          {/* Google Sheet View */}
+          {viewMode === 'sheet' && (
+          <div className="bg-slate-900/30 backdrop-blur-md border border-indigo-500/20 rounded-2xl overflow-hidden relative shadow-[0_0_40px_rgba(99,102,241,0.1)]">
+            <iframe
+              src="https://docs.google.com/spreadsheets/d/1ex1teZu6GAo98NciOfF2aITCR9LzFnxJoGZiel3MtUc/edit?usp=sharing&rm=minimal"
+              width="100%"
+              height="800"
+              style={{border: 'none', borderRadius: '1rem'}}
+              allowFullScreen
+            ></iframe>
           </div>
           )}
 
