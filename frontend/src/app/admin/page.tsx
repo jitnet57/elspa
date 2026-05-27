@@ -376,6 +376,10 @@ export default function AdminPortal() {
               <span className="material-symbols-outlined">groups</span>
               <span className="text-sm font-semibold">Therapists</span>
             </a>
+            <a className="flex items-center gap-4 px-4 py-3 rounded-xl text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all" href="/admin/book-massage.html">
+              <span className="material-symbols-outlined">spa</span>
+              <span className="text-sm font-semibold">Book Massage</span>
+            </a>
             <a className="flex items-center gap-4 px-4 py-3 rounded-xl text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all" href="/admin/payroll.html">
               <span className="material-symbols-outlined">payments</span>
               <span className="text-sm font-semibold">Payroll</span>

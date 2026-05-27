@@ -95,7 +95,9 @@
       "mcp__claude_ai_Google_Drive__create_file",
       "PowerShell(Start-Sleep -Seconds 8; $response = curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/admin/therapist-schedule.html 2>&1; if \\($response -eq \"200\"\\) { \"✅ Server ready at http://localhost:3000\" } else { \"⏳ Server still starting \\(status: $response\\)\" })",
       "PowerShell(Start-Sleep -Seconds 8; try { $response = \\(Invoke-WebRequest -Uri http://localhost:3000/admin/therapist-schedule.html -UseBasicParsing\\).StatusCode; if \\($response -eq 200\\) { \"✅ Server ready at http://localhost:3000\" } } catch { \"⏳ Server still starting...\" })",
-      "PowerShell(try { $response = \\(Invoke-WebRequest -Uri http://localhost:3002/admin/therapist-schedule.html -UseBasicParsing\\).StatusCode; \"✅ Page accessible \\(HTTP $response\\)\" } catch { \"✅ Server responding \\(will load in browser\\)\" })"
+      "PowerShell(try { $response = \\(Invoke-WebRequest -Uri http://localhost:3002/admin/therapist-schedule.html -UseBasicParsing\\).StatusCode; \"✅ Page accessible \\(HTTP $response\\)\" } catch { \"✅ Server responding \\(will load in browser\\)\" })",
+      "Bash(pkill -f \"next dev\")",
+      "PowerShell(Start-Sleep -Seconds 6; try { $response = \\(Invoke-WebRequest -Uri http://localhost:3002/admin/therapist-schedule.html -UseBasicParsing -TimeoutSec 5\\).StatusCode; \"✅ Server ready \\(HTTP $response\\)\" } catch { \"⏳ Server starting...\" })"
     ],
     "additionalDirectories": [
       "C:\\Users\\jitne\\Desktop",

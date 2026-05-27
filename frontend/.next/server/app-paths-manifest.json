@@ -4,6 +4,7 @@
   "/_not-found/page": "app/_not-found/page.js",
   "/admin/audit-logs/page": "app/admin/audit-logs/page.js",
   "/admin/billing/page": "app/admin/billing/page.js",
+  "/admin/book-massage/page": "app/admin/book-massage/page.js",
   "/admin/change-logs/page": "app/admin/change-logs/page.js",
   "/admin/commission-settings/page": "app/admin/commission-settings/page.js",
   "/admin/companies/page": "app/admin/companies/page.js",
