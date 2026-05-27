@@ -199,7 +199,8 @@ export default function TherapistSchedulePage() {
   const [therapists, setTherapists] = useState<ScheduleTherapist[]>(MOCK_THERAPISTS);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(2026, 4, 18)); // 5월 18일 기준
   const [searchTerm, setSearchTerm] = useState('');
-  
+  const [viewMode, setViewMode] = useState<'timeline' | 'table'>('timeline');
+
   // 3대 인터랙티브 모달 상태 제어
   const [selectedSession, setSelectedSession] = useState<ScheduleSession | null>(null);
   const [bookingSlot, setBookingSlot] = useState<{ therapistId: number; hour: number } | null>(null);
@@ -357,61 +358,93 @@ export default function TherapistSchedulePage() {
           
           {/* Date Navigator & Search */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-indigo-500/10 pb-6">
-            <div className="flex items-center gap-3 w-full md:w-auto">
-              <button 
-                onClick={handlePrevDay}
-                className="bg-white/5 border border-indigo-500/10 hover:border-indigo-500/30 p-3 rounded-xl hover:bg-white/10 active:scale-95 transition-all text-[#8aebff]"
-              >
-                <span className="material-symbols-outlined">chevron_left</span>
-              </button>
-              
-              {/* Date Chips */}
-              <div className="flex gap-2.5 overflow-x-auto py-1 max-w-[280px] sm:max-w-none">
-                {nextDays.map((date, i) => {
-                  const isSelected = date.toDateString() === selectedDate.toDateString();
-                  const isSat = date.getDay() === 6;
-                  return (
-                    <div
-                      key={i}
-                      onClick={() => setSelectedDate(date)}
-                      className={`flex flex-col items-center justify-center min-w-[65px] py-2 px-1.5 rounded-xl cursor-pointer active:scale-95 transition-all duration-300 border ${
-                        isSelected 
-                          ? 'bg-white/5 border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.25)]' 
-                          : 'bg-white/2 border-white/5 opacity-55 hover:opacity-100'
-                      }`}
-                    >
-                      <span className={`text-[9px] font-black tracking-widest ${isSelected ? 'text-cyan-400' : isSat ? 'text-rose-400' : 'text-indigo-200'}`}>
-                        {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][date.getDay()]}
-                      </span>
-                      <span className="text-lg font-black text-white mt-0.5">{date.getDate()}</span>
-                    </div>
-                  );
-                })}
+            <div className="flex flex-col gap-3 w-full">
+              <div className="flex items-center gap-3 w-full md:w-auto">
+                <button
+                  onClick={handlePrevDay}
+                  className="bg-white/5 border border-indigo-500/10 hover:border-indigo-500/30 p-3 rounded-xl hover:bg-white/10 active:scale-95 transition-all text-[#8aebff]"
+                >
+                  <span className="material-symbols-outlined">chevron_left</span>
+                </button>
+
+                {/* Date Chips */}
+                <div className="flex gap-2.5 overflow-x-auto py-1 max-w-[280px] sm:max-w-none">
+                  {nextDays.map((date, i) => {
+                    const isSelected = date.toDateString() === selectedDate.toDateString();
+                    const isSat = date.getDay() === 6;
+                    return (
+                      <div
+                        key={i}
+                        onClick={() => setSelectedDate(date)}
+                        className={`flex flex-col items-center justify-center min-w-[65px] py-2 px-1.5 rounded-xl cursor-pointer active:scale-95 transition-all duration-300 border ${
+                          isSelected
+                            ? 'bg-white/5 border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.25)]'
+                            : 'bg-white/2 border-white/5 opacity-55 hover:opacity-100'
+                        }`}
+                      >
+                        <span className={`text-[9px] font-black tracking-widest ${isSelected ? 'text-cyan-400' : isSat ? 'text-rose-400' : 'text-indigo-200'}`}>
+                          {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][date.getDay()]}
+                        </span>
+                        <span className="text-lg font-black text-white mt-0.5">{date.getDate()}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <button
+                  onClick={handleNextDay}
+                  className="bg-white/5 border border-indigo-500/10 hover:border-indigo-500/30 p-3 rounded-xl hover:bg-white/10 active:scale-95 transition-all text-[#8aebff]"
+                >
+                  <span className="material-symbols-outlined">chevron_right</span>
+                </button>
               </div>
 
-              <button 
-                onClick={handleNextDay}
-                className="bg-white/5 border border-indigo-500/10 hover:border-indigo-500/30 p-3 rounded-xl hover:bg-white/10 active:scale-95 transition-all text-[#8aebff]"
-              >
-                <span className="material-symbols-outlined">chevron_right</span>
-              </button>
-            </div>
+              {/* View Mode Toggle & Search */}
+              <div className="flex gap-3 md:gap-4 w-full md:justify-end items-center">
+                {/* View Mode Toggle */}
+                <div className="flex gap-2 bg-slate-900/40 border border-indigo-500/10 p-1 rounded-xl">
+                  <button
+                    onClick={() => setViewMode('timeline')}
+                    className={`px-4 py-2 rounded-lg font-bold text-xs transition-all ${
+                      viewMode === 'timeline'
+                        ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                        : 'text-indigo-300/60 hover:text-white'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined inline mr-1.5" style={{fontSize: '16px', verticalAlign: 'middle'}}>timeline</span>
+                    Timeline
+                  </button>
+                  <button
+                    onClick={() => setViewMode('table')}
+                    className={`px-4 py-2 rounded-lg font-bold text-xs transition-all ${
+                      viewMode === 'table'
+                        ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                        : 'text-indigo-300/60 hover:text-white'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined inline mr-1.5" style={{fontSize: '16px', verticalAlign: 'middle'}}>table_chart</span>
+                    Table
+                  </button>
+                </div>
 
-            {/* Live Search Box */}
-            <div className="relative w-full md:w-64">
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                placeholder="치료사 이름 또는 직무 검색..."
-                className="w-full px-4 py-2.5 bg-slate-950/80 border border-indigo-500/20 rounded-xl text-xs focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 transition-all text-white placeholder-indigo-300/30"
-              />
+                {/* Live Search Box */}
+                <div className="relative flex-1 md:flex-none md:w-64">
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    placeholder="치료사 이름 또는 직무 검색..."
+                    className="w-full px-4 py-2.5 bg-slate-950/80 border border-indigo-500/20 rounded-xl text-xs focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 transition-all text-white placeholder-indigo-300/30"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
           {/* ============================================================
-              📌 Schedule Timeline Canvas (Bento-like Grid Layout)
+              📌 Schedule Views (Timeline or Table Mode)
               ============================================================ */}
+          {viewMode === 'timeline' ? (
           <div className="bg-slate-900/30 backdrop-blur-md border border-indigo-500/20 rounded-2xl overflow-hidden relative shadow-[0_0_40px_rgba(99,102,241,0.1)]">
             
             {/* Timeline Horizontal Scroll Board */}
@@ -552,6 +585,109 @@ export default function TherapistSchedulePage() {
               </div>
             </div>
           </div>
+          ) : (
+          <div className="bg-slate-900/30 backdrop-blur-md border border-indigo-500/20 rounded-2xl overflow-hidden relative shadow-[0_0_40px_rgba(99,102,241,0.1)]">
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-slate-900/60 border-b border-indigo-500/20">
+                    <th className="px-4 py-4 text-left text-[10px] font-black tracking-widest text-indigo-300/50 border-r border-indigo-500/10 sticky left-0 z-10 bg-slate-900/60 w-32">
+                      <span className="flex items-center gap-1">
+                        <span className="material-symbols-outlined" style={{fontSize: '14px'}}>schedule</span>
+                        THERAPIST
+                      </span>
+                    </th>
+                    <th colSpan={8} className="px-4 py-4 text-center text-[10px] font-black tracking-widest text-cyan-400/70 border-r border-indigo-500/10">1ST TREATMENT</th>
+                    <th colSpan={8} className="px-4 py-4 text-center text-[10px] font-black tracking-widest text-emerald-400/70">2ND TREATMENT</th>
+                  </tr>
+                  <tr className="bg-slate-900/40 border-b border-indigo-500/10">
+                    <th className="px-4 py-3 text-left text-[9px] font-bold text-indigo-300/40 border-r border-indigo-500/10 sticky left-0 z-10 bg-slate-900/40">NAME</th>
+                    {['1ST', '2ND'].map(treatment => (
+                      <React.Fragment key={treatment}>
+                        <th className="px-2 py-3 text-[9px] font-bold text-indigo-300/40 border-r border-indigo-500/10 w-20">TYPE</th>
+                        <th className="px-2 py-3 text-[9px] font-bold text-indigo-300/40 border-r border-indigo-500/10 w-16">START</th>
+                        <th className="px-2 py-3 text-[9px] font-bold text-indigo-300/40 border-r border-indigo-500/10 w-16">END</th>
+                        <th className="px-2 py-3 text-[9px] font-bold text-indigo-300/40 border-r border-indigo-500/10 w-14">RM#</th>
+                        <th className="px-2 py-3 text-[9px] font-bold text-indigo-300/40 border-r border-indigo-500/10 w-24">GUEST</th>
+                        <th className="px-2 py-3 text-[9px] font-bold text-indigo-300/40 border-r border-indigo-500/10 w-20">NOTE</th>
+                        <th className="px-2 py-3 text-[9px] font-bold text-indigo-300/40 border-r border-indigo-500/10 w-16">PAYMENT</th>
+                        <th className="px-2 py-3 text-[9px] font-bold text-indigo-300/40 w-14">TIP</th>
+                      </React.Fragment>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredTherapists.length > 0 ? (
+                    filteredTherapists.map((therapist, idx) => {
+                      const [session1, session2] = therapist.sessions.sort((a, b) => a.startHour - b.startHour);
+                      return (
+                        <tr
+                          key={therapist.id}
+                          className="border-b border-indigo-500/10 hover:bg-indigo-500/5 transition-colors"
+                        >
+                          <td className="px-4 py-4 sticky left-0 z-10 bg-slate-900/30 border-r border-indigo-500/10">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-600/30 border border-indigo-500/40 flex items-center justify-center text-white font-black text-xs">
+                                {therapist.name[0]}
+                              </div>
+                              <div>
+                                <p className="text-xs font-bold text-white">{therapist.name}</p>
+                                <p className={`text-[9px] font-bold ${STATUS_CONFIG[therapist.status].color}`}>
+                                  {STATUS_CONFIG[therapist.status].label}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+
+                          {[session1, session2].map((session, sessionIdx) => (
+                            <React.Fragment key={`${therapist.id}-${sessionIdx}`}>
+                              <td className="px-2 py-4 border-r border-indigo-500/10">
+                                {session ? (
+                                  <span className={`text-[9px] font-bold px-2 py-1 rounded-lg ${SERVICE_CONFIG[session.serviceType as keyof typeof SERVICE_CONFIG].text} bg-white/5`}>
+                                    {session.serviceType.toUpperCase()}
+                                  </span>
+                                ) : (
+                                  <span className="text-[9px] text-indigo-300/20">-</span>
+                                )}
+                              </td>
+                              <td className="px-2 py-4 border-r border-indigo-500/10 text-xs text-white font-mono">
+                                {session ? formatTime(session.startHour) : '-'}
+                              </td>
+                              <td className="px-2 py-4 border-r border-indigo-500/10 text-xs text-white font-mono">
+                                {session ? formatTime(session.endHour) : '-'}
+                              </td>
+                              <td className="px-2 py-4 border-r border-indigo-500/10 text-xs text-white font-bold">
+                                {session?.roomNumber ? session.roomNumber.replace('Room ', '') : '-'}
+                              </td>
+                              <td className="px-2 py-4 border-r border-indigo-500/10 text-xs text-cyan-300 font-semibold truncate">
+                                {session?.customerName || '-'}
+                              </td>
+                              <td className="px-2 py-4 border-r border-indigo-500/10 text-xs text-indigo-300/60">
+                                -
+                              </td>
+                              <td className="px-2 py-4 border-r border-indigo-500/10 text-xs text-emerald-400 font-bold">
+                                -
+                              </td>
+                              <td className="px-2 py-4 text-xs text-orange-400 font-bold">
+                                -
+                              </td>
+                            </React.Fragment>
+                          ))}
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={17} className="text-center py-16 text-indigo-300/30 font-black text-sm uppercase">
+                        치료사를 찾을 수 없습니다.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          )}
 
           {/* ============================================================
               📌 Quick Action Floating Bento Grid
