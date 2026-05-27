@@ -211,7 +211,7 @@ export default function TherapistSchedulePage() {
     therapistId: 1,
     startHour: 9,
     duration: 60, // 60, 90, 120 Min
-    serviceType: 'swedish' as const,
+    serviceType: 'swedish' as 'swedish' | 'thai' | 'hotstone' | 'foot' | 'aroma',
     customerName: '',
     roomNumber: '',
   });
