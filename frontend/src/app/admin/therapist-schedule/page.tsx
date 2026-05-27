@@ -199,7 +199,7 @@ export default function TherapistSchedulePage() {
   const [therapists, setTherapists] = useState<ScheduleTherapist[]>(MOCK_THERAPISTS);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(2026, 4, 18)); // 5월 18일 기준
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'timeline' | 'table' | 'sheet' | 'book'>('timeline');
+  const [viewMode, setViewMode] = useState<'timeline' | 'table' | 'sheet' | 'book'>('sheet');
 
   // 3대 인터랙티브 모달 상태 제어
   const [selectedSession, setSelectedSession] = useState<ScheduleSession | null>(null);
