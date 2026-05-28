@@ -95,12 +95,3 @@ reportlab==4.0.9
 # CORS & Headers
 # ============================================================
 python-multipart==0.0.6
-
-# ============================================================
-# Task Scheduling & Google APIs
-# ============================================================
-apscheduler==3.10.4
-google-auth==2.27.0
-google-auth-oauthlib==1.2.0
-google-auth-httplib2==0.2.0
-google-api-python-client==2.105.0
