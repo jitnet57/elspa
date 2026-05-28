@@ -17,7 +17,7 @@
 //   4️⃣ 스와이프 제스처 (좌/우)
 // ============================================================
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 
 // 터치 인터랙션 옵션 인터페이스
 export interface TouchOptions {
@@ -75,7 +75,7 @@ export interface TouchState {
  * ```
  */
 export function useKnowledgeNetworkTouch(
-  containerRef: React.RefObject<HTMLElement | HTMLDivElement>,
+  containerRef: React.RefObject<HTMLElement | HTMLDivElement | null>,
   callbacks: TouchCallbacks,
   options: TouchOptions = {}
 ): TouchState {
@@ -99,7 +99,7 @@ export function useKnowledgeNetworkTouch(
     startTouchY: 0,
   });
 
-  const [isTouching, setIsTouching] = React.useState(false);
+  const [isTouching, setIsTouching] = useState(false);
 
   // ============================================================
   // 📐 거리 계산 함수 (두 점 사이의 거리)
@@ -268,17 +268,17 @@ export function useKnowledgeNetworkTouch(
     const touchOptions = { passive: false };
 
     // 이벤트 리스너 등록
-    container.addEventListener('touchstart', handleTouchStart, touchOptions);
-    container.addEventListener('touchmove', handleTouchMove, touchOptions);
-    container.addEventListener('touchend', handleTouchEnd, touchOptions);
-    container.addEventListener('touchcancel', handleTouchEnd, touchOptions); // 터치 취소 (예: 알림 팝업)
+    container.addEventListener('touchstart', handleTouchStart as EventListener, touchOptions);
+    container.addEventListener('touchmove', handleTouchMove as EventListener, touchOptions);
+    container.addEventListener('touchend', handleTouchEnd as EventListener, touchOptions);
+    container.addEventListener('touchcancel', handleTouchEnd as EventListener, touchOptions); // 터치 취소 (예: 알림 팝업)
 
     // Cleanup: 이벤트 리스너 제거
     return () => {
-      container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchmove', handleTouchMove);
-      container.removeEventListener('touchend', handleTouchEnd);
-      container.removeEventListener('touchcancel', handleTouchEnd);
+      container.removeEventListener('touchstart', handleTouchStart as EventListener);
+      container.removeEventListener('touchmove', handleTouchMove as EventListener);
+      container.removeEventListener('touchend', handleTouchEnd as EventListener);
+      container.removeEventListener('touchcancel', handleTouchEnd as EventListener);
     };
   }, [handleTouchStart, handleTouchMove, handleTouchEnd, containerRef]);
 
