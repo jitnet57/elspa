@@ -128,101 +128,108 @@ export default function MonitorPage({ showBookingButton = true }) {
 
   return (
     <div className="h-screen bg-slate-950 text-white flex flex-col">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border-b border-white/10 px-6 py-6">
-        <div className="flex justify-between items-center gap-4">
-          <div>
+      {/* Fixed Header with Stats on the Right */}
+      <div className="sticky top-0 z-50 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border-b border-white/10 px-6 py-4">
+        <div className="flex justify-between items-center gap-6">
+          {/* Left: Title & Google Button */}
+          <div className="flex-1 min-w-0">
             <h1 className="text-3xl font-bold text-white">📊 실시간 모니터</h1>
             <p className="text-sm text-gray-400 mt-1">Google Sheets 예약 관리</p>
-          </div>
-          <div className="text-right">
-            <div className="text-4xl font-mono font-bold text-indigo-400">{currentTime}</div>
-            <p className="text-xs text-gray-500 mt-1">현재 시간</p>
-          </div>
-        </div>
 
-        {/* RED BOX - Google Connection */}
-        {showBookingButton && (
-          <div className="flex justify-center mt-6">
-            {isGoogleConnected ? (
-              <button
-                onClick={() => setShowBookingModal(true)}
-                className="border-4 border-red-500/80 rounded-lg px-12 py-4 bg-transparent hover:bg-red-500/10 transition-all"
-              >
-                <span className="text-2xl font-bold text-white">📊 Booking with Therapist</span>
-                <span className="text-xs text-green-400 block mt-2">✅ Google 연결됨</span>
-              </button>
-            ) : (
-              <button
-                onClick={handleGoogleLogin}
-                className="border-4 border-blue-500/80 rounded-lg px-12 py-4 bg-transparent hover:bg-blue-500/10 transition-all"
-              >
-                <span className="text-2xl font-bold text-white">🔓 Google로 연결</span>
-                <span className="text-xs text-blue-300 block mt-2">Google Sheets에 접근하려면 클릭</span>
-              </button>
+            {/* RED BOX - Google Connection */}
+            {showBookingButton && (
+              <div className="mt-3 inline-block">
+                {isGoogleConnected ? (
+                  <button
+                    onClick={() => setShowBookingModal(true)}
+                    className="border-2 border-red-500/80 rounded-lg px-6 py-2 bg-transparent hover:bg-red-500/10 transition-all"
+                  >
+                    <span className="text-sm font-bold text-white">📊 Booking with Therapist</span>
+                    <span className="text-xs text-green-400 block">✅ Google 연결됨</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleGoogleLogin}
+                    className="border-2 border-blue-500/80 rounded-lg px-6 py-2 bg-transparent hover:bg-blue-500/10 transition-all"
+                  >
+                    <span className="text-sm font-bold text-white">🔓 Google로 연결</span>
+                    <span className="text-xs text-blue-300 block">Google Sheets에 접근</span>
+                  </button>
+                )}
+              </div>
             )}
           </div>
-        )}
+
+          {/* Right: Stats (Compact) */}
+          <div className="flex gap-2 items-center whitespace-nowrap">
+            {/* Time */}
+            <div className="text-right mr-4">
+              <div className="text-2xl font-mono font-bold text-indigo-400">{currentTime}</div>
+              <p className="text-xs text-gray-500">현재 시간</p>
+            </div>
+
+            {/* Bed Stats - Compact */}
+            <div className="bg-white/5 border border-white/10 rounded-lg p-2 text-center">
+              <div className="text-xl font-bold text-green-400">{bedStats.available}</div>
+              <p className="text-xs text-gray-400">사용가능</p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-lg p-2 text-center">
+              <div className="text-xl font-bold text-blue-400">{bedStats.inService}</div>
+              <p className="text-xs text-gray-400">시술중</p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-lg p-2 text-center">
+              <div className="text-xl font-bold text-amber-400">{bedStats.reserved}</div>
+              <p className="text-xs text-gray-400">예약됨</p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-lg p-2 text-center">
+              <div className="text-xl font-bold text-purple-400">{bedStats.cleaning}</div>
+              <p className="text-xs text-gray-400">청소중</p>
+            </div>
+
+            {/* Therapist Stats - Compact */}
+            <div className="bg-white/5 border border-white/10 rounded-lg p-2 text-center">
+              <div className="text-xl font-bold text-emerald-400">{therapistStats.checkedIn}</div>
+              <p className="text-xs text-gray-400">체크인</p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-lg p-2 text-center">
+              <div className="text-xl font-bold text-cyan-400">{therapistStats.waiting}</div>
+              <p className="text-xs text-gray-400">대기중</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Admin Dashboard Stats */}
-      <div className="grid grid-cols-4 gap-3 px-6 py-4 bg-slate-950 border-b border-white/10">
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 hover:bg-white/8 transition-all">
-          <div className="text-3xl font-bold text-green-400">{bedStats.available}</div>
-          <p className="text-xs text-gray-400 mt-1">✅ 사용 가능</p>
+      {/* Scrollable Section: Tab Navigation + Content */}
+      <div className="flex-1 overflow-y-auto flex flex-col">
+        {/* Tab Navigation */}
+        <div className="flex gap-2 px-6 py-4 border-b border-white/10 bg-slate-950 overflow-x-auto shrink-0">
+          <TabButton
+            active={activeTab === 'beds'}
+            onClick={() => setActiveTab('beds')}
+          >
+            🛏️ Real-time Bed Mode
+          </TabButton>
+          <TabButton
+            active={activeTab === 'schedule'}
+            onClick={() => setActiveTab('schedule')}
+          >
+            🗓️ Therapist Daily Schedule
+          </TabButton>
+          <TabButton
+            active={activeTab === 'booking'}
+            onClick={() => setActiveTab('booking')}
+          >
+            📊 BOOKING WITH THERAPIST
+          </TabButton>
         </div>
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 hover:bg-white/8 transition-all">
-          <div className="text-3xl font-bold text-blue-400">{bedStats.inService}</div>
-          <p className="text-xs text-gray-400 mt-1">🔵 시술 중</p>
-        </div>
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 hover:bg-white/8 transition-all">
-          <div className="text-3xl font-bold text-amber-400">{bedStats.reserved}</div>
-          <p className="text-xs text-gray-400 mt-1">🟡 예약됨</p>
-        </div>
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 hover:bg-white/8 transition-all">
-          <div className="text-3xl font-bold text-purple-400">{bedStats.cleaning}</div>
-          <p className="text-xs text-gray-400 mt-1">🟣 청소 중</p>
+
+        {/* Tab Content */}
+        <div className="flex-1 overflow-hidden">
+          {activeTab === 'beds' && <BedLayoutView />}
+          {activeTab === 'schedule' && <TherapistScheduleView />}
+          {activeTab === 'booking' && <BookingTabView />}
         </div>
       </div>
-
-      {/* Therapist Status */}
-      <div className="grid grid-cols-2 gap-3 px-6 py-4 bg-slate-950 border-b border-white/10">
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4">
-          <div className="text-3xl font-bold text-emerald-400">{therapistStats.checkedIn}</div>
-          <p className="text-xs text-gray-400 mt-1">✅ 체크인</p>
-        </div>
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4">
-          <div className="text-3xl font-bold text-cyan-400">{therapistStats.waiting}</div>
-          <p className="text-xs text-gray-400 mt-1">⏳ 대기 중</p>
-        </div>
-      </div>
-
-      {/* Tab Navigation */}
-      <div className="flex gap-2 px-6 py-4 border-b border-white/10 bg-slate-950 overflow-x-auto">
-        <TabButton
-          active={activeTab === 'beds'}
-          onClick={() => setActiveTab('beds')}
-        >
-          🛏️ Real-time Bed Mode
-        </TabButton>
-        <TabButton
-          active={activeTab === 'schedule'}
-          onClick={() => setActiveTab('schedule')}
-        >
-          🗓️ Therapist Daily Schedule
-        </TabButton>
-        <TabButton
-          active={activeTab === 'booking'}
-          onClick={() => setActiveTab('booking')}
-        >
-          📊 BOOKING WITH THERAPIST
-        </TabButton>
-      </div>
-
-      {/* Tab Content */}
-      {activeTab === 'beds' && <BedLayoutView />}
-      {activeTab === 'schedule' && <TherapistScheduleView />}
-      {activeTab === 'booking' && <BookingTabView />}
 
       {/* Google Sheet Booking Modal */}
       <GoogleSheetBookingModal
