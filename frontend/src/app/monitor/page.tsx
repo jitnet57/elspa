@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { MOCK_PICKUP_REQUESTS, MOCK_DRIVERS, MOCK_ACTIVE_TRIPS, MOCK_STATS, MOCK_STATIC_MAP_MARKERS } from '@/lib/mock/pickup-mock';
 import type { PickupRequest, DriverSummary, ActiveTrip, StaticMarker } from '@/lib/types/pickup-types';
+import { GoogleSheetBookingModal } from '@/components/GoogleSheetBookingModal';
 
 const RealtimeMap = dynamic(() => import('@/components/RealtimeMap').then(m => m.RealtimeMap), { ssr: false, loading: () => <div className="w-full h-full bg-gray-800 animate-pulse"></div> });
 
@@ -44,15 +45,32 @@ export function MonitorPage({ showBookingButton = true }) {
   const [showGoogleSheet, setShowGoogleSheet] = useState(false);
   const [googleSheetBookings, setGoogleSheetBookings] = useState<GoogleSheetBooking[]>([]);
   const [isLoadingSheet, setIsLoadingSheet] = useState(false);
+
+  // Google Sheets OAuth 상태
+  const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+  const [showBookingModal, setShowBookingModal] = useState(false);
   const [massageBookings, setMassageBookings] = useState<MassageBooking[]>([
     { id: '1', therapist: 'Maria Santos', service: 'Swedish Massage', date: '2026-05-28', time: '14:00', guestName: 'John Doe', roomNumber: '01', status: 'confirmed', createdAt: new Date().toISOString() },
     { id: '2', therapist: 'Ana Mercado', service: 'Thai Massage', date: '2026-05-28', time: '15:00', guestName: 'Jane Smith', roomNumber: '02', status: 'pending', createdAt: new Date().toISOString() },
     { id: '3', therapist: 'Rosa Chavez', service: 'Hot Stone Therapy', date: '2026-05-28', time: '16:00', guestName: 'Mike Johnson', roomNumber: '03', status: 'confirmed', createdAt: new Date().toISOString() },
   ]);
 
+  // Google Sheets 연결 상태 확인
   useEffect(() => {
-    // 클라이언트 사이드에서만 시간 업데이트
+    const checkGoogleConnection = async () => {
+      try {
+        const response = await fetch('/api/booking/status');
+        const data = await response.json();
+        setIsGoogleConnected(data.connected);
+      } catch (error) {
+        setIsGoogleConnected(false);
+      }
+    };
+    checkGoogleConnection();
+  }, []);
 
+  // 클라이언트 사이드 시간 업데이트
+  useEffect(() => {
     const updateTime = () => {
       const now = new Date();
       setCurrentTime(now.toLocaleTimeString('ko-KR', { hour12: false }));
@@ -61,6 +79,22 @@ export function MonitorPage({ showBookingButton = true }) {
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // Google OAuth 로그인 처리
+  const handleGoogleLogin = async () => {
+    try {
+      const response = await fetch('/api/booking/auth/google');
+      const data = await response.json();
+
+      // Google 로그인 페이지로 리다이렉트
+      if (data.authorization_url) {
+        window.location.href = data.authorization_url;
+      }
+    } catch (error) {
+      console.error('Google 로그인 실패:', error);
+      alert('Google 로그인에 실패했습니다. 나중에 다시 시도해주세요.');
+    }
+  };
 
   // Google Sheet 예약 데이터 조회
   const fetchGoogleSheetBookings = async () => {
@@ -241,12 +275,25 @@ export function MonitorPage({ showBookingButton = true }) {
         {/* RED BOX - Booking with Therapist (조건부 표시) */}
         {showBookingButton && (
           <div className="flex justify-center">
-            <button
-              onClick={() => setShowGoogleSheet(true)}
-              className="border-4 border-red-500/80 rounded-lg px-12 py-3 bg-transparent hover:bg-red-500/10 transition-all"
-            >
-              <span className="text-2xl font-bold text-white">Booking with Therapist</span>
-            </button>
+            {isGoogleConnected ? (
+              // Google 연결됨 - 예약 버튼 표시
+              <button
+                onClick={() => setShowBookingModal(true)}
+                className="border-4 border-red-500/80 rounded-lg px-12 py-3 bg-transparent hover:bg-red-500/10 transition-all"
+              >
+                <span className="text-2xl font-bold text-white">📊 Booking with Therapist</span>
+                <span className="text-xs text-green-400 block mt-1">✅ Google 연결됨</span>
+              </button>
+            ) : (
+              // Google 미연결 - 로그인 버튼 표시
+              <button
+                onClick={handleGoogleLogin}
+                className="border-4 border-blue-500/80 rounded-lg px-12 py-3 bg-transparent hover:bg-blue-500/10 transition-all"
+              >
+                <span className="text-2xl font-bold text-white">🔓 Google로 연결</span>
+                <span className="text-xs text-blue-300 block mt-1">Google Sheets에 접근하려면 클릭</span>
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -591,6 +638,14 @@ export function MonitorPage({ showBookingButton = true }) {
           </div>
         </div>
       )}
+
+      {/* Google Sheets Booking Modal */}
+      <GoogleSheetBookingModal
+        isOpen={showBookingModal}
+        onClose={() => setShowBookingModal(false)}
+        isConnected={isGoogleConnected}
+        onLoginClick={handleGoogleLogin}
+      />
     </div>
   );
 }

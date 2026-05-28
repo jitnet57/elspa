@@ -106,7 +106,8 @@
       "PowerShell(Start-Sleep -Seconds 5; try { $response = \\(Invoke-WebRequest -Uri http://localhost:3000/admin/book-massage.html -UseBasicParsing -TimeoutSec 5\\).StatusCode; \"✅ Page loaded \\(HTTP $response\\) - Go to: http://localhost:3000/admin/book-massage.html\" } catch { \"⏳ Server loading...\" })",
       "Bash(cd \"e:\\\\elspa\\\\frontend\" && rm -rf .next && npm run build 2>&1 | tail -30)",
       "Bash(taskkill /PID 7532 /F)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(xargs ls -la)"
     ],
     "additionalDirectories": [
       "C:\\Users\\jitne\\Desktop",
