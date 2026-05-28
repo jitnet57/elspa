@@ -16,7 +16,7 @@ const TherapistScheduleGantt = dynamic(
   { ssr: false, loading: () => <div className="text-gray-400 py-8 text-center">로딩 중...</div> }
 );
 
-export default function TherapistScheduleView() {
+export default function TherapistScheduleView({ realtimeData }: { realtimeData?: any }) {
   // 기본값: 오늘 날짜
   const defaultDate = new Date().toISOString().split('T')[0];
   const [selectedDate, setSelectedDate] = useState<string>(defaultDate);

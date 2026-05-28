@@ -12,7 +12,7 @@ import { therapyBeds, getBedsByRoom, type TherapyBed } from '@/app/admin/massage
 
 const PASSWORD = '1234'; // 기본 비밀번호
 
-export default function BedLayoutView() {
+export default function BedLayoutView({ realtimeData }: { realtimeData?: any }) {
   const [selectedBed, setSelectedBed] = useState<TherapyBed | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [password, setPassword] = useState('');
