@@ -5,6 +5,11 @@
 name = "elspa"
 pages_build_output_dir = "./frontend/out"
 
+# 빌드 설정 (frontend 폴더만 빌드, root의 requirements.txt 무시)
+[build]
+command = "cd frontend && npm run build"
+cwd = "."
+
 # 프로덕션 환경 변수
 [env.production.vars]
 ENVIRONMENT = "production"
