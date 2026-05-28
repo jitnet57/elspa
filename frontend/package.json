@@ -14,7 +14,8 @@
     "cypress:run:firefox": "cypress run --browser firefox",
     "cypress:run:edge": "cypress run --browser edge",
     "cypress:report": "node scripts/generate-report.js",
-    "cypress:debug": "cypress open --env debug=true"
+    "cypress:debug": "cypress open --env debug=true",
+    "deploy": "wrangler pages deploy .next --project-name=elspa-frontend"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.10",

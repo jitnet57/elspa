@@ -23,19 +23,21 @@ interface MassageBooking {
 
 interface GoogleSheetBooking {
   id: string;
-  therapist: string;
-  service: string;
-  date: string;
-  time: string;
-  guestName: string;
-  roomNumber: string;
+  dutyNumber: string;          // 9-5PM DUTY N#
+  service: string;              // 1ST TRT
+  startTime: string;            // 1ST START
+  endTime: string;              // 1ST END
+  roomNumber: string;           // 1ST RM#
+  guestName: string;            // 1ST GUEST
+  notes: string;                // 1ST NOTE
+  pay: string;                  // 1ST PAY
+  tip: string;                  // 1ST TIP
 }
 
 export default function MonitorPage() {
-  const [mounted, setMounted] = useState(false);
   const [currentTime, setCurrentTime] = useState<string>('--:--:--');
   const [activeTab, setActiveTab] = useState<TabType>('queue');
-  const [pickupRequests, setPickupRequests] = useState<PickupRequest[]>([]);
+  const [pickupRequests, setPickupRequests] = useState<PickupRequest[]>(MOCK_PICKUP_REQUESTS);
   const [drivers, setDrivers] = useState<DriverSummary[]>(MOCK_DRIVERS);
   const [isAssigning, setIsAssigning] = useState<string | null>(null);
   const [selectedDriver, setSelectedDriver] = useState<number | null>(null);
@@ -49,9 +51,7 @@ export default function MonitorPage() {
   ]);
 
   useEffect(() => {
-    setMounted(true);
-    // 클라이언트 사이드에서 데이터 로드 (하이드레이션 에러 방지)
-    setPickupRequests(MOCK_PICKUP_REQUESTS);
+    // 클라이언트 사이드에서만 시간 업데이트
 
     const updateTime = () => {
       const now = new Date();
@@ -66,43 +66,96 @@ export default function MonitorPage() {
   const fetchGoogleSheetBookings = async () => {
     setIsLoadingSheet(true);
     try {
-      const response = await fetch('http://localhost:8000/api/massage-bookings/');
+      const sheetId = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID;
+      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
+
+      if (!sheetId || !apiKey) {
+        console.warn('Google Sheets API credentials not configured. Using demo data.');
+        // Demo 데이터 표시
+        setGoogleSheetBookings([
+          {
+            id: 'demo-1',
+            dutyNumber: '1',
+            service: 'Swedish Massage',
+            startTime: '09:00',
+            endTime: '10:00',
+            roomNumber: '01',
+            guestName: 'John Doe',
+            notes: 'First time client',
+            pay: '$80',
+            tip: '$10',
+          },
+          {
+            id: 'demo-2',
+            dutyNumber: '2',
+            service: 'Thai Massage',
+            startTime: '10:15',
+            endTime: '11:15',
+            roomNumber: '02',
+            guestName: 'Jane Smith',
+            notes: 'Regular client',
+            pay: '$85',
+            tip: '$15',
+          },
+          {
+            id: 'demo-3',
+            dutyNumber: '3',
+            service: 'Hot Stone',
+            startTime: '11:30',
+            endTime: '12:30',
+            roomNumber: '03',
+            guestName: 'Mike Johnson',
+            notes: 'Back pain treatment',
+            pay: '$95',
+            tip: '$20',
+          },
+        ]);
+        return;
+      }
+
+      // Google Sheets API v4 사용 - gid=802481850 탭의 A2:I100 범위에서 데이터 읽기
+      // Sheet ID: 1-WRjYvp33RQ3vJBSJ7RIW1g6P5pZjKqy_vPeVtA7mf8
+      // gid (Sheet 탭): 802481850 (SHEET_SCHEDULE)
+      const sheetRange = "'SHEET_SCHEDULE (30 Lines)'!A2:I100"; // 행 2부터 100까지 (행 1은 제목, 행 2는 헤더)
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetRange)}?key=${apiKey}`;
+
+      const response = await fetch(url);
+
       if (response.ok) {
         const data = await response.json();
-        const bookings = data.bookings || [];
-        setGoogleSheetBookings(bookings.map((b: any) => ({
-          id: b.id,
-          therapist: b.therapist,
-          service: b.service,
-          date: b.date,
-          time: b.time,
-          guestName: b.guest_name || b.guestName,
-          roomNumber: b.room_number || b.roomNumber,
-        })));
+        const rows = data.values || [];
+
+        // Google Sheet 행을 GoogleSheetBooking 객체로 변환
+        const bookings = rows
+          .filter((row: string[]) => row && row.length > 0 && row[0]) // 빈 행 제외
+          .map((row: string[], index: number) => ({
+            id: `booking-${index}`,
+            dutyNumber: (row[0] || '').toString().trim(),
+            service: (row[1] || '').toString().trim(),
+            startTime: (row[2] || '').toString().trim(),
+            endTime: (row[3] || '').toString().trim(),
+            roomNumber: (row[4] || '').toString().trim(),
+            guestName: (row[5] || '').toString().trim(),
+            notes: (row[6] || '').toString().trim(),
+            pay: (row[7] || '').toString().trim(),
+            tip: (row[8] || '').toString().trim(),
+          }));
+
+        setGoogleSheetBookings(bookings);
+        console.log(`✅ Google Sheet 데이터 로드 완료: ${bookings.length}건`);
+      } else if (response.status === 403) {
+        console.error('❌ Google Sheets API 권한 오류: API Key가 유효하지 않거나 권한이 없습니다');
+        setGoogleSheetBookings([]);
+      } else if (response.status === 404) {
+        console.error('❌ Google Sheet을 찾을 수 없습니다: ID를 확인하세요');
+        setGoogleSheetBookings([]);
       } else {
-        // 에러 발생 시 현재 마사지 북은 기존 데이터로 표시
-        setGoogleSheetBookings(massageBookings.map(b => ({
-          id: b.id,
-          therapist: b.therapist,
-          service: b.service,
-          date: b.date,
-          time: b.time,
-          guestName: b.guestName,
-          roomNumber: b.roomNumber,
-        })));
+        console.error('❌ Google Sheets API 오류:', response.statusText);
+        setGoogleSheetBookings([]);
       }
     } catch (error) {
-      console.error('Google Sheet 데이터 조회 실패:', error);
-      // 백업: 현재 테이블의 마사지 예약 데이터 사용
-      setGoogleSheetBookings(massageBookings.map(b => ({
-        id: b.id,
-        therapist: b.therapist,
-        service: b.service,
-        date: b.date,
-        time: b.time,
-        guestName: b.guestName,
-        roomNumber: b.roomNumber,
-      })));
+      console.error('❌ Google Sheet 데이터 조회 실패:', error);
+      setGoogleSheetBookings([]);
     } finally {
       setIsLoadingSheet(false);
     }
@@ -224,18 +277,11 @@ export default function MonitorPage() {
       {/* Main Content */}
       <div className="flex-1 flex gap-4 px-6 py-4 overflow-hidden">
         {/* Map Section (60%) */}
-        <div className="w-3/5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden">
-          {mounted ? (
-            <RealtimeMap
-              enableWebSocket={false}
-              staticMarkers={MOCK_STATIC_MAP_MARKERS}
-              onMarkerClick={() => {}}
-            />
-          ) : (
-            <div className="w-full h-full bg-slate-900 flex items-center justify-center">
-              <p className="text-gray-400">🗺️ 지도 로딩 중...</p>
-            </div>
-          )}
+        <div className="w-3/5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-4xl mb-4">🗺️</p>
+            <p className="text-gray-400">실시간 지도</p>
+          </div>
         </div>
 
         {/* Control Panel (40%) */}
@@ -485,30 +531,45 @@ export default function MonitorPage() {
                   <p className="text-gray-400 text-sm">Google Sheet에 예약 데이터가 없습니다</p>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {googleSheetBookings.map(booking => (
-                    <div
-                      key={booking.id}
-                      className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/8 transition-all"
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex-1">
-                          <p className="font-semibold text-white text-base">👤 {booking.guestName}</p>
-                          <p className="text-sm text-pink-400 mt-1">{booking.service}</p>
-                          <p className="text-sm text-gray-400 mt-1">테라피스트: <span className="text-indigo-300 font-medium">{booking.therapist}</span></p>
-                          <p className="text-xs text-gray-500 mt-2">📅 {booking.date} ⏰ {booking.time} | 🚪 Room {booking.roomNumber}</p>
-                        </div>
-                        <div className="bg-pink-500/20 text-pink-300 px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap">
-                          ☁️ Cloud
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                <div className="space-y-4">
+                  {/* Table Header */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-pink-500/20 border border-pink-500/30">
+                          <th className="px-3 py-2 text-left text-pink-300 font-bold border border-pink-500/30">9-5PM DUTY N#</th>
+                          <th className="px-3 py-2 text-left text-pink-300 font-bold border border-pink-500/30">1ST TRT</th>
+                          <th className="px-3 py-2 text-left text-pink-300 font-bold border border-pink-500/30">1ST START</th>
+                          <th className="px-3 py-2 text-left text-pink-300 font-bold border border-pink-500/30">1ST END</th>
+                          <th className="px-3 py-2 text-left text-pink-300 font-bold border border-pink-500/30">1ST RM#</th>
+                          <th className="px-3 py-2 text-left text-pink-300 font-bold border border-pink-500/30">1ST GUEST</th>
+                          <th className="px-3 py-2 text-left text-pink-300 font-bold border border-pink-500/30">1ST NOTE</th>
+                          <th className="px-3 py-2 text-left text-pink-300 font-bold border border-pink-500/30">1ST PAY</th>
+                          <th className="px-3 py-2 text-left text-pink-300 font-bold border border-pink-500/30">1ST TIP</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {googleSheetBookings.map((booking, index) => (
+                          <tr key={booking.id} className={`border border-white/10 ${index % 2 === 0 ? 'bg-white/2' : 'bg-white/5'}`}>
+                            <td className="px-3 py-2 text-white border border-white/10">{booking.dutyNumber}</td>
+                            <td className="px-3 py-2 text-white border border-white/10">{booking.service}</td>
+                            <td className="px-3 py-2 text-white border border-white/10">{booking.startTime}</td>
+                            <td className="px-3 py-2 text-white border border-white/10">{booking.endTime}</td>
+                            <td className="px-3 py-2 text-white border border-white/10">{booking.roomNumber}</td>
+                            <td className="px-3 py-2 text-white border border-white/10">{booking.guestName}</td>
+                            <td className="px-3 py-2 text-gray-300 border border-white/10 text-xs">{booking.notes}</td>
+                            <td className="px-3 py-2 text-white border border-white/10">{booking.pay}</td>
+                            <td className="px-3 py-2 text-white border border-white/10">{booking.tip}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
 
-                  {/* Sync Info */}
-                  <div className="mt-6 pt-4 border-t border-white/10">
+                  {/* Info */}
+                  <div className="mt-4 pt-4 border-t border-white/10">
                     <p className="text-xs text-gray-500 text-center">
-                      💾 매일 자정(00:00)에 자동으로 클라우드와 동기화됩니다
+                      ☁️ Google Sheets에서 실시간으로 동기화된 마사지 예약 스케줄 (총 {googleSheetBookings.length}건)
                     </p>
                   </div>
                 </div>

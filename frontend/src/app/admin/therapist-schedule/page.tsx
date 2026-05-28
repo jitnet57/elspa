@@ -369,14 +369,19 @@ export default function TherapistSchedulePage() {
             <a className="flex items-center gap-2 hover:bg-white/10 p-2 rounded-full transition-all active:scale-95" href="/admin">
               <span className="material-symbols-outlined text-cyan-400">arrow_back</span>
             </a>
-            <button className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg hover:bg-slate-700/50 transition-all text-slate-300 hover:text-white text-sm font-semibold">
+            <a href="/admin/realtime-bed-mode" className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg hover:bg-slate-700/50 transition-all text-slate-300 hover:text-white text-sm font-semibold">
               🛏️ Real-time Bed Mode
-            </button>
+            </a>
+            <a href="/admin/therapist-schedule" className="flex items-center gap-2 px-4 py-2 bg-purple-600/50 border border-purple-700 rounded-lg hover:bg-purple-700/50 transition-all text-white text-sm font-semibold">
+              🗓️ Therapist Daily Schedule
+            </a>
           </div>
 
           {/* Center Tab - Booking with Therapist */}
-          <button className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 rounded-xl transition-all text-white font-bold shadow-lg hover:shadow-purple-500/50">
-            <span style={{fontSize: '20px'}}>🧖</span>
+          <button
+            onClick={() => window.open(process.env.NEXT_PUBLIC_GOOGLE_SHEET_BOOKING_URL, '_blank')}
+            className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 rounded-xl transition-all text-white font-bold shadow-lg hover:shadow-red-500/50">
+            <span style={{fontSize: '20px'}}>📝</span>
             BOOKING WITH THERAPIST
           </button>
 
@@ -398,14 +403,20 @@ export default function TherapistSchedulePage() {
         <div className="flex justify-center px-6 pb-4">
           <button
             onClick={() => setShowGoogleSheetBooking(true)}
-            className="w-full max-w-2xl px-6 py-4 border-4 border-red-500/80 rounded-lg bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white font-bold text-lg transition-all shadow-xl hover:shadow-rose-500/50 flex items-center justify-center gap-3"
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all
+              ${showGoogleSheetBooking ? 'bg-red-600 text-white shadow-lg' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}
+            `}
           >
-            <span className="text-2xl">🧖</span>
-            <div className="text-left">
-              <div>Booking with Therapist</div>
-              <div className="text-xs text-white/80">View Google Sheets Bookings</div>
-            </div>
-            <span className="ml-auto">→</span>
+            <span className="material-symbols-outlined text-lg">edit_document</span> Google Sheets Booking
+          </button>
+
+          <button
+            onClick={() => setShowGoogleSheetBooking(false)}
+            className={`ml-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all
+              ${!showGoogleSheetBooking ? 'bg-purple-600 text-white shadow-lg' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}
+            `}
+          >
+            <span className="material-symbols-outlined text-lg">calendar_month</span> Therapist Schedule
           </button>
         </div>
       </header>
@@ -929,11 +940,11 @@ export default function TherapistSchedulePage() {
                   onChange={e => setQuickForm({ ...quickForm, serviceType: e.target.value as any })}
                   className="w-full px-4 py-3 bg-slate-950/80 border border-indigo-500/30 rounded-xl text-xs focus:outline-none focus:border-cyan-400 text-white font-bold"
                 >
-                  <option value="swedish">💆 Swedish Massage</option>
-                  <option value="thai">🙏 Thai Massage</option>
-                  <option value="hotstone">🪨 Hot Stone Therapy</option>
-                  <option value="foot">🦶 Foot Massage</option>
-                  <option value="aroma">🌸 Aromatherapy</option>
+                  <option value="swedish">Swedish Massage</option>
+                  <option value="thai">Thai Massage</option>
+                  <option value="hotstone">Hot Stone Therapy</option>
+                  <option value="foot">Foot Massage</option>
+                  <option value="aroma">Aromatherapy</option>
                 </select>
               </div>
 
@@ -1257,9 +1268,9 @@ export default function TherapistSchedulePage() {
               <div className="space-y-3">
                 {/* Google Sheets Booking Data (Dynamic) */}
                 {googleBookings && googleBookings.length > 0 ? (
-                  googleBookings.map(booking => (
+                  googleBookings.map((booking, index) => (
                     <div
-                      key={booking.id}
+                      key={index}
                       className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/8 transition-all"
                     >
                       <div className="flex justify-between items-start mb-2">
