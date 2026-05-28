@@ -12,9 +12,19 @@ import { usePayrollStore } from '@/lib/store/payroll-store';
 // 🔄 업데이트: 2026-05-28 - 모킹 데이터 → API 통합
 // ============================================================
 export default function AdminDashboard() {
+  // Main tab: Dashboard vs Payroll Periods
+  const [adminTab, setAdminTab] = useState<'dashboard' | 'payroll'>('dashboard');
+
+  // Dashboard tab states
   const [payrollSearch, setPayrollSearch] = useState('');
   const [payrollTab, setPayrollTab] = useState('all');
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
+
+  // Payroll tab states
+  const [payGroup, setPayGroup] = useState<'weekly' | 'biweekly'>('weekly');
+  const [selectedPeriod, setSelectedPeriod] = useState<any | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [isCalculating, setIsCalculating] = useState(false);
 
   // 폴백 모킹 데이터 (API 데이터 없을 때만 사용)
   const fallbackMockData = [
@@ -58,6 +68,9 @@ export default function AdminDashboard() {
       notes: "📌 5/20 결근 1일 차감 적용 완료."
     }
   ];
+
+  // Payroll store - periods for payroll tab
+  const { periods = [], loading: payrollLoading, startCalculation, approvePeriodAction } = usePayrollStore();
 
   // API 데이터 (임시로 disabled - store 문제 해결)
   // const { records, employees, loading, error, fetchRecords, fetchEmployees, clearError } = usePayrollStore();
@@ -111,7 +124,34 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
-          
+
+      {/* Tab Navigation */}
+      <div className="flex gap-2 border-b border-white/10 pb-4">
+        <button
+          onClick={() => setAdminTab('dashboard')}
+          className={`px-4 py-2 rounded-lg font-bold transition ${
+            adminTab === 'dashboard'
+              ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+              : 'text-gray-400 hover:text-white'
+          }`}
+        >
+          Dashboard
+        </button>
+        <button
+          onClick={() => setAdminTab('payroll')}
+          className={`px-4 py-2 rounded-lg font-bold transition ${
+            adminTab === 'payroll'
+              ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+              : 'text-gray-400 hover:text-white'
+          }`}
+        >
+          Payroll Periods
+        </button>
+      </div>
+
+      {adminTab === 'dashboard' && (
+        <>
+
           {/* Bento-Style Grid Layout */}
           <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             
@@ -425,6 +465,138 @@ export default function AdminDashboard() {
               )}
             </div>
           </section>
+        </>
+      )}
+
+      {adminTab === 'payroll' && (
+        <section className="space-y-6">
+          {/* KPI Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white shadow-lg">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-sm font-semibold opacity-90">Total Periods</p>
+                  <h3 className="text-3xl font-bold mt-2">{periods.length}</h3>
+                </div>
+                <span className="text-3xl">📊</span>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg p-6 text-white shadow-lg">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-sm font-semibold opacity-90">Draft</p>
+                  <h3 className="text-3xl font-bold mt-2">{periods.filter(p => p.status === 'draft').length}</h3>
+                </div>
+                <span className="text-3xl">📝</span>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg p-6 text-white shadow-lg">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-sm font-semibold opacity-90">Approved</p>
+                  <h3 className="text-3xl font-bold mt-2">{periods.filter(p => p.status === 'approved').length}</h3>
+                </div>
+                <span className="text-3xl">✅</span>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-6 text-white shadow-lg">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-sm font-semibold opacity-90">Paid</p>
+                  <h3 className="text-3xl font-bold mt-2">{periods.filter(p => p.status === 'paid').length}</h3>
+                </div>
+                <span className="text-3xl">💰</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Pay Group Tabs */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setPayGroup('weekly')}
+              className={`px-6 py-3 rounded-lg font-bold transition-all ${
+                payGroup === 'weekly'
+                  ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              📅 Weekly
+            </button>
+            <button
+              onClick={() => setPayGroup('biweekly')}
+              className={`px-6 py-3 rounded-lg font-bold transition-all ${
+                payGroup === 'biweekly'
+                  ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              📆 Bi-Weekly
+            </button>
+          </div>
+
+          {/* Payroll Periods List */}
+          <div className="space-y-4">
+            {periods.length === 0 ? (
+              <div className="bg-white/5 rounded-xl p-8 text-center text-gray-400 border border-white/10">
+                <p className="text-lg font-semibold">No payroll periods found</p>
+              </div>
+            ) : (
+              periods
+                .filter(p => (p.pay_group === payGroup))
+                .map(period => (
+                  <div
+                    key={period.id}
+                    className="bg-white/5 rounded-lg border border-white/10 shadow-sm hover:bg-white/8 transition-all p-6"
+                  >
+                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                      {/* Period Info */}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-3">
+                          <h3 className="text-xl font-bold text-white">
+                            Period {period.id}
+                          </h3>
+                          <span className={`px-3 py-1 rounded-full text-sm font-bold ${
+                            period.status === 'draft' ? 'bg-yellow-500/20 text-yellow-300' :
+                            period.status === 'approved' ? 'bg-blue-500/20 text-blue-300' :
+                            'bg-green-500/20 text-green-300'
+                          }`}>
+                            {period.status.toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="w-full bg-white/10 rounded-full h-2">
+                          <div
+                            className="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full transition-all"
+                            style={{
+                              width: `${period.employeeCount ? ((period.processedCount || 0) / period.employeeCount) * 100 : 0}%`,
+                            }}
+                          ></div>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-2">{period.processedCount || 0} / {period.employeeCount || 0} employees</p>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
+                        {period.status === 'draft' && (
+                          <button className="px-6 py-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg text-sm">
+                            🧮 Calculate
+                          </button>
+                        )}
+                        {period.status === 'approved' && (
+                          <button className="px-6 py-2 bg-purple-500 hover:bg-purple-600 text-white font-bold rounded-lg text-sm">
+                            💳 Process
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+            )}
+          </div>
+        </section>
+      )}
         </div>
     );
 }
