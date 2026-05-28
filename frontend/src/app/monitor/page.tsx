@@ -35,7 +35,7 @@ export default function MonitorPage() {
   const [mounted, setMounted] = useState(false);
   const [currentTime, setCurrentTime] = useState<string>('--:--:--');
   const [activeTab, setActiveTab] = useState<TabType>('queue');
-  const [pickupRequests, setPickupRequests] = useState<PickupRequest[]>(MOCK_PICKUP_REQUESTS);
+  const [pickupRequests, setPickupRequests] = useState<PickupRequest[]>([]);
   const [drivers, setDrivers] = useState<DriverSummary[]>(MOCK_DRIVERS);
   const [isAssigning, setIsAssigning] = useState<string | null>(null);
   const [selectedDriver, setSelectedDriver] = useState<number | null>(null);
@@ -50,6 +50,9 @@ export default function MonitorPage() {
 
   useEffect(() => {
     setMounted(true);
+    // 클라이언트 사이드에서 데이터 로드 (하이드레이션 에러 방지)
+    setPickupRequests(MOCK_PICKUP_REQUESTS);
+
     const updateTime = () => {
       const now = new Date();
       setCurrentTime(now.toLocaleTimeString('ko-KR', { hour12: false }));
