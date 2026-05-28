@@ -3592,3 +3592,114 @@ db.commit()  # 트랜잭션 커밋
 ### Tokens
 ~7,200 tokens
 
+
+## [2026-05-28 14:45] Order: 016 - WalkInBookingModal 멀티 선택 기능 구현
+
+**주제:** 테라피스트 및 침대 다중 선택 UI 개선 (체크박스 + 그리드 선택)
+
+### Plan
+✅ "Select Therapist(s)" - 체크박스로 여러 테라피스트 다중 선택
+✅ "Select Bed(s)" - 침대 그리드에서 클릭으로 다중 선택 + 하이라이트
+✅ "Unassigned (Auto by Check-in Order)" 옵션 추가
+✅ 선택된 개수 표시 (Selected: N)
+✅ 선택 요약 패널 (Selection Summary) 추가
+✅ 스타일 정의 (선택됨: indigo-600, 미선택: slate-700)
+✅ 호버 효과 및 피드백 추가
+✅ TypeScript 빌드 검증
+
+### Task 수행 내용
+
+#### 수정 파일: WalkInBookingModal.tsx (Step 2 전체 재구현)
+
+**1. Select Therapist(s) - 멀티 선택 체크박스**
+- `label` 요소로 감싼 체크박스 (접근성 개선)
+- `selectedTherapists: number[]` 배열에 여러 ID 저장
+- 선택 해제 시: `filter()` 사용해서 ID 제거
+- 선택된 개수를 우측에 표시 (cyan-400)
+- 선택된 항목 옆에 checkmark(✓) 아이콘 표시
+- 호버 효과: `hover:bg-gray-700/50` 추가
+- 검색 필드 UI 추가 (필요시 필터링 함수 확장 가능)
+
+**2. Select Bed(s) - 멀티 선택 그리드**
+- 그리드 시스템: `grid-cols-3 sm:grid-cols-4 md:grid-cols-5`
+- Unassigned (Auto) 옵션을 첫 번째 타일로 배치
+- 클릭 시 배열에서 추가/제거 (toggle 방식)
+- 선택됨: `bg-indigo-600 border-indigo-500 shadow-lg shadow-indigo-500/50`
+- 미선택: `bg-slate-700 border-slate-600 hover:bg-slate-600`
+- 선택된 개수를 우측에 표시 (green-400)
+- 경계선 2px로 선택 상태 강조
+
+**3. Selection Summary 패널**
+- 조건: `selectedTherapists.length > 0 || selectedBeds.length > 0` 일 때만 표시
+- 두 섹션으로 나뉨: Therapists + Beds
+- 각 선택 항목을 태그 형식으로 표시 (`bg-indigo-600/40` 또는 `bg-green-600/40`)
+- 선택 개수를 괄호에 표시
+
+**4. 확인 버튼 개선**
+- 버튼 텍스트: "✅ Confirm Assignment (N therapist(s), M bed(s))"
+- 동적 개수 표시로 사용자 피드백 강화
+
+### Result
+✅ **1개 파일 수정 완료** (WalkInBookingModal.tsx, ~120줄 변경)
+✅ **멀티 선택 기능 완성**
+  - 테라피스트 체크박스 선택 ✓
+  - 침대 그리드 클릭 선택 ✓
+  - Unassigned 옵션 ✓
+  - 선택 요약 표시 ✓
+  - 스타일 적용 ✓
+✅ **TypeScript 빌드 통과** (35/35 페이지 정적 생성)
+✅ **Git 커밋 완료** (commit 1e9179e)
+
+### 주요 파일
+- `frontend/src/components/WalkInBookingModal.tsx` - 멀티 선택 UI 구현
+
+### 코드 하이라이트
+
+**테라피스트 체크박스 구현:**
+```typescript
+<label className="flex items-start gap-3 p-2 rounded hover:bg-gray-700/50 cursor-pointer">
+  <input
+    type="checkbox"
+    checked={selectedTherapists.includes(t.id)}
+    onChange={(e) => {
+      if (e.target.checked) {
+        setSelectedTherapists([...selectedTherapists, t.id]);
+      } else {
+        setSelectedTherapists(selectedTherapists.filter(id => id !== t.id));
+      }
+    }}
+    className="w-4 h-4 mt-1 accent-indigo-600 cursor-pointer"
+  />
+  {/* 치료사 정보 */}
+</label>
+```
+
+**침대 그리드 멀티 선택:**
+```typescript
+<button
+  onClick={() => {
+    if (selectedBeds.includes(bed.id)) {
+      setSelectedBeds(selectedBeds.filter(id => id !== bed.id));
+    } else {
+      setSelectedBeds([...selectedBeds, bed.id]);
+    }
+  }}
+  className={selectedBeds.includes(bed.id) 
+    ? 'bg-indigo-600 border-indigo-500 shadow-lg'
+    : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
+  }
+>
+```
+
+### Next
+1. 검색 기능 활성화 (therapist 이름/ID 필터링)
+2. 통합 테스트: Walk-in 예약 흐름 전체 검증
+3. 프로덕션 배포
+
+### Agent
+- Claude Code (Bash, Read, Edit)
+
+### Tokens
+~5,200 tokens
+
+---
