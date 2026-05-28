@@ -7,7 +7,19 @@ import type { PickupRequest, DriverSummary, ActiveTrip, StaticMarker } from '@/l
 
 const RealtimeMap = dynamic(() => import('@/components/RealtimeMap').then(m => m.RealtimeMap), { ssr: false, loading: () => <div className="w-full h-full bg-gray-800 animate-pulse"></div> });
 
-type TabType = 'queue' | 'trips' | 'drivers';
+type TabType = 'queue' | 'trips' | 'drivers' | 'bookings';
+
+interface MassageBooking {
+  id: string;
+  therapist: string;
+  service: string;
+  date: string;
+  time: string;
+  guestName: string;
+  roomNumber: string;
+  status: 'pending' | 'confirmed' | 'completed';
+  createdAt: string;
+}
 
 export default function MonitorPage() {
   const [currentTime, setCurrentTime] = useState<string>('');
@@ -16,6 +28,11 @@ export default function MonitorPage() {
   const [drivers, setDrivers] = useState<DriverSummary[]>(MOCK_DRIVERS);
   const [isAssigning, setIsAssigning] = useState<string | null>(null);
   const [selectedDriver, setSelectedDriver] = useState<number | null>(null);
+  const [massageBookings, setMassageBookings] = useState<MassageBooking[]>([
+    { id: '1', therapist: 'Maria Santos', service: 'Swedish Massage', date: '2026-05-28', time: '14:00', guestName: 'John Doe', roomNumber: '01', status: 'confirmed', createdAt: new Date().toISOString() },
+    { id: '2', therapist: 'Ana Mercado', service: 'Thai Massage', date: '2026-05-28', time: '15:00', guestName: 'Jane Smith', roomNumber: '02', status: 'pending', createdAt: new Date().toISOString() },
+    { id: '3', therapist: 'Rosa Chavez', service: 'Hot Stone Therapy', date: '2026-05-28', time: '16:00', guestName: 'Mike Johnson', roomNumber: '03', status: 'confirmed', createdAt: new Date().toISOString() },
+  ]);
 
   useEffect(() => {
     const updateTime = () => {
@@ -175,6 +192,16 @@ export default function MonitorPage() {
             >
               드라이버 ({drivers.length})
             </button>
+            <button
+              onClick={() => setActiveTab('bookings')}
+              className={`flex-1 py-3 px-4 text-sm font-medium transition-all ${
+                activeTab === 'bookings'
+                  ? 'bg-pink-500/20 text-pink-300 border-b-2 border-pink-400'
+                  : 'text-gray-400 hover:text-gray-300'
+              }`}
+            >
+              마사지 ({massageBookings.length})
+            </button>
           </div>
 
           {/* Content */}
@@ -309,6 +336,39 @@ export default function MonitorPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Massage Bookings Tab */}
+            {activeTab === 'bookings' && (
+              <div className="space-y-3">
+                {massageBookings.length === 0 ? (
+                  <div className="text-center text-gray-500 py-8">
+                    <p className="text-sm">마사지 예약이 없습니다</p>
+                  </div>
+                ) : (
+                  massageBookings.map(booking => (
+                    <div key={booking.id} className="bg-white/5 border border-white/10 rounded-xl p-3 space-y-2 hover:bg-white/8 transition-all">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <p className="font-semibold text-white text-sm">🧖 {booking.guestName}</p>
+                          <p className="text-xs text-pink-400 mt-1">{booking.service}</p>
+                          <p className="text-xs text-gray-400 mt-1">테라피스트: {booking.therapist}</p>
+                          <p className="text-xs text-gray-500 mt-1">📅 {booking.date} {booking.time} | 🚪 Room {booking.roomNumber}</p>
+                        </div>
+                        <span className={`text-xs px-2 py-1 rounded whitespace-nowrap ${
+                          booking.status === 'confirmed'
+                            ? 'bg-emerald-500/20 text-emerald-300'
+                            : booking.status === 'completed'
+                            ? 'bg-blue-500/20 text-blue-300'
+                            : 'bg-amber-500/20 text-amber-300'
+                        }`}>
+                          {booking.status === 'confirmed' ? '✅ 예약' : booking.status === 'completed' ? '✓ 완료' : '⏳ 대기'}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             )}
           </div>
