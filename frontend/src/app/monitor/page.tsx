@@ -140,29 +140,6 @@ export default function MonitorPage({ showBookingButton = true }) {
             <p className="text-xs text-gray-500 mt-1">현재 시간</p>
           </div>
         </div>
-
-        {/* RED BOX - Google Connection */}
-        {showBookingButton && (
-          <div className="flex justify-center mt-6">
-            {isGoogleConnected ? (
-              <button
-                onClick={() => setShowBookingModal(true)}
-                className="border-4 border-red-500/80 rounded-lg px-12 py-4 bg-transparent hover:bg-red-500/10 transition-all"
-              >
-                <span className="text-2xl font-bold text-white">📊 Booking with Therapist</span>
-                <span className="text-xs text-green-400 block mt-2">✅ Google 연결됨</span>
-              </button>
-            ) : (
-              <button
-                onClick={handleGoogleLogin}
-                className="border-4 border-blue-500/80 rounded-lg px-12 py-4 bg-transparent hover:bg-blue-500/10 transition-all"
-              >
-                <span className="text-2xl font-bold text-white">🔓 Google로 연결</span>
-                <span className="text-xs text-blue-300 block mt-2">Google Sheets에 접근하려면 클릭</span>
-              </button>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Admin Dashboard Stats */}
