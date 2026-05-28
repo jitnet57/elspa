@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import React from 'react';
 import { usePayrollStore } from '@/lib/store/payroll-store';
+import { usePayrollCalculation } from '@/hooks/usePayrollCalculation';
 
 // ============================================================
 // 📌 컴포넌트명: AdminDashboard
@@ -14,6 +15,9 @@ import { usePayrollStore } from '@/lib/store/payroll-store';
 export default function AdminDashboard() {
   // Main tab: Dashboard vs Payroll Periods vs Payroll Calculation
   const [adminTab, setAdminTab] = useState<'dashboard' | 'payroll' | 'payroll-calc'>('dashboard');
+
+  // Payroll Calculation API 훅
+  const { calculateSingle, loading: apiLoading, error: apiError, result: apiResult, reset: resetCalc } = usePayrollCalculation();
 
   // Dashboard tab states
   const [payrollSearch, setPayrollSearch] = useState('');
@@ -35,7 +39,15 @@ export default function AdminDashboard() {
     incomeTax: 0,
     otherDeductions: 0
   });
-  const [calcResult, setCalcResult] = useState<any>(null);
+  const [calcResult, setCalcResult] = useState<{
+    employeeName: string;
+    grossPay: number;
+    totalDeductions: number;
+    netPay: number;
+    breakdown: { base: number; commission: number };
+    deductionDetail: { sss: number; tax: number; other: number };
+    warnings?: string[];
+  } | null>(null);
 
   // 폴백 모킹 데이터 (API 데이터 없을 때만 사용)
   const fallbackMockData = [
@@ -501,6 +513,13 @@ export default function AdminDashboard() {
                 <h3 className="text-xl font-black text-white">급여 정산 계산기</h3>
               </div>
 
+              {/* API 에러 표시 */}
+              {apiError && (
+                <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg">
+                  <p className="text-xs text-rose-400 font-semibold">⚠️ {apiError}</p>
+                </div>
+              )}
+
               <div className="space-y-5">
                 {/* Employee Name */}
                 <div>
@@ -576,30 +595,30 @@ export default function AdminDashboard() {
 
                 {/* Calculate Button */}
                 <button
-                  onClick={() => {
-                    const grossPay = calcForm.baseSalary + calcForm.commission;
-                    const totalDeductions = calcForm.sssTax + calcForm.incomeTax + calcForm.otherDeductions;
-                    const netPay = grossPay - totalDeductions;
-
-                    setCalcResult({
-                      employeeName: calcForm.employeeName || '(이름 미입력)',
-                      grossPay,
-                      totalDeductions,
-                      netPay,
-                      breakdown: {
-                        base: calcForm.baseSalary,
-                        commission: calcForm.commission
-                      },
-                      deductionDetail: {
-                        sss: calcForm.sssTax,
-                        tax: calcForm.incomeTax,
-                        other: calcForm.otherDeductions
-                      }
-                    });
+                  onClick={async () => {
+                    try {
+                      const result = await calculateSingle(calcForm);
+                      setCalcResult({
+                        employeeName: result.employee_name,
+                        grossPay: result.gross_pay,
+                        totalDeductions: result.total_deductions,
+                        netPay: result.net_pay,
+                        breakdown: result.breakdown,
+                        deductionDetail: result.deduction_detail,
+                        warnings: result.validation_warnings
+                      });
+                    } catch (err) {
+                      console.error('계산 실패:', err);
+                    }
                   }}
-                  className="w-full mt-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black rounded-lg transition-all shadow-lg shadow-orange-500/30"
+                  disabled={apiLoading}
+                  className={`w-full mt-6 py-3 ${
+                    apiLoading
+                      ? 'bg-gray-500 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-lg shadow-orange-500/30'
+                  } text-white font-black rounded-lg transition-all`}
                 >
-                  📊 급여 정산하기
+                  {apiLoading ? '⏳ 계산 중...' : '📊 급여 정산하기'}
                 </button>
               </div>
             </div>
@@ -608,6 +627,17 @@ export default function AdminDashboard() {
             <div className="space-y-4">
               {calcResult ? (
                 <>
+                  {/* 경고 메시지 */}
+                  {calcResult.warnings && calcResult.warnings.length > 0 && (
+                    <div className="mb-6 space-y-2">
+                      {calcResult.warnings.map((warning, idx) => (
+                        <div key={idx} className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg">
+                          <p className="text-xs text-rose-400 font-semibold">{warning}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   {/* Result Card */}
                   <div className="bg-gradient-to-br from-orange-500/10 to-amber-500/10 border border-orange-500/30 rounded-3xl p-8 shadow-[0_0_40px_rgba(234,179,8,0.1)]">
                     <div className="mb-6 pb-6 border-b border-orange-500/20">
@@ -685,6 +715,7 @@ export default function AdminDashboard() {
                         otherDeductions: 0
                       });
                       setCalcResult(null);
+                      resetCalc();
                     }}
                     className="w-full py-2.5 bg-white/5 hover:bg-white/10 text-indigo-300 font-semibold rounded-lg transition-all border border-white/10"
                   >

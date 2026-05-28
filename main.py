@@ -221,6 +221,8 @@ from app.routers import driver_api
 from app.routers import massage_bookings
 # 📊 Google Sheets OAuth 2.0 예약 API (신규 - Sprint 14)
 from app.routers import google_sheets_router
+# 💰 급여 정산 API 라우터 (BMAD × LangGraph)
+from app.routers import payroll
 
 # 기존 라우터들 (일부 호환성 문제로 주석 처리)
 # from app.routers import beds, therapists, bookings, matching
@@ -247,6 +249,7 @@ app.include_router(bookings_api.router)
 app.include_router(admin_data_api.router)
 app.include_router(reviews_api.router)
 app.include_router(settlement.router)  # Settlement API (Mock Data)
+app.include_router(payroll.router)  # 💰 Payroll API (BMAD × LangGraph)
 app.include_router(driver_api.router)  # 🚗 드라이버 API
 app.include_router(massage_bookings.router)  # 🧖 마사지 예약 API (Google Sheets 동기화)
 app.include_router(google_sheets_router.router)  # 📊 Google Sheets OAuth 2.0 API
