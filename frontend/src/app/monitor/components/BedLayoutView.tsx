@@ -4,42 +4,39 @@ import { therapyBeds, getBedsByRoom, type TherapyBed } from '@/app/admin/massage
 
 /**
  * 📌 컴포넌트: BedLayoutView
- * 📋 목적: 30개 침대를 2개 마사지룸으로 분류하여 실시간 상태 표시
- * 🎨 레이아웃: 각 룸당 15개 침대, 5열 그리드
+ * 📋 목적: 86개 침대를 4개 마사지룸으로 분류하여 실시간 상태 표시
+ * 🎨 레이아웃: 마사지실1(30), 마사지실2(30), VIP실(14), 기타실(12)
  * 📅 작성일: 2026-05-28
  */
 
 export default function BedLayoutView() {
   const room1Beds = getBedsByRoom('room1');
   const room2Beds = getBedsByRoom('room2');
+  const room3Beds = getBedsByRoom('room3');
+  const room4Beds = getBedsByRoom('room4');
+
+  const rooms = [
+    { id: 'room1', name: '🛏️ 마사지실1', icon: '💆', beds: room1Beds },
+    { id: 'room2', name: '🛏️ 마사지실2', icon: '💆', beds: room2Beds },
+    { id: 'room3', name: '👑 VIP실', icon: '✨', beds: room3Beds },
+    { id: 'room4', name: '🏢 기타실', icon: '📋', beds: room4Beds },
+  ];
 
   return (
     <div className="flex-1 overflow-y-auto px-6 py-4 space-y-8">
-      {/* 마사지룸1 */}
-      <div>
-        <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-          <span>🛏️ 마사지룸1</span>
-          <span className="text-sm text-gray-400">({room1Beds.length}개 침대)</span>
-        </h2>
-        <div className="grid grid-cols-5 gap-3">
-          {room1Beds.map(bed => (
-            <BedCard key={bed.id} bed={bed} />
-          ))}
+      {rooms.map(room => (
+        <div key={room.id}>
+          <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+            <span>{room.name}</span>
+            <span className="text-sm text-gray-400">({room.beds.length}개 침대)</span>
+          </h2>
+          <div className="grid grid-cols-6 gap-3">
+            {room.beds.map(bed => (
+              <BedCard key={bed.id} bed={bed} />
+            ))}
+          </div>
         </div>
-      </div>
-
-      {/* 마사지룸2 */}
-      <div>
-        <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-          <span>🛏️ 마사지룸2</span>
-          <span className="text-sm text-gray-400">({room2Beds.length}개 침대)</span>
-        </h2>
-        <div className="grid grid-cols-5 gap-3">
-          {room2Beds.map(bed => (
-            <BedCard key={bed.id} bed={bed} />
-          ))}
-        </div>
-      </div>
+      ))}
     </div>
   );
 }

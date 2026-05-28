@@ -8,7 +8,7 @@ export interface TherapyBed {
   id: string;
   name: string;
   roomNumber: string;
-  room: 'room1' | 'room2';
+  room: 'room1' | 'room2' | 'room3' | 'room4';
   type: 'massage' | 'spa' | 'facial' | 'premium';
   status: 'available' | 'occupied' | 'maintenance' | 'cleaning';
   capacity: number;
@@ -51,43 +51,79 @@ export interface TimeSlot {
 }
 
 // ============================================================
-// 베드/시술실 (30개: Room1 15개, Room2 15개)
+// 86개 베드 생성 함수: 마사지실1(30), 마사지실2(30), VIP실(14), 기타실(12)
 // ============================================================
-export const therapyBeds: TherapyBed[] = [
-  // 마사지룸1 (A-1 ~ A-15)
-  { id: 'BED-001', name: 'A-1', roomNumber: 'Room1-A1', room: 'room1', type: 'massage', status: 'occupied', capacity: 1, therapistId: 'THER-001', serviceName: 'Thai Massage', endTime: '10:15' },
-  { id: 'BED-002', name: 'A-2', roomNumber: 'Room1-A2', room: 'room1', type: 'massage', status: 'available', capacity: 1 },
-  { id: 'BED-003', name: 'A-3', roomNumber: 'Room1-A3', room: 'room1', type: 'massage', status: 'available', capacity: 1 },
-  { id: 'BED-004', name: 'A-4', roomNumber: 'Room1-A4', room: 'room1', type: 'massage', status: 'occupied', capacity: 1, therapistId: 'THER-002', serviceName: 'Swedish Massage', endTime: '14:00' },
-  { id: 'BED-005', name: 'A-5', roomNumber: 'Room1-A5', room: 'room1', type: 'massage', status: 'cleaning', capacity: 1 },
-  { id: 'BED-006', name: 'A-6', roomNumber: 'Room1-A6', room: 'room1', type: 'spa', status: 'available', capacity: 1 },
-  { id: 'BED-007', name: 'A-7', roomNumber: 'Room1-A7', room: 'room1', type: 'spa', status: 'occupied', capacity: 1, therapistId: 'THER-003', serviceName: 'Aromatherapy', endTime: '15:30' },
-  { id: 'BED-008', name: 'A-8', roomNumber: 'Room1-A8', room: 'room1', type: 'massage', status: 'available', capacity: 1 },
-  { id: 'BED-009', name: 'A-9', roomNumber: 'Room1-A9', room: 'room1', type: 'facial', status: 'available', capacity: 1 },
-  { id: 'BED-010', name: 'A-10', roomNumber: 'Room1-A10', room: 'room1', type: 'massage', status: 'available', capacity: 1 },
-  { id: 'BED-011', name: 'A-11', roomNumber: 'Room1-A11', room: 'room1', type: 'massage', status: 'available', capacity: 1 },
-  { id: 'BED-012', name: 'A-12', roomNumber: 'Room1-A12', room: 'room1', type: 'premium', status: 'available', capacity: 2 },
-  { id: 'BED-013', name: 'A-13', roomNumber: 'Room1-A13', room: 'room1', type: 'massage', status: 'available', capacity: 1 },
-  { id: 'BED-014', name: 'A-14', roomNumber: 'Room1-A14', room: 'room1', type: 'massage', status: 'available', capacity: 1 },
-  { id: 'BED-015', name: 'A-15', roomNumber: 'Room1-A15', room: 'room1', type: 'spa', status: 'available', capacity: 1 },
+const generateBeds = (): TherapyBed[] => {
+  const beds: TherapyBed[] = [];
+  let bedId = 1;
 
-  // 마사지룸2 (B-1 ~ B-15)
-  { id: 'BED-016', name: 'B-1', roomNumber: 'Room2-B1', room: 'room2', type: 'massage', status: 'available', capacity: 1 },
-  { id: 'BED-017', name: 'B-2', roomNumber: 'Room2-B2', room: 'room2', type: 'massage', status: 'occupied', capacity: 1, therapistId: 'THER-004', serviceName: 'Deep Tissue', endTime: '16:30' },
-  { id: 'BED-018', name: 'B-3', roomNumber: 'Room2-B3', room: 'room2', type: 'massage', status: 'available', capacity: 1 },
-  { id: 'BED-019', name: 'B-4', roomNumber: 'Room2-B4', room: 'room2', type: 'facial', status: 'available', capacity: 1 },
-  { id: 'BED-020', name: 'B-5', roomNumber: 'Room2-B5', room: 'room2', type: 'massage', status: 'available', capacity: 1 },
-  { id: 'BED-021', name: 'B-6', roomNumber: 'Room2-B6', room: 'room2', type: 'spa', status: 'available', capacity: 1 },
-  { id: 'BED-022', name: 'B-7', roomNumber: 'Room2-B7', room: 'room2', type: 'massage', status: 'occupied', capacity: 1, therapistId: 'THER-005', serviceName: 'Hot Stone', endTime: '17:45' },
-  { id: 'BED-023', name: 'B-8', roomNumber: 'Room2-B8', room: 'room2', type: 'massage', status: 'available', capacity: 1 },
-  { id: 'BED-024', name: 'B-9', roomNumber: 'Room2-B9', room: 'room2', type: 'massage', status: 'available', capacity: 1 },
-  { id: 'BED-025', name: 'B-10', roomNumber: 'Room2-B10', room: 'room2', type: 'premium', status: 'available', capacity: 2 },
-  { id: 'BED-026', name: 'B-11', roomNumber: 'Room2-B11', room: 'room2', type: 'massage', status: 'cleaning', capacity: 1 },
-  { id: 'BED-027', name: 'B-12', roomNumber: 'Room2-B12', room: 'room2', type: 'massage', status: 'available', capacity: 1 },
-  { id: 'BED-028', name: 'B-13', roomNumber: 'Room2-B13', room: 'room2', type: 'facial', status: 'available', capacity: 1 },
-  { id: 'BED-029', name: 'B-14', roomNumber: 'Room2-B14', room: 'room2', type: 'massage', status: 'available', capacity: 1 },
-  { id: 'BED-030', name: 'B-15', roomNumber: 'Room2-B15', room: 'room2', type: 'spa', status: 'available', capacity: 1 },
-];
+  // 마사지실1 (A-1 ~ A-30, room1)
+  for (let i = 1; i <= 30; i++) {
+    const isOccupied = i === 1 || i === 4 || i === 7;
+    beds.push({
+      id: `BED-${String(bedId).padStart(3, '0')}`,
+      name: `A-${i}`,
+      roomNumber: `Room1-A${i}`,
+      room: 'room1',
+      type: i % 5 === 0 ? 'spa' : i % 12 === 0 ? 'premium' : i % 8 === 0 ? 'facial' : 'massage',
+      status: i === 5 || i === 26 ? 'cleaning' : isOccupied ? 'occupied' : 'available',
+      capacity: i % 12 === 0 ? 2 : 1,
+      ...(i === 1 && { therapistId: 'THER-001', serviceName: 'Thai Massage', endTime: '10:15' }),
+      ...(i === 4 && { therapistId: 'THER-002', serviceName: 'Swedish Massage', endTime: '14:00' }),
+      ...(i === 7 && { therapistId: 'THER-003', serviceName: 'Aromatherapy', endTime: '15:30' }),
+    });
+    bedId++;
+  }
+
+  // 마사지실2 (B-1 ~ B-30, room2)
+  for (let i = 1; i <= 30; i++) {
+    const isOccupied = i === 2 || i === 7;
+    beds.push({
+      id: `BED-${String(bedId).padStart(3, '0')}`,
+      name: `B-${i}`,
+      roomNumber: `Room2-B${i}`,
+      room: 'room2',
+      type: i % 5 === 0 ? 'spa' : i % 10 === 0 ? 'premium' : i % 8 === 0 ? 'facial' : 'massage',
+      status: i === 11 ? 'cleaning' : isOccupied ? 'occupied' : 'available',
+      capacity: i % 10 === 0 ? 2 : 1,
+      ...(i === 2 && { therapistId: 'THER-004', serviceName: 'Deep Tissue', endTime: '16:30' }),
+      ...(i === 7 && { therapistId: 'THER-005', serviceName: 'Hot Stone', endTime: '17:45' }),
+    });
+    bedId++;
+  }
+
+  // VIP실 (V-1 ~ V-14, room3)
+  for (let i = 1; i <= 14; i++) {
+    beds.push({
+      id: `BED-${String(bedId).padStart(3, '0')}`,
+      name: `V-${i}`,
+      roomNumber: `VIP-V${i}`,
+      room: 'room3',
+      type: 'premium',
+      status: 'available',
+      capacity: 2,
+    });
+    bedId++;
+  }
+
+  // 기타실 (E-1 ~ E-12, room4)
+  for (let i = 1; i <= 12; i++) {
+    beds.push({
+      id: `BED-${String(bedId).padStart(3, '0')}`,
+      name: `E-${i}`,
+      roomNumber: `ETC-E${i}`,
+      room: 'room4',
+      type: 'massage',
+      status: 'available',
+      capacity: 1,
+    });
+    bedId++;
+  }
+
+  return beds;
+};
+
+export const therapyBeds: TherapyBed[] = generateBeds();
 
 // ============================================================
 // 테라피스트
@@ -351,6 +387,6 @@ export const bookingSummary = {
 // ============================================================
 // 유틸리티 함수
 // ============================================================
-export const getBedsByRoom = (roomId: 'room1' | 'room2'): TherapyBed[] => {
+export const getBedsByRoom = (roomId: 'room1' | 'room2' | 'room3' | 'room4'): TherapyBed[] => {
   return therapyBeds.filter(bed => bed.room === roomId);
 };
