@@ -373,13 +373,6 @@ export default function TherapistSchedulePage() {
             </a>
           </div>
 
-          {/* Center Tab - Booking with Therapist */}
-          <button
-            onClick={() => setShowGoogleSheetBooking(true)}
-            className="border-4 border-red-500/80 rounded-lg px-8 py-2 bg-transparent hover:bg-red-500/10 transition-all">
-            <span className="text-xl font-bold text-black dark:text-white">Booking Of Therapist</span>
-          </button>
-
           {/* Right - Time & Language */}
           <div className="flex items-center gap-4">
             <div className="text-right">

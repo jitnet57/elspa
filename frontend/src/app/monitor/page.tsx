@@ -226,7 +226,7 @@ export function MonitorPage() {
     <div className="h-screen bg-slate-950 text-white flex flex-col">
       {/* Header */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border-b border-white/10 px-6 py-4">
-        <div className="flex justify-between items-center gap-4">
+        <div className="flex justify-between items-center gap-4 mb-4">
           <div>
             <h1 className="text-2xl font-bold text-white">🚗 픽업 디스패치 센터</h1>
             <p className="text-sm text-gray-400 mt-1">실시간 드라이버 및 픽업 요청 관리</p>
@@ -236,6 +236,16 @@ export function MonitorPage() {
             <div className="text-3xl font-mono font-bold text-indigo-400">{currentTime}</div>
             <p className="text-xs text-gray-500 mt-1">실시간 모니터링</p>
           </div>
+        </div>
+
+        {/* RED BOX - Booking with Therapist */}
+        <div className="flex justify-center">
+          <button
+            onClick={() => setShowGoogleSheet(true)}
+            className="border-4 border-red-500/80 rounded-lg px-12 py-3 bg-transparent hover:bg-red-500/10 transition-all"
+          >
+            <span className="text-2xl font-bold text-white">Booking with Therapist</span>
+          </button>
         </div>
       </div>
 
