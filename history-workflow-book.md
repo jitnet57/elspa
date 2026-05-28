@@ -4250,3 +4250,138 @@ db.commit()  # 트랜잭션 커밋
 ~45,000 tokens (실행 자료 생성 + git 커밋 + history 기록)
 
 ---
+
+---
+
+## [2026-05-29 10:45] Order: 047 - 급여 정산 시스템 버그 수정 (PayrollRecord 필드 누락)
+
+**주제:** PayrollRecord 모델의 누락된 필드 추가 및 계산 엔진 수정
+
+### Plan
+✅ thirteenth_month_accrual 필드 추가 (모델)
+✅ is_obsolete 필드 추가 (모델)
+✅ 계산 엔진에서 thirteenth_month_accrual 계산 로직 추가
+✅ PayrollRecord 생성 시 새 필드 설정
+✅ Pydantic 스키마 업데이트
+
+### Task 수행 내용
+
+#### 섹션 1: 데이터 모델 수정
+1. app/models/payroll.py
+   - PayrollRecord 클래스에 thirteenth_month_accrual 필드 추가 (247번 라인)
+   - PayrollRecord 클래스에 is_obsolete 필드 추가 (255번 라인)
+
+#### 섹션 2: 계산 엔진 수정
+1. app/services/payroll_calculator.py
+   - _calculate_employee_payroll 메서드에서 thirteenth_month_accrual 계산 로직 추가 (305-313번 라인)
+   - PayrollRecord 생성 시 thirteenth_month_accrual, is_obsolete 필드 설정 (384, 399번 라인)
+
+#### 섹션 3: 스키마 업데이트
+1. app/schemas/payroll.py
+   - PayrollRecordResponse에 is_obsolete 필드 추가 (171번 라인)
+
+### Result
+✅ **3개 파일 수정 완료**
+
+**해결된 문제:**
+- ❌ API /api/payroll/thirteenth-month/{employee_id} → AttributeError (thirteenth_month_accrual 필드 없음)
+- ❌ API /api/payroll/thirteenth-month → ColumnNotFound (is_obsolete 필드 없음)
+- ❌ 13개월 보너스 누적액 계산 누락
+
+**적용 범위:**
+- PayrollRecord 데이터베이스 테이블 (마이그레이션 필요)
+- 급여 정산 API 응답 (thirteenth_month_accrual 포함)
+- 13개월 보너스 조회 API 정상화
+
+**커밋:**
+- c5cc623: 🐛 Fix: PayrollRecord 모델 필드 누락
+
+### 영향도 분석
+
+**Direct Impact:**
+- 모든 PayrollRecord 조회 API에서 thirteenth_month_accrual 반환
+- /api/payroll/thirteenth-month/* 엔드포인트 정상화
+- 13개월 보너스 누적액 추적 가능
+
+**Migration Required:**
+```sql
+ALTER TABLE payroll_records 
+  ADD COLUMN thirteenth_month_accrual NUMERIC(10,2) DEFAULT 0,
+  ADD COLUMN is_obsolete BOOLEAN DEFAULT FALSE;
+```
+
+---
+
+---
+## [2026-05-29 14:35] Order: 048 - 지식 네트워크 3D + 검색 기능 구현
+
+**주제:** ElSpa 시장 정보를 Three.js 기반 3D 네트워크로 시각화 + Fuse.js 검색 기능
+
+### Plan
+✅ Three.js & Fuse.js 패키지 설치
+✅ 3D 네트워크 시각화 컴포넌트 구현
+✅ 검색 UI 및 필터링 로직 추가
+✅ 페이지 라우트 생성 (/admin/knowledge-network)
+✅ 샘플 데이터 추가 (마사지, 웰니스, 판매자, 고객, 경영 정보)
+
+### Task 수행 내용
+
+#### Phase 1: 패키지 설치
+- npm install three fuse.js @types/three --save (완료)
+- 총 9개 패키지 추가됨
+
+#### Phase 2: 컴포넌트 구현
+**파일:** frontend/src/components/20250529-1435-knowledge-network-3d.tsx
+- Three.js Scene, Camera, Renderer 설정
+- 구(Sphere) 메시 생성 및 3D 배치 (구면 좌표)
+- Fuse.js 검색 엔진 (threshold: 0.3)
+- 검색 결과: 노드 하이라이트 + 비일치 노드 페이드 (opacity 0.3)
+- 마우스 레이캐스팅 클릭 감지
+- 자동 회전 애니메이션
+- 반응형 리사이즈 처리
+
+**주요 기능:**
+1. **3D 시각화:** 노드를 구 표면에 균등 배치
+2. **검색:** 라벨, 설명, 카테고리 기반 모호 매칭
+3. **인터랙션:** 클릭 시 onNodeClick 콜백 실행
+4. **UI:** 검색창 + 결과 패널 + 조작 가이드
+
+#### Phase 3: 페이지 라우트
+**파일:** frontend/src/app/admin/knowledge-network/page.tsx
+- 'use client' 컴포넌트
+- 샘플 데이터: 16개 노드
+  - 시장 정보 (ElSpa)
+  - 마사지 서비스 (4개: 타이, 시아츠, 스포츠, 아로마)
+  - 웰니스 (3개: 스파, 요가, 명상)
+  - 판매자 (3개: 존, 마리아, 데이빗)
+  - 고객 세그먼트 (3개: 기업, 운동선수, 시니어)
+  - 경영 지표 (3개: 매출, 예약률, 고객유지율)
+- 노드 클릭 시 우측 패널에 상세 정보 표시
+
+### Result
+✅ **2개 파일 생성 완료**
+- 20250529-1435-knowledge-network-3d.tsx (컴포넌트, 419줄)
+- knowledge-network/page.tsx (페이지, 151줄)
+
+✅ **기능 완료**
+- 3D 지식 네트워크 시각화 ✓
+- Fuse.js 검색 필터링 ✓
+- 인터랙티브 노드 선택 ✓
+- 반응형 UI (모바일 대응) ✓
+- 샘플 데이터 (16개 노드) ✓
+
+### Next
+- [ ] npm run dev로 개발 서버 시작 및 테스트
+- [ ] /admin/knowledge-network 페이지 브라우저 확인
+- [ ] 검색 기능 동작 확인
+- [ ] 타입스크립트 검증 (npm run build)
+- [ ] 추가 데이터 연동 (백엔드 API와 통합)
+
+### Agent
+- dev-workflow-assistant (이 작업 추적)
+- general-purpose (코드 구현)
+
+### Tokens
+~2,500 tokens
+
+---

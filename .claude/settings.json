@@ -40,7 +40,11 @@
       "PowerShell(Head -5)",
       "PowerShell(Get-Process node -ErrorAction SilentlyContinue)",
       "PowerShell(curl.exe -s http://localhost:3000/admin/matching -I)",
-      "Bash(curl -s -I https://elspa-vercel.app/admin/matching)"
+      "Bash(curl -s -I https://elspa-vercel.app/admin/matching)",
+      "Bash(Get-ChildItem -Path 'e:\\\\elspa' -Filter '*.md')",
+      "Bash(grep -E \"\\\\.md$|\\\\.txt$\")",
+      "PowerShell(start \"C:\\\\Users\\\\jitne\\\\.gemini\\\\history\\\\kenneth-brain\\\\brain-network-2d.html\")",
+      "PowerShell(New-Item -ItemType Directory -Path \"e:\\\\elspa\\\\PHILIPPINES\" -Force)"
     ]
   }
 }
