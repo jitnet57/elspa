@@ -597,7 +597,14 @@ export default function AdminDashboard() {
                 <button
                   onClick={async () => {
                     try {
-                      const result = await calculateSingle(calcForm);
+                      const result = await calculateSingle({
+                        employee_name: calcForm.employeeName,
+                        base_salary: calcForm.baseSalary,
+                        commission: calcForm.commission,
+                        sss_tax: calcForm.sssTax,
+                        income_tax: calcForm.incomeTax,
+                        other_deductions: calcForm.otherDeductions,
+                      });
                       setCalcResult({
                         employeeName: result.employee_name,
                         grossPay: result.gross_pay,
