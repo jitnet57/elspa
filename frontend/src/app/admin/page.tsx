@@ -16,52 +16,6 @@ export default function AdminDashboard() {
   const [payrollTab, setPayrollTab] = useState('all');
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
 
-  // API 데이터 (임시로 disabled - store 문제 해결)
-  // const { records, employees, loading, error, fetchRecords, fetchEmployees, clearError } = usePayrollStore();
-
-  // 임시 빈 배열로 처리
-  const records = [];
-  const employees = [];
-  const loading = false;
-  const error = null;
-
-  // API 데이터를 테이블 형식으로 변환
-  const payrollData = records.map((record) => {
-    const employee = employees.find(e => e.id === record.employee_id);
-    return {
-      id: record.id?.toString() || `REC-${record.employee_id}`,
-      name: employee?.name || `Employee ${record.employee_id}`,
-      type: 'staff',
-      roleLabel: 'ADMIN STAFF',
-      gross: record.gross_pay || 0,
-      deductions: record.total_deductions || 0,
-      net: (record.gross_pay || 0) - (record.total_deductions || 0),
-      status: ((record.gross_pay || 0) - (record.total_deductions || 0)) === 0 ? 'error' : 'emerald',
-      breakdown: {
-        base: record.base_salary || 0,
-        commission: (record.gross_pay || 0) - (record.base_salary || 0),
-      },
-      deductionDetail: {
-        sss: record.sss_contribution || 0,
-        misc: (record.total_deductions || 0) - (record.sss_contribution || 0),
-      },
-      notes: `Record ID: ${record.id} | Period: ${record.period_id || 'N/A'}`
-    };
-  });
-
-  // 실시간 검색 및 직군 탭 필터링 로직
-  const displayData = payrollData.length > 0 ? payrollData : fallbackMockData;
-
-  const filteredPayroll = displayData.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(payrollSearch.toLowerCase()) || item.id.toLowerCase().includes(payrollSearch.toLowerCase());
-    const matchesTab = payrollTab === 'all'
-      ? true
-      : payrollTab === 'therapist'
-        ? item.type === 'therapist'
-        : item.type === 'staff';
-    return matchesSearch && matchesTab;
-  });
-
   // 폴백 모킹 데이터 (API 데이터 없을 때만 사용)
   const fallbackMockData = [
     {
@@ -104,6 +58,52 @@ export default function AdminDashboard() {
       notes: "📌 5/20 결근 1일 차감 적용 완료."
     }
   ];
+
+  // API 데이터 (임시로 disabled - store 문제 해결)
+  // const { records, employees, loading, error, fetchRecords, fetchEmployees, clearError } = usePayrollStore();
+
+  // 임시 빈 배열로 처리
+  const records: any[] = [];
+  const employees: any[] = [];
+  const loading = false;
+  const error = null;
+
+  // API 데이터를 테이블 형식으로 변환
+  const payrollData = records.map((record) => {
+    const employee = employees.find(e => e.id === record.employee_id);
+    return {
+      id: record.id?.toString() || `REC-${record.employee_id}`,
+      name: employee?.name || `Employee ${record.employee_id}`,
+      type: 'staff',
+      roleLabel: 'ADMIN STAFF',
+      gross: record.gross_pay || 0,
+      deductions: record.total_deductions || 0,
+      net: (record.gross_pay || 0) - (record.total_deductions || 0),
+      status: ((record.gross_pay || 0) - (record.total_deductions || 0)) === 0 ? 'error' : 'emerald',
+      breakdown: {
+        base: record.base_salary || 0,
+        commission: (record.gross_pay || 0) - (record.base_salary || 0),
+      },
+      deductionDetail: {
+        sss: record.sss_contribution || 0,
+        misc: (record.total_deductions || 0) - (record.sss_contribution || 0),
+      },
+      notes: `Record ID: ${record.id} | Period: ${record.period_id || 'N/A'}`
+    };
+  });
+
+  // 실시간 검색 및 직군 탭 필터링 로직
+  const displayData = payrollData.length > 0 ? payrollData : fallbackMockData;
+
+  const filteredPayroll = displayData.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(payrollSearch.toLowerCase()) || item.id.toLowerCase().includes(payrollSearch.toLowerCase());
+    const matchesTab = payrollTab === 'all'
+      ? true
+      : payrollTab === 'therapist'
+        ? item.type === 'therapist'
+        : item.type === 'staff';
+    return matchesSearch && matchesTab;
+  });
 
   const toggleAccordion = (id: string) => {
     setExpandedRowId(expandedRowId === id ? null : id);
