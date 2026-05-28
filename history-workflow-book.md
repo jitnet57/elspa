@@ -3779,3 +3779,182 @@ db.commit()  # 트랜잭션 커밋
 ### Tokens
 ~2,500 tokens
 
+
+---
+
+## [2026-05-28 23:45] Order: 032
+
+**주제:** 실시간 정보 동기화 WebSocket 시스템 구현
+
+### Plan
+✅ WebSocket 백엔드 엔드포인트 구현 (/ws/monitor)
+✅ 실시간 메시지 빌더 (RealtimeMessageBuilder) 추가
+✅ 프론트엔드 useRealtimeSync Hook 구현
+✅ Monitor 페이지에 Hook 통합 & 연결 상태 표시
+✅ 브로드캐스트 API 엔드포인트 (6개)
+✅ 타입 안전한 메시지 처리
+✅ 자동 재연결 & 하트비트 기능
+✅ API 문서 작성 (REALTIME_WEBSOCKET_GUIDE.md)
+
+### Task
+
+#### 섹션 1: 백엔드 구현
+
+1. **websocket_realtime.py** (NEW)
+   - `/ws/monitor` WebSocket 엔드포인트
+   - 연결/해제 관리 (ConnectionManager 사용)
+   - 30초마다 하트비트 전송
+   - 메시지 수신 루프 (ping/sync 처리)
+   - 6개 브로드캐스트 API:
+     * POST /api/realtime/broadcast/bed-status
+     * POST /api/realtime/broadcast/booking-added
+     * POST /api/realtime/broadcast/booking-completed
+     * POST /api/realtime/broadcast/booking-cancelled
+     * POST /api/realtime/broadcast/therapist-checkin
+     * POST /api/realtime/broadcast/therapist-checkout
+     * GET /api/realtime/ws/status (상태 조회)
+
+2. **websocket_manager.py** (UPDATED)
+   - RealtimeMessageBuilder 클래스 추가
+   - 8개 메시지 빌더 메서드:
+     * bed_status_changed()
+     * booking_added()
+     * booking_completed()
+     * booking_cancelled()
+     * therapist_checkin()
+     * therapist_checkout()
+     * heartbeat()
+     * sync_request()
+
+3. **main.py** (UPDATED)
+   - websocket_realtime 라우터 임포트 & 등록
+   - 라인 273-275
+
+#### 섹션 2: 프론트엔드 구현
+
+1. **useRealtimeSync.ts** (NEW)
+   - TypeScript Hook (180+ 라인)
+   - 타입 정의 (BedStatusChangedData, BookingAddedData 등)
+   - 연결 관리 (connect/disconnect/reconnect)
+   - 메시지 핸들러 (8가지 타입)
+   - 자동 재연결 (3초 간격)
+   - 하트비트 전송 (30초마다)
+   - 반환값: {isConnected, isConnecting, lastUpdate, send, disconnect}
+   - 옵션: 6개 콜백 함수 지원
+
+2. **Monitor 페이지** (UPDATED: src/app/monitor/page.tsx)
+   - useRealtimeSync Hook 통합
+   - 연결 상태 표시 UI:
+     * 🟢 Green (connected)
+     * 🟡 Yellow (connecting)
+     * 🔴 Red (disconnected)
+     * 애니메이션 효과 (animate-pulse)
+   - 실시간 데이터 상태 관리:
+     * bedUpdate
+     * bookingUpdate
+     * therapistUpdate
+   - 자식 컴포넌트에 데이터 전달:
+     * <BedLayoutView realtimeData={realtimeData} />
+     * <TherapistScheduleView realtimeData={realtimeData} />
+   - Debug 정보 (개발 모드에서만 표시)
+     * 우측 하단에 최신 메시지 JSON 출력
+
+### 메시지 형식
+
+**클라이언트 → 서버:**
+```json
+{ "type": "ping" }
+{ "type": "sync" }
+```
+
+**서버 → 클라이언트 (7가지 타입):**
+1. bed_status_changed: 침대 상태 (available/occupied/cleaning)
+2. booking_added: 새 예약 추가
+3. booking_completed: 예약 완료
+4. booking_cancelled: 예약 취소 (+ reason)
+5. therapist_checkin: 테라피스트 체크인
+6. therapist_checkout: 테라피스트 체크아웃
+7. heartbeat: 하트비트 (30초마다 자동)
+
+각 메시지에는 timestamp 자동 추가됨.
+
+### Result
+✅ **4개 파일 생성, 3개 파일 수정 완료**
+
+**생성된 파일:**
+- e:\elspa\app\routers\websocket_realtime.py (366 라인)
+- e:\elspa\frontend\src\hooks\useRealtimeSync.ts (280 라인)
+- e:\elspa\REALTIME_WEBSOCKET_GUIDE.md (완전한 API 문서)
+
+**수정된 파일:**
+- e:\elspa\app\services\websocket_manager.py (RealtimeMessageBuilder 추가)
+- e:\elspa\frontend\src\app\monitor\page.tsx (Hook 통합)
+- e:\elspa\main.py (라우터 등록)
+
+**주요 기능:**
+- ✓ 실시간 WebSocket 연결 관리
+- ✓ 자동 재연결 (3초 간격)
+- ✓ 하트비트 모니터링 (30초마다)
+- ✓ 침대/예약/테라피스트 상태 동기화
+- ✓ 타입 안전한 메시지 처리
+- ✓ 개발자 친화적인 Hook API
+- ✓ 연결 상태 시각화
+- ✓ Debug 정보 표시
+
+### 통합 테스트 방법
+
+1. **로컬 서버 시작:**
+   ```bash
+   cd e:\elspa\frontend && npm run dev
+   python -m uvicorn main:app --reload
+   ```
+
+2. **Monitor 페이지 확인:**
+   - http://localhost:3000/monitor 열기
+   - 연결 상태: 🟢 Connected 확인
+
+3. **침대 상태 변경 테스트:**
+   ```bash
+   curl -X POST http://localhost:8000/api/realtime/broadcast/bed-status \
+     -H "Content-Type: application/json" \
+     -d '{
+       "bed_id": 1,
+       "status": "occupied",
+       "customer_id": 123,
+       "customer_name": "김철수",
+       "therapist_id": 456,
+       "therapist_name": "이영희",
+       "service_name": "스웨디시 60분",
+       "starts_at": "2026-05-28T10:00:00",
+       "ends_at": "2026-05-28T11:00:00"
+     }'
+   ```
+
+4. **다중 클라이언트 테스트:**
+   - Monitor 페이지를 2개 탭에서 열기
+   - 위의 cURL 명령어 실행
+   - 두 탭 모두에서 실시간 업데이트 확인
+
+5. **WebSocket 상태 조회:**
+   ```bash
+   curl http://localhost:8000/api/realtime/ws/status
+   ```
+
+### Next
+- 실제 침대/예약/테라피스트 CRUD 로직에서 브로드캐스트 API 호출 추가
+- BedLayoutView 컴포넌트에서 realtimeData 처리 로직 구현
+- TherapistScheduleView 컴포넌트에서 realtimeData 처리 로직 구현
+- E2E 테스트 (Playwright/Cypress)
+- 성능 테스트 (1000+ 동시 연결)
+- 배포 전 통합 테스트
+
+### Agent
+- Claude Code (Agent)
+- FastAPI WebSocket (백엔드)
+- React Hooks & TypeScript (프론트엔드)
+- Tailwind CSS (UI/UX)
+
+### Tokens
+~8,500 tokens
+
+---
