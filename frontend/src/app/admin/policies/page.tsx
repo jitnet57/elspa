@@ -31,7 +31,7 @@ const SETTINGS_SECTIONS: SettingsSection[] = [
   },
   {
     id: 'therapist',
-    name: '💆 테라피스트 등록',
+    name: '테라피스트 등록',
     description: '테라피스트 정보 관리',
     color: 'bg-pink-50 border-pink-200',
   },

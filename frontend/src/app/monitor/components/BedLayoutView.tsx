@@ -5,7 +5,7 @@ import { therapyBeds, getBedsByRoom, type TherapyBed } from '@/app/admin/massage
 /**
  * 📌 컴포넌트: BedLayoutView
  * 📋 목적: 86개 침대를 4개 마사지룸으로 분류하여 실시간 상태 표시
- * 🎨 레이아웃: 마사지실1(30), 마사지실2(30), VIP실(14), 기타실(12)
+ * 🎨 레이아웃: 마사지실1(30), 마사지실2(30), VIP실(14), 기타실(12) - 10열 그리드
  * 📅 작성일: 2026-05-28
  */
 
@@ -16,21 +16,20 @@ export default function BedLayoutView() {
   const room4Beds = getBedsByRoom('room4');
 
   const rooms = [
-    { id: 'room1', name: '🛏️ 마사지실1', icon: '💆', beds: room1Beds },
-    { id: 'room2', name: '🛏️ 마사지실2', icon: '💆', beds: room2Beds },
-    { id: 'room3', name: '👑 VIP실', icon: '✨', beds: room3Beds },
-    { id: 'room4', name: '🏢 기타실', icon: '📋', beds: room4Beds },
+    { id: 'room1', name: '마사지룸1', beds: room1Beds },
+    { id: 'room2', name: '마사지룸2', beds: room2Beds },
+    { id: 'room3', name: 'VIP실', beds: room3Beds },
+    { id: 'room4', name: '기타실', beds: room4Beds },
   ];
 
   return (
-    <div className="flex-1 overflow-y-auto px-6 py-4 space-y-8">
+    <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
       {rooms.map(room => (
         <div key={room.id}>
-          <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-            <span>{room.name}</span>
-            <span className="text-sm text-gray-400">({room.beds.length}개 침대)</span>
+          <h2 className="text-xl font-bold text-gray-800 mb-3">
+            {room.name} ({room.beds.length})
           </h2>
-          <div className="grid grid-cols-6 gap-3">
+          <div className="grid grid-cols-10 gap-2">
             {room.beds.map(bed => (
               <BedCard key={bed.id} bed={bed} />
             ))}
@@ -47,51 +46,26 @@ export default function BedLayoutView() {
  * 🎨 색상: available(초록), occupied(파랑), cleaning(황색), maintenance(회색)
  */
 function BedCard({ bed }: { bed: TherapyBed }) {
-  // 상태별 색상 매핑
   const statusColorMap: Record<string, string> = {
-    available: 'bg-green-500/20 border-green-500/50 text-green-400 hover:bg-green-500/30',
-    occupied: 'bg-blue-500/20 border-blue-500/50 text-blue-400 hover:bg-blue-500/30',
-    cleaning: 'bg-amber-500/20 border-amber-500/50 text-amber-400 hover:bg-amber-500/30',
-    maintenance: 'bg-gray-500/20 border-gray-500/50 text-gray-400 hover:bg-gray-500/30',
+    available: 'bg-green-500 text-white hover:bg-green-600',
+    occupied: 'bg-blue-500 text-white hover:bg-blue-600',
+    cleaning: 'bg-amber-500 text-white hover:bg-amber-600',
+    maintenance: 'bg-gray-500 text-white hover:bg-gray-600',
   };
 
-  const statusLabelMap: Record<string, string> = {
-    available: '✅ 가능',
-    occupied: '🔵 사용 중',
-    cleaning: '🟡 청소 중',
-    maintenance: '🔧 점검 중',
-  };
-
-  const typeColorMap: Record<string, string> = {
-    massage: '💆 마사지',
-    spa: '🌊 스파',
-    facial: '✨ 페이셜',
-    premium: '👑 프리미엄',
+  const typeMap: Record<string, string> = {
+    massage: 'Massage',
+    spa: 'Spa',
+    facial: 'Facial',
+    premium: 'Premium',
   };
 
   return (
     <div
-      className={`p-4 rounded-lg border-2 transition cursor-pointer ${statusColorMap[bed.status]} min-h-[160px] flex flex-col justify-between`}
+      className={`px-2 py-2 rounded font-bold text-center text-sm transition cursor-pointer ${statusColorMap[bed.status]}`}
     >
-      {/* 침대 번호 */}
-      <div>
-        <div className="font-bold text-lg">{bed.name}</div>
-        <div className="text-xs mt-1 opacity-70">{typeColorMap[bed.type]}</div>
-      </div>
-
-      {/* 상태 표시 */}
-      <div>
-        <div className="text-xs font-semibold mt-2">{statusLabelMap[bed.status]}</div>
-
-        {/* 점유 시 세부 정보 */}
-        {bed.status === 'occupied' && bed.therapistId && (
-          <div className="text-xs mt-2 space-y-1 border-t border-current/20 pt-2 opacity-90">
-            <div>테라: {bed.therapistId}</div>
-            <div>{bed.serviceName}</div>
-            <div className="font-bold text-green-300">종료: {bed.endTime}</div>
-          </div>
-        )}
-      </div>
+      <div className="text-xs font-bold">Bed {bed.name.split('-')[1]}</div>
+      <div className="text-xs">{typeMap[bed.type]}</div>
     </div>
   );
 }

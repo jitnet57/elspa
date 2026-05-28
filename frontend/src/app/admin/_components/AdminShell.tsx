@@ -58,7 +58,7 @@ export default function AdminShell({ children }: AdminShellProps) {
             <img alt="Admin" className="w-10 h-10 rounded-full border border-cyan-500/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-Zy8obKMQ4KCOYGq9VIYlInzuOjEWliz7MAm1b9M5EEj61q1lo_2sCRiGkqfcKFDnZjkwYMvbTZHOg2smiDIkZDWTwUpaCQk-oX6O0iXV1zHd1WgoZFvVOp48yI6TmwNqLqIIqVWp_S_QBwxAPp62YS_LzVshm44scATwlDBlPFAtUD82Uo44NHlxPnEPZFBXmYfzAZJcRzB7KKQ9mII2ooy_6pSlDZHBruhDIHh_RkDrzvLV2QPWnD4iw7G2YybILo_B44PhxT-d"/>
             <div className="overflow-hidden">
               <p className="font-bold text-sm truncate text-white">Admin User</p>
-              <p className="text-[9px] font-mono text-cyan-400">V2.0.4 Online</p>
+              <p className="text-[9px] font-mono text-cyan-400">v2.0.5 • 2026-05-28 13:23</p>
             </div>
           </div>
         </div>
