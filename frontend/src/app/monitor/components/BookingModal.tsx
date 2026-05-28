@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
 
 /**
  * 📌 컴포넌트: BookingModal
@@ -103,9 +102,9 @@ export default function BookingModal({ onClose }: { onClose: () => void }) {
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/20 rounded-lg transition"
+            className="text-2xl text-white hover:bg-white/20 rounded-lg p-2 transition font-bold"
           >
-            <X size={24} className="text-white" />
+            ✕
           </button>
         </div>
 
