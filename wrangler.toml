@@ -1,37 +1,16 @@
-# 🚀 Cloudflare Pages 배포 설정 (Sprint 12)
+# 🚀 Cloudflare Pages 배포 설정
 # 목적: Next.js 정적 사이트를 Cloudflare Pages에 배포
-# 빌드: npm run build → ./out 폴더 생성 → wrangler pages deploy
+# 빌드: npm run build → ./frontend/out 폴더 생성 → Cloudflare Pages 자동 배포
 
 name = "elspa"
-account_id = ""  # wrangler login 후 자동 설정
-pages_build_output_dir = "./frontend/out"  # Next.js static export 폴더
+pages_build_output_dir = "./frontend/out"
 
-# 프로젝트 설정
-[env.production]
-name = "elspa-prod"
-routes = [
-  { pattern = "example.com", zone_name = "example.com" },
-  { pattern = "*.example.com", zone_name = "example.com" }
-]
-
-[env.staging]
-name = "elspa-staging"
-
-# 환경 변수 설정 (배포 시 사용)
+# 프로덕션 환경 변수
 [env.production.vars]
 ENVIRONMENT = "production"
-API_URL = "https://api.elspa.com"  # 실제 API URL로 변경
+API_URL = "https://api.elspa.com"
 
-[env.staging.vars]
-ENVIRONMENT = "staging"
-API_URL = "https://staging-api.elspa.com"
-
-[env.development.vars]
-ENVIRONMENT = "development"
-API_URL = "http://localhost:8000"
-
-# 빌드 설정
-[build]
-command = "npm run build"
-cwd = "./frontend"
-
+# 미리보기 환경 변수
+[env.preview.vars]
+ENVIRONMENT = "preview"
+API_URL = "https://api.elspa.com"
