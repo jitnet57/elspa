@@ -215,7 +215,7 @@ export default function MonitorPage({ showBookingButton = true }) {
           active={activeTab === 'booking'}
           onClick={() => setActiveTab('booking')}
         >
-          📊 Google Sheets Booking
+          📊 BOOKING WITH THERAPIST
         </TabButton>
       </div>
 

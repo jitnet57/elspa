@@ -12,8 +12,8 @@ import { usePayrollStore } from '@/lib/store/payroll-store';
 // 🔄 업데이트: 2026-05-28 - 모킹 데이터 → API 통합
 // ============================================================
 export default function AdminDashboard() {
-  // Main tab: Dashboard vs Payroll Periods
-  const [adminTab, setAdminTab] = useState<'dashboard' | 'payroll'>('dashboard');
+  // Main tab: Dashboard vs Payroll Periods vs Payroll Calculation
+  const [adminTab, setAdminTab] = useState<'dashboard' | 'payroll' | 'payroll-calc'>('dashboard');
 
   // Dashboard tab states
   const [payrollSearch, setPayrollSearch] = useState('');
@@ -25,6 +25,17 @@ export default function AdminDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState<any | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
+
+  // Payroll Calculation states
+  const [calcForm, setCalcForm] = useState({
+    employeeName: '',
+    baseSalary: 0,
+    commission: 0,
+    sssTax: 0,
+    incomeTax: 0,
+    otherDeductions: 0
+  });
+  const [calcResult, setCalcResult] = useState<any>(null);
 
   // 폴백 모킹 데이터 (API 데이터 없을 때만 사용)
   const fallbackMockData = [
@@ -126,10 +137,10 @@ export default function AdminDashboard() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
 
       {/* Tab Navigation */}
-      <div className="flex gap-2 border-b border-white/10 pb-4">
+      <div className="flex gap-2 border-b border-white/10 pb-4 overflow-x-auto">
         <button
           onClick={() => setAdminTab('dashboard')}
-          className={`px-4 py-2 rounded-lg font-bold transition ${
+          className={`px-4 py-2 rounded-lg font-bold transition whitespace-nowrap ${
             adminTab === 'dashboard'
               ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
               : 'text-gray-400 hover:text-white'
@@ -139,13 +150,23 @@ export default function AdminDashboard() {
         </button>
         <button
           onClick={() => setAdminTab('payroll')}
-          className={`px-4 py-2 rounded-lg font-bold transition ${
+          className={`px-4 py-2 rounded-lg font-bold transition whitespace-nowrap ${
             adminTab === 'payroll'
               ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
               : 'text-gray-400 hover:text-white'
           }`}
         >
           Payroll Periods
+        </button>
+        <button
+          onClick={() => setAdminTab('payroll-calc')}
+          className={`px-4 py-2 rounded-lg font-bold transition whitespace-nowrap ${
+            adminTab === 'payroll-calc'
+              ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
+              : 'text-gray-400 hover:text-white'
+          }`}
+        >
+          💰 Payroll Calc
         </button>
       </div>
 
@@ -466,6 +487,219 @@ export default function AdminDashboard() {
             </div>
           </section>
         </>
+      )}
+
+      {adminTab === 'payroll-calc' && (
+        <section className="space-y-8">
+          {/* Payroll Calculator Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            {/* Input Form */}
+            <div className="bg-white/3 backdrop-blur-md border border-orange-500/20 rounded-3xl p-8 shadow-[0_0_40px_rgba(234,179,8,0.1)]">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="material-symbols-outlined text-orange-400 text-3xl">calculate</span>
+                <h3 className="text-xl font-black text-white">급여 정산 계산기</h3>
+              </div>
+
+              <div className="space-y-5">
+                {/* Employee Name */}
+                <div>
+                  <label className="text-xs font-black text-orange-300/60 uppercase tracking-widest block mb-2">직원명</label>
+                  <input
+                    type="text"
+                    value={calcForm.employeeName}
+                    onChange={(e) => setCalcForm({ ...calcForm, employeeName: e.target.value })}
+                    placeholder="직원 이름 입력"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-indigo-300/30 focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/20 font-medium"
+                  />
+                </div>
+
+                {/* Base Salary */}
+                <div>
+                  <label className="text-xs font-black text-orange-300/60 uppercase tracking-widest block mb-2">기본 급여</label>
+                  <input
+                    type="number"
+                    value={calcForm.baseSalary}
+                    onChange={(e) => setCalcForm({ ...calcForm, baseSalary: Number(e.target.value) })}
+                    placeholder="0"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-indigo-300/30 focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/20 font-medium"
+                  />
+                </div>
+
+                {/* Commission */}
+                <div>
+                  <label className="text-xs font-black text-orange-300/60 uppercase tracking-widest block mb-2">커미션/보너스</label>
+                  <input
+                    type="number"
+                    value={calcForm.commission}
+                    onChange={(e) => setCalcForm({ ...calcForm, commission: Number(e.target.value) })}
+                    placeholder="0"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-indigo-300/30 focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/20 font-medium"
+                  />
+                </div>
+
+                {/* SSS Tax */}
+                <div>
+                  <label className="text-xs font-black text-rose-300/60 uppercase tracking-widest block mb-2">SSS 납입금</label>
+                  <input
+                    type="number"
+                    value={calcForm.sssTax}
+                    onChange={(e) => setCalcForm({ ...calcForm, sssTax: Number(e.target.value) })}
+                    placeholder="0"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-indigo-300/30 focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/20 font-medium"
+                  />
+                </div>
+
+                {/* Income Tax */}
+                <div>
+                  <label className="text-xs font-black text-rose-300/60 uppercase tracking-widest block mb-2">소득세</label>
+                  <input
+                    type="number"
+                    value={calcForm.incomeTax}
+                    onChange={(e) => setCalcForm({ ...calcForm, incomeTax: Number(e.target.value) })}
+                    placeholder="0"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-indigo-300/30 focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/20 font-medium"
+                  />
+                </div>
+
+                {/* Other Deductions */}
+                <div>
+                  <label className="text-xs font-black text-rose-300/60 uppercase tracking-widest block mb-2">기타 공제</label>
+                  <input
+                    type="number"
+                    value={calcForm.otherDeductions}
+                    onChange={(e) => setCalcForm({ ...calcForm, otherDeductions: Number(e.target.value) })}
+                    placeholder="0"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-indigo-300/30 focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/20 font-medium"
+                  />
+                </div>
+
+                {/* Calculate Button */}
+                <button
+                  onClick={() => {
+                    const grossPay = calcForm.baseSalary + calcForm.commission;
+                    const totalDeductions = calcForm.sssTax + calcForm.incomeTax + calcForm.otherDeductions;
+                    const netPay = grossPay - totalDeductions;
+
+                    setCalcResult({
+                      employeeName: calcForm.employeeName || '(이름 미입력)',
+                      grossPay,
+                      totalDeductions,
+                      netPay,
+                      breakdown: {
+                        base: calcForm.baseSalary,
+                        commission: calcForm.commission
+                      },
+                      deductionDetail: {
+                        sss: calcForm.sssTax,
+                        tax: calcForm.incomeTax,
+                        other: calcForm.otherDeductions
+                      }
+                    });
+                  }}
+                  className="w-full mt-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black rounded-lg transition-all shadow-lg shadow-orange-500/30"
+                >
+                  📊 급여 정산하기
+                </button>
+              </div>
+            </div>
+
+            {/* Result Summary */}
+            <div className="space-y-4">
+              {calcResult ? (
+                <>
+                  {/* Result Card */}
+                  <div className="bg-gradient-to-br from-orange-500/10 to-amber-500/10 border border-orange-500/30 rounded-3xl p-8 shadow-[0_0_40px_rgba(234,179,8,0.1)]">
+                    <div className="mb-6 pb-6 border-b border-orange-500/20">
+                      <p className="text-[10px] font-black text-orange-300/60 uppercase tracking-widest mb-1">정산 결과</p>
+                      <h2 className="text-2xl font-black text-white">{calcResult.employeeName}</h2>
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Gross Pay */}
+                      <div className="flex justify-between items-center p-4 bg-white/5 rounded-xl border border-white/5">
+                        <span className="text-sm font-semibold text-indigo-200">총 급여</span>
+                        <span className="text-lg font-mono font-black text-orange-400">₱{calcResult.grossPay.toLocaleString()}</span>
+                      </div>
+
+                      {/* Total Deductions */}
+                      <div className="flex justify-between items-center p-4 bg-white/5 rounded-xl border border-white/5">
+                        <span className="text-sm font-semibold text-indigo-200">공제액</span>
+                        <span className="text-lg font-mono font-black text-rose-400">-₱{calcResult.totalDeductions.toLocaleString()}</span>
+                      </div>
+
+                      {/* Net Pay - Highlighted */}
+                      <div className="flex justify-between items-center p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/30 mt-6">
+                        <span className="text-sm font-black text-emerald-200">✅ 실수령액</span>
+                        <span className="text-2xl font-mono font-black text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.4)]">₱{calcResult.netPay.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Breakdown Details */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* 수입 내역 */}
+                    <div className="bg-white/3 border border-indigo-500/20 rounded-xl p-4">
+                      <p className="text-[10px] font-black text-indigo-300/60 uppercase tracking-widest mb-3">수입</p>
+                      <div className="space-y-2 text-xs text-indigo-200 font-semibold">
+                        <div className="flex justify-between">
+                          <span>기본급</span>
+                          <span className="font-mono">₱{calcResult.breakdown.base.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>커미션</span>
+                          <span className="font-mono">₱{calcResult.breakdown.commission.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 공제 내역 */}
+                    <div className="bg-white/3 border border-rose-500/20 rounded-xl p-4">
+                      <p className="text-[10px] font-black text-rose-300/60 uppercase tracking-widest mb-3">공제</p>
+                      <div className="space-y-2 text-xs text-rose-300 font-semibold">
+                        <div className="flex justify-between">
+                          <span>SSS</span>
+                          <span className="font-mono">-₱{calcResult.deductionDetail.sss.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>소득세</span>
+                          <span className="font-mono">-₱{calcResult.deductionDetail.tax.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>기타</span>
+                          <span className="font-mono">-₱{calcResult.deductionDetail.other.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Reset Button */}
+                  <button
+                    onClick={() => {
+                      setCalcForm({
+                        employeeName: '',
+                        baseSalary: 0,
+                        commission: 0,
+                        sssTax: 0,
+                        incomeTax: 0,
+                        otherDeductions: 0
+                      });
+                      setCalcResult(null);
+                    }}
+                    className="w-full py-2.5 bg-white/5 hover:bg-white/10 text-indigo-300 font-semibold rounded-lg transition-all border border-white/10"
+                  >
+                    새로 계산하기
+                  </button>
+                </>
+              ) : (
+                <div className="bg-white/3 border border-dashed border-indigo-500/30 rounded-3xl p-12 flex flex-col items-center justify-center h-full min-h-[400px]">
+                  <span className="material-symbols-outlined text-5xl text-indigo-400/30 mb-4">calculate</span>
+                  <p className="text-sm text-indigo-300/60 font-semibold text-center">좌측에서 급여 정보를 입력하고<br/>계산 버튼을 눌러주세요</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
       )}
 
       {adminTab === 'payroll' && (
