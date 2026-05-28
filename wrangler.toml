@@ -3,9 +3,8 @@
 # 빌드: npm run build → ./out 폴더 생성 → wrangler pages deploy
 
 name = "elspa"
-type = "javascript"
 account_id = ""  # wrangler login 후 자동 설정
-pages_build_output_dir = "./out"  # Next.js static export 폴더
+pages_build_output_dir = "./frontend/.next"  # Next.js 빌드 폴더
 
 # 프로젝트 설정
 [env.production]
@@ -36,23 +35,3 @@ API_URL = "http://localhost:8000"
 command = "npm run build"
 cwd = "./frontend"
 
-# 자산 설정
-[assets]
-binding = "ASSETS"
-
-# 캐시 설정
-[cache]
-default_ttl = 3600
-browser_ttl = 1800
-
-# 보안 헤더
-[[rules]]
-type = "CompiledContentType"
-globs = ["**/*.weba"]
-fallthrough = true
-
-# 리다이렉트 규칙 (SPA 모드)
-[[redirects]]
-from = "/*"
-to = "/index.html"
-status = "rewrite"
