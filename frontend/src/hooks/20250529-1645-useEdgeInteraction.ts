@@ -52,7 +52,7 @@ const isTouchDevice = () => {
   if (typeof window === 'undefined') return false;
   return (
     (typeof window.ontouchstart !== 'undefined') ||
-    (typeof window.onmsgesturechange !== 'undefined') ||
+    (typeof (window as any).onmsgesturechange !== 'undefined') ||
     navigator.maxTouchPoints > 0 ||
     (navigator as any).msMaxTouchPoints > 0
   );
