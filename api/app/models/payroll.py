@@ -242,6 +242,7 @@ class PayrollRecord(Base):
     sss_deduction = Column(Numeric(10, 2), default=0)  # SSS 선지급
     ca_deduction = Column(Numeric(10, 2), default=0)  # CA 차감
     health_check_deduction = Column(Numeric(10, 2), default=0)  # 보건소 검사비
+    thirteenth_month_accrual = Column(Numeric(10, 2), default=0)  # 13개월 보너스 누적액
     thirteenth_month_deduction = Column(Numeric(10, 2), default=0)  # 13개월 보너스 선지급
 
     # 최종 금액
@@ -251,6 +252,7 @@ class PayrollRecord(Base):
 
     status = Column(String(50), nullable=False, default="draft")  # draft, approved, paid
     notes = Column(String(1000))
+    is_obsolete = Column(Boolean, default=False)  # 소프트 삭제 플래그 (거래 추적성 유지)
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
