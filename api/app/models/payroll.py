@@ -9,7 +9,7 @@ from datetime import datetime, date
 from decimal import Decimal
 from sqlalchemy import (
     Column, Integer, String, Date, DateTime, Boolean,
-    ForeignKey, Numeric, Index, UniqueConstraint, CheckConstraint
+    ForeignKey, Numeric, Index, UniqueConstraint, CheckConstraint, BigInteger
 )
 from sqlalchemy.orm import relationship
 from app.database import Base
@@ -142,13 +142,16 @@ class CashAdvance(Base):
 class AttendanceLog(Base):
     """
     출퇴근 기록 및 근태 관리
-    지각, OT 자동 계산
+    정직원: 출퇴근 기록 (지각, OT)
+    테라피스트: 마사지 예약 연결 기록
 
     제약 조건:
-      - (employee_id, work_date) 복합 고유 제약 - 하루에 한 번만 기록
+      - (employee_id, work_date) 복합 고유 제약 - 정직원만 적용 (하루에 한 번만)
+      - Therapist/Nail의 경우 여러 booking 가능
 
     인덱스:
       - (employee_id, work_date) - 직원별 날짜 조회 최적화
+      - (massage_booking_id) - 마사지 예약 조회 최적화
     """
     __tablename__ = "attendance_logs"
 
@@ -161,6 +164,10 @@ class AttendanceLog(Base):
     overtime_minutes = Column(Integer, default=0)  # 초과근무 분 (40분 이상 시 계산)
     is_absent = Column(Boolean, default=False)  # 결근 여부
     holiday_type = Column(String(50), default="none")  # none, national, special
+
+    # 마사지 예약 연결 (테라피스트/네일 전용)
+    massage_booking_id = Column(BigInteger, ForeignKey("massage_bookings.id"), nullable=True)
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -168,6 +175,7 @@ class AttendanceLog(Base):
     __table_args__ = (
         UniqueConstraint("employee_id", "work_date", name="uq_attendance_employee_workdate"),
         Index("idx_attendance_employee_workdate", "employee_id", "work_date"),
+        Index("idx_attendance_massage_booking", "massage_booking_id"),
     )
 
     # 관계

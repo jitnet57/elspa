@@ -61,10 +61,50 @@ class PayrollCalculator:
 
     @staticmethod
     def calculate_commission(employee_type: str, session_count: int, session_price: Decimal = Decimal(100)) -> Decimal:
-        """커미션 (Therapist/Nail 전용)"""
+        """
+        커미션 (Therapist/Nail 전용) - 레거시 호환성용
+
+        주의: 이 메서드는 레거시 호환성만 제공합니다.
+        실제 커미션 계산은 calculate_therapist_commission_from_bookings()를 사용하세요.
+        """
         if employee_type not in [EmployeeType.THERAPIST, EmployeeType.NAIL]:
             return Decimal(0)
         return Decimal(session_count) * session_price
+
+    @staticmethod
+    async def calculate_therapist_commission_from_bookings(
+        employee_id: int,
+        period_start: date,
+        period_end: date,
+        db: AsyncSession
+    ) -> Decimal:
+        """
+        마사지 예약 기반 테라피스트 커미션 계산
+
+        - 정산 기간 내 완료된(status='completed') 마사지 예약의 service_price 합산
+        - 각 예약의 실제 가격을 반영
+
+        Args:
+            employee_id: 직원 ID
+            period_start: 정산 기간 시작일
+            period_end: 정산 기간 종료일
+            db: AsyncSession
+
+        Returns:
+            커미션 총액 (Decimal)
+        """
+        from app.models.massage_booking import MassageBooking
+
+        result = await db.execute(
+            select(func.sum(MassageBooking.service_price)).where(
+                MassageBooking.therapist_id == employee_id,
+                MassageBooking.date >= period_start,
+                MassageBooking.date <= period_end,
+                MassageBooking.status == "completed"
+            )
+        )
+        total = result.scalar()
+        return Decimal(str(total)) if total else Decimal(0)
 
     @staticmethod
     def calculate_health_check_deduction(employee_type: str, payroll_period: PayrollPeriod) -> Decimal:
@@ -265,10 +305,13 @@ class PayrollCalculator:
         absent_count = 0
 
         # 커미션 (Therapist/Nail)
+        # 마사지 예약 기반 실제 가격으로 계산
         if employee.employee_type in [EmployeeType.THERAPIST, EmployeeType.NAIL]:
-            session_count = len([log for log in attendance_logs if not log.is_absent])
-            commission_amount = calc.calculate_commission(
-                employee.employee_type, session_count, session_price=Decimal(100)
+            commission_amount = await calc.calculate_therapist_commission_from_bookings(
+                employee_id=employee.id,
+                period_start=payroll_period.period_start,
+                period_end=payroll_period.period_end,
+                db=db
             )
 
         # 초과근무 (정직원)
@@ -334,7 +377,7 @@ class PayrollCalculator:
 
         if employee.employee_type in [EmployeeType.THERAPIST, EmployeeType.NAIL]:
             note_lines.append(f"   • 커미션 (Commission): {commission_amount:,.2f} PHP")
-            note_lines.append(f"     [정산체계: Therapist/Nail 전용 - 출근 일수(세션 수) {session_count}일 × 세션 단가 100 PHP]")
+            note_lines.append(f"     [정산체계: Therapist/Nail 전용 - 완료된 마사지 예약의 서비스 가격 합계]")
         else:
             if overtime_amount > 0 or total_ot > 0:
                 note_lines.append(f"   • 초과근무 수당 (Overtime): {overtime_amount:,.2f} PHP")
