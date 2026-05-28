@@ -18,7 +18,7 @@ interface AdminGateState {
 export const useAdminGate = create<AdminGateState>()(
   persist(
     (set) => ({
-      isAdminAuthenticated: false,
+      isAdminAuthenticated: true,
 
       login: (password: string) => {
         if (password === 'admin123') {

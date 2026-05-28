@@ -301,7 +301,7 @@ export default function TherapistSchedulePage() {
         {/* Top Navigation */}
         <div className="flex justify-between items-center px-6 py-4">
           <div className="flex items-center gap-4">
-            <a className="flex items-center gap-2 hover:bg-white/10 p-2 rounded-full transition-all active:scale-95" href="/admin.html">
+            <a className="flex items-center gap-2 hover:bg-white/10 p-2 rounded-full transition-all active:scale-95" href="/admin">
               <span className="material-symbols-outlined text-cyan-400">arrow_back</span>
             </a>
             <button className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg hover:bg-slate-700/50 transition-all text-slate-300 hover:text-white text-sm font-semibold">
@@ -353,19 +353,19 @@ export default function TherapistSchedulePage() {
         {/* Navigation Sidebar Shell */}
         <aside className="hidden lg:flex flex-col h-screen p-6 fixed left-0 top-0 h-full w-[280px] bg-slate-900/40 backdrop-blur-xl border-r border-indigo-500/10 shadow-2xl shadow-black/50 z-40 pt-24 justify-between">
           <div className="flex flex-col gap-2">
-            <a className="flex items-center gap-4 px-4 py-3 rounded-xl text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all" href="/admin.html">
+            <a className="flex items-center gap-4 px-4 py-3 rounded-xl text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all" href="/admin">
               <span className="material-symbols-outlined">dashboard</span>
               <span className="font-semibold text-sm">Dashboard</span>
             </a>
-            <a className="flex items-center gap-4 px-4 py-3 rounded-xl text-cyan-400 bg-white/10 border-r-2 border-cyan-400 font-bold shadow-[0_0_15px_rgba(34,211,238,0.2)] transition-all" href="/admin/therapists.html">
+            <a className="flex items-center gap-4 px-4 py-3 rounded-xl text-cyan-400 bg-white/10 border-r-2 border-cyan-400 font-bold shadow-[0_0_15px_rgba(34,211,238,0.2)] transition-all" href="/admin/therapists">
               <span className="material-symbols-outlined">groups</span>
               <span className="font-bold text-sm">Therapists</span>
             </a>
-            <a className="flex items-center gap-4 px-4 py-3 rounded-xl text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all" href="/admin/payroll.html">
+            <a className="flex items-center gap-4 px-4 py-3 rounded-xl text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all" href="/admin/payroll">
               <span className="material-symbols-outlined">payments</span>
               <span className="font-semibold text-sm">Payroll</span>
             </a>
-            <a className="flex items-center gap-4 px-4 py-3 rounded-xl text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all" href="/admin/policies.html">
+            <a className="flex items-center gap-4 px-4 py-3 rounded-xl text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all" href="/admin/policies">
               <span className="material-symbols-outlined">settings</span>
               <span className="font-semibold text-sm">Settings</span>
             </a>
@@ -802,7 +802,7 @@ export default function TherapistSchedulePage() {
 
             {/* Quick Action: Dashboard Link */}
             <a 
-              href="/admin/test-data.html"
+              href="/admin/test-data"
               className="bg-slate-900/40 backdrop-blur-sm border border-indigo-500/10 p-6 rounded-2xl hover:translate-y-[-4px] active:scale-95 transition-all cursor-pointer group flex items-center gap-6 shadow-md hover:bg-slate-900/70"
             >
               <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-white/40 group-hover:bg-white/20 group-hover:text-white transition-colors">
@@ -1240,15 +1240,15 @@ export default function TherapistSchedulePage() {
           📌 Mobile Bottom Navigation (fixed at bottom)
           ============================================================ */}
       <nav className="lg:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-slate-950/80 backdrop-blur-lg border-t border-cyan-500/20 shadow-[0_-10px_40px_rgba(0,0,0,0.6)]">
-        <a className="flex flex-col items-center justify-center text-indigo-300/40" href="/monitor.html">
+        <a className="flex flex-col items-center justify-center text-indigo-300/40" href="/monitor">
           <span className="material-symbols-outlined">home_max</span>
           <span className="text-[9px] font-black mt-0.5 tracking-wider">HOME</span>
         </a>
-        <a className="flex flex-col items-center justify-center text-cyan-400 drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]" href="/admin/therapists.html">
+        <a className="flex flex-col items-center justify-center text-cyan-400 drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]" href="/admin/therapists">
           <span className="material-symbols-outlined">group</span>
           <span className="text-[9px] font-black mt-0.5 tracking-wider">STAFF</span>
         </a>
-        <a className="flex flex-col items-center justify-center text-indigo-300/40" href="/admin/payroll.html">
+        <a className="flex flex-col items-center justify-center text-indigo-300/40" href="/admin/payroll">
           <span className="material-symbols-outlined">receipt_long</span>
           <span className="text-[9px] font-black mt-0.5 tracking-wider">PAY</span>
         </a>

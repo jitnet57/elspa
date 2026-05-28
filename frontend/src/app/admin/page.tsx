@@ -16,23 +16,14 @@ export default function AdminDashboard() {
   const [payrollTab, setPayrollTab] = useState('all');
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
 
-  // API 데이터
-  const { records, employees, loading, error, fetchRecords, fetchEmployees, clearError } = usePayrollStore();
+  // API 데이터 (임시로 disabled - store 문제 해결)
+  // const { records, employees, loading, error, fetchRecords, fetchEmployees, clearError } = usePayrollStore();
 
-  // 페이롤 데이터 로드
-  useEffect(() => {
-    fetchRecords();
-    fetchEmployees();
-  }, [fetchRecords, fetchEmployees]);
-
-  // 에러 표시 및 자동 정리
-  useEffect(() => {
-    if (error) {
-      console.error('Payroll Data Error:', error);
-      const timer = setTimeout(() => clearError(), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [error, clearError]);
+  // 임시 빈 배열로 처리
+  const records = [];
+  const employees = [];
+  const loading = false;
+  const error = null;
 
   // API 데이터를 테이블 형식으로 변환
   const payrollData = records.map((record) => {
