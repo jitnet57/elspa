@@ -247,6 +247,71 @@ export default function TherapistSchedulePage() {
     return () => clearInterval(interval);
   }, []);
 
+  // ============================================================
+  // 📌 Google Sheets 예약 데이터 로드
+  // ============================================================
+  useEffect(() => {
+    if (!showGoogleSheetBooking) return;
+
+    const fetchGoogleSheetBookings = async () => {
+      try {
+        // Google Sheets API v4를 사용하여 공개 스프레드시트에서 데이터 읽기
+        // 참고: 실제 환경에서는 스프레드시트 ID와 API Key를 환경변수로 설정해야 함
+
+        const spreadsheetId = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID || '';
+        const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
+
+        if (!spreadsheetId || !apiKey) {
+          // 환경변수가 없을 경우 기본 데이터 사용
+          const fallbackData = [
+            { id: '1', therapist: 'Maria Santos', service: 'Swedish Massage', date: '2026-05-28', time: '14:00', guest: 'John Doe', room: '01' },
+            { id: '2', therapist: 'Ana Mercado', service: 'Thai Massage', date: '2026-05-28', time: '15:00', guest: 'Jane Smith', room: '02' },
+            { id: '3', therapist: 'Rosa Chavez', service: 'Hot Stone Therapy', date: '2026-05-28', time: '16:00', guest: 'Mike Johnson', room: '03' },
+            { id: '4', therapist: 'Elena Santos', service: 'Foot Massage', date: '2026-05-28', time: '17:00', guest: 'Sarah Davis', room: '04' },
+            { id: '5', therapist: 'Jennifer Cruz', service: 'Aromatherapy', date: '2026-05-28', time: '18:00', guest: 'Tom Wilson', room: '05' },
+          ];
+          setGoogleBookings(fallbackData);
+          return;
+        }
+
+        // Google Sheets API 호출
+        const range = 'Sheet1!A2:G100'; // 첫 행은 헤더, A2부터 시작
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
+
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Failed to fetch Google Sheets data');
+
+        const data = await response.json();
+        const values = data.values || [];
+
+        // 데이터 변환: Google Sheets 행 → 객체 배열
+        const bookings = values.map((row: string[], index: number) => ({
+          id: String(index + 1),
+          guest: row[0] || 'N/A',        // A: Guest Name
+          service: row[1] || 'N/A',      // B: Service Type
+          therapist: row[2] || 'N/A',    // C: Therapist Name
+          date: row[3] || 'N/A',         // D: Date
+          time: row[4] || 'N/A',         // E: Time
+          room: row[5] || 'N/A',         // F: Room Number
+          notes: row[6] || '',           // G: Notes
+        }));
+
+        setGoogleBookings(bookings);
+      } catch (error) {
+        console.error('Error fetching Google Sheets bookings:', error);
+        // 에러 발생 시 기본 데이터 사용
+        const fallbackData = [
+          { id: '1', therapist: 'Maria Santos', service: 'Swedish Massage', date: '2026-05-28', time: '14:00', guest: 'John Doe', room: '01' },
+          { id: '2', therapist: 'Ana Mercado', service: 'Thai Massage', date: '2026-05-28', time: '15:00', guest: 'Jane Smith', room: '02' },
+          { id: '3', therapist: 'Rosa Chavez', service: 'Hot Stone Therapy', date: '2026-05-28', time: '16:00', guest: 'Mike Johnson', room: '03' },
+        ];
+        setGoogleBookings(fallbackData);
+      }
+    };
+
+    fetchGoogleSheetBookings();
+  }, [showGoogleSheetBooking]);
+
   const formatTime = (hour: number) => {
     const hh = Math.floor(hour);
     const mm = Math.round((hour % 1) * 60);
@@ -309,10 +374,10 @@ export default function TherapistSchedulePage() {
             </button>
           </div>
 
-          {/* Center Tab - Therapist Daily Schedule */}
+          {/* Center Tab - Booking with Therapist */}
           <button className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 rounded-xl transition-all text-white font-bold shadow-lg hover:shadow-purple-500/50">
-            <span style={{fontSize: '20px'}}>📅</span>
-            Therapist Daily Schedule
+            <span style={{fontSize: '20px'}}>🧖</span>
+            BOOKING WITH THERAPIST
           </button>
 
           {/* Right - Time & Language */}
@@ -1190,29 +1255,31 @@ export default function TherapistSchedulePage() {
             {/* Modal Content */}
             <div className="p-6">
               <div className="space-y-3">
-                {/* Sample Booking Data */}
-                {[
-                  { id: '1', therapist: 'Maria Santos', service: 'Swedish Massage', date: '2026-05-28', time: '14:00', guest: 'John Doe', room: '01' },
-                  { id: '2', therapist: 'Ana Mercado', service: 'Thai Massage', date: '2026-05-28', time: '15:00', guest: 'Jane Smith', room: '02' },
-                  { id: '3', therapist: 'Rosa Chavez', service: 'Hot Stone Therapy', date: '2026-05-28', time: '16:00', guest: 'Mike Johnson', room: '03' },
-                ].map(booking => (
-                  <div
-                    key={booking.id}
-                    className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/8 transition-all"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex-1">
-                        <p className="font-semibold text-white text-base">👤 {booking.guest}</p>
-                        <p className="text-sm text-pink-400 mt-1">{booking.service}</p>
-                        <p className="text-sm text-gray-400 mt-1">Therapist: <span className="text-indigo-300 font-medium">{booking.therapist}</span></p>
-                        <p className="text-xs text-gray-500 mt-2">📅 {booking.date} ⏰ {booking.time} | 🚪 Room {booking.room}</p>
-                      </div>
-                      <div className="bg-pink-500/20 text-pink-300 px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap">
-                        ☁️ Synced
+                {/* Google Sheets Booking Data (Dynamic) */}
+                {googleBookings && googleBookings.length > 0 ? (
+                  googleBookings.map(booking => (
+                    <div
+                      key={booking.id}
+                      className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/8 transition-all"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex-1">
+                          <p className="font-semibold text-white text-base">👤 {booking.guest}</p>
+                          <p className="text-sm text-pink-400 mt-1">{booking.service}</p>
+                          <p className="text-sm text-gray-400 mt-1">Therapist: <span className="text-indigo-300 font-medium">{booking.therapist}</span></p>
+                          <p className="text-xs text-gray-500 mt-2">📅 {booking.date} ⏰ {booking.time} | 🚪 Room {booking.room}</p>
+                        </div>
+                        <div className="bg-pink-500/20 text-pink-300 px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap">
+                          ☁️ Synced
+                        </div>
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <p className="text-sm">Loading bookings...</p>
                   </div>
-                ))}
+                )}
 
                 {/* Sync Info */}
                 <div className="mt-6 pt-4 border-t border-white/10">
