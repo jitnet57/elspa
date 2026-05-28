@@ -13,6 +13,7 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment
 from datetime import datetime
 import os
+import tempfile
 from typing import List, Dict, Any
 
 router = APIRouter(prefix="/api/admin/data", tags=["Admin Data"])
@@ -117,7 +118,7 @@ async def export_therapists_excel():
 
     # 파일 저장
     filename = f"therapists_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-    filepath = f"/tmp/{filename}"
+    filepath = os.path.join(tempfile.gettempdir(), filename)
     wb.save(filepath)
 
     return FileResponse(filepath, filename=filename, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
@@ -198,7 +199,7 @@ async def export_bookings_excel():
 
     # 파일 저장
     filename = f"bookings_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-    filepath = f"/tmp/{filename}"
+    filepath = os.path.join(tempfile.gettempdir(), filename)
     wb.save(filepath)
 
     return FileResponse(filepath, filename=filename, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
@@ -278,7 +279,7 @@ async def export_drivers_excel():
 
     # 파일 저장
     filename = f"drivers_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-    filepath = f"/tmp/{filename}"
+    filepath = os.path.join(tempfile.gettempdir(), filename)
     wb.save(filepath)
 
     return FileResponse(filepath, filename=filename, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
