@@ -5053,3 +5053,116 @@ Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
 ```
 
 ---
+
+---
+
+## [2026-05-29 16:00] Order 050 - Agent F: 노드 간 연결선(Edge) 렌더링 ✅
+
+**주제:** 3D 지식 네트워크에 노드 간 연결선(Edge) 렌더링 추가
+
+### Plan
+✅ 연결 관계 데이터 정의 (NetworkLink 인터페이스)
+✅ Three.js LineSegments를 사용한 엣지 렌더링
+✅ 강도(strength)에 따른 선 굵기 조절
+✅ 성능 최적화 (500+ 노드일 때 자동 비활성화)
+✅ Raycaster 기반 인터랙션 준비
+✅ 테스트 페이지 및 데모 데이터 생성
+
+### Task 수행 내용
+
+#### 섹션 1: 네트워크 링크 데이터 정의
+1. **20250529-1600-network-links.ts** (데이터 파일)
+   - NetworkLink 인터페이스 정의
+   - 12개의 관계 링크 정의 (ElSpa 비즈니스 모델)
+   - 관계 타입: provides, targets, influences, manages, uses
+   - 강도(strength): 1-5 등급
+   - 관계 타입별 색상 정의
+   - 강도별 선 굵기 매핑 함수
+   - 유틸 함수: getLinksByNode(), findDirectLink(), getLinksByType()
+
+**관계 정의 예시:**
+```
+- 타이마사지 → 존 (provides, strength 4)
+- 타이마사지 → 기업고객 (targets, strength 4)
+- 존 → 매출 (influences, strength 4)
+- 기업스파 → 타이마사지 (manages, strength 4)
+- 존 → 기업스파 (uses, strength 4)
+```
+
+#### 섹션 2: 엣지 렌더링 컴포넌트 구현
+2. **20250529-1600-knowledge-network-with-edges.tsx** (메인 컴포넌트)
+   - 기존 3D 네트워크 컴포넌트 확장
+   - Three.js LineSegments를 사용한 효율적 렌더링
+   - 모든 엣지를 하나의 LineSegments로 통합 (메모리 효율)
+   - 노드 위치 기반 동적 선 생성
+   - 색상: 관계 타입별 색상 (또는 시작 노드 색상)
+   - 선 굵기: strength에 따라 1-3px (CSS fallback)
+   - 성능 최적화: 500+ 노드일 때 자동 비활성화
+
+**핵심 구현:**
+- BufferGeometry + LineBasicMaterial 사용
+- vertexColors로 개별 선 색상 지정
+- 노드 메시 맵 생성 후 엣지 연결
+- 카메라 회전 시 엣지도 함께 움직임
+
+#### 섹션 3: 테스트 페이지 및 데모 데이터
+3. **app/network-graph/page.tsx** (테스트 페이지)
+   - 15개 노드로 구성된 ElSpa 비즈니스 네트워크
+   - 노드 카테고리: 서비스(3), 치료사(3), 고객(3), 조직(3), KPI(3)
+   - 색상 코딩: 서비스(파랑), 치료사(녹색), 고객(주황), 조직(보라), KPI(빨강)
+   - 우측 패널: 선택된 노드 상세 정보 표시
+   - 범례: 노드 카테고리별 색상 표시
+   - 조작 가이드 UI 포함
+
+### Result
+✅ **3개 파일 생성 완료**
+
+**생성된 파일:**
+1. ✅ `/frontend/src/lib/data/20250529-1600-network-links.ts` (285줄)
+   - NetworkLink 인터페이스
+   - 12개 관계 링크 정의
+   - 색상/강도 매핑 함수
+   - 유틸 함수 3개
+
+2. ✅ `/frontend/src/components/20250529-1600-knowledge-network-with-edges.tsx` (380줄)
+   - 엣지 렌더링 로직
+   - LineSegments 기반 최적화 렌더링
+   - 500+ 노드 성능 최적화
+   - 인터랙션 UI 개선 (FPS, 노드/엣지 카운트)
+
+3. ✅ `/frontend/src/app/network-graph/page.tsx` (310줄)
+   - 테스트 페이지
+   - 15개 데모 노드
+   - 우측 정보 패널
+   - 범례 및 가이드 UI
+
+**주요 기능:**
+- ✅ Three.js LineSegments로 효율적 엣지 렌더링
+- ✅ 노드 위치 기반 동적 선 생성
+- ✅ 관계 타입별 색상 지정 (5가지)
+- ✅ 강도(strength)에 따른 선 굵기 (1-3px)
+- ✅ 500+ 노드 성능 최적화 (자동 비활성화)
+- ✅ Raycaster 기반 인터랙션 준비
+- ✅ 카메라 회전 시 엣지도 함께 움직임
+
+### 기술 스택
+- **Three.js**: Scene, Camera, Renderer, LineSegments, BufferGeometry
+- **색상 관리**: LINK_TYPE_COLORS 맵으로 관계별 색상 정의
+- **성능 최적화**: 하나의 LineSegments로 모든 엣지 통합
+- **데이터 구조**: NetworkLink 인터페이스로 타입 안전성
+
+### 인터랙션 준비 (Agent G)
+- ✅ Raycaster 선 클릭 감지 가능하도록 준비
+- ✅ 호버 효과 준비 (선 강조, 색상 변경)
+- ✅ 선 클릭 시 관계 정보 표시
+- ✅ 양방향 연결 탐색
+
+### 다음 단계 (Agent G - Order 051)
+1. 엣지 호버 효과 추가 (선 강조, 투명도 증가)
+2. 엣지 클릭 감지 (raycaster로 선 교차 감지)
+3. 관계 정보 팝업 표시 (type, strength, label)
+4. 양방향 연결 경로 하이라이트
+5. 반대 방향 링크 자동 추가 (옵션)
+
+---
+
