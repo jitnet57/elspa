@@ -214,10 +214,10 @@ export const useEdgeInteraction = () => {
       const material = mesh.material as THREE.LineBasicMaterial;
       if (highlight) {
         material.linewidth = 4;
-        material.emissive.set(0xffff00); // 노란색 하이라이트
+        material.color.set(0xffff00); // 노란색 하이라이트
       } else {
         material.linewidth = 2;
-        material.emissive.set(0x000000); // 기본값
+        material.color.set(0x888888); // 기본값
       }
     }
   }, []);
