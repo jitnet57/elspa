@@ -271,6 +271,10 @@ app.include_router(beds_split.router)  # 🛏️ 침대 그룹 분할 API
 # from app.routers import websocket_financial
 # app.include_router(websocket_financial.router)
 
+# 📡 Monitor 실시간 동기화 WebSocket 라우터 (신규 - 2026-05-28)
+from app.routers import websocket_realtime
+app.include_router(websocket_realtime.router)
+
 # 🔐 인증 라우터 등록 (Phase 8-2)
 app.include_router(auth.router)
 

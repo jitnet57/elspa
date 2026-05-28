@@ -203,5 +203,135 @@ class FinancialMessageBuilder:
         }
 
 
+class RealtimeMessageBuilder:
+    """Monitor 실시간 메시지 빌더 (침대, 예약, 테라피스트 동기화)"""
+
+    @staticmethod
+    def bed_status_changed(
+        bed_id: int,
+        status: str,
+        customer_id: int = None,
+        customer_name: str = None,
+        therapist_id: int = None,
+        therapist_name: str = None,
+        service_name: str = None,
+        starts_at: str = None,
+        ends_at: str = None,
+    ):
+        """
+        침대 상태 변경 메시지
+        상태: available, occupied, cleaning
+        """
+        return {
+            "type": "bed_status_changed",
+            "data": {
+                "bedId": bed_id,
+                "status": status,
+                "customerId": customer_id,
+                "customerName": customer_name,
+                "therapistId": therapist_id,
+                "therapistName": therapist_name,
+                "serviceName": service_name,
+                "startsAt": starts_at,
+                "endsAt": ends_at,
+            },
+        }
+
+    @staticmethod
+    def booking_added(
+        booking_id: int,
+        bed_id: int,
+        customer_id: int,
+        customer_name: str,
+        therapist_id: int,
+        therapist_name: str,
+        service_name: str,
+        service_minutes: int,
+        service_price: float,
+        starts_at: str,
+        ends_at: str,
+    ):
+        """새 예약 추가 메시지"""
+        return {
+            "type": "booking_added",
+            "data": {
+                "bookingId": booking_id,
+                "bedId": bed_id,
+                "customerId": customer_id,
+                "customerName": customer_name,
+                "therapistId": therapist_id,
+                "therapistName": therapist_name,
+                "serviceName": service_name,
+                "serviceMinutes": service_minutes,
+                "servicePrice": service_price,
+                "startsAt": starts_at,
+                "endsAt": ends_at,
+            },
+        }
+
+    @staticmethod
+    def booking_completed(booking_id: int, bed_id: int):
+        """예약 완료 메시지"""
+        return {
+            "type": "booking_completed",
+            "data": {
+                "bookingId": booking_id,
+                "bedId": bed_id,
+            },
+        }
+
+    @staticmethod
+    def booking_cancelled(booking_id: int, bed_id: int, reason: str = None):
+        """예약 취소 메시지"""
+        return {
+            "type": "booking_cancelled",
+            "data": {
+                "bookingId": booking_id,
+                "bedId": bed_id,
+                "reason": reason,
+            },
+        }
+
+    @staticmethod
+    def therapist_checkin(therapist_id: int, therapist_name: str, check_in_time: str):
+        """테라피스트 체크인 메시지"""
+        return {
+            "type": "therapist_checkin",
+            "data": {
+                "therapistId": therapist_id,
+                "therapistName": therapist_name,
+                "checkInTime": check_in_time,
+            },
+        }
+
+    @staticmethod
+    def therapist_checkout(therapist_id: int, therapist_name: str, check_out_time: str):
+        """테라피스트 체크아웃 메시지"""
+        return {
+            "type": "therapist_checkout",
+            "data": {
+                "therapistId": therapist_id,
+                "therapistName": therapist_name,
+                "checkOutTime": check_out_time,
+            },
+        }
+
+    @staticmethod
+    def heartbeat():
+        """하트비트 메시지"""
+        return {
+            "type": "heartbeat",
+            "message": "Monitor server is alive",
+        }
+
+    @staticmethod
+    def sync_request():
+        """동기화 요청 메시지"""
+        return {
+            "type": "sync_request",
+            "message": "전체 모니터 데이터 동기화 필요",
+        }
+
+
 # 전역 Connection Manager 인스턴스
 manager = ConnectionManager()

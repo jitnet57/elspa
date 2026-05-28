@@ -3703,3 +3703,79 @@ db.commit()  # 트랜잭션 커밋
 ~5,200 tokens
 
 ---
+
+---
+## [2026-05-28 23:45] Order: 013 - Admin 마사지 종류 관리 컴포넌트 생성
+
+**주제:** Admin 마사지 종류 설정 페이지 구현 (추가, 수정, 삭제 기능 완성)
+
+### Plan
+✅ MassageTypeSettings 컴포넌트 생성
+✅ 마사지 종류 CRUD 기능 구현
+✅ 테이블 형식 UI 디자인 (Tailwind)
+✅ 삭제 확인 모달 추가
+✅ admin/massage 페이지에 탭 통합
+✅ TypeScript 빌드 검증
+
+### Task
+
+#### 1. 새 컴포넌트 생성: MassageTypeSettings.tsx
+- 파일 위치: e:\elspa\frontend\src\app\admin\massage\components\MassageTypeSettings.tsx
+- 6개 기본 마사지 종류 (Swedish, Thai, Hot Stone, Deep Tissue, Aroma, Facial)
+- 각 항목: id, name, basePrice, baseDurationMinutes, description, isActive, createdAt
+
+#### 2. CRUD 기능 구현
+- **추가(Create)**: handleAddMassageType() - 새 마사지 종류 추가
+- **조회(Read)**: 기본 데이터셋에서 표시
+- **수정(Update)**: handleEditMassageType() - 기존 항목 수정
+- **삭제(Delete)**: handleDeleteMassageType() - 확인 후 삭제
+
+#### 3. UI 구성
+1. 헤더: 제목 + "새 마사지 종류 추가" 버튼
+2. 추가/편집 폼 (조건부 표시)
+   - 마사지 종류 이름 (text)
+   - 기본 가격 (number, step=1000)
+   - 기본 시간 (number, min=15, step=15)
+   - 설명 (textarea)
+   - [수정 완료/추가] [취소] 버튼
+3. 마사지 종류 테이블
+   - 컬럼: 이름, 기본 가격, 기본 시간, 설명, 상태, 작업
+   - 각 행: [편집] [삭제] 버튼
+4. 삭제 확인 모달 (AlertCircle 아이콘 포함)
+
+#### 4. 상위 페이지 수정: page.tsx
+- MassageTypeSettings 임포트 추가
+- activeTab 타입: 'schedule' | 'grouping' | 'types'
+- 마사지 종류 탭 버튼 추가 (💆 마사지 종류)
+- 탭 콘텐츠 렌더링
+
+### Result
+✅ MassageTypeSettings.tsx (313줄) 생성 완료
+✅ page.tsx 업데이트 완료 (탭 통합)
+✅ TypeScript 빌드 검증 성공 (npm run build)
+✅ 모든 기능 구현 완료:
+  - ✓ 마사지 종류 목록 표시 (테이블 형식)
+  - ✓ 추가 폼 (name, price, duration, description)
+  - ✓ 편집 기능 (클릭 후 수정 및 저장)
+  - ✓ 삭제 기능 (확인 모달 포함)
+  - ✓ API 호출 구조 (주석처리, 실제 구현 대기)
+  - ✓ 로딩 상태 관리 (disabled 처리)
+  - ✓ 에러 처리 (try-catch)
+
+### 주요 파일
+1. e:\elspa\frontend\src\app\admin\massage\components\MassageTypeSettings.tsx (NEW)
+2. e:\elspa\frontend\src\app\admin\massage\page.tsx (UPDATED)
+
+### Next
+- 백엔드 API 구현 (POST /api/admin/massage-types, PUT, DELETE)
+- 실제 데이터베이스 연동
+- 마사지 종류별 추가 옵션 (이미지, 카테고리 태그 등)
+
+### Agent
+- Claude Code (Agent)
+- Lucide React Icons (UI 아이콘)
+- Tailwind CSS 4 (스타일링)
+
+### Tokens
+~2,500 tokens
+
