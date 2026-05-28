@@ -5166,3 +5166,170 @@ Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
 
 ---
 
+
+## [2026-05-29 16:45] Order: 050 - Agent G: 연결선 라벨 & 인터랙션 시스템 완성
+
+**주제:** Three.js 연결선(엣지)의 라벨, 호버, 클릭 인터랙션 및 정보 패널 구현 완료
+
+### Plan
+✅ 커스텀 훅 생성 (useEdgeInteraction.ts)
+✅ 엣지 렌더링 & 인터랙션 컴포넌트 (EdgeInteractions.tsx)
+✅ 백엔드 엣지 API 라우터 (knowledge-network-edges-router.py)
+✅ 프론트엔드 API 클라이언트 확장 (knowledge-network-client.ts)
+✅ 통합 3D 컴포넌트 (KnowledgeNetworkWithEdges.tsx)
+✅ 정보 패널 UI (Desktop + Mobile)
+
+### Task 수행 내용
+
+#### **프론트엔드 - React/Three.js**
+
+1. **useEdgeInteraction.ts** (240줄)
+   - Edge 인터페이스 정의
+   - 마우스 호버/클릭 상태 관리
+   - Throttle 기반 성능 최적화
+   - 선 하이라이트 로직
+   - 검색 연동 기능
+   - 노드명 등록 (라벨 표시용)
+   - 모바일 기기 감지 (호버 제거)
+
+2. **EdgeInteractions.tsx** (450줄)
+   - Billboard 라벨 렌더링 (Canvas Texture)
+   - Raycaster 기반 선 호버 감지
+   - Two-way 연결선 강조
+   - 데스크톱: 마우스 호버 + 팔로잉 패널
+   - 모바일: 터치 클릭 + 고정 패널
+   - 검색 키워드 연동
+   - EdgesInfoPanel (데스크톱) & EdgeInfoPanelMobile (모바일)
+
+3. **KnowledgeNetworkWithEdges.tsx** (480줄)
+   - 노드 + 엣지 통합 렌더링
+   - Golden spiral 배치 (500+ 노드 지원)
+   - 노드 호버 & 클릭
+   - 관련 엣지 자동 강조
+   - 검색바 UI
+   - 호버 정보 팝업
+   - Three.js 최적화 (프레임 레이트 유지)
+
+4. **knowledge-network-client.ts** 확장 (200줄)
+   - NetworkEdge 인터페이스
+   - getAllEdges() - 모든 엣지 조회
+   - getEdgesForNode() - 특정 노드 관련 엣지
+   - searchEdges() - 키워드 검색
+   - getEdgeById() - 상세 조회
+
+#### **백엔드 - FastAPI**
+
+1. **knowledge-network-edges-router.py** (550줄)
+   - GET /edges - 모든 엣지 조회 (필터링)
+   - POST /edges - 새 엣지 추가 (관리자)
+   - GET /edges/{edge_id} - 상세 조회
+   - GET /nodes/{node_id}/edges - 노드 관련 엣지
+   - POST /edges/search - 검색
+   - PUT /edges/{edge_id} - 수정 (관리자)
+   - DELETE /edges/{edge_id} - 삭제 (관리자)
+   - 10개 더미 데이터 (마사지/웰니스 관계)
+
+2. **main.py 업데이트**
+   - knowledge_network_edges_router import
+   - 라우터 등록
+
+### 주요 기능 구현
+
+**1. 연결선 라벨 표시**
+```
+- Canvas Texture로 텍스트 렌더링
+- Billboard 메시 (항상 카메라를 향함)
+- 카메라 거리에 따라 자동 스케일 조정
+- 선의 중점에 배치
+```
+
+**2. 마우스 호버 인터랙션**
+```
+- Raycaster로 선 감지
+- 선 하이라이트 (노란색, 두께 2배)
+- 관련 노드 자동 강조 (CustomEvent)
+- Throttle로 성능 최적화 (60ms)
+- 모바일에서 비활성화
+```
+
+**3. 클릭 인터랙션**
+```
+- 선 클릭 감지 (데스크톱/모바일 공통)
+- 관계 정보 패널 표시
+- 출발-도착 노드명, 관계타입, 강도★, 설명
+- 데스크톱: 마우스 위치 팔로잉
+- 모바일: 화면 중앙 상단 고정
+```
+
+**4. 검색 연동**
+```
+- 검색 키워드 입력 시 일치하는 엣지 강조
+- 노드명, 관계타입, 설명에서 검색
+- 실시간 하이라이트 업데이트
+```
+
+**5. 성능 최적화**
+```
+- Billboard 라벨만 필요할 때 렌더링
+- Throttle 60ms (마우스 호버)
+- Three.js 프레임 레이트 유지
+- 모바일: 클릭으로만 정보 표시
+- 메모리: Map 기반 메시 관리
+```
+
+### 생성된 파일
+
+1. ✅ `/frontend/src/hooks/20250529-1645-useEdgeInteraction.ts` (240줄)
+2. ✅ `/frontend/src/components/20250529-1645-edge-interactions.tsx` (450줄)
+3. ✅ `/frontend/src/components/20250529-1700-knowledge-network-with-edges.tsx` (480줄)
+4. ✅ `/app/routers/20250529-1645-knowledge-network-edges-router.py` (550줄)
+5. ✅ `/frontend/src/lib/api/20250529-1530-knowledge-network-client.ts` (확장 200줄)
+6. ✅ `/main.py` (import + 라우터 등록)
+
+**총 2,170줄 작성**
+
+### UI 패널 구현
+
+**데스크톱 - 마우스 팔로잉**
+```
+┌─────────────────────────────┐
+│ 마사지 → 존                 │ X
+├─────────────────────────────┤
+│ 관계유형: 제공자             │
+│ 분류: 서비스 제공            │
+│ 강도: ★★★★☆ (4/5)         │
+│ 설명: 존이 마사지를...      │
+└─────────────────────────────┘
+```
+
+**모바일 - 중앙 상단 고정**
+```
+┌─────────────────────────┐
+│ 마사지 → 존 X           │
+├─────────────────────────┤
+│ 관계: 제공자             │
+│ 유형: 서비스 제공        │
+│ 강도: ★★★★☆ (4/5)     │
+│ 설명: 존이 마사지를...  │
+└─────────────────────────┘
+```
+
+### 기술 스택
+
+- **프론트엔드**: React 19, TypeScript, Three.js, Tailwind CSS
+- **백엔드**: FastAPI, Pydantic, SQLAlchemy
+- **3D 렌더링**: THREE.Line, THREE.BufferGeometry, Billboard Effect
+- **인터랙션**: Raycaster, Canvas Texture, CustomEvent
+- **모바일**: Touch Events, Device Detection
+- **성능**: Throttle, Request Animation Frame
+
+### 다음 단계 (Agent H)
+
+1. DB 마이그레이션 - MockEdges → PostgreSQL (엣지 영속성)
+2. 양방향 관계 자동 생성 (A→B 생성하면 B→A도 옵션)
+3. 엣지 강도 자동 계산 (교점 수, 거리 기반)
+4. 고급 필터링 (강도 범위, 관계타입 다중선택)
+5. 실시간 업데이트 (WebSocket 엣지 스트림)
+6. 애니메이션 개선 (엣지 펄스, 노드 궤도)
+
+---
