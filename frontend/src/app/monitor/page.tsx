@@ -232,6 +232,14 @@ export function MonitorPage() {
             <p className="text-sm text-gray-400 mt-1">실시간 드라이버 및 픽업 요청 관리</p>
           </div>
 
+          {/* RED BOX - Booking of Therapist */}
+          <button
+            onClick={() => setShowGoogleSheet(true)}
+            className="border-4 border-red-500/80 rounded-lg px-8 py-2 bg-transparent hover:bg-red-500/10 transition-all"
+          >
+            <span className="text-xl font-bold text-black dark:text-white">Booking Of Therapist</span>
+          </button>
+
           <div className="text-right">
             <div className="text-3xl font-mono font-bold text-indigo-400">{currentTime}</div>
             <p className="text-xs text-gray-500 mt-1">실시간 모니터링</p>
