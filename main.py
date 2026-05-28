@@ -81,6 +81,12 @@ app.add_middleware(
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # ============================================================
+# 감사 컨텍스트 미들웨어 (Audit Trail)
+# ============================================================
+from app.middleware.audit_context import AuditContextMiddleware
+app.add_middleware(AuditContextMiddleware)
+
+# ============================================================
 # Phase 10-2: 모니터링 & 로깅 미들웨어 등록
 # ============================================================
 

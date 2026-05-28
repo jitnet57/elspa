@@ -214,52 +214,158 @@ export const WalkInBookingModal = ({
               </div>
             </div>
 
-            {/* 테라피스트 선택 */}
+            {/* 테라피스트 선택 - 멀티 선택 */}
             <div>
-              <label className="text-gray-300 font-bold mb-2 block">💆 Select Therapist</label>
-              <div className="space-y-1 max-h-40 overflow-y-auto">
-                {idleTherapists.map((t, idx) => (
-                  <button
-                    key={t.id}
-                    onClick={() => setSelectedTherapists([t.id])}
-                    className={`w-full p-2 rounded text-left text-sm transition-colors ${
-                      selectedTherapists.includes(t.id)
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    }`}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <span className="font-bold">#{idx + 1}</span> {t.name}
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-gray-300 font-bold block">💆 Select Therapist(s)</label>
+                <span className="text-cyan-400 font-bold text-sm">
+                  Selected: {selectedTherapists.length}
+                </span>
+              </div>
+
+              {/* 검색 기능 추가 (선택 사항) */}
+              <input
+                type="text"
+                placeholder="Search by name or ID..."
+                className="w-full bg-gray-700 text-white px-3 py-2 rounded border border-gray-600 focus:border-blue-500 focus:outline-none mb-3 text-sm"
+              />
+
+              {/* 테라피스트 목록 - 체크박스 형식 */}
+              <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-600 rounded-lg p-3 bg-gray-800/50">
+                {idleTherapists.length === 0 ? (
+                  <div className="text-gray-500 text-sm text-center py-4">No available therapists</div>
+                ) : (
+                  idleTherapists.map((t, idx) => (
+                    <label key={t.id} className="flex items-start gap-3 p-2 rounded hover:bg-gray-700/50 cursor-pointer transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={selectedTherapists.includes(t.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedTherapists([...selectedTherapists, t.id]);
+                          } else {
+                            setSelectedTherapists(selectedTherapists.filter(id => id !== t.id));
+                          }
+                        }}
+                        className="w-4 h-4 mt-1 accent-indigo-600 cursor-pointer"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-white">#{idx + 1}</span>
+                          <span className="text-white font-semibold truncate">{t.name}</span>
+                        </div>
+                        <div className="text-xs text-gray-400 mt-1">
+                          {t.specialty} • checked in: {t.checked_in_at}
+                        </div>
                       </div>
-                      <div className="text-xs">checked in: {t.checked_in_at}</div>
-                    </div>
-                    <div className="text-xs text-gray-400">{t.specialty}</div>
-                  </button>
-                ))}
+                      {selectedTherapists.includes(t.id) && (
+                        <span className="text-indigo-400 text-lg flex-shrink-0">✓</span>
+                      )}
+                    </label>
+                  ))
+                )}
               </div>
             </div>
 
-            {/* 침대 선택 */}
+            {/* 침대 선택 - 멀티 선택 */}
             <div>
-              <label className="text-gray-300 font-bold mb-2 block">🛏️ Select Bed</label>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-40 overflow-y-auto">
-                {availableBeds.map(bed => (
-                  <button
-                    key={bed.id}
-                    onClick={() => setSelectedBeds([bed.id])}
-                    className={`p-2 rounded text-sm font-bold transition-colors ${
-                      selectedBeds.includes(bed.id)
-                        ? 'bg-green-600 text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    }`}
-                  >
-                    <div>{bed.room_zone}</div>
-                    <div className="text-xs">Bed {bed.bed_number}</div>
-                  </button>
-                ))}
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-gray-300 font-bold block">🛏️ Select Bed(s)</label>
+                <span className="text-green-400 font-bold text-sm">
+                  Selected: {selectedBeds.length}
+                </span>
+              </div>
+
+              {/* 침대 그리드 - 클릭으로 다중 선택 */}
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 p-3 border border-gray-600 rounded-lg bg-gray-800/50">
+                {/* Unassigned 옵션 */}
+                <button
+                  onClick={() => {
+                    if (selectedBeds.length === 0) {
+                      setSelectedBeds([]);
+                    } else {
+                      setSelectedBeds([]);
+                    }
+                  }}
+                  className={`p-3 rounded-lg font-bold text-sm transition-all border-2 ${
+                    selectedBeds.length === 0
+                      ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/50'
+                      : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'
+                  }`}
+                  title="Auto by Check-in Order"
+                >
+                  <div className="text-xs">Unassigned</div>
+                  <div className="text-xs mt-1">(Auto)</div>
+                </button>
+
+                {/* 개별 침대 선택 */}
+                {availableBeds.length === 0 ? (
+                  <div className="col-span-full text-gray-500 text-sm text-center py-6">
+                    No available beds
+                  </div>
+                ) : (
+                  availableBeds.map(bed => (
+                    <button
+                      key={bed.id}
+                      onClick={() => {
+                        if (selectedBeds.includes(bed.id)) {
+                          setSelectedBeds(selectedBeds.filter(id => id !== bed.id));
+                        } else {
+                          setSelectedBeds([...selectedBeds, bed.id]);
+                        }
+                      }}
+                      className={`p-3 rounded-lg font-bold text-sm transition-all border-2 ${
+                        selectedBeds.includes(bed.id)
+                          ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/50'
+                          : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'
+                      }`}
+                    >
+                      <div className="text-xs font-semibold">{bed.room_zone}</div>
+                      <div className="text-xs mt-1">Bed {bed.bed_number}</div>
+                    </button>
+                  ))
+                )}
               </div>
             </div>
+
+            {/* 선택 요약 */}
+            {(selectedTherapists.length > 0 || selectedBeds.length > 0) && (
+              <div className="bg-blue-900/30 border-l-4 border-blue-500 p-3 rounded">
+                <div className="text-blue-300 font-bold mb-2">📋 Selection Summary</div>
+                <div className="space-y-2 text-sm">
+                  {selectedTherapists.length > 0 && (
+                    <div>
+                      <span className="text-gray-400">Therapists ({selectedTherapists.length}):</span>
+                      <div className="text-white font-semibold flex flex-wrap gap-2 mt-1">
+                        {selectedTherapists.map(tId => {
+                          const therapist = therapists.find(t => t.id === tId);
+                          return (
+                            <span key={tId} className="bg-indigo-600/40 px-2 py-1 rounded text-xs">
+                              {therapist?.name}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                  {selectedBeds.length > 0 && (
+                    <div>
+                      <span className="text-gray-400">Beds ({selectedBeds.length}):</span>
+                      <div className="text-white font-semibold flex flex-wrap gap-2 mt-1">
+                        {selectedBeds.map(bedId => {
+                          const bed = availableBeds.find(b => b.id === bedId);
+                          return (
+                            <span key={bedId} className="bg-green-600/40 px-2 py-1 rounded text-xs">
+                              {bed?.room_zone} - Bed {bed?.bed_number}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* 버튼 */}
             <div className="flex gap-2 pt-2">
@@ -278,7 +384,7 @@ export const WalkInBookingModal = ({
                     : 'bg-green-600 hover:bg-green-700 text-white'
                 }`}
               >
-                ✅ Confirm Assignment
+                ✅ Confirm Assignment ({selectedTherapists.length} therapist(s), {selectedBeds.length} bed(s))
               </button>
             </div>
           </div>
