@@ -18,16 +18,18 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const { isAdminAuthenticated } = useAdminGate();
-  const [hasHydrated, setHasHydrated] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setHasHydrated(true);
+    setIsClient(true);
   }, []);
 
-  if (!hasHydrated) {
-    return null;
+  // Always render AdminShell on server (SSR), only check auth on client
+  if (!isClient) {
+    return <AdminShell>{children}</AdminShell>;
   }
 
+  // On client, check authentication state
   if (!isAdminAuthenticated) {
     return <AdminLoginScreen />;
   }
