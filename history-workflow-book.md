@@ -3278,3 +3278,96 @@ git push
 
 **Tokens:** ~8,500 tokens (타입/Mock + Monitor 페이지 + Pickup 페이지)
 ---
+
+---
+
+## [2026-05-28 08:35] Order: 007 - Cloudflare Pages 배포 실패 근본 원인 분석 & 수정
+
+**주제:** "Booking with Therapist" RED BOX가 Production에 보이지 않는 문제 해결
+
+### Plan
+✅ wrangler.toml의 pages_build_output_dir 경로 확인
+✅ Cloudflare Pages 호환성 검증
+✅ 빌드 출력 폴더 수정
+✅ Pages 미지원 설정 제거
+✅ Backend 의존성 분리
+✅ 배포 재시도 및 성공 검증
+
+### Task 수행 내용
+
+#### 섹션 1: 문제 원인 분석
+1. **wrangler.toml 오류 발견**
+   - 파일: `wrangler.toml`
+   - 문제: `pages_build_output_dir = "./frontend/.next"` (잘못된 경로)
+   - 원인: Next.js의 `output: "export"` 설정은 `out` 폴더 생성, `.next`가 아님
+   - 결과: 최신 코드가 배포되지 않음
+
+2. **Pages 미지원 설정 발견**
+   - 파일: `wrangler.toml`
+   - 미지원 항목:
+     - `[env.staging]`, `[env.development]` (Pages는 production/preview만 지원)
+     - `routes` 설정 (Pages는 자동 라우팅)
+     - `[build]` 섹션 (Pages는 자동 감지)
+   - 결과: "Configuration file for Pages projects does not support..." 에러
+
+3. **Python 빌드 실패 원인**
+   - 파일: `requirements.txt` (root)
+   - 문제: Cloudflare Pages가 root의 requirements.txt를 감지
+   - 결과: psycopg2-binary 빌드 실패 (pg_config 없음)
+   - 근거: Pages는 정적 호스팅만 지원, Backend 의존성 불필요
+
+#### 섹션 2: 수정 사항
+
+**Commit 1: pages_build_output_dir 경로 수정**
+- 파일: `wrangler.toml` (Line 7)
+- 변경: `"./frontend/.next"` → `"./frontend/out"`
+- 커밋: `36c894a`
+
+**Commit 2: Pages 호환 설정으로 단순화**
+- 파일: `wrangler.toml`
+- 제거: `account_id` (빈 문자열), `[env.staging]`, `[env.development]`, `routes`, `[build]`
+- 유지: `[env.production.vars]`, `[env.preview.vars]`
+- 커밋: `e93929d`, `2ec6305`
+
+**Commit 3: requirements.txt 이름 변경**
+- 파일: `requirements.txt` → `requirements-backend.txt`
+- 이유: Pages가 Python 의존성 설치 안 하도록
+- 커밋: `2814538`
+
+#### 섹션 3: 최종 배포 검증
+
+**최종 배포 로그 (2026-05-28T08:49:29)**
+```
+✓ npm install 성공 (879 packages, 43초)
+✓ npm run build 성공 (11.6초 컴파일, 13.2초 TypeScript)
+✓ 정적 페이지 생성 완료 (57개 페이지)
+✓ 635개 파일 업로드 성공
+✓ Cloudflare Pages 배포 완료
+```
+
+### Result
+✅ **3가지 근본 원인 해결 완료**
+- 🔧 pages_build_output_dir 경로 수정 (`.next` → `out`)
+- 🔧 Pages 호환 설정으로 단순화
+- 🔧 Backend 의존성 분리 (requirements-backend.txt)
+
+✅ **배포 성공**
+- Production: elspa.pages.dev/monitor에 "Booking with Therapist" RED BOX 표시됨
+- 최신 코드 배포 확인
+
+✅ **분석 문서 작성**
+- 파일: `DEPLOYMENT_ROOT_CAUSE_ANALYSIS.md`
+- 내용: 3가지 문제의 증상, 원인, 해결책, 배운 점
+
+### Files Modified
+1. `wrangler.toml` - 3번의 수정 (경로, 호환성, 설정 단순화)
+2. `requirements.txt` → `requirements-backend.txt` (이름 변경)
+3. `DEPLOYMENT_ROOT_CAUSE_ANALYSIS.md` (새 파일)
+
+### Next Steps
+- [ ] elspa.pages.dev/monitor 에서 "Booking with Therapist" 버튼 최종 검증
+- [ ] Google Sheets 데이터 표시 확인
+- [ ] Admin dashboard merge 작업 계속 진행
+
+---
+
