@@ -35,25 +35,25 @@ export default function AdminShell({ children }: AdminShellProps) {
           <nav className="flex flex-col gap-1">
             {/* Dashboard */}
             <Link className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all font-bold text-[#8aebff] bg-white/10 border-l-2 border-[#8aebff] shadow-[0_0_15px_rgba(34,211,238,0.2)]" href="/admin">
-              <span className="material-symbols-outlined">dashboard</span>
+              <span className="text-lg">📊</span>
               <span className="text-sm">Dashboard</span>
             </Link>
 
             {/* Therapists */}
             <Link className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all" href="/admin/therapist-schedule">
-              <span className="material-symbols-outlined">groups</span>
+              <span className="text-lg">👥</span>
               <span className="text-sm">Therapists</span>
             </Link>
 
             {/* Payroll */}
             <Link className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all" href="/admin/payroll">
-              <span className="material-symbols-outlined">payments</span>
+              <span className="text-lg">💰</span>
               <span className="text-sm">Payroll</span>
             </Link>
 
             {/* Settings */}
             <Link className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all" href="/admin/policies">
-              <span className="material-symbols-outlined">settings</span>
+              <span className="text-lg">⚙️</span>
               <span className="text-sm">Settings</span>
             </Link>
           </nav>
@@ -99,19 +99,19 @@ export default function AdminShell({ children }: AdminShellProps) {
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-indigo-500/10 z-50">
           <div className="flex justify-around items-stretch">
             <Link href="/admin" className="flex flex-col items-center justify-center flex-1 py-3 text-[#8aebff] hover:bg-white/5 transition-all text-[10px] font-bold">
-              <span className="material-symbols-outlined">dashboard</span>
+              <span className="text-xl">📊</span>
               <span className="mt-1">Dashboard</span>
             </Link>
             <Link href="/admin/therapist-schedule" className="flex flex-col items-center justify-center flex-1 py-3 text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all text-[10px] font-bold">
-              <span className="material-symbols-outlined">groups</span>
+              <span className="text-xl">👥</span>
               <span className="mt-1">Therapists</span>
             </Link>
             <Link href="/admin/payroll" className="flex flex-col items-center justify-center flex-1 py-3 text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all text-[10px] font-bold">
-              <span className="material-symbols-outlined">payments</span>
+              <span className="text-xl">💰</span>
               <span className="mt-1">Payroll</span>
             </Link>
             <Link href="/admin/policies" className="flex flex-col items-center justify-center flex-1 py-3 text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all text-[10px] font-bold">
-              <span className="material-symbols-outlined">settings</span>
+              <span className="text-xl">⚙️</span>
               <span className="mt-1">Settings</span>
             </Link>
           </div>

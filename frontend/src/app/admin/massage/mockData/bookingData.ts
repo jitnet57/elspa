@@ -50,6 +50,15 @@ export interface TimeSlot {
   notes: string;
 }
 
+export interface BedGroup {
+  id: string;
+  name: string;
+  description?: string;
+  bedIds: string[]; // bed IDs in this group
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ============================================================
 // 86개 베드 생성 함수: 마사지실1(30), 마사지실2(30), VIP실(14), 기타실(12)
 // ============================================================
