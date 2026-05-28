@@ -205,6 +205,8 @@ export default function TherapistSchedulePage() {
   const [selectedSession, setSelectedSession] = useState<ScheduleSession | null>(null);
   const [bookingSlot, setBookingSlot] = useState<{ therapistId: number; hour: number } | null>(null);
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
+  const [showGoogleSheetBooking, setShowGoogleSheetBooking] = useState(false);
+  const [googleBookings, setGoogleBookings] = useState<any[]>([]);
 
   // 예약 폼 상태 제어
   const [quickForm, setQuickForm] = useState({ customerName: '', serviceType: 'swedish' as const, roomNumber: '' });
@@ -295,23 +297,51 @@ export default function TherapistSchedulePage() {
       {/* ============================================================
           📌 Top Navigation Shell (Shared Component)
           ============================================================ */}
-      <header className="bg-slate-950/40 backdrop-blur-md text-cyan-400 flex justify-between items-center px-6 py-4 w-full sticky top-0 z-50 border-b border-indigo-500/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
-        <div className="flex items-center gap-4">
-          <a className="flex items-center gap-2 hover:bg-white/10 p-2 rounded-full transition-all active:scale-95 text-[#8aebff]" href="/admin.html">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>arrow_back</span>
-          </a>
-          <h1 className="text-xl sm:text-2xl font-black tracking-tighter text-[#8aebff] drop-shadow-[0_0_8px_rgba(138,235,255,0.4)]">
-            ELSPA CONTROL
-          </h1>
+      <header className="bg-gradient-to-b from-slate-900/60 to-slate-950/40 backdrop-blur-md text-white sticky top-0 z-50 border-b border-indigo-500/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+        {/* Top Navigation */}
+        <div className="flex justify-between items-center px-6 py-4">
+          <div className="flex items-center gap-4">
+            <a className="flex items-center gap-2 hover:bg-white/10 p-2 rounded-full transition-all active:scale-95" href="/admin.html">
+              <span className="material-symbols-outlined text-cyan-400">arrow_back</span>
+            </a>
+            <button className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg hover:bg-slate-700/50 transition-all text-slate-300 hover:text-white text-sm font-semibold">
+              🛏️ Real-time Bed Mode
+            </button>
+          </div>
+
+          {/* Center Tab - Therapist Daily Schedule */}
+          <button className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 rounded-xl transition-all text-white font-bold shadow-lg hover:shadow-purple-500/50">
+            <span style={{fontSize: '20px'}}>📅</span>
+            Therapist Daily Schedule
+          </button>
+
+          {/* Right - Time & Language */}
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <div className="text-sm font-mono text-slate-300">08:47:31</div>
+              <div className="text-xs text-slate-500">Polls: 1 | 📞</div>
+            </div>
+            <button className="px-3 py-1 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-bold text-sm">EN</button>
+            <button className="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-bold text-sm">KO</button>
+            <button className="p-2 hover:bg-white/10 rounded-lg transition-all">
+              <span className="material-symbols-outlined text-slate-400">settings</span>
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-6">
-          <div className="hidden md:flex gap-4 text-xs font-black tracking-wider uppercase items-center">
-            <span className="text-[#8aebff] font-bold">Therapist Schedule</span>
-            <span className="text-indigo-300/40">v2.0.4</span>
-          </div>
-          <div className="w-10 h-10 rounded-full border border-cyan-500/30 overflow-hidden shadow-[0_0_10px_rgba(34,211,238,0.2)]">
-            <img alt="Admin" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-Zy8obKMQ4KCOYGq9VIYlInzuOjEWliz7MAm1b9M5EEj61q1lo_2sCRiGkqfcKFDnZjkwYMvbTZHOg2smiDIkZDWTwUpaCQk-oX6O0iXV1zHd1WgoZFvVOp48yI6TmwNqLqIIqVWp_S_QBwxAPp62YS_LzVshm44scATwlDBlPFAtUD82Uo44NHlxPnEPZFBXmYfzAZJcRzB7KKQ9mII2ooy_6pSlDZHBruhDIHh_RkDrzvLV2QPWnD4iw7G2YybILo_B44PhxT-d"/>
-          </div>
+
+        {/* RED BOX - Booking Menu */}
+        <div className="flex justify-center px-6 pb-4">
+          <button
+            onClick={() => setShowGoogleSheetBooking(true)}
+            className="w-full max-w-2xl px-6 py-4 border-4 border-red-500/80 rounded-lg bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white font-bold text-lg transition-all shadow-xl hover:shadow-rose-500/50 flex items-center justify-center gap-3"
+          >
+            <span className="text-2xl">🧖</span>
+            <div className="text-left">
+              <div>Booking with Therapist</div>
+              <div className="text-xs text-white/80">View Google Sheets Bookings</div>
+            </div>
+            <span className="ml-auto">→</span>
+          </button>
         </div>
       </header>
 
@@ -1133,6 +1163,73 @@ export default function TherapistSchedulePage() {
                 className="flex-1 px-4 py-3 bg-rose-500 hover:bg-rose-600 text-slate-950 font-black rounded-xl transition-all text-center shadow-lg"
               >
                 Delete Session
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Google Sheet Booking Modal */}
+      {showGoogleSheetBooking && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[150] p-4">
+          <div className="bg-slate-900 border border-pink-500/50 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-gradient-to-r from-pink-600 to-rose-600 px-6 py-4 flex justify-between items-center border-b border-pink-500/30">
+              <div>
+                <h2 className="text-xl font-bold text-white">🧖 Therapist Bookings</h2>
+                <p className="text-xs text-pink-100 mt-1">Google Sheets Integration</p>
+              </div>
+              <button
+                onClick={() => setShowGoogleSheetBooking(false)}
+                className="text-white hover:bg-white/20 rounded-lg p-2 transition-all"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6">
+              <div className="space-y-3">
+                {/* Sample Booking Data */}
+                {[
+                  { id: '1', therapist: 'Maria Santos', service: 'Swedish Massage', date: '2026-05-28', time: '14:00', guest: 'John Doe', room: '01' },
+                  { id: '2', therapist: 'Ana Mercado', service: 'Thai Massage', date: '2026-05-28', time: '15:00', guest: 'Jane Smith', room: '02' },
+                  { id: '3', therapist: 'Rosa Chavez', service: 'Hot Stone Therapy', date: '2026-05-28', time: '16:00', guest: 'Mike Johnson', room: '03' },
+                ].map(booking => (
+                  <div
+                    key={booking.id}
+                    className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/8 transition-all"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1">
+                        <p className="font-semibold text-white text-base">👤 {booking.guest}</p>
+                        <p className="text-sm text-pink-400 mt-1">{booking.service}</p>
+                        <p className="text-sm text-gray-400 mt-1">Therapist: <span className="text-indigo-300 font-medium">{booking.therapist}</span></p>
+                        <p className="text-xs text-gray-500 mt-2">📅 {booking.date} ⏰ {booking.time} | 🚪 Room {booking.room}</p>
+                      </div>
+                      <div className="bg-pink-500/20 text-pink-300 px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap">
+                        ☁️ Synced
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Sync Info */}
+                <div className="mt-6 pt-4 border-t border-white/10">
+                  <p className="text-xs text-gray-500 text-center">
+                    💾 Auto-synced daily at midnight (00:00)
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="sticky bottom-0 bg-slate-800 border-t border-white/10 px-6 py-4 flex justify-end gap-3">
+              <button
+                onClick={() => setShowGoogleSheetBooking(false)}
+                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-white text-sm font-medium transition-all"
+              >
+                Close
               </button>
             </div>
           </div>
