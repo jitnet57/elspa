@@ -15,7 +15,7 @@ interface MassageBooking {
   createdAt: string;
 }
 
-export function MonitorPage({ showBookingButton = true }) {
+export default function MonitorPage({ showBookingButton = true }) {
   const [currentTime, setCurrentTime] = useState<string>('--:--:--');
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
