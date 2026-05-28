@@ -107,7 +107,13 @@
       "Bash(cd \"e:\\\\elspa\\\\frontend\" && rm -rf .next && npm run build 2>&1 | tail -30)",
       "Bash(taskkill /PID 7532 /F)",
       "Bash(npm run *)",
-      "Bash(xargs ls -la)"
+      "Bash(xargs ls -la)",
+      "Bash(railway --version)",
+      "Bash(wrangler pages *)",
+      "Bash(dir e:\\\\elspa)",
+      "Bash(Get-ChildItem -Path \"e:\\\\elspa\" -Force)",
+      "Bash(ls -la \"E:\\\\elspa\\\\\" | head -30)",
+      "Read(//e//**)"
     ],
     "additionalDirectories": [
       "C:\\Users\\jitne\\Desktop",

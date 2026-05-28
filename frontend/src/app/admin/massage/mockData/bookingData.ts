@@ -8,9 +8,13 @@ export interface TherapyBed {
   id: string;
   name: string;
   roomNumber: string;
+  room: 'room1' | 'room2';
   type: 'massage' | 'spa' | 'facial' | 'premium';
-  status: 'available' | 'occupied' | 'maintenance';
+  status: 'available' | 'occupied' | 'maintenance' | 'cleaning';
   capacity: number;
+  therapistId?: string;
+  serviceName?: string;
+  endTime?: string;
 }
 
 export interface Therapist {
@@ -47,57 +51,42 @@ export interface TimeSlot {
 }
 
 // ============================================================
-// 베드/시술실
+// 베드/시술실 (30개: Room1 15개, Room2 15개)
 // ============================================================
 export const therapyBeds: TherapyBed[] = [
-  {
-    id: 'BED-001',
-    name: 'Room A',
-    roomNumber: 'A-1',
-    type: 'massage',
-    status: 'occupied',
-    capacity: 1,
-  },
-  {
-    id: 'BED-002',
-    name: 'Room B',
-    roomNumber: 'B-1',
-    type: 'massage',
-    status: 'available',
-    capacity: 1,
-  },
-  {
-    id: 'BED-003',
-    name: 'Room C',
-    roomNumber: 'C-1',
-    type: 'massage',
-    status: 'occupied',
-    capacity: 1,
-  },
-  {
-    id: 'BED-004',
-    name: 'Premium Suite',
-    roomNumber: 'P-1',
-    type: 'premium',
-    status: 'available',
-    capacity: 2,
-  },
-  {
-    id: 'BED-005',
-    name: 'Spa Room',
-    roomNumber: 'S-1',
-    type: 'spa',
-    status: 'maintenance',
-    capacity: 2,
-  },
-  {
-    id: 'BED-006',
-    name: 'Facial Room',
-    roomNumber: 'F-1',
-    type: 'facial',
-    status: 'available',
-    capacity: 1,
-  },
+  // 마사지룸1 (A-1 ~ A-15)
+  { id: 'BED-001', name: 'A-1', roomNumber: 'Room1-A1', room: 'room1', type: 'massage', status: 'occupied', capacity: 1, therapistId: 'THER-001', serviceName: 'Thai Massage', endTime: '10:15' },
+  { id: 'BED-002', name: 'A-2', roomNumber: 'Room1-A2', room: 'room1', type: 'massage', status: 'available', capacity: 1 },
+  { id: 'BED-003', name: 'A-3', roomNumber: 'Room1-A3', room: 'room1', type: 'massage', status: 'available', capacity: 1 },
+  { id: 'BED-004', name: 'A-4', roomNumber: 'Room1-A4', room: 'room1', type: 'massage', status: 'occupied', capacity: 1, therapistId: 'THER-002', serviceName: 'Swedish Massage', endTime: '14:00' },
+  { id: 'BED-005', name: 'A-5', roomNumber: 'Room1-A5', room: 'room1', type: 'massage', status: 'cleaning', capacity: 1 },
+  { id: 'BED-006', name: 'A-6', roomNumber: 'Room1-A6', room: 'room1', type: 'spa', status: 'available', capacity: 1 },
+  { id: 'BED-007', name: 'A-7', roomNumber: 'Room1-A7', room: 'room1', type: 'spa', status: 'occupied', capacity: 1, therapistId: 'THER-003', serviceName: 'Aromatherapy', endTime: '15:30' },
+  { id: 'BED-008', name: 'A-8', roomNumber: 'Room1-A8', room: 'room1', type: 'massage', status: 'available', capacity: 1 },
+  { id: 'BED-009', name: 'A-9', roomNumber: 'Room1-A9', room: 'room1', type: 'facial', status: 'available', capacity: 1 },
+  { id: 'BED-010', name: 'A-10', roomNumber: 'Room1-A10', room: 'room1', type: 'massage', status: 'available', capacity: 1 },
+  { id: 'BED-011', name: 'A-11', roomNumber: 'Room1-A11', room: 'room1', type: 'massage', status: 'available', capacity: 1 },
+  { id: 'BED-012', name: 'A-12', roomNumber: 'Room1-A12', room: 'room1', type: 'premium', status: 'available', capacity: 2 },
+  { id: 'BED-013', name: 'A-13', roomNumber: 'Room1-A13', room: 'room1', type: 'massage', status: 'available', capacity: 1 },
+  { id: 'BED-014', name: 'A-14', roomNumber: 'Room1-A14', room: 'room1', type: 'massage', status: 'available', capacity: 1 },
+  { id: 'BED-015', name: 'A-15', roomNumber: 'Room1-A15', room: 'room1', type: 'spa', status: 'available', capacity: 1 },
+
+  // 마사지룸2 (B-1 ~ B-15)
+  { id: 'BED-016', name: 'B-1', roomNumber: 'Room2-B1', room: 'room2', type: 'massage', status: 'available', capacity: 1 },
+  { id: 'BED-017', name: 'B-2', roomNumber: 'Room2-B2', room: 'room2', type: 'massage', status: 'occupied', capacity: 1, therapistId: 'THER-004', serviceName: 'Deep Tissue', endTime: '16:30' },
+  { id: 'BED-018', name: 'B-3', roomNumber: 'Room2-B3', room: 'room2', type: 'massage', status: 'available', capacity: 1 },
+  { id: 'BED-019', name: 'B-4', roomNumber: 'Room2-B4', room: 'room2', type: 'facial', status: 'available', capacity: 1 },
+  { id: 'BED-020', name: 'B-5', roomNumber: 'Room2-B5', room: 'room2', type: 'massage', status: 'available', capacity: 1 },
+  { id: 'BED-021', name: 'B-6', roomNumber: 'Room2-B6', room: 'room2', type: 'spa', status: 'available', capacity: 1 },
+  { id: 'BED-022', name: 'B-7', roomNumber: 'Room2-B7', room: 'room2', type: 'massage', status: 'occupied', capacity: 1, therapistId: 'THER-005', serviceName: 'Hot Stone', endTime: '17:45' },
+  { id: 'BED-023', name: 'B-8', roomNumber: 'Room2-B8', room: 'room2', type: 'massage', status: 'available', capacity: 1 },
+  { id: 'BED-024', name: 'B-9', roomNumber: 'Room2-B9', room: 'room2', type: 'massage', status: 'available', capacity: 1 },
+  { id: 'BED-025', name: 'B-10', roomNumber: 'Room2-B10', room: 'room2', type: 'premium', status: 'available', capacity: 2 },
+  { id: 'BED-026', name: 'B-11', roomNumber: 'Room2-B11', room: 'room2', type: 'massage', status: 'cleaning', capacity: 1 },
+  { id: 'BED-027', name: 'B-12', roomNumber: 'Room2-B12', room: 'room2', type: 'massage', status: 'available', capacity: 1 },
+  { id: 'BED-028', name: 'B-13', roomNumber: 'Room2-B13', room: 'room2', type: 'facial', status: 'available', capacity: 1 },
+  { id: 'BED-029', name: 'B-14', roomNumber: 'Room2-B14', room: 'room2', type: 'massage', status: 'available', capacity: 1 },
+  { id: 'BED-030', name: 'B-15', roomNumber: 'Room2-B15', room: 'room2', type: 'spa', status: 'available', capacity: 1 },
 ];
 
 // ============================================================
@@ -357,4 +346,11 @@ export const bookingSummary = {
     }, 0),
   availableTherapists: therapists.filter(t => t.status === 'available').length,
   availableBeds: therapyBeds.filter(b => b.status === 'available').length,
+};
+
+// ============================================================
+// 유틸리티 함수
+// ============================================================
+export const getBedsByRoom = (roomId: 'room1' | 'room2'): TherapyBed[] => {
+  return therapyBeds.filter(bed => bed.room === roomId);
 };

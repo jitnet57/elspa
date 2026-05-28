@@ -8,6 +8,7 @@ const statusColors = {
   available: 'bg-green-100 text-green-700',
   occupied: 'bg-blue-100 text-blue-700',
   maintenance: 'bg-gray-100 text-gray-700',
+  cleaning: 'bg-amber-100 text-amber-700',
 };
 
 const typeColors = {
@@ -69,7 +70,7 @@ export default function MassageBookingBeds() {
                   <p className="text-label-sm text-on-surface-variant">Room {bed.roomNumber}</p>
                 </div>
                 <span className={`px-2 py-1 rounded-full text-label-xs font-bold uppercase ${statusColors[bed.status]}`}>
-                  {bed.status === 'available' ? '예약가능' : bed.status === 'occupied' ? '사용중' : '점검중'}
+                  {bed.status === 'available' ? '예약가능' : bed.status === 'occupied' ? '사용중' : bed.status === 'cleaning' ? '청소중' : '점검중'}
                 </span>
               </div>
 
