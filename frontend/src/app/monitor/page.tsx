@@ -185,7 +185,7 @@ export default function MonitorPage() {
           </div>
         </div>
 
-        {/* 🧖 RED BOX - Google Sheet Bookings Menu */}
+        {/* 🧖 RED BOX - Booking with Therapist Menu */}
         <div className="mt-4 border-4 border-red-500/80 rounded-lg p-6 bg-white/5 backdrop-blur-sm">
           <button
             onClick={handleOpenGoogleSheet}
@@ -193,8 +193,8 @@ export default function MonitorPage() {
           >
             <span className="text-3xl group-hover:scale-110 transition-transform">🧖</span>
             <div className="text-left">
-              <div className="font-bold">마사지 예약</div>
-              <div className="text-xs text-white/80">Google Sheets 예약 정보</div>
+              <div className="font-bold">BOOKING WITH THERAPIST</div>
+              <div className="text-xs text-white/80">Google Sheets 예약 정보 조회</div>
             </div>
             <span className="ml-auto text-white/70 group-hover:text-white">→</span>
           </button>
