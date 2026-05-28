@@ -46,7 +46,7 @@ export default function AdminShell({ children }: AdminShellProps) {
             </Link>
 
             {/* Payroll */}
-            <Link className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all" href="/admin">
+            <Link className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all" href="/admin/payroll">
               <span className="material-symbols-outlined">payments</span>
               <span className="text-sm">Payroll</span>
             </Link>
@@ -106,7 +106,7 @@ export default function AdminShell({ children }: AdminShellProps) {
               <span className="material-symbols-outlined">groups</span>
               <span className="mt-1">Therapists</span>
             </Link>
-            <Link href="/admin" className="flex flex-col items-center justify-center flex-1 py-3 text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all text-[10px] font-bold">
+            <Link href="/admin/payroll" className="flex flex-col items-center justify-center flex-1 py-3 text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all text-[10px] font-bold">
               <span className="material-symbols-outlined">payments</span>
               <span className="mt-1">Payroll</span>
             </Link>
