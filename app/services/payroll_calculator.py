@@ -302,12 +302,14 @@ class PayrollCalculator:
         sss_deduction = Decimal(0)
         ca_deduction = await calc.get_approved_ca_amount(employee.id, db)
 
-        # 13개월 보너스 선지급 계산
-        thirteenth_month_deduction = calc.calculate_thirteenth_month_deduction(
+        # 13개월 보너스 누적액 및 선지급 계산
+        thirteenth_month_accrual = calc.calculate_thirteenth_month_deduction(
             base_salary=base_amount,
             hire_date=employee.hire_date,
             reference_date=payroll_period.period_end
         )
+        # 선지급액은 누적액과 동일 (매 정산 시 누적액을 차감)
+        thirteenth_month_deduction = thirteenth_month_accrual
 
         # 보건소 검사비 차감 (Therapist, 분기별 1회)
         health_check_deduction = calc.calculate_health_check_deduction(
@@ -390,12 +392,14 @@ class PayrollCalculator:
             sss_deduction=sss_deduction,
             ca_deduction=ca_deduction,
             health_check_deduction=health_check_deduction,
+            thirteenth_month_accrual=thirteenth_month_accrual,
             thirteenth_month_deduction=thirteenth_month_deduction,
             gross_pay=gross_pay,
             total_deductions=total_deductions,
             net_pay=net_pay,
             notes=notes,
-            status="draft"
+            status="draft",
+            is_obsolete=False
         )
 
     @staticmethod

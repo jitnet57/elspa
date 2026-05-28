@@ -169,6 +169,7 @@ class PayrollRecordResponse(BaseModel):
 
     status: str  # draft, approved, paid
     notes: Optional[str] = None
+    is_obsolete: bool = False
 
     created_at: datetime
     updated_at: datetime
