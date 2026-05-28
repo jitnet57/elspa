@@ -127,6 +127,16 @@ async def startup_event():
         await init_db()
         logger.info("✅ 데이터베이스 초기화 완료")
 
+        # 지식 네트워크 샘플 데이터 시드 (Order 049)
+        from app.database import SessionLocal
+        from app.services.knowledge_network_seeder import seed_knowledge_network
+        async with SessionLocal() as db_session:
+            try:
+                result = await seed_knowledge_network(db_session)
+                logger.info(f"✅ 지식 네트워크 시드 완료: {result['inserted']}개 삽입, {result['skipped']}개 스킵")
+            except Exception as e:
+                logger.warning(f"⚠️ 지식 네트워크 시드 스킵 (이미 존재함): {e}")
+
         # 마사지 예약 일일 동기화 스케줄러 시작
         from app.services.scheduler import start_scheduler
         start_scheduler()
@@ -231,6 +241,8 @@ from app.routers import google_sheets_router
 from app.routers import payroll
 # 🛏️ 침대 그룹 분할 API 라우터 (신규 - 2026-05-28)
 from app.routers import beds_split
+# 📚 지식 네트워크 API 라우터 (신규 - 2026-05-29, Order 049)
+from app.routers import knowledge_network_router
 
 # 기존 라우터들 (일부 호환성 문제로 주석 처리)
 # from app.routers import beds, therapists, bookings, matching
@@ -262,6 +274,7 @@ app.include_router(driver_api.router)  # 🚗 드라이버 API
 app.include_router(massage_bookings.router)  # 🧖 마사지 예약 API (Google Sheets 동기화)
 app.include_router(google_sheets_router.router)  # 📊 Google Sheets OAuth 2.0 API
 app.include_router(beds_split.router)  # 🛏️ 침대 그룹 분할 API
+app.include_router(knowledge_network_router.router)  # 📚 지식 네트워크 API (3D 시각화)
 
 # 재무 감사 로그 라우터 등록 (임시 비활성화)
 # from app.routers import audit_api

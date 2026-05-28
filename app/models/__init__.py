@@ -18,6 +18,7 @@ from .coupon import Coupon
 from .sss_contribution import SssContribution
 from .financial import ExpenseCategory, Expense, Budget, MonthlyRevenue
 from .driver import Driver, DriverBooking, DriverEarnings, DriverWithdrawal
+from .knowledge_network import KnowledgeNetworkNode
 
 __all__ = [
     "Customer", "Service", "Booking", "Staff", "Transaction", "Chat",
@@ -25,5 +26,6 @@ __all__ = [
     "TherapistService", "CustomerPoint", "PointTransaction",
     "Stamp", "Coupon", "SssContribution",
     "ExpenseCategory", "Expense", "Budget", "MonthlyRevenue",
-    "Driver", "DriverBooking", "DriverEarnings", "DriverWithdrawal"
+    "Driver", "DriverBooking", "DriverEarnings", "DriverWithdrawal",
+    "KnowledgeNetworkNode"
 ]
