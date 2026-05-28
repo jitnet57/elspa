@@ -3371,3 +3371,80 @@ git push
 
 ---
 
+
+---
+## [2026-05-28 19:00] Order: 012 - Google Sheets 통합 완료 & 배포 아키텍처 확정
+
+**주제:** Google Sheets OAuth 2.0 통합 완료, Cloudflare Pages + Railway 배포 구조 확정
+
+### Plan
+✅ Google OAuth 2.0 구현 (Google Cloud Console 설정)
+✅ FastAPI 백엔드 API 작성 (google_sheets_router.py, google_oauth_service.py)
+✅ Frontend 예약 입력 폼 작성 (GoogleSheetBookingModal.tsx)
+✅ Monitor 페이지에 Google 로그인 버튼 추가
+✅ 3시간 자동 저장 스케줄러 구현 (APScheduler)
+✅ Supabase Storage 연동 (CSV 백업)
+✅ 배포 구조 설계 (Cloudflare Pages + Railway)
+
+### Task 수행 내용
+
+#### 1단계: Google OAuth 2.0 구현
+1. Google Cloud Console: OAuth 2.0 클라이언트 ID/Secret 생성
+2. FastAPI 백엔드:
+   - `app/services/google_oauth_service.py`: Google Sheets API 통합
+   - `app/routers/google_sheets_router.py`: OAuth 엔드포인트 (/api/booking/auth/google)
+   - `app/services/booking_scheduler.py`: 3시간 자동 저장
+   - `app/services/supabase_service.py`: CSV 저장소
+
+#### 2단계: Frontend 예약 폼
+1. `frontend/src/components/GoogleSheetBookingModal.tsx`
+   - 9개 필드 입력 (duty_number, service, start_time, end_time, room_number, guest_name, notes, pay, tip)
+   - Google 연결 상태 확인
+   - 예약 저장 기능
+
+2. `frontend/src/app/monitor/page.tsx`
+   - "🔓 Google로 연결" 버튼 추가
+   - "📊 Booking with Therapist" 메뉴 추가
+   - pickup-dispatch 페이지에서 제외 (showBookingButton=false)
+
+#### 3단계: 배포 구조 설정
+1. Cloudflare Pages: Frontend 정적 호스팅 유지
+2. Railway: FastAPI 백엔드 배포 준비
+   - `api/` 폴더 생성
+   - `api/index.py` (main.py 복사)
+   - `api/requirements.txt` (의존성 정리)
+   - `api/.python-version` (3.11)
+
+### Result
+✅ **Google Sheets 통합 완료** (OAuth 2.0 + 읽기/쓰기)
+✅ **예약 입력 폼 UI 완성** (3패널 레이아웃)
+✅ **3시간 자동 저장 구현** (APScheduler + Supabase)
+✅ **배포 아키텍처 확정** (Cloudflare Pages + Railway)
+✅ **배포 가이드 작성** (DEPLOYMENT_GUIDE.md)
+
+### 주요 파일
+- `api/index.py` - FastAPI 진입점
+- `api/app/services/google_oauth_service.py` - OAuth 2.0 구현
+- `api/app/routers/google_sheets_router.py` - API 엔드포인트
+- `api/app/services/booking_scheduler.py` - 자동 저장 스케줄러
+- `frontend/src/components/GoogleSheetBookingModal.tsx` - 예약 폼
+- `DEPLOYMENT_GUIDE.md` - 배포 가이드
+
+### Next
+1. Railway에 FastAPI 배포
+2. NEXT_PUBLIC_API_URL 설정
+3. Cloudflare Pages 재배포
+4. 엔드-투-엔드 테스트
+   - Monitor 페이지 → Google 로그인
+   - 예약 데이터 입력 및 저장
+   - Google Sheets 확인
+   - Supabase CSV 저장 확인
+
+### Agent
+- Bash (파일 생성, Git 커밋)
+- Read/Edit (코드 작성)
+
+### Tokens
+~8,500 tokens
+
+---
