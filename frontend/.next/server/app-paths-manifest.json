@@ -35,7 +35,6 @@
   "/admin/therapist-booking-dashboard/page": "app/admin/therapist-booking-dashboard/page.js",
   "/admin/therapist-schedule/page": "app/admin/therapist-schedule/page.js",
   "/admin/therapists/page": "app/admin/therapists/page.js",
-  "/auth/login/page": "app/auth/login/page.js",
   "/customer/about-matching/page": "app/customer/about-matching/page.js",
   "/customer/booking/page": "app/customer/booking/page.js",
   "/customer/driver-tracking/page": "app/customer/driver-tracking/page.js",

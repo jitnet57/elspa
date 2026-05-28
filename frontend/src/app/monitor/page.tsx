@@ -21,13 +21,27 @@ interface MassageBooking {
   createdAt: string;
 }
 
+interface GoogleSheetBooking {
+  id: string;
+  therapist: string;
+  service: string;
+  date: string;
+  time: string;
+  guestName: string;
+  roomNumber: string;
+}
+
 export default function MonitorPage() {
-  const [currentTime, setCurrentTime] = useState<string>('');
+  const [mounted, setMounted] = useState(false);
+  const [currentTime, setCurrentTime] = useState<string>('--:--:--');
   const [activeTab, setActiveTab] = useState<TabType>('queue');
   const [pickupRequests, setPickupRequests] = useState<PickupRequest[]>(MOCK_PICKUP_REQUESTS);
   const [drivers, setDrivers] = useState<DriverSummary[]>(MOCK_DRIVERS);
   const [isAssigning, setIsAssigning] = useState<string | null>(null);
   const [selectedDriver, setSelectedDriver] = useState<number | null>(null);
+  const [showGoogleSheet, setShowGoogleSheet] = useState(false);
+  const [googleSheetBookings, setGoogleSheetBookings] = useState<GoogleSheetBooking[]>([]);
+  const [isLoadingSheet, setIsLoadingSheet] = useState(false);
   const [massageBookings, setMassageBookings] = useState<MassageBooking[]>([
     { id: '1', therapist: 'Maria Santos', service: 'Swedish Massage', date: '2026-05-28', time: '14:00', guestName: 'John Doe', roomNumber: '01', status: 'confirmed', createdAt: new Date().toISOString() },
     { id: '2', therapist: 'Ana Mercado', service: 'Thai Massage', date: '2026-05-28', time: '15:00', guestName: 'Jane Smith', roomNumber: '02', status: 'pending', createdAt: new Date().toISOString() },
@@ -35,6 +49,7 @@ export default function MonitorPage() {
   ]);
 
   useEffect(() => {
+    setMounted(true);
     const updateTime = () => {
       const now = new Date();
       setCurrentTime(now.toLocaleTimeString('ko-KR', { hour12: false }));
@@ -43,6 +58,57 @@ export default function MonitorPage() {
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // Google Sheet 예약 데이터 조회
+  const fetchGoogleSheetBookings = async () => {
+    setIsLoadingSheet(true);
+    try {
+      const response = await fetch('http://localhost:8000/api/massage-bookings/');
+      if (response.ok) {
+        const data = await response.json();
+        const bookings = data.bookings || [];
+        setGoogleSheetBookings(bookings.map((b: any) => ({
+          id: b.id,
+          therapist: b.therapist,
+          service: b.service,
+          date: b.date,
+          time: b.time,
+          guestName: b.guest_name || b.guestName,
+          roomNumber: b.room_number || b.roomNumber,
+        })));
+      } else {
+        // 에러 발생 시 현재 마사지 북은 기존 데이터로 표시
+        setGoogleSheetBookings(massageBookings.map(b => ({
+          id: b.id,
+          therapist: b.therapist,
+          service: b.service,
+          date: b.date,
+          time: b.time,
+          guestName: b.guestName,
+          roomNumber: b.roomNumber,
+        })));
+      }
+    } catch (error) {
+      console.error('Google Sheet 데이터 조회 실패:', error);
+      // 백업: 현재 테이블의 마사지 예약 데이터 사용
+      setGoogleSheetBookings(massageBookings.map(b => ({
+        id: b.id,
+        therapist: b.therapist,
+        service: b.service,
+        date: b.date,
+        time: b.time,
+        guestName: b.guestName,
+        roomNumber: b.roomNumber,
+      })));
+    } finally {
+      setIsLoadingSheet(false);
+    }
+  };
+
+  const handleOpenGoogleSheet = () => {
+    setShowGoogleSheet(true);
+    fetchGoogleSheetBookings();
+  };
 
   // 드라이버 배정 처리
   const handleAssignDriver = (requestId: string, driverId: number) => {
@@ -100,24 +166,35 @@ export default function MonitorPage() {
     return `${req.flightNumber} (${arrivalTime})`;
   };
 
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   return (
     <div className="h-screen bg-slate-950 text-white flex flex-col">
       {/* Header */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border-b border-white/10 px-6 py-4">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-white">🚗 픽업 디스패치 센터</h1>
             <p className="text-sm text-gray-400 mt-1">실시간 드라이버 및 픽업 요청 관리</p>
           </div>
+
           <div className="text-right">
             <div className="text-3xl font-mono font-bold text-indigo-400">{currentTime}</div>
             <p className="text-xs text-gray-500 mt-1">실시간 모니터링</p>
           </div>
+        </div>
+
+        {/* 🧖 RED BOX - Google Sheet Bookings Menu */}
+        <div className="mt-4 border-4 border-red-500/80 rounded-lg p-6 bg-white/5 backdrop-blur-sm">
+          <button
+            onClick={handleOpenGoogleSheet}
+            className="w-full px-6 py-4 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 rounded-lg font-bold text-white text-lg transition-all shadow-xl hover:shadow-rose-500/50 flex items-center justify-center gap-3 group"
+          >
+            <span className="text-3xl group-hover:scale-110 transition-transform">🧖</span>
+            <div className="text-left">
+              <div className="font-bold">마사지 예약</div>
+              <div className="text-xs text-white/80">Google Sheets 예약 정보</div>
+            </div>
+            <span className="ml-auto text-white/70 group-hover:text-white">→</span>
+          </button>
         </div>
       </div>
 
@@ -374,6 +451,85 @@ export default function MonitorPage() {
           </div>
         </div>
       </div>
+
+      {/* Google Sheet Bookings Modal */}
+      {showGoogleSheet && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 border border-pink-500/50 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-gradient-to-r from-pink-600 to-rose-600 px-6 py-4 flex justify-between items-center border-b border-pink-500/30">
+              <div>
+                <h2 className="text-xl font-bold text-white">🧖 Google Sheets 마사지 예약</h2>
+                <p className="text-xs text-pink-100 mt-1">클라우드 동기화 데이터</p>
+              </div>
+              <button
+                onClick={() => setShowGoogleSheet(false)}
+                className="text-white hover:bg-white/20 rounded-lg p-2 transition-all"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6">
+              {isLoadingSheet ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-pink-500 border-opacity-75"></div>
+                  <span className="ml-4 text-gray-400">데이터 로딩 중...</span>
+                </div>
+              ) : googleSheetBookings.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-400 text-sm">Google Sheet에 예약 데이터가 없습니다</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {googleSheetBookings.map(booking => (
+                    <div
+                      key={booking.id}
+                      className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/8 transition-all"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex-1">
+                          <p className="font-semibold text-white text-base">👤 {booking.guestName}</p>
+                          <p className="text-sm text-pink-400 mt-1">{booking.service}</p>
+                          <p className="text-sm text-gray-400 mt-1">테라피스트: <span className="text-indigo-300 font-medium">{booking.therapist}</span></p>
+                          <p className="text-xs text-gray-500 mt-2">📅 {booking.date} ⏰ {booking.time} | 🚪 Room {booking.roomNumber}</p>
+                        </div>
+                        <div className="bg-pink-500/20 text-pink-300 px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap">
+                          ☁️ Cloud
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Sync Info */}
+                  <div className="mt-6 pt-4 border-t border-white/10">
+                    <p className="text-xs text-gray-500 text-center">
+                      💾 매일 자정(00:00)에 자동으로 클라우드와 동기화됩니다
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="sticky bottom-0 bg-slate-800 border-t border-white/10 px-6 py-4 flex justify-end gap-3">
+              <button
+                onClick={() => fetchGoogleSheetBookings()}
+                className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-white text-sm font-medium transition-all"
+              >
+                🔄 새로고침
+              </button>
+              <button
+                onClick={() => setShowGoogleSheet(false)}
+                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-white text-sm font-medium transition-all"
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

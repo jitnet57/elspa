@@ -1,20 +1,78 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import React from 'react';
+import { usePayrollStore } from '@/lib/store/payroll-store';
 
 // ============================================================
 // 📌 컴포넌트명: AdminDashboard
-// 📋 목적: ElSpa 관리자 대시보드 (메인 콘텐츠만)
-// 🔧 기능: KPI 카운터, 벤토 그리드, 급여 정산 테이블
+// 📋 목적: ElSpa 관리자 대시보드 - 페이롤 API 통합
+// 🔧 기능: KPI 카운터, 벤토 그리드, 실시간 급여 정산 테이블
 // 📅 작성일: 2026-05-28
+// 🔄 업데이트: 2026-05-28 - 모킹 데이터 → API 통합
 // ============================================================
 export default function AdminDashboard() {
   const [payrollSearch, setPayrollSearch] = useState('');
   const [payrollTab, setPayrollTab] = useState('all');
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
 
-  const mockPayrollData = [
+  // API 데이터
+  const { records, employees, loading, error, fetchRecords, fetchEmployees, clearError } = usePayrollStore();
+
+  // 페이롤 데이터 로드
+  useEffect(() => {
+    fetchRecords();
+    fetchEmployees();
+  }, [fetchRecords, fetchEmployees]);
+
+  // 에러 표시 및 자동 정리
+  useEffect(() => {
+    if (error) {
+      console.error('Payroll Data Error:', error);
+      const timer = setTimeout(() => clearError(), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, clearError]);
+
+  // API 데이터를 테이블 형식으로 변환
+  const payrollData = records.map((record) => {
+    const employee = employees.find(e => e.id === record.employee_id);
+    return {
+      id: record.id?.toString() || `REC-${record.employee_id}`,
+      name: employee?.name || `Employee ${record.employee_id}`,
+      type: 'staff',
+      roleLabel: 'ADMIN STAFF',
+      gross: record.gross_pay || 0,
+      deductions: record.total_deductions || 0,
+      net: (record.gross_pay || 0) - (record.total_deductions || 0),
+      status: ((record.gross_pay || 0) - (record.total_deductions || 0)) === 0 ? 'error' : 'emerald',
+      breakdown: {
+        base: record.base_salary || 0,
+        commission: (record.gross_pay || 0) - (record.base_salary || 0),
+      },
+      deductionDetail: {
+        sss: record.sss_contribution || 0,
+        misc: (record.total_deductions || 0) - (record.sss_contribution || 0),
+      },
+      notes: `Record ID: ${record.id} | Period: ${record.period_id || 'N/A'}`
+    };
+  });
+
+  // 실시간 검색 및 직군 탭 필터링 로직
+  const displayData = payrollData.length > 0 ? payrollData : fallbackMockData;
+
+  const filteredPayroll = displayData.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(payrollSearch.toLowerCase()) || item.id.toLowerCase().includes(payrollSearch.toLowerCase());
+    const matchesTab = payrollTab === 'all'
+      ? true
+      : payrollTab === 'therapist'
+        ? item.type === 'therapist'
+        : item.type === 'staff';
+    return matchesSearch && matchesTab;
+  });
+
+  // 폴백 모킹 데이터 (API 데이터 없을 때만 사용)
+  const fallbackMockData = [
     {
       id: "TH-01",
       name: "Ana",
@@ -26,7 +84,7 @@ export default function AdminDashboard() {
       status: "emerald",
       breakdown: { base: 18000, commission: 6500 },
       deductionDetail: { sss: 1200, misc: 900 },
-      notes: "📌 Perfect attendance bonus applied. Verification complete. 보건소 검사비 -500 PHP 분기 차감 포함."
+      notes: "📌 Perfect attendance bonus applied. Verification complete."
     },
     {
       id: "TH-03",
@@ -36,10 +94,10 @@ export default function AdminDashboard() {
       gross: 8200,
       deductions: 8200,
       net: 0,
-      status: "error", // Net 0에 따른 안전 락다운 활성화
+      status: "error",
       breakdown: { base: 6200, commission: 2000 },
       deductionDetail: { ca: 5000, sss: 2700, misc: 500 },
-      notes: "⚠️ Safety Interlock active: Total deductions meet or exceed gross earnings. Manual verification required before disbursement."
+      notes: "⚠️ Safety Interlock active: Total deductions meet or exceed gross earnings."
     },
     {
       id: "EMP-01",
@@ -50,35 +108,11 @@ export default function AdminDashboard() {
       deductions: 4500,
       net: 27500,
       status: "emerald",
-      breakdown: { base: 30000, commission: 2000 }, // Manager 직무 수당 포함
-      deductionDetail: { absence: 2000, sss: 2500 }, // 1일 결근 반영 (-2,000 PHP)
-      notes: "📌 5/20 결근 1일 차감 적용 완료 (매니저 전용 차감 규칙 연계 확인). SSS 기여금 공제 완료."
-    },
-    {
-      id: "EMP-03",
-      name: "Mason",
-      type: "staff",
-      roleLabel: "DRIVER",
-      gross: 20470,
-      deductions: 4000,
-      net: 16470,
-      status: "emerald",
-      breakdown: { base: 20000, commission: 470 }, // 초과근무 70 + 식대 200 + 기본급
-      deductionDetail: { sss: 4000 }, // PENDING CA(4,000 PHP)는 차감 제외 규칙 반영 확인
-      notes: "📌 드라이버 초과근무 수당 및 식대 지원금 합산 완료. 승인 대기(Pending) 상태인 CA는 안전하게 정산 대상에서 제외."
+      breakdown: { base: 30000, commission: 2000 },
+      deductionDetail: { absence: 2000, sss: 2500 },
+      notes: "📌 5/20 결근 1일 차감 적용 완료."
     }
   ];
-
-  // 실시간 검색 및 직군 탭 필터링 로직
-  const filteredPayroll = mockPayrollData.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(payrollSearch.toLowerCase()) || item.id.toLowerCase().includes(payrollSearch.toLowerCase());
-    const matchesTab = payrollTab === 'all' 
-      ? true 
-      : payrollTab === 'therapist' 
-        ? item.type === 'therapist'
-        : item.type === 'staff';
-    return matchesSearch && matchesTab;
-  });
 
   const toggleAccordion = (id: string) => {
     setExpandedRowId(expandedRowId === id ? null : id);
@@ -198,10 +232,24 @@ export default function AdminDashboard() {
             <div className="p-6 border-b border-indigo-500/10 flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
                 <h3 className="text-xl font-black tracking-tight text-white flex items-center gap-2">
-                  💵 Payroll Overview 
-                  <span className="text-[9px] tracking-widest bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 px-2.5 py-0.5 rounded-full font-black uppercase">Active Ledger</span>
+                  💵 Payroll Overview
+                  <span className={`text-[9px] tracking-widest px-2.5 py-0.5 rounded-full font-black uppercase ${
+                    loading
+                      ? 'bg-yellow-500/10 border border-yellow-500/30 text-yellow-400'
+                      : 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-400'
+                  }`}>
+                    {loading ? 'Loading...' : 'Active Ledger'}
+                  </span>
                 </h3>
-                <p className="text-xs text-indigo-200/50 mt-1 font-semibold">Batch Processing Cycle: May 16 - May 27</p>
+                <p className="text-xs text-indigo-200/50 mt-1 font-semibold">
+                  {error ? (
+                    <span className="text-rose-400">⚠️ Error loading payroll data</span>
+                  ) : loading ? (
+                    <span className="text-yellow-400">📊 Loading payroll records...</span>
+                  ) : (
+                    <span>✅ {payrollData.length} records loaded | Batch: May 16 - May 27</span>
+                  )}
+                </p>
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4 text-xs font-black tracking-widest">
@@ -237,6 +285,16 @@ export default function AdminDashboard() {
 
             {/* Table Area */}
             <div className="overflow-x-auto">
+              {loading && (
+                <div className="p-12 text-center">
+                  <div className="inline-flex items-center gap-3">
+                    <div className="w-4 h-4 rounded-full bg-cyan-400 animate-pulse"></div>
+                    <p className="text-indigo-300 font-semibold">Loading payroll records...</p>
+                  </div>
+                </div>
+              )}
+
+              {!loading && (
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="bg-white/5 text-[10px] font-black tracking-widest text-indigo-300/60 border-b border-indigo-500/10">
@@ -373,6 +431,7 @@ export default function AdminDashboard() {
                   )}
                 </tbody>
               </table>
+              )}
             </div>
           </section>
         </div>

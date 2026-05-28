@@ -84,11 +84,7 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 # Phase 10-2: 모니터링 & 로깅 미들웨어 등록
 # ============================================================
 
-# 1. 메트릭 수집 미들웨어 (Prometheus)
-app.add_middleware(apm_middleware.__class__)  # APM 미들웨어는 직접 등록
-
-
-# 2. 사용자 정의 메트릭 엔드포인트
+# 1. 사용자 정의 메트릭 엔드포인트
 setup_metrics_endpoint(app)
 
 # 3. 예외 핸들러 등록
@@ -125,6 +121,11 @@ async def startup_event():
         await init_db()
         logger.info("✅ 데이터베이스 초기화 완료")
 
+        # 마사지 예약 일일 동기화 스케줄러 시작
+        from app.services.scheduler import start_scheduler
+        start_scheduler()
+        logger.info("✅ 마사지 예약 자동 동기화 스케줄러 시작")
+
         logger.info("🎉 ElSpa API 준비 완료")
     except Exception as e:
         logger.error(f"❌ 시작 단계 실패: {e}", exc_info=True)
@@ -135,6 +136,11 @@ async def startup_event():
 async def shutdown_event():
     """애플리케이션 종료 이벤트"""
     logger.info("🛑 ElSpa API 종료 중...")
+
+    # 스케줄러 중지
+    from app.services.scheduler import stop_scheduler
+    stop_scheduler()
+
     await close_db()
     logger.info("✅ ElSpa API 종료 완료")
 
@@ -211,6 +217,8 @@ from app.routers import payroll, payroll_analytics, messaging
 from app.routers import admin_data_api
 # 🚗 드라이버 API 라우터 (신규 - Sprint 13)
 from app.routers import driver_api
+# 🧖 마사지 예약 API 라우터 (Google Sheets 동기화)
+from app.routers import massage_bookings
 
 # 기존 라우터들 (일부 호환성 문제로 주석 처리)
 # from app.routers import beds, therapists, bookings, matching
@@ -238,6 +246,7 @@ app.include_router(admin_data_api.router)
 app.include_router(reviews_api.router)
 app.include_router(settlement.router)  # Settlement API (Mock Data)
 app.include_router(driver_api.router)  # 🚗 드라이버 API
+app.include_router(massage_bookings.router)  # 🧖 마사지 예약 API (Google Sheets 동기화)
 
 # 재무 감사 로그 라우터 등록 (임시 비활성화)
 # from app.routers import audit_api

@@ -5,7 +5,6 @@
  * 🔧 기능:
  *   - 자동 토큰 갱신 (401 응답 시)
  *   - 재시도 로직
- *   - 미인증 시 /auth/login 리다이렉트
  * 📅 작성일: 2026-05-22
  * ============================================================
  */
@@ -37,9 +36,8 @@ export async function authenticatedFetch(
   const store = useAuthStore.getState();
   const accessToken = store.accessToken;
 
-  // 토큰이 없으면 로그인 페이지로 리다이렉트
+  // 토큰이 없으면 에러 throw
   if (!accessToken) {
-    window.location.href = '/auth/login';
     throw new Error('No access token available');
   }
 
@@ -74,12 +72,10 @@ export async function authenticatedFetch(
           ...retryOptions,
         } as RequestInit);
       } else {
-        // 토큰 갱신 실패 → 로그인 페이지로
-        window.location.href = '/auth/login';
+        // 토큰 갱신 실패
         throw new Error('Token refresh failed');
       }
     } catch (error) {
-      window.location.href = '/auth/login';
       throw error;
     }
   }
