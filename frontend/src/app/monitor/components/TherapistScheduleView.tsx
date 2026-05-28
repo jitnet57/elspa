@@ -22,22 +22,21 @@ export default function TherapistScheduleView() {
   const [selectedDate, setSelectedDate] = useState<string>(defaultDate);
 
   return (
-    <div className="flex-1 overflow-auto px-6 py-4 flex flex-col">
+    <div className="flex-1 overflow-auto px-3 py-4 flex flex-col">
       {/* 날짜 선택기 */}
-      <div className="mb-6 flex items-center gap-3">
-        <label htmlFor="schedule-date" className="text-sm font-semibold text-gray-300">
-          📅 날짜 선택:
+      <div className="mb-4 flex items-center gap-3 px-3">
+        <label htmlFor="schedule-date" className="text-sm font-semibold text-gray-300 whitespace-nowrap">
+          📅 날짜:
         </label>
         <input
           id="schedule-date"
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          className="px-4 py-2 rounded-lg bg-slate-800 border border-indigo-500/50 text-white text-sm focus:outline-none focus:border-indigo-400 transition"
+          className="px-3 py-2 rounded-lg bg-slate-800 border border-indigo-500/50 text-white text-sm focus:outline-none focus:border-indigo-400 transition"
         />
-        <span className="text-xs text-gray-400 ml-2">
+        <span className="text-xs text-gray-400">
           {new Date(selectedDate + 'T00:00:00').toLocaleDateString('ko-KR', {
-            weekday: 'long',
             month: 'short',
             day: 'numeric',
           })}
@@ -45,7 +44,7 @@ export default function TherapistScheduleView() {
       </div>
 
       {/* Gantt 차트 */}
-      <div className="flex-1 overflow-auto border border-white/10 rounded-lg bg-white/5 backdrop-blur-xl">
+      <div className="flex-1 overflow-auto">
         <TherapistScheduleGantt />
       </div>
     </div>

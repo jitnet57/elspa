@@ -77,6 +77,7 @@ class Employee(Base):
     pay_group = Column(String(50), nullable=False)  # weekly or biweekly
     base_salary = Column(Numeric(10, 2), nullable=False, default=0)
     commission_rate = Column(Numeric(5, 2), default=0)  # therapist/nail용 커미션율 (%)
+    meal_allowance = Column(Numeric(10, 2), default=0)  # 드라이버 식비 지급 (일일 금액, 수정 가능)
     hire_date = Column(Date, nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -86,6 +87,7 @@ class Employee(Base):
     __table_args__ = (
         CheckConstraint("base_salary >= 0", name="ck_employee_base_salary_positive"),
         CheckConstraint("commission_rate >= 0", name="ck_employee_commission_rate_positive"),
+        CheckConstraint("meal_allowance >= 0", name="ck_employee_meal_allowance_positive"),
         Index("idx_employee_type_active_paygroup", "employee_type", "is_active", "pay_group"),
     )
 
