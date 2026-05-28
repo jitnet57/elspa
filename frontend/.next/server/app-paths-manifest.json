@@ -32,6 +32,7 @@
   "/admin/simulation/page": "app/admin/simulation/page.js",
   "/admin/sss/page": "app/admin/sss/page.js",
   "/admin/test-data/page": "app/admin/test-data/page.js",
+  "/admin/therapist-booking-dashboard/page": "app/admin/therapist-booking-dashboard/page.js",
   "/admin/therapist-schedule/page": "app/admin/therapist-schedule/page.js",
   "/admin/therapists/page": "app/admin/therapists/page.js",
   "/auth/login/page": "app/auth/login/page.js",

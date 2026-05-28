@@ -91,6 +91,32 @@ export default function AdminShell({ children }: AdminShellProps) {
 
         {/* Content Area */}
         {children}
+
+        {/* Mobile Navigation Footer */}
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-slate-900/80 backdrop-blur-md border-t border-indigo-500/10 z-50">
+          <div className="flex justify-around items-center px-4 py-2">
+            <Link href="/admin" className="flex flex-col items-center justify-center p-3 text-[#8aebff] rounded-lg text-[10px]">
+              <span className="material-symbols-outlined text-lg">dashboard</span>
+              <span className="font-bold">Dashboard</span>
+            </Link>
+            <Link href="/admin/therapist-schedule" className="flex flex-col items-center justify-center p-3 text-indigo-300/60 hover:text-white rounded-lg text-[10px]">
+              <span className="material-symbols-outlined text-lg">groups</span>
+              <span className="font-bold">Therapists</span>
+            </Link>
+            <Link href="/admin/book-massage" className="flex flex-col items-center justify-center p-3 text-indigo-300/60 hover:text-white rounded-lg text-[10px]">
+              <span className="material-symbols-outlined text-lg">spa</span>
+              <span className="font-bold">Book</span>
+            </Link>
+            <Link href="/admin/payroll" className="flex flex-col items-center justify-center p-3 text-indigo-300/60 hover:text-white rounded-lg text-[10px]">
+              <span className="material-symbols-outlined text-lg">payments</span>
+              <span className="font-bold">Payroll</span>
+            </Link>
+            <Link href="/admin/policies" className="flex flex-col items-center justify-center p-3 text-indigo-300/60 hover:text-white rounded-lg text-[10px]">
+              <span className="material-symbols-outlined text-lg">settings</span>
+              <span className="font-bold">Settings</span>
+            </Link>
+          </div>
+        </nav>
       </main>
     </div>
   );

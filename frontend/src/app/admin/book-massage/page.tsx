@@ -25,6 +25,8 @@ export default function BookMassage() {
   });
 
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
+  const [bookingError, setBookingError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const therapists = [
     'Maria Santos', 'Ana Mercado', 'Rosa Chavez', 'Carmen Rodriguez',
@@ -50,20 +52,57 @@ export default function BookMassage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.therapist && formData.service && formData.guestName) {
-      setBookingConfirmed(true);
-      setTimeout(() => setBookingConfirmed(false), 3000);
-      setFormData({
-        therapist: '',
-        service: '',
-        date: new Date().toISOString().split('T')[0],
-        time: '10:00',
-        guestName: '',
-        roomNumber: '',
-        notes: ''
-      });
+    setBookingError('');
+
+    if (!formData.therapist || !formData.service || !formData.guestName) {
+      setBookingError('Please fill in required fields');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('therapist', formData.therapist);
+      formDataToSend.append('service', formData.service);
+      formDataToSend.append('date', formData.date);
+      formDataToSend.append('time', formData.time);
+      formDataToSend.append('guestName', formData.guestName);
+      formDataToSend.append('roomNumber', formData.roomNumber);
+      formDataToSend.append('notes', formData.notes);
+
+      const response = await fetch(
+        'https://script.google.com/macros/s/AKfycbxjNk5uAbusS5CEeGMuUiRhcI1tDiTYtZtlI5T-5rciWk_aQGTNQFkVuHwRIKjpMqQf/exec',
+        {
+          method: 'POST',
+          body: formDataToSend,
+        }
+      );
+
+      const result = await response.json();
+
+      if (result.status === 'success') {
+        setBookingConfirmed(true);
+        setTimeout(() => setBookingConfirmed(false), 3000);
+        setFormData({
+          therapist: '',
+          service: '',
+          date: new Date().toISOString().split('T')[0],
+          time: '10:00',
+          guestName: '',
+          roomNumber: '',
+          notes: ''
+        });
+      } else {
+        setBookingError(result.message || 'Booking failed. Please try again.');
+      }
+    } catch (error) {
+      setBookingError('Error submitting booking. Please check your connection and try again.');
+      console.error('Booking submission error:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -214,12 +253,22 @@ export default function BookMassage() {
                   ></textarea>
                 </div>
 
+                {/* Error Message */}
+                {bookingError && (
+                  <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
+                    <p className="text-red-400 font-bold text-center text-sm">
+                      ❌ {bookingError}
+                    </p>
+                  </div>
+                )}
+
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-black py-4 rounded-xl uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] active:scale-95"
+                  disabled={isSubmitting}
+                  className="w-full bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 disabled:from-slate-500 disabled:to-slate-600 text-white font-black py-4 rounded-xl uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  ✨ Confirm Booking
+                  {isSubmitting ? '⏳ Submitting...' : '✨ Confirm Booking'}
                 </button>
               </form>
             </div>
