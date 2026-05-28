@@ -4,7 +4,7 @@
 
 name = "elspa"
 account_id = ""  # wrangler login 후 자동 설정
-pages_build_output_dir = "./frontend/.next"  # Next.js 빌드 폴더
+pages_build_output_dir = "./frontend/out"  # Next.js static export 폴더
 
 # 프로젝트 설정
 [env.production]
