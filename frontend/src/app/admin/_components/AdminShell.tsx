@@ -39,12 +39,6 @@ export default function AdminShell({ children }: AdminShellProps) {
               <span className="text-sm">Dashboard</span>
             </Link>
 
-            {/* Therapists */}
-            <Link className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all" href="/admin/therapist-schedule">
-              <span className="text-lg">👥</span>
-              <span className="text-sm">Therapists</span>
-            </Link>
-
             {/* Payroll */}
             <Link className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all" href="/admin/payroll">
               <span className="text-lg">💰</span>
@@ -101,10 +95,6 @@ export default function AdminShell({ children }: AdminShellProps) {
             <Link href="/admin" className="flex flex-col items-center justify-center flex-1 py-3 text-[#8aebff] hover:bg-white/5 transition-all text-[10px] font-bold">
               <span className="text-xl">📊</span>
               <span className="mt-1">Dashboard</span>
-            </Link>
-            <Link href="/admin/therapist-schedule" className="flex flex-col items-center justify-center flex-1 py-3 text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all text-[10px] font-bold">
-              <span className="text-xl">👥</span>
-              <span className="mt-1">Therapists</span>
             </Link>
             <Link href="/admin/payroll" className="flex flex-col items-center justify-center flex-1 py-3 text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all text-[10px] font-bold">
               <span className="text-xl">💰</span>

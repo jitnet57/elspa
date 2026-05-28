@@ -1,468 +1,389 @@
 'use client';
 
 import { useState } from 'react';
+import { Plus, Edit2, Trash2 } from 'lucide-react';
 
-interface MatchingMode {
+interface SettingsSection {
   id: string;
   name: string;
   description: string;
-  formula: string;
-  weights: Record<string, number>;
-  useCase: string[];
-  pros: string[];
-  cons: string[];
   color: string;
-  example?: {
-    candidate: string;
-    scores: Record<string, number>;
-    total: number;
-  }[];
 }
 
-const MATCHING_MODES: MatchingMode[] = [
+const SETTINGS_SECTIONS: SettingsSection[] = [
   {
-    id: 'basic',
-    name: 'Basic Mode (70/20/10)',
-    description: 'Traditional matching algorithm that prioritizes customer satisfaction',
-    formula: 'Score = (Expertise × 70%) + (Distance/Time × 20%) + (Rating × 10%)',
-    weights: {
-      expertise: 70,
-      distance: 20,
-      rating: 10,
-      fairness: 0,
-    },
-    useCase: [
-      'VIP customers (high repeat visit rate)',
-      'Special services (couple massage, customized services)',
-      'Important: customer satisfaction is the top priority',
-    ],
-    pros: [
-      '✓ Always assign the best therapist',
-      '✓ Maximize customer satisfaction',
-      '✓ Guarantee service quality',
-    ],
-    cons: [
-      '✗ Work concentrated on popular therapists',
-      '✗ Limited opportunities for new therapists',
-      '✗ Revenue imbalance among therapists',
-    ],
+    id: 'bed-groups',
+    name: '🛏️ 베드 그룹 관리',
+    description: '마사지실별 침대 그룹 설정',
     color: 'bg-blue-50 border-blue-200',
-    example: [
-      {
-        candidate: 'Jessica',
-        scores: { expertise: 66.5, distance: 17, rating: 8.8 },
-        total: 92.3,
-      },
-      {
-        candidate: 'Sarah',
-        scores: { expertise: 63, distance: 12, rating: 9.2 },
-        total: 84.2,
-      },
-      {
-        candidate: 'Emma',
-        scores: { expertise: 59.5, distance: 14, rating: 8.5 },
-        total: 82.0,
-      },
-    ],
   },
   {
-    id: 'fairness',
-    name: 'Fairness Mode (40/20/10/30)',
-    description: 'Fair matching that distributes work equally among therapists',
-    formula: 'Score = (Expertise × 40%) + (Distance/Time × 20%) + (Rating × 10%) + (Workload Balance × 30%)',
-    weights: {
-      expertise: 40,
-      distance: 20,
-      rating: 10,
-      fairness: 30,
-    },
-    useCase: [
-      'Regular hours (11:00~18:00)',
-      'Routine bookings',
-      'Need to distribute work equally among therapists',
-    ],
-    pros: [
-      '✓ Provide equal opportunities to all therapists',
-      '✓ New therapists can receive assignments',
-      '✓ Improve therapist revenue balance',
-      '✓ Increase motivation',
-    ],
-    cons: [
-      '✗ Sometimes assign non-optimal therapists',
-      '✗ Customer satisfaction may slightly decrease',
-    ],
-    color: 'bg-green-50 border-green-200',
-    example: [
-      {
-        candidate: 'Emma (1건만 받음)',
-        scores: { expertise: 34, distance: 15, rating: 8.5, fairness: 28.5 },
-        total: 86.0,
-      },
-      {
-        candidate: 'Jessica (4건 받음)',
-        scores: { expertise: 38, distance: 17, rating: 8.8, fairness: 6 },
-        total: 69.8,
-      },
-    ],
+    id: 'company',
+    name: '🏢 업체 등록',
+    description: '회사/업체 정보 관리',
+    color: 'bg-emerald-50 border-emerald-200',
   },
   {
-    id: 'newtherapist',
-    name: 'New Therapist Boost Mode',
-    description: 'Concentrate opportunities for new therapist to gain experience',
-    formula: 'Score = (Base Score) + New Therapist Bonus (+20 points)',
-    weights: {
-      expertise: 70,
-      distance: 20,
-      rating: 10,
-      fairness: 0,
-      newTherapistBonus: 20,
-    },
-    useCase: [
-      'Training period for new therapists (first 6 months)',
-      'Need to provide new therapists with sufficient experience',
-      'Period for new therapist rating building',
-    ],
-    pros: [
-      '✓ New therapists actively receive assignments',
-      '✓ Guarantee opportunities for new therapists to gain experience',
-      '✓ Accelerate new therapist rating improvement',
-      '✓ Improve training efficiency',
-    ],
-    cons: [
-      '✗ May appear as a temporary measure',
-      '✗ Some customer satisfaction may decrease',
-    ],
+    id: 'guide',
+    name: '📖 가이드 등록',
+    description: '운영 규칙 및 정책 설정',
     color: 'bg-amber-50 border-amber-200',
-    example: [
-      {
-        candidate: '이준호 (신입, 1개월)',
-        scores: { expertise: 49, distance: 16, rating: 3.5, newTherapistBonus: 20 },
-        total: 88.5,
-      },
-    ],
   },
   {
-    id: 'hybrid',
-    name: 'Hybrid Mode (Automatic Time-based Switching)',
-    description: 'Automatically switch algorithms based on time of day and situation',
-    formula: 'Automatically apply one of the 3 modes above based on situation',
-    weights: {
-      expertise: 0,
-      distance: 0,
-      rating: 0,
-      fairness: 0,
-    },
-    useCase: [
-      'Need flexible operation based on situation',
-      'Handle various customer types throughout the day',
-      'Most practical operation method',
-    ],
-    pros: [
-      '✓ Provide optimal flexibility',
-      '✓ Automatically apply optimal strategy for each time period',
-      '✓ Handle VIP/regular/new therapists',
-      '✓ Make best decisions for each situation',
-    ],
-    cons: [
-      '✗ Configuration can be complex',
-      '✗ Requires manager understanding',
-    ],
+    id: 'therapist',
+    name: '💆 테라피스트 등록',
+    description: '테라피스트 정보 관리',
+    color: 'bg-pink-50 border-pink-200',
+  },
+  {
+    id: 'staff',
+    name: '👥 직원 등록',
+    description: '일반 직원 정보 관리',
     color: 'bg-purple-50 border-purple-200',
   },
 ];
 
 export default function PoliciesPage() {
-  const [selectedMode, setSelectedMode] = useState<string>('basic');
-  const selectedModeData = MATCHING_MODES.find(m => m.id === selectedMode);
+  const [selectedSection, setSelectedSection] = useState<string>('bed-groups');
+  const selectedData = SETTINGS_SECTIONS.find(s => s.id === selectedSection);
+
+  const renderContent = () => {
+    switch (selectedSection) {
+      case 'bed-groups':
+        return <BedGroupsContent />;
+      case 'company':
+        return <CompanyContent />;
+      case 'guide':
+        return <GuideContent />;
+      case 'therapist':
+        return <TherapistContent />;
+      case 'staff':
+        return <StaffContent />;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-orange-50 to-amber-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-slate-100 p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2 tracking-tight">
-            📋 Matching Policy Management
+            ⚙️ Settings
           </h1>
           <p className="text-lg text-gray-600 font-light">
-            Select therapist matching algorithm mode and monitor the current status
+            관리 설정 및 정책 관리
           </p>
         </div>
 
-        {/* Mode Selection Card */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
-          {MATCHING_MODES.map(mode => (
+        {/* Section Selection */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-8">
+          {SETTINGS_SECTIONS.map(section => (
             <button
-              key={mode.id}
-              onClick={() => setSelectedMode(mode.id)}
-              className={`p-6 rounded-xl border-2 transition-all text-left
-                ${
-                  selectedMode === mode.id
-                    ? `${mode.color} border-current shadow-lg scale-105`
-                    : 'bg-white border-stone-200 hover:border-orange-300'
-                }`}
+              key={section.id}
+              onClick={() => setSelectedSection(section.id)}
+              className={`p-6 rounded-xl border-2 transition-all text-left ${
+                selectedSection === section.id
+                  ? `${section.color} border-current shadow-lg scale-105`
+                  : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-md'
+              }`}
             >
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="font-bold text-gray-900">{mode.name}</h3>
-                {selectedMode === mode.id && (
-                  <span className="text-xl">✓</span>
-                )}
+              <div className="font-bold text-base text-gray-900 mb-2">
+                {section.name}
               </div>
-              <p className="text-xs text-gray-600 font-light">
-                {mode.description.split(' ')[0]}
-              </p>
+              <div className="text-xs text-gray-600">
+                {section.description}
+              </div>
             </button>
           ))}
         </div>
 
-        {selectedModeData && (
-          <>
-            {/* Selected Mode Details */}
-            <div className={`${selectedModeData.color} rounded-xl p-8 mb-8 border-2`}>
-              <div className="mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-3">
-                  {selectedModeData.name}
-                </h2>
-                <p className="text-lg text-gray-700 font-light mb-4">
-                  {selectedModeData.description}
-                </p>
-
-                {/* Formula */}
-                <div className="bg-white/80 rounded-lg p-4 mb-6 border border-stone-200">
-                  <p className="text-sm text-gray-600 font-light mb-2">📐 Matching Formula</p>
-                  <p className="font-mono text-sm text-gray-900 font-semibold">
-                    {selectedModeData.formula}
-                  </p>
-                </div>
-
-                {/* Weight Display */}
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-                  {Object.entries(selectedModeData.weights).map(([key, value]) => {
-                    const labels: Record<string, string> = {
-                      expertise: 'Expertise',
-                      distance: 'Distance/Time',
-                      rating: 'Rating',
-                      fairness: 'Fairness',
-                      newTherapistBonus: 'New Therapist Bonus',
-                    };
-                    return value > 0 ? (
-                      <div key={key} className="bg-white/60 rounded-lg p-3 text-center border border-stone-200">
-                        <p className="text-xs text-gray-600 font-light">{labels[key]}</p>
-                        <p className="text-2xl font-bold text-orange-600">{value}%</p>
-                      </div>
-                    ) : null;
-                  })}
-                </div>
-              </div>
-
-              {/* Usage Timing */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Usage Timing */}
-                <div>
-                  <h3 className="font-bold text-gray-900 mb-3">📌 When to Use</h3>
-                  <ul className="space-y-2">
-                    {selectedModeData.useCase.map((use, idx) => (
-                      <li key={idx} className="text-sm text-gray-700 font-light flex gap-2">
-                        <span className="text-orange-600">•</span>
-                        {use}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Advantages */}
-                <div>
-                  <h3 className="font-bold text-gray-900 mb-3">✅ Advantages</h3>
-                  <ul className="space-y-2">
-                    {selectedModeData.pros.map((pro, idx) => (
-                      <li key={idx} className="text-sm text-gray-700 font-light">
-                        {pro}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Disadvantages */}
-                <div>
-                  <h3 className="font-bold text-gray-900 mb-3">⚠️ Disadvantages</h3>
-                  <ul className="space-y-2">
-                    {selectedModeData.cons.map((con, idx) => (
-                      <li key={idx} className="text-sm text-gray-700 font-light">
-                        {con}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* Example */}
-            {selectedModeData.example && (
-              <div className="bg-white rounded-xl p-8 shadow-sm border border-stone-100 mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                  🎯 Matching Example: Customer "Min-jun Kim" - Swedish 60-minute Booking
-                </h3>
-
-                <div className="space-y-4">
-                  {selectedModeData.example.map((ex, idx) => (
-                    <div
-                      key={idx}
-                      className={`p-6 rounded-lg border-2
-                        ${idx === 0
-                          ? 'bg-yellow-50 border-yellow-300'
-                          : 'bg-stone-50 border-stone-200'
-                        }`}
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <p className="font-bold text-lg text-gray-900">
-                            {idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'} {ex.candidate}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-3xl font-bold text-orange-600">
-                            {ex.total.toFixed(1)}점
-                          </p>
-                          <p className="text-xs text-gray-500">Final Score</p>
-                        </div>
-                      </div>
-
-                      {/* Score Details */}
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                        {Object.entries(ex.scores).map(([key, score]) => {
-                          const labels: Record<string, string> = {
-                            expertise: 'Expertise',
-                            distance: 'Distance/Time',
-                            rating: 'Rating',
-                            fairness: 'Fairness',
-                            newTherapistBonus: 'New Therapist Bonus',
-                          };
-                          return (
-                            <div key={key} className="bg-white rounded p-3 text-center">
-                              <p className="text-xs text-gray-600 font-light mb-1">
-                                {labels[key]}
-                              </p>
-                              <p className="font-bold text-gray-900">{score} points</p>
-                              <div className="w-full h-1.5 bg-stone-200 rounded-full mt-2">
-                                <div
-                                  className="h-full bg-orange-500 rounded-full"
-                                  style={{ width: `${Math.min(score / 10, 100)}%` }}
-                                />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      {idx === 0 && (
-                        <div className="mt-4 pt-4 border-t border-yellow-200">
-                          <p className="text-sm font-semibold text-yellow-900">
-                            ✓ Assigned to this therapist
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Hybrid Mode Details */}
-            {selectedMode === 'hybrid' && (
-              <div className="bg-white rounded-xl p-8 shadow-sm border border-stone-100">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                  ⏰ Automatic Policy Switching by Time Period
-                </h3>
-
-                <div className="space-y-4">
-                  {[
-                    {
-                      time: '08:00 - 11:00',
-                      mode: 'Basic Mode (70/20/10)',
-                      reason: 'Early morning customers: Provide best service',
-                      icon: '🌅',
-                    },
-                    {
-                      time: '11:00 - 13:00',
-                      mode: 'Fairness Mode (40/20/10/30)',
-                      reason: 'Lunch peak time: Give opportunities to all therapists',
-                      icon: '☀️',
-                    },
-                    {
-                      time: '13:00 - 18:00',
-                      mode: 'Hybrid Mode',
-                      reason: 'Regular hours: Flexible adjustment based on situation',
-                      icon: '🌤️',
-                    },
-                    {
-                      time: '18:00 - 22:00',
-                      mode: 'New Therapist Boost Mode',
-                      reason: 'Evening: Focus on training new therapists',
-                      icon: '🌙',
-                    },
-                  ].map((slot, idx) => (
-                    <div key={idx} className="p-4 bg-stone-50 rounded-lg border border-stone-200">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="text-sm text-gray-600 font-light mb-1">
-                            <span className="text-lg">{slot.icon}</span> {slot.time}
-                          </p>
-                          <p className="font-bold text-gray-900 mb-1">{slot.mode}</p>
-                          <p className="text-sm text-gray-600 font-light">{slot.reason}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-
-                  {/* Special Situations */}
-                  <div className="mt-6 pt-6 border-t-2 border-stone-300">
-                    <p className="font-bold text-gray-900 mb-4">🚨 Special Situations</p>
-                    <div className="space-y-3">
-                      {[
-                        { condition: 'VIP customers', action: 'Always use basic mode' },
-                        { condition: 'Booking shortage', action: 'Switch to fairness mode' },
-                        { condition: 'New therapist rating < 4.0', action: 'Auto-activate new therapist boost' },
-                      ].map((item, idx) => (
-                        <div key={idx} className="flex gap-4">
-                          <div className="text-sm text-orange-600 font-bold">→</div>
-                          <div>
-                            <p className="text-sm text-gray-900">
-                              <span className="font-semibold">{item.condition}:</span> {item.action}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Current Policy Status */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-100">
-            <p className="text-sm text-gray-600 font-light mb-2">Currently Active Mode</p>
-            <p className="text-2xl font-bold text-orange-600 mb-4">
-              {selectedModeData?.name.split('(')[0].trim()}
-            </p>
-            <button className="w-full px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-colors text-sm">
-              Applied with this mode
-            </button>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-100">
-            <p className="text-sm text-gray-600 font-light mb-2">Today's Matching Count</p>
-            <p className="text-2xl font-bold text-blue-600 mb-4">24</p>
-            <p className="text-xs text-gray-500 font-light">Last 7 days average: 21.3</p>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-100">
-            <p className="text-sm text-gray-600 font-light mb-2">Average Customer Satisfaction</p>
-            <p className="text-2xl font-bold text-green-600 mb-4">⭐ 4.7 / 5.0</p>
-            <p className="text-xs text-gray-500 font-light">Last 7 days average: 4.65</p>
-          </div>
+        {/* Content Area */}
+        <div className="bg-white rounded-xl border-2 border-gray-200 shadow-lg p-8">
+          {renderContent()}
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// 베드 그룹 관리 컴포넌트
+// ============================================================
+function BedGroupsContent() {
+  const [bedGroups] = useState([
+    { id: 1, name: '🛏️ 마사지실1', beds: 30, status: '정상' },
+    { id: 2, name: '🛏️ 마사지실2', beds: 30, status: '정상' },
+    { id: 3, name: '👑 VIP실', beds: 14, status: '정상' },
+    { id: 4, name: '🏢 기타실', beds: 12, status: '정상' },
+  ]);
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">마사지실 침대 구성</h2>
+        <button className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+          <Plus size={18} />
+          새 그룹 추가
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {bedGroups.map(group => (
+          <div key={group.id} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <div className="font-bold text-lg text-gray-900">{group.name}</div>
+                <div className="text-sm text-gray-500">총 {group.beds}개 침대</div>
+              </div>
+              <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
+                {group.status}
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <button className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50 transition">
+                <Edit2 size={14} />
+                편집
+              </button>
+              <button className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm border border-red-300 text-red-600 rounded hover:bg-red-50 transition">
+                <Trash2 size={14} />
+                삭제
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// 업체 등록 컴포넌트
+// ============================================================
+function CompanyContent() {
+  const [companies] = useState([
+    { id: 1, name: 'ElSpa Plaza', address: 'Seoul, Korea', phone: '02-1234-5678', status: '활성' },
+    { id: 2, name: 'Wellness Center', address: 'Busan, Korea', phone: '051-2345-6789', status: '활성' },
+  ]);
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">등록된 업체</h2>
+        <button className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition">
+          <Plus size={18} />
+          업체 추가
+        </button>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-gray-200">
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">업체명</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">주소</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">연락처</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">상태</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">작업</th>
+            </tr>
+          </thead>
+          <tbody>
+            {companies.map(company => (
+              <tr key={company.id} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="px-4 py-3 font-medium text-gray-900">{company.name}</td>
+                <td className="px-4 py-3 text-gray-600">{company.address}</td>
+                <td className="px-4 py-3 text-gray-600">{company.phone}</td>
+                <td className="px-4 py-3">
+                  <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
+                    {company.status}
+                  </span>
+                </td>
+                <td className="px-4 py-3 flex gap-2">
+                  <button className="text-blue-600 hover:text-blue-800 transition">
+                    <Edit2 size={16} />
+                  </button>
+                  <button className="text-red-600 hover:text-red-800 transition">
+                    <Trash2 size={16} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// 가이드 등록 컴포넌트
+// ============================================================
+function GuideContent() {
+  const [guides] = useState([
+    { id: 1, title: '서비스 운영 규칙', category: '운영 정책', status: '활성' },
+    { id: 2, title: '고객 응대 가이드', category: '교육', status: '활성' },
+    { id: 3, title: '안전 수칙', category: '안전', status: '활성' },
+  ]);
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">운영 가이드</h2>
+        <button className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">
+          <Plus size={18} />
+          가이드 추가
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        {guides.map(guide => (
+          <div key={guide.id} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition">
+            <div className="flex justify-between items-start mb-2">
+              <div>
+                <div className="font-bold text-gray-900">{guide.title}</div>
+                <div className="text-sm text-gray-500">분류: {guide.category}</div>
+              </div>
+              <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
+                {guide.status}
+              </span>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button className="text-blue-600 hover:text-blue-800 transition">
+                <Edit2 size={16} />
+              </button>
+              <button className="text-red-600 hover:text-red-800 transition">
+                <Trash2 size={16} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// 테라피스트 등록 컴포넌트
+// ============================================================
+function TherapistContent() {
+  const [therapists] = useState([
+    { id: 1, name: 'Maria Santos', specialty: 'Swedish Massage', experience: '5년', status: '활동 중' },
+    { id: 2, name: 'Ana Mercado', specialty: 'Thai Massage', experience: '3년', status: '활동 중' },
+    { id: 3, name: 'Rosa Chavez', specialty: 'Hot Stone', experience: '4년', status: '휴직' },
+  ]);
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">테라피스트 관리</h2>
+        <button className="flex items-center gap-2 px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition">
+          <Plus size={18} />
+          테라피스트 추가
+        </button>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-gray-200">
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">이름</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">전문</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">경력</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">상태</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">작업</th>
+            </tr>
+          </thead>
+          <tbody>
+            {therapists.map(therapist => (
+              <tr key={therapist.id} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="px-4 py-3 font-medium text-gray-900">{therapist.name}</td>
+                <td className="px-4 py-3 text-gray-600">{therapist.specialty}</td>
+                <td className="px-4 py-3 text-gray-600">{therapist.experience}</td>
+                <td className="px-4 py-3">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    therapist.status === '활동 중'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {therapist.status}
+                  </span>
+                </td>
+                <td className="px-4 py-3 flex gap-2">
+                  <button className="text-blue-600 hover:text-blue-800 transition">
+                    <Edit2 size={16} />
+                  </button>
+                  <button className="text-red-600 hover:text-red-800 transition">
+                    <Trash2 size={16} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// 직원 등록 컴포넌트
+// ============================================================
+function StaffContent() {
+  const [staff] = useState([
+    { id: 1, name: 'John Doe', position: '매니저', department: '운영', status: '근무 중' },
+    { id: 2, name: 'Jane Smith', position: '어시스턴트', department: '고객서비스', status: '근무 중' },
+    { id: 3, name: 'Mike Johnson', position: '청소원', department: '시설', status: '휴무' },
+  ]);
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">직원 관리</h2>
+        <button className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition">
+          <Plus size={18} />
+          직원 추가
+        </button>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-gray-200">
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">이름</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">직책</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">부서</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">상태</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">작업</th>
+            </tr>
+          </thead>
+          <tbody>
+            {staff.map(employee => (
+              <tr key={employee.id} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="px-4 py-3 font-medium text-gray-900">{employee.name}</td>
+                <td className="px-4 py-3 text-gray-600">{employee.position}</td>
+                <td className="px-4 py-3 text-gray-600">{employee.department}</td>
+                <td className="px-4 py-3">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    employee.status === '근무 중'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {employee.status}
+                  </span>
+                </td>
+                <td className="px-4 py-3 flex gap-2">
+                  <button className="text-blue-600 hover:text-blue-800 transition">
+                    <Edit2 size={16} />
+                  </button>
+                  <button className="text-red-600 hover:text-red-800 transition">
+                    <Trash2 size={16} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
