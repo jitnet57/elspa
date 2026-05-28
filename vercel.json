@@ -1,25 +1,5 @@
 {
   "$schema": "https://vercel.com/schemas/vercel.json",
   "version": 2,
-  "framework": "nextjs",
-  "builds": [
-    {
-      "src": "api/index.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "frontend/package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "api/index.py"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "frontend"
-    }
-  ]
+  "framework": "nextjs"
 }
