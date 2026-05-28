@@ -3448,3 +3448,147 @@ git push
 ~8,500 tokens
 
 ---
+
+---
+## [2026-05-28 10:35] Order: 013 - 침대 그룹 분할 기능 추가
+
+**주제:** 마사지 침대 그룹을 여러 개의 소그룹으로 분할하는 기능 구현
+
+### Plan
+✅ BedGroupingSettings 컴포넌트에 분할 UI 추가
+✅ 분할 수 선택 (2~5개) 및 미리보기 기능
+✅ 백엔드 API 엔드포인트 구현 (PUT /api/admin/beds/reorganize)
+✅ 타입 정의 및 서비스 레이어 구현
+✅ 유효성 검사 및 에러 처리
+✅ 기존 그룹 자동 제거 및 새 그룹 자동 생성
+
+### Task 수행 내용
+
+#### 섹션 1: 프론트엔드 컴포넌트 개선
+1. `BedGroupingSettings.tsx` - 분할 기능 추가
+   - 분할 버튼 UI 추가 (Copy 아이콘)
+   - 분할 수 선택 버튼 (2~5개)
+   - 분할 미리보기 표시 (새로운 그룹 레이아웃)
+   - 에러 메시지 및 로딩 상태 처리
+
+#### 섹션 2: 프론트엔드 타입 및 서비스
+1. `src/lib/types/bed-split.ts` - 타입 정의
+   - BedSplitRequest: groupId, splitInto, newGroups
+   - BedSplitResponse: success, message, newGroupIds, error
+
+2. `src/lib/services/bed-split-service.ts` - API 통신 서비스
+   - splitBedGroup(): API 호출 함수
+   - validateSplitCount(): 분할 수 유효성 검사
+   - 에러 처리 및 로깅
+
+#### 섹션 3: 백엔드 API 구현
+1. `app/routers/beds_split.py` - FastAPI 라우터
+   - PUT /api/admin/beds/reorganize: 그룹 분할 엔드포인트
+   - GET /api/admin/beds/groups: 모든 그룹 조회
+   - BedSplitRequest/Response 스키마
+   - 트랜잭션 기반 데이터 일관성 관리
+   - 상세한 로깅 및 에러 처리
+
+#### 섹션 4: main.py 업데이트
+1. beds_split 라우터 임포트 및 등록
+   - from app.routers import beds_split
+   - app.include_router(beds_split.router)
+
+### 알고리즘
+
+**침대 분할 로직:**
+1. 사용자가 그룹의 [분할] 버튼 클릭
+2. 분할 수 선택 (2~5개)
+3. 미리보기 생성: bedIds를 균등하게 배분
+   - 예: 30개 침대 → 2개로 분할 → 각 15개
+   - 예: 30개 침대 → 3개로 분할 → 10, 10, 10개
+4. "분할 저장" 클릭 시 API 호출
+5. 백엔드에서 기존 그룹 삭제 및 새 그룹 생성 (트랜잭션)
+6. 성공 시 로컬 상태 업데이트
+
+### Result
+✅ **5개 파일 생성 완료**
+- `BedGroupingSettings.tsx` (수정)
+- `bed-split.ts` (생성)
+- `bed-split-service.ts` (생성)
+- `beds_split.py` (생성)
+- `main.py` (수정)
+
+✅ **기능 완성**
+- 침대 그룹 분할 UI ✓
+- 분할 수 선택 ✓
+- 미리보기 표시 ✓
+- API 통신 ✓
+- 유효성 검사 ✓
+- 트랜잭션 관리 ✓
+
+### 주요 파일
+- `e:\elspa\frontend\src\app\admin\massage\components\BedGroupingSettings.tsx`
+- `e:\elspa\frontend\src\lib\types\bed-split.ts`
+- `e:\elspa\frontend\src\lib\services\bed-split-service.ts`
+- `e:\elspa\app\routers\beds_split.py`
+- `e:\elspa\main.py`
+
+### 코드 스니펫
+
+**분할 미리보기 생성:**
+```typescript
+const generateSplitPreview = (groupId: string, count: number) => {
+  const group = groups.find(g => g.id === groupId);
+  if (!group || count < 2) return [];
+
+  const bedIds = group.bedIds;
+  const bedsPerGroup = Math.ceil(bedIds.length / count);
+  const preview: BedGroup[] = [];
+
+  for (let i = 0; i < count; i++) {
+    const start = i * bedsPerGroup;
+    const end = Math.min(start + bedsPerGroup, bedIds.length);
+    const newBedIds = bedIds.slice(start, end);
+
+    preview.push({
+      id: `${group.id}-split-${i}`,
+      name: `${group.name} - Part ${i + 1}`,
+      bedIds: newBedIds,
+      // ...
+    });
+  }
+  return preview;
+};
+```
+
+**백엔드 분할 로직:**
+```python
+# 기존 그룹 삭제
+db.delete(existing_group)
+
+# 새로운 그룹 생성
+for idx, new_group_data in enumerate(request.newGroups):
+  new_group = BedGroup(
+    name=new_group_data.name,
+    bedIds=new_group_data.bedIds,
+  )
+  db.add(new_group)
+  db.flush()
+
+db.commit()  # 트랜잭션 커밋
+```
+
+### Next
+1. 테스트 (로컬)
+   - 침대 그룹 분할 UI 동작 확인
+   - 분할 수 변경 시 미리보기 업데이트 확인
+   - API 호출 및 데이터베이스 저장 확인
+2. 에러 시나리오 테스트
+   - 잘못된 분할 수 입력
+   - API 오류 처리
+3. 프로덕션 배포
+
+### Agent
+- Bash (파일 생성, Git 커밋)
+- Read/Edit (코드 작성)
+- 타입 정의 및 서비스 레이어
+
+### Tokens
+~7,200 tokens
+

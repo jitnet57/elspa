@@ -388,20 +388,29 @@ export default function BedGroupingSettings() {
                       🔀 '{group.name}' 분할하기
                     </h4>
 
+                    {/* 에러 메시지 */}
+                    {splitError && (
+                      <div className="flex items-center gap-2 p-3 bg-red-900/30 border border-red-700 rounded text-red-300 text-xs">
+                        <AlertCircle size={16} />
+                        {splitError}
+                      </div>
+                    )}
+
                     {/* 분할 수 선택 */}
                     <div>
                       <label className="block text-xs font-bold text-gray-300 mb-2">
                         분할할 그룹 수 선택 (현재: {group.bedIds.length}개 침대)
                       </label>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 flex-wrap">
                         {[2, 3, 4, 5].map(num => (
                           <button
                             key={num}
                             onClick={() => handleSplitCountChange(num)}
+                            disabled={isSplitting}
                             className={`px-3 py-1 rounded text-sm font-bold transition ${
                               splitCount === num
                                 ? 'bg-purple-600 text-white'
-                                : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+                                : 'bg-slate-700 text-gray-300 hover:bg-slate-600 disabled:opacity-50'
                             }`}
                           >
                             {num}개로 분할
@@ -414,7 +423,7 @@ export default function BedGroupingSettings() {
                     {splitPreview.length > 0 && (
                       <div>
                         <label className="block text-xs font-bold text-gray-300 mb-2">
-                          📊 분할 미리보기
+                          📊 분할 미리보기 ({splitPreview.reduce((sum, g) => sum + g.bedIds.length, 0)}개 침대 재분배)
                         </label>
                         <div className="space-y-2 max-h-48 overflow-y-auto">
                           {splitPreview.map((previewGroup, idx) => (
@@ -426,7 +435,7 @@ export default function BedGroupingSettings() {
                                 {previewGroup.name}
                               </p>
                               <p className="text-gray-400">
-                                {previewGroup.bedIds.length}개 침대
+                                침대 {previewGroup.bedIds.length}개: {previewGroup.bedIds.join(', ')}
                               </p>
                             </div>
                           ))}
@@ -438,13 +447,18 @@ export default function BedGroupingSettings() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleConfirmSplit(group.id)}
-                        className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-bold transition"
+                        disabled={isSplitting || splitPreview.length === 0}
+                        className="px-3 py-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:opacity-50 text-white rounded text-sm font-bold transition"
                       >
-                        ✅ 분할 저장
+                        {isSplitting ? '⏳ 분할 중...' : '✅ 분할 저장'}
                       </button>
                       <button
-                        onClick={() => setSplittingGroupId(null)}
-                        className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm font-bold transition"
+                        onClick={() => {
+                          setSplittingGroupId(null);
+                          setSplitError(null);
+                        }}
+                        disabled={isSplitting}
+                        className="px-3 py-1 bg-gray-600 hover:bg-gray-700 disabled:opacity-50 text-white rounded text-sm font-bold transition"
                       >
                         취소
                       </button>

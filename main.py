@@ -229,6 +229,8 @@ from app.routers import massage_bookings
 from app.routers import google_sheets_router
 # 💰 급여 정산 API 라우터 (BMAD × LangGraph)
 from app.routers import payroll
+# 🛏️ 침대 그룹 분할 API 라우터 (신규 - 2026-05-28)
+from app.routers import beds_split
 
 # 기존 라우터들 (일부 호환성 문제로 주석 처리)
 # from app.routers import beds, therapists, bookings, matching
@@ -259,6 +261,7 @@ app.include_router(payroll.router)  # 💰 Payroll API (BMAD × LangGraph)
 app.include_router(driver_api.router)  # 🚗 드라이버 API
 app.include_router(massage_bookings.router)  # 🧖 마사지 예약 API (Google Sheets 동기화)
 app.include_router(google_sheets_router.router)  # 📊 Google Sheets OAuth 2.0 API
+app.include_router(beds_split.router)  # 🛏️ 침대 그룹 분할 API
 
 # 재무 감사 로그 라우터 등록 (임시 비활성화)
 # from app.routers import audit_api
