@@ -248,64 +248,60 @@ export default function TherapistSchedulePage() {
   }, []);
 
   // ============================================================
-  // 📌 Google Sheets 예약 데이터 로드
+  // 📌 Google Sheets 예약 데이터 로드 (Monitor 페이지 동일한 형식)
   // ============================================================
   useEffect(() => {
     if (!showGoogleSheetBooking) return;
 
     const fetchGoogleSheetBookings = async () => {
       try {
-        // Google Sheets API v4를 사용하여 공개 스프레드시트에서 데이터 읽기
-        // 참고: 실제 환경에서는 스프레드시트 ID와 API Key를 환경변수로 설정해야 함
-
         const spreadsheetId = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID || '';
         const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 
         if (!spreadsheetId || !apiKey) {
-          // 환경변수가 없을 경우 기본 데이터 사용
-          const fallbackData = [
-            { id: '1', therapist: 'Maria Santos', service: 'Swedish Massage', date: '2026-05-28', time: '14:00', guest: 'John Doe', room: '01' },
-            { id: '2', therapist: 'Ana Mercado', service: 'Thai Massage', date: '2026-05-28', time: '15:00', guest: 'Jane Smith', room: '02' },
-            { id: '3', therapist: 'Rosa Chavez', service: 'Hot Stone Therapy', date: '2026-05-28', time: '16:00', guest: 'Mike Johnson', room: '03' },
-            { id: '4', therapist: 'Elena Santos', service: 'Foot Massage', date: '2026-05-28', time: '17:00', guest: 'Sarah Davis', room: '04' },
-            { id: '5', therapist: 'Jennifer Cruz', service: 'Aromatherapy', date: '2026-05-28', time: '18:00', guest: 'Tom Wilson', room: '05' },
+          // Demo 데이터 표시
+          const demoData = [
+            { id: 'demo-1', dutyNumber: '1', service: 'Swedish Massage', startTime: '09:00', endTime: '10:00', roomNumber: '01', guestName: 'John Doe', notes: 'First time client', pay: '$80', tip: '$10' },
+            { id: 'demo-2', dutyNumber: '2', service: 'Thai Massage', startTime: '10:15', endTime: '11:15', roomNumber: '02', guestName: 'Jane Smith', notes: 'Regular client', pay: '$85', tip: '$15' },
+            { id: 'demo-3', dutyNumber: '3', service: 'Hot Stone', startTime: '11:30', endTime: '12:30', roomNumber: '03', guestName: 'Mike Johnson', notes: 'Back pain treatment', pay: '$95', tip: '$20' },
           ];
-          setGoogleBookings(fallbackData);
+          setGoogleBookings(demoData);
           return;
         }
 
-        // Google Sheets API 호출
-        const range = 'Sheet1!A2:G100'; // 첫 행은 헤더, A2부터 시작
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
+        // Google Sheets API v4 - gid=802481850 탭의 A2:I100 범위
+        const sheetRange = "'SHEET_SCHEDULE (30 Lines)'!A2:I100";
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(sheetRange)}?key=${apiKey}`;
 
         const response = await fetch(url);
-        if (!response.ok) throw new Error('Failed to fetch Google Sheets data');
+        if (response.ok) {
+          const data = await response.json();
+          const rows = data.values || [];
 
-        const data = await response.json();
-        const values = data.values || [];
+          const bookings = rows
+            .filter((row: string[]) => row && row.length > 0 && row[0])
+            .map((row: string[], index: number) => ({
+              id: `booking-${index}`,
+              dutyNumber: (row[0] || '').toString().trim(),
+              service: (row[1] || '').toString().trim(),
+              startTime: (row[2] || '').toString().trim(),
+              endTime: (row[3] || '').toString().trim(),
+              roomNumber: (row[4] || '').toString().trim(),
+              guestName: (row[5] || '').toString().trim(),
+              notes: (row[6] || '').toString().trim(),
+              pay: (row[7] || '').toString().trim(),
+              tip: (row[8] || '').toString().trim(),
+            }));
 
-        // 데이터 변환: Google Sheets 행 → 객체 배열
-        const bookings = values.map((row: string[], index: number) => ({
-          id: String(index + 1),
-          guest: row[0] || 'N/A',        // A: Guest Name
-          service: row[1] || 'N/A',      // B: Service Type
-          therapist: row[2] || 'N/A',    // C: Therapist Name
-          date: row[3] || 'N/A',         // D: Date
-          time: row[4] || 'N/A',         // E: Time
-          room: row[5] || 'N/A',         // F: Room Number
-          notes: row[6] || '',           // G: Notes
-        }));
-
-        setGoogleBookings(bookings);
+          setGoogleBookings(bookings);
+          console.log(`✅ Google Sheet 데이터 로드 완료: ${bookings.length}건`);
+        } else {
+          console.error('Google Sheets API 오류:', response.statusText);
+          setGoogleBookings([]);
+        }
       } catch (error) {
-        console.error('Error fetching Google Sheets bookings:', error);
-        // 에러 발생 시 기본 데이터 사용
-        const fallbackData = [
-          { id: '1', therapist: 'Maria Santos', service: 'Swedish Massage', date: '2026-05-28', time: '14:00', guest: 'John Doe', room: '01' },
-          { id: '2', therapist: 'Ana Mercado', service: 'Thai Massage', date: '2026-05-28', time: '15:00', guest: 'Jane Smith', room: '02' },
-          { id: '3', therapist: 'Rosa Chavez', service: 'Hot Stone Therapy', date: '2026-05-28', time: '16:00', guest: 'Mike Johnson', room: '03' },
-        ];
-        setGoogleBookings(fallbackData);
+        console.error('❌ Google Sheet 데이터 조회 실패:', error);
+        setGoogleBookings([]);
       }
     };
 
@@ -379,9 +375,9 @@ export default function TherapistSchedulePage() {
 
           {/* Center Tab - Booking with Therapist */}
           <button
-            onClick={() => window.open(process.env.NEXT_PUBLIC_GOOGLE_SHEET_BOOKING_URL, '_blank')}
+            onClick={() => setShowGoogleSheetBooking(true)}
             className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 rounded-xl transition-all text-white font-bold shadow-lg hover:shadow-red-500/50">
-            <span style={{fontSize: '20px'}}>📝</span>
+            <span style={{fontSize: '20px'}}>🧖</span>
             BOOKING WITH THERAPIST
           </button>
 
@@ -1248,12 +1244,12 @@ export default function TherapistSchedulePage() {
       {/* Google Sheet Booking Modal */}
       {showGoogleSheetBooking && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[150] p-4">
-          <div className="bg-slate-900 border border-pink-500/50 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-slate-900 border border-pink-500/50 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="sticky top-0 bg-gradient-to-r from-pink-600 to-rose-600 px-6 py-4 flex justify-between items-center border-b border-pink-500/30">
               <div>
-                <h2 className="text-xl font-bold text-white">🧖 Therapist Bookings</h2>
-                <p className="text-xs text-pink-100 mt-1">Google Sheets Integration</p>
+                <h2 className="text-xl font-bold text-white">🧖 BOOKING WITH THERAPIST</h2>
+                <p className="text-xs text-pink-100 mt-1">Google Sheets Integration Data</p>
               </div>
               <button
                 onClick={() => setShowGoogleSheetBooking(false)}
@@ -1265,40 +1261,55 @@ export default function TherapistSchedulePage() {
 
             {/* Modal Content */}
             <div className="p-6">
-              <div className="space-y-3">
-                {/* Google Sheets Booking Data (Dynamic) */}
-                {googleBookings && googleBookings.length > 0 ? (
-                  googleBookings.map((booking, index) => (
-                    <div
-                      key={index}
-                      className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/8 transition-all"
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex-1">
-                          <p className="font-semibold text-white text-base">👤 {booking.guest}</p>
-                          <p className="text-sm text-pink-400 mt-1">{booking.service}</p>
-                          <p className="text-sm text-gray-400 mt-1">Therapist: <span className="text-indigo-300 font-medium">{booking.therapist}</span></p>
-                          <p className="text-xs text-gray-500 mt-2">📅 {booking.date} ⏰ {booking.time} | 🚪 Room {booking.room}</p>
-                        </div>
-                        <div className="bg-pink-500/20 text-pink-300 px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap">
-                          ☁️ Synced
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <p className="text-sm">Loading bookings...</p>
-                  </div>
-                )}
-
-                {/* Sync Info */}
-                <div className="mt-6 pt-4 border-t border-white/10">
-                  <p className="text-xs text-gray-500 text-center">
-                    💾 Auto-synced daily at midnight (00:00)
-                  </p>
+              {!googleBookings || googleBookings.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-pink-500 border-opacity-75 mx-auto"></div>
+                  <p className="text-sm mt-4">Loading bookings...</p>
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Table */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-pink-500/20 border border-pink-500/30">
+                          <th className="px-3 py-2 text-left text-pink-300 font-bold border border-pink-500/30">9-5PM DUTY N#</th>
+                          <th className="px-3 py-2 text-left text-pink-300 font-bold border border-pink-500/30">1ST TRT</th>
+                          <th className="px-3 py-2 text-left text-pink-300 font-bold border border-pink-500/30">1ST START</th>
+                          <th className="px-3 py-2 text-left text-pink-300 font-bold border border-pink-500/30">1ST END</th>
+                          <th className="px-3 py-2 text-left text-pink-300 font-bold border border-pink-500/30">1ST RM#</th>
+                          <th className="px-3 py-2 text-left text-pink-300 font-bold border border-pink-500/30">1ST GUEST</th>
+                          <th className="px-3 py-2 text-left text-pink-300 font-bold border border-pink-500/30">1ST NOTE</th>
+                          <th className="px-3 py-2 text-left text-pink-300 font-bold border border-pink-500/30">1ST PAY</th>
+                          <th className="px-3 py-2 text-left text-pink-300 font-bold border border-pink-500/30">1ST TIP</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {googleBookings.map((booking: any, index: number) => (
+                          <tr key={booking.id || index} className={`border border-white/10 ${index % 2 === 0 ? 'bg-white/2' : 'bg-white/5'}`}>
+                            <td className="px-3 py-2 text-white border border-white/10">{booking.dutyNumber || booking.id}</td>
+                            <td className="px-3 py-2 text-white border border-white/10">{booking.service}</td>
+                            <td className="px-3 py-2 text-white border border-white/10">{booking.startTime || booking.time}</td>
+                            <td className="px-3 py-2 text-white border border-white/10">{booking.endTime || ''}</td>
+                            <td className="px-3 py-2 text-white border border-white/10">{booking.roomNumber || booking.room}</td>
+                            <td className="px-3 py-2 text-white border border-white/10">{booking.guestName || booking.guest}</td>
+                            <td className="px-3 py-2 text-gray-300 border border-white/10 text-xs">{booking.notes || ''}</td>
+                            <td className="px-3 py-2 text-white border border-white/10">{booking.pay || ''}</td>
+                            <td className="px-3 py-2 text-white border border-white/10">{booking.tip || ''}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Info */}
+                  <div className="mt-4 pt-4 border-t border-white/10">
+                    <p className="text-xs text-gray-500 text-center">
+                      ☁️ Google Sheets에서 실시간으로 동기화된 마사지 예약 스케줄 (총 {googleBookings.length}건)
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Modal Footer */}

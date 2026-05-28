@@ -34,7 +34,7 @@ interface GoogleSheetBooking {
   tip: string;                  // 1ST TIP
 }
 
-export default function MonitorPage() {
+export function MonitorPage() {
   const [currentTime, setCurrentTime] = useState<string>('--:--:--');
   const [activeTab, setActiveTab] = useState<TabType>('queue');
   const [pickupRequests, setPickupRequests] = useState<PickupRequest[]>(MOCK_PICKUP_REQUESTS);
@@ -238,20 +238,6 @@ export default function MonitorPage() {
           </div>
         </div>
 
-        {/* 🧖 RED BOX - Booking with Therapist Menu */}
-        <div className="mt-4 border-4 border-red-500/80 rounded-lg p-6 bg-white/5 backdrop-blur-sm">
-          <button
-            onClick={handleOpenGoogleSheet}
-            className="w-full px-6 py-4 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 rounded-lg font-bold text-white text-lg transition-all shadow-xl hover:shadow-rose-500/50 flex items-center justify-center gap-3 group"
-          >
-            <span className="text-3xl group-hover:scale-110 transition-transform">🧖</span>
-            <div className="text-left">
-              <div className="font-bold">BOOKING WITH THERAPIST</div>
-              <div className="text-xs text-white/80">Google Sheets 예약 정보 조회</div>
-            </div>
-            <span className="ml-auto text-white/70 group-hover:text-white">→</span>
-          </button>
-        </div>
       </div>
 
       {/* Stats Bar */}
@@ -597,3 +583,5 @@ export default function MonitorPage() {
     </div>
   );
 }
+
+export default MonitorPage;
