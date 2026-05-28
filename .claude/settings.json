@@ -44,7 +44,8 @@
       "Bash(Get-ChildItem -Path 'e:\\\\elspa' -Filter '*.md')",
       "Bash(grep -E \"\\\\.md$|\\\\.txt$\")",
       "PowerShell(start \"C:\\\\Users\\\\jitne\\\\.gemini\\\\history\\\\kenneth-brain\\\\brain-network-2d.html\")",
-      "PowerShell(New-Item -ItemType Directory -Path \"e:\\\\elspa\\\\PHILIPPINES\" -Force)"
+      "PowerShell(New-Item -ItemType Directory -Path \"e:\\\\elspa\\\\PHILIPPINES\" -Force)",
+      "Read(//e/elspa/frontend/src/lib/store/**)"
     ]
   }
 }

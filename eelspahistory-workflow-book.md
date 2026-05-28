@@ -236,3 +236,106 @@ curl "http://localhost:8000/api/messaging/stats?period_days=7" \
 | migrations_notes.md | 100+ | DB 마이그레이션 가이드 |
 
 ---
+
+---
+
+## [2026-05-29 15:30] Order: 049 - Agent B: Three.js 드래그 회전 기능
+
+**주제:** 3D 네트워크 컴포넌트에 마우스 드래그 회전, 마우스 휠 줌, 더블클릭 리셋 기능 추가
+
+### Plan
+✅ 마우스 드래그로 3D 씬 회전 (X축: Y이동, Y축: X이동, easing 적용)
+✅ 마우스 휠 줌 인/아웃 (범위: 15~100, 부드러운 감속)
+✅ 더블 클릭으로 카메라 위치/회전 초기화
+✅ 드래그 중 자동 회전 비활성화, 중지 후 재개
+✅ 기존 검색 기능 유지 + 성능 최적화 (requestAnimationFrame)
+✅ TypeScript 타입 검증 및 한국어 주석 포함
+
+### Task 수행 내용
+
+#### 섹션 1: 신규 컴포넌트 개발
+1. frontend/src/components/20250529-1530-knowledge-network-interactive.tsx
+   - KnowledgeNetworkInteractive 컴포넌트 (기존 KnowledgeNetwork3D 업그레이드)
+   - Three.js Scene, PerspectiveCamera, WebGLRenderer 설정
+   - 마우스 인터랙션 상태 관리 (isDragging, deltaX/Y, rotationX/Y)
+   - 초기 카메라 위치 저장 (리셋용)
+
+#### 섹션 2: 마우스 드래그 회전 구현
+1. handleMouseDown: 드래그 시작 (isDrawing = true)
+2. handleMouseMove: 마우스 이동 거리 계산 + 회전값 누적
+   - 감도 조정: deltaX/Y * 0.01
+   - 회전 제한: 상하 ±90도 범위 (너무 뒤로 돌지 않도록)
+3. handleMouseUp: 드래그 종료 (isDragging = false)
+
+#### 섹션 3: 마우스 휠 줌 구현
+1. handleMouseWheel: wheel 이벤트 처리
+   - 스크롤 업 (deltaY < 0): 카메라 가까워짐 (-2)
+   - 스크롤 다운 (deltaY > 0): 카메라 멀어짐 (+2)
+   - 범위 제한: Math.max(15, Math.min(100, targetZoom))
+   - preventDefault() 호출로 페이지 스크롤 방지
+
+#### 섹션 4: 더블 클릭 리셋 구현
+1. handleDoubleClick: 300ms 이내 두 번 클릭 감지
+2. resetCamera: 회전값 및 카메라 위치 초기화
+   - rotationRef.current = {x: 0, y: 0}
+   - targetZoom = 40
+   - scene.rotation 초기화
+
+#### 섹션 5: 애니메이션 루프 개선
+1. 자동 회전 조건부 적용
+   - isDragging === false일 때만 자동 회전
+   - isDragging === true일 때 사용자 드래그값만 적용
+2. 부드러운 전환 (lerp 사용)
+   - scene.rotation: 현재값 → 목표값으로 0.1 속도로 접근
+   - camera.position.z: 현재 줌 → 목표 줌으로 0.1 속도로 접근
+   - 노드 스케일: 검색 상태에 따라 1 → 1.3 부드럽게
+
+#### 섹션 6: 이벤트 리스너 등록
+1. mousedown, mousemove, mouseup: 드래그 추적
+2. wheel: 마우스 휠 (passive: false로 설정)
+3. dblclick: 더블클릭 리셋
+4. click: 노드 클릭 선택 (기존 유지)
+5. resize: 윈도우 크기 변경 대응
+
+#### 섹션 7: UI 개선
+1. 조작 가이드 텍스트 업데이트
+   - 🖱️ 드래그: 3D 회전
+   - 🔍 휠: 줌 인/아웃 (15~100)
+   - 📌 더블클릭: 카메라 리셋
+2. 리셋 버튼 추가 (우하단)
+   - RotateCcw 아이콘
+   - 호버 시 색상 변경 (bg-blue-600 → bg-blue-700)
+
+#### 섹션 8: 테스트 페이지 생성
+1. frontend/src/app/test-network-interactive/page.tsx
+   - 12개 샘플 노드 데이터 (다양한 카테고리/색상)
+   - handleNodeClick 콜백 (선택 노드 정보 표시)
+   - 접속 URL: /test-network-interactive
+
+### Result
+✅ **2개 파일 생성 완료 (컴포넌트 + 테스트 페이지)**
+
+**주요 기능:**
+- ✓ 마우스 드래그 회전 (X/Y축, easing 0.1)
+- ✓ 마우스 휠 줌 (15~100 범위, 감속 0.1)
+- ✓ 더블클릭 리셋 (카메라 + 회전)
+- ✓ 드래그 중 자동 회전 일시 중지
+- ✓ 기존 검색 기능 유지 + 노드 클릭
+- ✓ TypeScript 타입 안전성
+- ✓ 한국어 주석 및 UI 가이드
+
+**성능:**
+- requestAnimationFrame 사용 (60fps 목표)
+- 부드러운 애니메이션 (lerp 적용)
+- 이벤트 리스너 정리 (메모리 누수 방지)
+
+**다음 단계:**
+- Agent C: 터치 제스처 (모바일) - Order 050
+- Agent D: 모바일 터치 핸들러 - Order 051
+- 프로덕션 배포 검증
+
+**주요 파일:**
+1. e:\elspa\frontend\src\components\20250529-1530-knowledge-network-interactive.tsx (540줄)
+2. e:\elspa\frontend\src\app\test-network-interactive\page.tsx (70줄)
+
+---

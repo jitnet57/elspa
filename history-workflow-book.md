@@ -4385,3 +4385,102 @@ ALTER TABLE payroll_records
 ~2,500 tokens
 
 ---
+
+---
+
+## [2026-05-29 11:30] Order: 048 - 테라피스트 커미션 정산 시스템 개선
+
+**주제:** MassageBooking과 PayrollCalculator를 연결하여 실제 마사지 가격 기반 커미션 계산 구현
+
+### Plan
+✅ MassageBooking 모델: therapist_id(FK), service_price, service_duration_minutes 추가
+✅ AttendanceLog 모델: massage_booking_id(FK) 추가로 마사지 예약 연결
+✅ PayrollCalculator: calculate_therapist_commission_from_bookings() 구현
+✅ 데이터베이스 마이그레이션 생성
+✅ api/ 디렉토리 동기화
+
+### Task 수행 내용
+
+#### 섹션 1: 데이터 모델 개선
+1. app/models/massage_booking.py
+   - therapist_id: FK (employees.id) 추가 - Employee와 직접 연결
+   - service_duration_minutes: Integer 추가 - 마사지 소요 시간
+   - service_price: Numeric(10,2) 추가 - 실제 마사지 가격
+   - therapist: String 유지 - 레거시 호환성
+
+2. app/models/payroll.py (AttendanceLog)
+   - massage_booking_id: FK (massage_bookings.id) 추가 - 마사지 예약과 연결
+   - 인덱스: idx_attendance_massage_booking 추가
+
+#### 섹션 2: 계산 엔진 개선
+1. app/services/payroll_calculator.py
+   - calculate_therapist_commission_from_bookings() 메서드 추가
+   - MassageBooking.service_price 기반 커미션 계산
+   - 상태='completed' 인 예약만 포함
+   - _calculate_employee_payroll에서 새 메서드 호출로 변경
+
+#### 섹션 3: 데이터베이스 마이그레이션
+1. migrations/003_add_therapist_commission_fields.sql
+   - MassageBooking에 3개 필드 추가
+   - AttendanceLog에 1개 필드 추가
+   - 4개 인덱스 추가
+
+#### 섹션 4: API 동기화
+1. api/app/models/massage_booking.py - 동일 수정
+2. api/app/models/payroll.py - 동일 수정
+3. api/app/services/payroll_calculator.py - 동일 수정
+
+### Result
+✅ **7개 파일 수정 완료, 1개 마이그레이션 파일 생성**
+
+**해결된 문제:**
+- ❌ 테라피스트 커미션이 고정 100 Peso로 계산되던 문제 해결
+- ❌ 하루 여러 마사지 시 1회로만 계산되던 문제 해결
+- ❌ MassageBooking과 PayrollCalculator의 데이터 단절 해결
+
+**개선 사항:**
+- ✅ 마사지 예약의 실제 가격(service_price) 반영
+- ✅ 마사지 소요 시간(service_duration_minutes) 추적
+- ✅ therapist_id FK로 Employee와 직접 연결
+- ✅ 완료된(status='completed') 예약만 정산에 포함
+- ✅ 레거시 호환성 유지 (therapist 문자열 필드)
+
+### 주요 파일 변경
+
+**MassageBooking 모델:**
+```python
+therapist_id = Column(Integer, ForeignKey("employees.id"), nullable=True)
+service_duration_minutes = Column(Integer, default=60)
+service_price = Column(Numeric(10, 2), default=0)
+```
+
+**PayrollCalculator 메서드:**
+```python
+async def calculate_therapist_commission_from_bookings(
+    employee_id, period_start, period_end, db
+) -> Decimal:
+    # MassageBooking.service_price 합산
+    # WHERE therapist_id = employee_id
+    # AND date >= period_start AND date <= period_end
+    # AND status = 'completed'
+```
+
+### 영향도 분석
+
+**Direct Impact:**
+- 모든 테라피스트 정산에서 마사지 가격 반영
+- 이전: 고정 100 Peso × 출근일수
+- 이후: 마사지 가격의 합계 (30분/60분/90분 등 실제 가격)
+
+**Migration Required:**
+- migrations/003_add_therapist_commission_fields.sql 실행 필요
+- therapist_id 매칭: 수동 마이그레이션 스크립트 제공
+
+**Backward Compatibility:**
+- therapist 필드 유지 (기존 데이터 손상 없음)
+- 새 필드 nullable (점진적 마이그레이션 가능)
+
+**커밋:**
+- 01dd129: ✨ Feat: 테라피스트 커미션 정산 시스템 개선
+
+---

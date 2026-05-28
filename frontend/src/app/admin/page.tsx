@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import React from 'react';
+import Link from 'next/link';
 import { usePayrollStore } from '@/lib/store/payroll-store';
 import { usePayrollCalculation } from '@/hooks/usePayrollCalculation';
 
@@ -93,32 +94,42 @@ export default function AdminDashboard() {
   ];
 
   // Payroll store - periods for payroll tab
-  const { periods = [], loading: payrollLoading, startCalculation, approvePeriodAction } = usePayrollStore();
+  const {
+    periods = [],
+    loading: payrollLoading,
+    startCalculation,
+    approvePeriodAction,
+    records = [],
+    employees = [],
+    loading = false,
+    error = null,
+    fetchRecords,
+    fetchEmployees
+  } = usePayrollStore();
 
-  // API 데이터 (임시로 disabled - store 문제 해결)
-  // const { records, employees, loading, error, fetchRecords, fetchEmployees, clearError } = usePayrollStore();
-
-  // 임시 빈 배열로 처리
-  const records: any[] = [];
-  const employees: any[] = [];
-  const loading = false;
-  const error = null;
+  // API 데이터 로드 (마운트 시 1회)
+  useEffect(() => {
+    if (fetchRecords) fetchRecords();
+    if (fetchEmployees) fetchEmployees();
+  }, [fetchRecords, fetchEmployees]);
 
   // API 데이터를 테이블 형식으로 변환
-  const payrollData = records.map((record) => {
+  const payrollData = records.map((record: any) => {
     const employee = employees.find(e => e.id === record.employee_id);
+    const baseSalary = record.base_salary || record.base || 0;
+    const grossPay = record.gross_pay || 0;
     return {
       id: record.id?.toString() || `REC-${record.employee_id}`,
       name: employee?.name || `Employee ${record.employee_id}`,
       type: 'staff',
       roleLabel: 'ADMIN STAFF',
-      gross: record.gross_pay || 0,
+      gross: grossPay,
       deductions: record.total_deductions || 0,
-      net: (record.gross_pay || 0) - (record.total_deductions || 0),
-      status: ((record.gross_pay || 0) - (record.total_deductions || 0)) === 0 ? 'error' : 'emerald',
+      net: grossPay - (record.total_deductions || 0),
+      status: (grossPay - (record.total_deductions || 0)) === 0 ? 'error' : 'emerald',
       breakdown: {
-        base: record.base_salary || 0,
-        commission: (record.gross_pay || 0) - (record.base_salary || 0),
+        base: baseSalary,
+        commission: grossPay - baseSalary,
       },
       deductionDetail: {
         sss: record.sss_contribution || 0,
@@ -201,8 +212,8 @@ export default function AdminDashboard() {
                 <p className="text-indigo-200/50 text-xs mt-1 font-semibold">Directory, Scheduling, & Bio-metrics</p>
               </div>
               <div className="flex gap-2 mt-auto text-[10px] font-black tracking-widest">
-                <a className="flex-1 text-center py-2.5 bg-white/5 hover:bg-[#8aebff]/20 hover:text-[#8aebff] rounded-lg transition-all" href="/admin/therapists.html">DIRECTORY</a>
-                <a className="flex-1 text-center py-2.5 bg-white/5 hover:bg-[#8aebff]/20 hover:text-[#8aebff] rounded-lg transition-all" href="/admin/therapist-schedule.html">SCHEDULE</a>
+                <Link className="flex-1 text-center py-2.5 bg-white/5 hover:bg-[#8aebff]/20 hover:text-[#8aebff] rounded-lg transition-all" href="/admin/therapists">DIRECTORY</Link>
+                <Link className="flex-1 text-center py-2.5 bg-white/5 hover:bg-[#8aebff]/20 hover:text-[#8aebff] rounded-lg transition-all" href="/admin/therapist-schedule">SCHEDULE</Link>
               </div>
             </div>
 
@@ -221,11 +232,11 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-[10px] font-black tracking-widest">
-                <a className="px-4 py-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-[#8aebff]/40 transition-all text-center" href="/admin/companies.html">COMPANIES</a>
-                <a className="px-4 py-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-[#8aebff]/40 transition-all text-center" href="/admin/payroll.html">PAYROLL</a>
-                <a className="px-4 py-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-[#8aebff]/40 transition-all text-center" href="/therapist-settlement.html">THERAPIST</a>
-                <a className="px-4 py-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-[#8aebff]/40 transition-all text-center" href="/admin/guide-referral-fee.html">GUIDE FEE</a>
-                <a className="px-4 py-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-[#8aebff]/40 transition-all text-center" href="/admin/settlement-report.html">REPORTS</a>
+                <Link className="px-4 py-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-[#8aebff]/40 transition-all text-center" href="/admin/companies">COMPANIES</Link>
+                <Link className="px-4 py-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-[#8aebff]/40 transition-all text-center" href="/admin/payroll">PAYROLL</Link>
+                <Link className="px-4 py-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-[#8aebff]/40 transition-all text-center" href="/admin/monthly-settlement">THERAPIST</Link>
+                <Link className="px-4 py-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-[#8aebff]/40 transition-all text-center" href="/admin/guide-referral-fee">GUIDE FEE</Link>
+                <Link className="px-4 py-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-[#8aebff]/40 transition-all text-center" href="/admin/settlement-report">REPORTS</Link>
               </div>
             </div>
 
@@ -248,8 +259,8 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2 mt-auto text-[10px] font-black tracking-widest">
-                <a className="py-2.5 bg-white/5 rounded-lg text-center hover:bg-white/10" href="/admin/change-logs.html">LOGS</a>
-                <a className="py-2.5 bg-white/5 rounded-lg text-center hover:bg-[#8aebff]/20 hover:text-[#8aebff]" href="/admin/test-data.html">VALIDATE</a>
+                <Link className="py-2.5 bg-white/5 rounded-lg text-center hover:bg-white/10" href="/admin/change-logs">LOGS</Link>
+                <Link className="py-2.5 bg-white/5 rounded-lg text-center hover:bg-[#8aebff]/20 hover:text-[#8aebff]" href="/admin/test-data">VALIDATE</Link>
               </div>
             </div>
 
@@ -260,12 +271,12 @@ export default function AdminDashboard() {
                 <h4 className="font-bold text-sm text-white">Daily Reporting</h4>
               </div>
               <p className="text-xs text-indigo-200/50 mb-6 font-semibold leading-relaxed">Consolidated expense tracking for all regional sectors.</p>
-              <a 
-                href="/admin/expense.html" 
+              <Link
+                href="/admin/expense"
                 className="block w-full py-3.5 bg-[#8aebff]/15 border border-[#8aebff]/30 text-[#8aebff] font-black text-center rounded-xl hover:bg-[#8aebff]/35 transition-all text-xs tracking-widest"
               >
                 OPEN EXPENSE LEDGER
-              </a>
+              </Link>
             </div>
 
             {/* Card 5: SSS Management */}
@@ -277,13 +288,13 @@ export default function AdminDashboard() {
                 </div>
                 <p className="text-xs text-indigo-200/50 font-semibold leading-relaxed">Legacy data migration & scan to spreadsheet.</p>
               </div>
-              <a 
-                href="/admin/sss.html"
+              <Link
+                href="/admin/sss"
                 className="mt-4 px-4 py-3 bg-white/5 rounded-xl flex items-center justify-center gap-2 hover:bg-white/10 border border-white/5 transition-all text-xs font-black tracking-widest"
               >
                 <span className="material-symbols-outlined text-sm">file_export</span>
                 EXPORT TO EXCEL
-              </a>
+              </Link>
             </div>
           </section>
 
