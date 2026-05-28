@@ -176,20 +176,8 @@ export default function MonitorPage({ showBookingButton = true }) {
 
       {/* Scrollable Section: Tab Navigation + Content */}
       <div className="flex-1 overflow-y-auto flex flex-col">
-        {/* Tab Navigation */}
-        <div className="flex gap-2 px-6 py-4 border-b border-white/10 bg-slate-950 overflow-x-auto shrink-0">
-          <TabButton
-            active={activeTab === 'beds'}
-            onClick={() => setActiveTab('beds')}
-          >
-            🛏️ Real-time Bed Mode
-          </TabButton>
-          <TabButton
-            active={activeTab === 'schedule'}
-            onClick={() => setActiveTab('schedule')}
-          >
-            🗓️ Therapist Daily Schedule
-          </TabButton>
+        {/* Tab Navigation - Centered */}
+        <div className="flex justify-center gap-2 px-6 py-4 border-b border-white/10 bg-slate-950 shrink-0">
           <TabButton
             active={activeTab === 'booking'}
             onClick={() => setActiveTab('booking')}
@@ -200,9 +188,7 @@ export default function MonitorPage({ showBookingButton = true }) {
 
         {/* Tab Content */}
         <div className="flex-1 overflow-hidden">
-          {activeTab === 'beds' && <BedLayoutView />}
-          {activeTab === 'schedule' && <TherapistScheduleView />}
-          {activeTab === 'booking' && <BookingTabView />}
+          <BookingTabView />
         </div>
       </div>
 
