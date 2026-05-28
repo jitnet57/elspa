@@ -205,23 +205,26 @@ export const EdgeInteractions: React.FC<EdgeInteractionProps> = ({
       const line = new THREE.Line(lineGeometry, lineMaterial);
       (line as any).userData = { edge };
 
-      edgeGroupRef.current.add(line);
-      edgeLinesRef.current.set(edge.id, line);
-      registerEdge(edge, line);
+      // ✅ Null 체크 추가: edgeGroupRef.current이 null이 아닌지 확인
+      if (edgeGroupRef.current) {
+        edgeGroupRef.current.add(line);
+        edgeLinesRef.current.set(edge.id, line);
+        registerEdge(edge, line);
 
-      // ===== 2. 라벨 렌더링 =====
-      if (edge.label) {
-        // 선의 중점 계산
-        const midpoint = new THREE.Vector3(
-          (sourceNode.position.x + targetNode.position.x) / 2,
-          (sourceNode.position.y + targetNode.position.y) / 2,
-          (sourceNode.position.z + targetNode.position.z) / 2
-        );
+        // ===== 2. 라벨 렌더링 =====
+        if (edge.label) {
+          // 선의 중점 계산
+          const midpoint = new THREE.Vector3(
+            (sourceNode.position.x + targetNode.position.x) / 2,
+            (sourceNode.position.y + targetNode.position.y) / 2,
+            (sourceNode.position.z + targetNode.position.z) / 2
+          );
 
-        // Billboard 라벨 생성
-        const label = createBillboardLabel(edge.label, midpoint, 15);
-        edgeGroupRef.current.add(label);
-        edgeLabelsRef.current.set(edge.id, label);
+          // Billboard 라벨 생성
+          const label = createBillboardLabel(edge.label, midpoint, 15);
+          edgeGroupRef.current.add(label);
+          edgeLabelsRef.current.set(edge.id, label);
+        }
       }
 
       // ===== 3. 노드명 등록 =====

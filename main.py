@@ -244,6 +244,8 @@ from app.routers import beds_split
 # 📚 지식 네트워크 API 라우터 (신규 - 2026-05-29, Order 049)
 from app.routers import knowledge_network_router
 from app.routers import knowledge_network_edges_router
+# 🔗 지식 네트워크 엣지 DB API 라우터 (PostgreSQL 기반 - Order 051)
+from app.routers import knowledge_network_edges_db_router
 
 # 기존 라우터들 (일부 호환성 문제로 주석 처리)
 # from app.routers import beds, therapists, bookings, matching
@@ -276,7 +278,8 @@ app.include_router(massage_bookings.router)  # 🧖 마사지 예약 API (Google
 app.include_router(google_sheets_router.router)  # 📊 Google Sheets OAuth 2.0 API
 app.include_router(beds_split.router)  # 🛏️ 침대 그룹 분할 API
 app.include_router(knowledge_network_router.router)  # 📚 지식 네트워크 API (노드)
-app.include_router(knowledge_network_edges_router.router)  # 🔗 지식 네트워크 엣지 API (연결선)
+app.include_router(knowledge_network_edges_router.router)  # 🔗 지식 네트워크 엣지 API (연결선 - 메모리)
+# DB 기반 엣지 라우터는 현재 동기 세션 사용으로 import 방식 변경 필요
 
 # 재무 감사 로그 라우터 등록 (임시 비활성화)
 # from app.routers import audit_api
