@@ -279,3 +279,136 @@ export async function fetchFinancial<T = any>(
 
   return response.json();
 }
+
+// ============================================================
+// Knowledge Network API
+// ============================================================
+
+export interface KnowledgeNetworkNode {
+  id: string;
+  label: string;
+  description: string;
+  category: string;
+  color: string;
+}
+
+export interface KnowledgeNetworkResponse {
+  nodes: KnowledgeNetworkNode[];
+  total: number;
+}
+
+export interface KnowledgeNetworkSearchResponse {
+  results: KnowledgeNetworkNode[];
+  count: number;
+  query: string;
+}
+
+/**
+ * 📌 함수: getKnowledgeNetworkNodes
+ * 📋 목적: 모든 지식 네트워크 노드 조회 (카테고리 필터 선택)
+ * 🔧 매개변수:
+ *    - category: 카테고리 필터 (선택)
+ *    - skip: 페이지네이션 오프셋
+ *    - limit: 페이지네이션 리미트
+ * 📤 반환값: {nodes: KnowledgeNetworkNode[], total: number}
+ */
+export async function getKnowledgeNetworkNodes(params?: {
+  category?: string;
+  skip?: number;
+  limit?: number;
+}): Promise<KnowledgeNetworkResponse> {
+  const searchParams = new URLSearchParams();
+  if (params?.category) searchParams.append('category', params.category);
+  if (params?.skip !== undefined) searchParams.append('skip', params.skip.toString());
+  if (params?.limit) searchParams.append('limit', params.limit.toString());
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/knowledge-network/nodes?${searchParams.toString()}`,
+    { cache: 'no-store' }
+  );
+
+  if (!response.ok) {
+    throw new Error('지식 네트워크 노드를 불러올 수 없습니다');
+  }
+
+  return response.json();
+}
+
+/**
+ * 📌 함수: searchKnowledgeNetworkNodes
+ * 📋 목적: 키워드 기반 검색 수행
+ * 🔧 매개변수:
+ *    - query: 검색 키워드
+ *    - category: 카테고리 필터 (선택)
+ *    - limit: 결과 최대 개수
+ * 📤 반환값: {results: KnowledgeNetworkNode[], count: number, query: string}
+ */
+export async function searchKnowledgeNetworkNodes(params: {
+  query: string;
+  category?: string;
+  limit?: number;
+}): Promise<KnowledgeNetworkSearchResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/knowledge-network/search`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: params.query,
+        category: params.category,
+        limit: params.limit || 10,
+      }),
+      cache: 'no-store',
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('검색에 실패했습니다');
+  }
+
+  return response.json();
+}
+
+/**
+ * 📌 함수: getKnowledgeNetworkNodeById
+ * 📋 목적: 특정 노드의 상세 정보 조회
+ * 🔧 매개변수:
+ *    - nodeId: 노드 고유 식별자
+ * 📤 반환값: KnowledgeNetworkNode 객체
+ */
+export async function getKnowledgeNetworkNodeById(
+  nodeId: string
+): Promise<KnowledgeNetworkNode> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/knowledge-network/nodes/${nodeId}`,
+    { cache: 'no-store' }
+  );
+
+  if (!response.ok) {
+    throw new Error('노드 정보를 불러올 수 없습니다');
+  }
+
+  return response.json();
+}
+
+/**
+ * 📌 함수: getKnowledgeNetworkCategories
+ * 📋 목적: 전체 카테고리 목록 조회
+ * 🔧 매개변수: (없음)
+ * 📤 반환값: {categories: string[], count: number}
+ */
+export async function getKnowledgeNetworkCategories(): Promise<{
+  categories: string[];
+  count: number;
+}> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/knowledge-network/categories`,
+    { cache: 'no-store' }
+  );
+
+  if (!response.ok) {
+    throw new Error('카테고리 목록을 불러올 수 없습니다');
+  }
+
+  return response.json();
+}

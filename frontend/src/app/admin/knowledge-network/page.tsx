@@ -1,186 +1,144 @@
 // ============================================================
-// 📌 페이지: 지식 네트워크 3D
-// 📋 목적: 세부(Cebu) ElSpa 시장 정보를 3D 네트워크로 시각화
-// 🔧 기능: 3D 시각화 + 검색 필터링
+// 📌 페이지: 지식 네트워크 3D (API 통합)
+// 📋 목적: 백엔드 API에서 지식 네트워크 데이터를 로드하여 3D로 시각화
+// 🔧 기능: API 데이터 로드 + 3D 시각화 + 검색 + 에러 처리
 // 📅 작성일: 2026-05-29
 // ⚠️ 주의: 'use client' 컴포넌트 (Three.js 렌더링)
 // ============================================================
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import KnowledgeNetwork3D, { NetworkNode } from '@/components/20250529-1435-knowledge-network-3d';
+import KnowledgeNetworkOptimized from '@/components/20250529-1545-knowledge-network-optimized';
+import { getKnowledgeNetworkNodes, getKnowledgeNetworkNodeById } from '@/lib/api-client';
 
 /**
- * 샘플 지식 네트워크 데이터
- * ElSpa 시장의 주요 정보: 점포, 상품, 판매자, 고객
- */
-const SAMPLE_KNOWLEDGE_NETWORK: NetworkNode[] = [
-  // 📍 시장 정보
-  {
-    id: 'elspa-market',
-    label: 'ElSpa 시장',
-    description: '세부(Cebu) 지역의 종합 마사지 및 웰니스 서비스 시장',
-    category: '시장',
-    color: '#ef4444',
-  },
-
-  // 💇 마사지 서비스
-  {
-    id: 'massage-thai',
-    label: '타이 마사지',
-    description: '전통 태국식 마사지, 경혈 치료, 근육 이완',
-    category: '마사지',
-    color: '#3b82f6',
-  },
-  {
-    id: 'massage-shiatsu',
-    label: '시아츠 마사지',
-    description: '일본식 지압 마사지, 신경계 활성화',
-    category: '마사지',
-    color: '#3b82f6',
-  },
-  {
-    id: 'massage-sports',
-    label: '스포츠 마사지',
-    description: '운동 선수 전문 마사지, 근육 회복 치료',
-    category: '마사지',
-    color: '#3b82f6',
-  },
-  {
-    id: 'massage-aromatherapy',
-    label: '아로마테라피',
-    description: '향기 요법, 정신 건강 개선, 스트레스 완화',
-    category: '마사지',
-    color: '#3b82f6',
-  },
-
-  // 💆 웰니스 서비스
-  {
-    id: 'wellness-spa',
-    label: '스파',
-    description: '고급 휴식 및 피부 관리 서비스',
-    category: '웰니스',
-    color: '#10b981',
-  },
-  {
-    id: 'wellness-yoga',
-    label: '요가',
-    description: '신체 단련, 명상, 유연성 증진',
-    category: '웰니스',
-    color: '#10b981',
-  },
-  {
-    id: 'wellness-meditation',
-    label: '명상',
-    description: '마음챙김 명상, 스트레스 해소, 정신 수양',
-    category: '웰니스',
-    color: '#10b981',
-  },
-
-  // 👥 판매자 정보
-  {
-    id: 'therapist-john',
-    label: '존 (치료사)',
-    description: '경력 10년의 마사지 전문가, 타이 마사지 전공',
-    category: '판매자',
-    color: '#f59e0b',
-  },
-  {
-    id: 'therapist-maria',
-    label: '마리아 (치료사)',
-    description: '스파 및 아로마테라피 전문, 5성 평점 유지',
-    category: '판매자',
-    color: '#f59e0b',
-  },
-  {
-    id: 'therapist-david',
-    label: '데이빗 (치료사)',
-    description: '스포츠 마사지 전문, 국가대표팀 경험',
-    category: '판매자',
-    color: '#f59e0b',
-  },
-
-  // 👤 고객 정보
-  {
-    id: 'customer-segment-corporate',
-    label: '기업 고객',
-    description: '회사원, 임원진, 스트레스 관리 필요',
-    category: '고객',
-    color: '#8b5cf6',
-  },
-  {
-    id: 'customer-segment-athletes',
-    label: '운동선수',
-    description: '축구, 농구, 피트니스 선수들',
-    category: '고객',
-    color: '#8b5cf6',
-  },
-  {
-    id: 'customer-segment-elderly',
-    label: '시니어',
-    description: '65세 이상, 건강 관리 필요',
-    category: '고객',
-    color: '#8b5cf6',
-  },
-
-  // 📊 경영 정보
-  {
-    id: 'business-revenue',
-    label: '매출',
-    description: '월별 총 매출액, 성장률 추이',
-    category: '경영',
-    color: '#ec4899',
-  },
-  {
-    id: 'business-occupancy',
-    label: '예약률',
-    description: '침대/방 사용률, 피크 시간',
-    category: '경영',
-    color: '#ec4899',
-  },
-  {
-    id: 'business-customer-retention',
-    label: '고객 유지율',
-    description: '재방문 고객 비율, 만족도 지수',
-    category: '경영',
-    color: '#ec4899',
-  },
-];
-
-/**
- * 지식 네트워크 3D 페이지
+ * 지식 네트워크 3D 페이지 (API 통합)
+ * - FastAPI에서 노드 데이터 실시간 로드
  * - Three.js 기반 3D 시각화
- * - Fuse.js 검색 기능
- * - 노드 클릭 시 상세 정보 표시
+ * - 노드 클릭 시 API에서 상세 정보 로드
+ * - 로딩 스피너 & 에러 처리 포함
  */
 export default function KnowledgeNetworkPage() {
+  const [nodes, setNodes] = useState<NetworkNode[]>([]);
   const [selectedNode, setSelectedNode] = useState<NetworkNode | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
 
-  const handleNodeClick = (node: NetworkNode) => {
-    setSelectedNode(node);
-    console.log('🎯 선택된 노드:', node);
+  // 초기 로드: 모든 노드 조회
+  useEffect(() => {
+    const loadNodes = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const response = await getKnowledgeNetworkNodes({ limit: 100 });
+        console.log('✅ 노드 로드 완료:', response.nodes.length, '개');
+
+        setNodes(response.nodes);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : '노드를 로드할 수 없습니다';
+        console.error('❌ 노드 로드 실패:', errorMessage);
+        setError(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadNodes();
+  }, []);
+
+  // 노드 클릭 핸들러: API에서 상세 정보 로드
+  const handleNodeClick = async (node: NetworkNode) => {
+    try {
+      setIsLoadingDetail(true);
+      setError(null);
+
+      // API에서 상세 정보 로드 (선택사항 - 이미 클라이언트에 있으면 건너뜀)
+      const detailNode = await getKnowledgeNetworkNodeById(node.id);
+      console.log('🎯 상세 정보 로드:', detailNode);
+
+      setSelectedNode(detailNode);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : '상세 정보를 불러올 수 없습니다';
+      console.warn('⚠️ 상세 정보 로드 실패:', errorMessage);
+      // 실패해도 현재 노드 표시 (클라이언트 데이터 사용)
+      setSelectedNode(node);
+    } finally {
+      setIsLoadingDetail(false);
+    }
   };
 
   return (
     <div className="relative w-full h-screen">
-      {/* 3D 시각화 영역 */}
-      <KnowledgeNetwork3D
-        nodes={SAMPLE_KNOWLEDGE_NETWORK}
-        onNodeClick={handleNodeClick}
-      />
+      {/* 로딩 상태 */}
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+          <div className="bg-white rounded-lg shadow-xl p-8 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-700 font-semibold">지식 네트워크를 로드 중입니다...</p>
+            <p className="text-gray-500 text-sm mt-2">잠시만 기다려주세요</p>
+          </div>
+        </div>
+      )}
 
-      {/* 선택된 노드 상세 정보 패널 (중앙 상단) */}
+      {/* 에러 상태 */}
+      {error && !isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+          <div className="bg-white rounded-lg shadow-xl p-8 text-center max-w-md">
+            <div className="text-red-500 text-4xl mb-4">!</div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">오류 발생</h2>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"
+            >
+              다시 시도
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 3D 시각화 영역 (노드 수에 따라 자동 선택) */}
+      {!isLoading && !error && nodes.length > 0 && (
+        <>
+          {nodes.length < 500 ? (
+            // 표준 버전: 100개 미만 노드
+            <KnowledgeNetwork3D
+              nodes={nodes}
+              onNodeClick={handleNodeClick}
+            />
+          ) : (
+            // 최적화 버전: 500개 이상 노드 (Fallback으로 사용)
+            <KnowledgeNetworkOptimized
+              nodes={nodes}
+              onNodeClick={handleNodeClick}
+            />
+          )}
+        </>
+      )}
+
+      {/* 선택된 노드 상세 정보 패널 */}
       {selectedNode && (
         <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-white rounded-lg shadow-2xl p-6 max-w-md z-20 animate-fadeIn">
           <button
             onClick={() => setSelectedNode(null)}
-            className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+            className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition"
           >
             ✕
           </button>
 
           <div className="space-y-3">
+            {/* 로딩 상태 (상세 정보 로드 중) */}
+            {isLoadingDetail && (
+              <div className="flex items-center space-x-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                <p className="text-gray-500 text-sm">상세 정보 로드 중...</p>
+              </div>
+            )}
+
             {/* 노드 제목 */}
             <div>
               <h2 className="text-2xl font-bold text-gray-900">
@@ -214,10 +172,14 @@ export default function KnowledgeNetworkPage() {
       )}
 
       {/* 상단 타이틀 (모바일 친화적) */}
-      <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-3 max-w-xs hidden md:block">
-        <h1 className="text-lg font-bold text-gray-900">ElSpa 지식 네트워크</h1>
-        <p className="text-sm text-gray-600">세부 시장 정보 시각화</p>
-      </div>
+      {!isLoading && !error && (
+        <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-3 max-w-xs hidden md:block">
+          <h1 className="text-lg font-bold text-gray-900">ElSpa 지식 네트워크</h1>
+          <p className="text-sm text-gray-600">
+            {nodes.length > 0 ? `${nodes.length}개 노드` : '로드 중...'}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

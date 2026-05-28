@@ -302,7 +302,30 @@ export default function AdminDashboard() {
               📌 Embedded Payroll Panel (실시간 급여 정산 테이블)
               ============================================================ */}
           <section className="bg-white/3 backdrop-blur-md border border-indigo-500/20 rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(99,102,241,0.15)]">
-            
+
+            {/* 에러 베너 */}
+            {error && (
+              <div className="bg-rose-500/10 border-b border-rose-500/30 px-6 py-4">
+                <div className="flex items-center gap-4">
+                  <span className="material-symbols-outlined text-rose-500 text-2xl">warning</span>
+                  <div className="flex-1">
+                    <p className="text-sm font-black text-rose-500 uppercase tracking-widest">API 연결 오류</p>
+                    <p className="text-xs text-rose-300/80 font-semibold mt-1">{error}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      // clearError?.();
+                      fetchRecords?.();
+                      fetchEmployees?.();
+                    }}
+                    className="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/30 rounded text-[10px] font-black text-rose-300 transition-all"
+                  >
+                    재시도
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Header Area */}
             <div className="p-6 border-b border-indigo-500/10 flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
@@ -317,9 +340,7 @@ export default function AdminDashboard() {
                   </span>
                 </h3>
                 <p className="text-xs text-indigo-200/50 mt-1 font-semibold">
-                  {error ? (
-                    <span className="text-rose-400">⚠️ Error loading payroll data</span>
-                  ) : loading ? (
+                  {loading ? (
                     <span className="text-yellow-400">📊 Loading payroll records...</span>
                   ) : (
                     <span>✅ {payrollData.length} records loaded | Batch: May 16 - May 27</span>
@@ -360,16 +381,52 @@ export default function AdminDashboard() {
 
             {/* Table Area */}
             <div className="overflow-x-auto">
-              {loading && (
-                <div className="p-12 text-center">
-                  <div className="inline-flex items-center gap-3">
+              {loading ? (
+                <div className="p-8">
+                  {/* 로딩 상태 헤더 */}
+                  <div className="flex items-center gap-3 mb-8">
                     <div className="w-4 h-4 rounded-full bg-cyan-400 animate-pulse"></div>
-                    <p className="text-indigo-300 font-semibold">Loading payroll records...</p>
+                    <p className="text-indigo-300 font-semibold">급여 데이터 로딩 중...</p>
+                    <span className="text-[10px] text-indigo-300/50 ml-auto">(최대 5초)</span>
                   </div>
-                </div>
-              )}
 
-              {!loading && (
+                  {/* 스켈레톤 테이블 */}
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-white/5 text-[10px] font-black tracking-widest text-indigo-300/60 border-b border-indigo-500/10">
+                        <th className="px-6 py-4">ID / NAME</th>
+                        <th className="px-6 py-4">ROLE</th>
+                        <th className="px-6 py-4 text-right">GROSS PAY</th>
+                        <th className="px-6 py-4 text-right">DEDUCTIONS</th>
+                        <th className="px-6 py-4 text-right">NET PAY</th>
+                        <th className="px-6 py-4 text-center">STATUS</th>
+                        <th className="px-6 py-4"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {[...Array(5)].map((_, i) => (
+                        <tr key={i} className="animate-pulse">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-white/10"></div>
+                              <div className="space-y-2 w-full">
+                                <div className="h-3 bg-white/10 rounded w-24"></div>
+                                <div className="h-2 bg-white/5 rounded w-16"></div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4"><div className="h-3 bg-white/10 rounded w-20"></div></td>
+                          <td className="px-6 py-4"><div className="h-3 bg-white/10 rounded w-24 ml-auto"></div></td>
+                          <td className="px-6 py-4"><div className="h-3 bg-white/10 rounded w-20 ml-auto"></div></td>
+                          <td className="px-6 py-4"><div className="h-3 bg-white/10 rounded w-24 ml-auto"></div></td>
+                          <td className="px-6 py-4 text-center"><div className="h-2 w-2 bg-white/10 rounded-full mx-auto"></div></td>
+                          <td className="px-6 py-4"></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="bg-white/5 text-[10px] font-black tracking-widest text-indigo-300/60 border-b border-indigo-500/10">
