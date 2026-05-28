@@ -4484,3 +4484,140 @@ async def calculate_therapist_commission_from_bookings(
 - 01dd129: ✨ Feat: 테라피스트 커미션 정산 시스템 개선
 
 ---
+
+---
+
+## [2026-05-29 15:30] Order: 049 - FastAPI 백엔드 API 연동
+
+**주제:** ElSpa 지식 네트워크를 위한 FastAPI 엔드포인트 구현 (7개, CRUD 포함)
+
+### Plan
+✅ SQLAlchemy ORM 모델 구현 (KnowledgeNetworkNode)
+✅ FastAPI 라우터 구현 (7개 엔드포인트)
+✅ 샘플 데이터 시더 작성 (16개 노드 자동 삽입)
+✅ TypeScript 클라이언트 서비스 작성
+✅ API 문서 생성 (OpenAPI + 사용 가이드)
+✅ 메인 앱에 라우터 등록 및 시드 자동화
+
+### Task 수행 내용
+
+#### Phase 1: SQLAlchemy 모델 구현
+**파일:** app/models/knowledge_network.py
+- KnowledgeNetworkNode 모델 정의
+- 필드: id, node_id, label, description, category, color, created_at, updated_at
+- 인덱스: category, node_id, label (조회 성능 최적화)
+- to_dict() 메서드 (JSON 응답 변환)
+
+#### Phase 2: FastAPI 라우터 구현
+**파일:** app/routers/20250529-1530-knowledge-network-router.py
+- 7개 엔드포인트 구현:
+  1. GET /api/knowledge-network/nodes — 모든 노드 조회 (카테고리 필터)
+  2. POST /api/knowledge-network/search — 키워드 검색
+  3. GET /api/knowledge-network/nodes/{id} — 노드 상세 조회
+  4. GET /api/knowledge-network/categories — 카테고리 목록
+  5. POST /api/knowledge-network/nodes — 노드 추가 (관리자)
+  6. PUT /api/knowledge-network/nodes/{id} — 노드 수정 (관리자)
+  7. DELETE /api/knowledge-network/nodes/{id} — 노드 삭제 (관리자)
+- Pydantic 스키마: KnowledgeNetworkNodeSchema, SearchRequestSchema, SearchResponseSchema 등
+- 에러 처리: 404, 400, 500
+- 로깅: 모든 작업에 일원화된 로깅
+
+#### Phase 3: 샘플 데이터 시더
+**파일:** app/services/knowledge_network_seeder.py
+- 16개 노드 샘플 데이터 정의
+  - 시장 정보 (1개): ElSpa 시장
+  - 마사지 (4개): 타이, 시아츠, 스포츠, 아로마테라피
+  - 웰니스 (3개): 스파, 요가, 명상
+  - 판매자 (3개): 존, 마리아, 데이빗
+  - 고객 (3개): 기업, 운동선수, 시니어
+  - 경영 (3개): 매출, 예약률, 고객유지율
+- seed_knowledge_network() 함수 — 데이터베이스에 자동 삽입
+- get_knowledge_network_stats() 함수 — 통계 조회
+
+#### Phase 4: TypeScript 클라이언트 서비스
+**파일:** frontend/src/lib/api/20250529-1530-knowledge-network-client.ts
+- KnowledgeNetworkClient 클래스
+- 정적 메서드:
+  - getAllNodes(category?, skip, limit) — 노드 조회
+  - searchNodes(request) — 검색
+  - getNodeById(nodeId) — 상세 조회
+  - getCategories() — 카테고리 목록
+- TypeScript 인터페이스: NetworkNode, NodesResponse, SearchResponse, CategoriesResponse
+- 에러 로깅 및 콘솔 디버깅 기능
+
+#### Phase 5: 메인 앱 연동
+**파일:** main.py
+- 라우터 임포트: `from app.routers import knowledge_network_router`
+- 라우터 등록: `app.include_router(knowledge_network_router.router)`
+- startup 이벤트에서 시드 자동화:
+  ```python
+  from app.services.knowledge_network_seeder import seed_knowledge_network
+  result = await seed_knowledge_network(db_session)
+  logger.info(f"✅ 지식 네트워크 시드: {result['inserted']}개 삽입")
+  ```
+- models/__init__.py에 모델 등록
+
+#### Phase 6: API 문서 작성
+**파일:** KNOWLEDGE-NETWORK-API.md
+- 전체 엔드포인트 명세 (7개)
+- 요청/응답 예시 (cURL + JSON)
+- TypeScript 사용 예시
+- 에러 처리 가이드
+- 데이터베이스 스키마
+- 배포 가이드
+
+### Result
+✅ **5개 파일 생성 완료**
+- app/models/knowledge_network.py (67줄)
+- app/routers/20250529-1530-knowledge-network-router.py (576줄)
+- app/services/knowledge_network_seeder.py (226줄)
+- frontend/src/lib/api/20250529-1530-knowledge-network-client.ts (268줄)
+- KNOWLEDGE-NETWORK-API.md (완전한 문서)
+
+✅ **기능 완료**
+- 7개 API 엔드포인트 (CRUD + 검색) ✓
+- 16개 샘플 노드 자동 시드 ✓
+- TypeScript 클라이언트 ✓
+- 전체 API 문서 ✓
+- 에러 처리 ✓
+- 로깅 ✓
+
+✅ **주요 특징**
+- ✨ SQLAlchemy ORM 기반 (PostgreSQL 호환)
+- ✨ 페이지네이션 + 필터링
+- ✨ 다중 열 검색 (라벨, 설명, 카테고리)
+- ✨ 카테고리 통계
+- ✨ 완전한 CRUD 작업
+- ✨ 한국어 주석 + 상세 로깅
+
+### Next
+- [ ] `npm run build` 및 TypeScript 타입 검증
+- [ ] 백엔드 개발 서버 시작 (`python -m uvicorn main:app --reload`)
+- [ ] API 문서 확인 (http://localhost:8000/docs)
+- [ ] 프론트엔드에서 API 클라이언트 테스트
+- [ ] 모든 7개 엔드포인트 동작 확인
+- [ ] 3D 지식 네트워크 페이지에 API 연결
+
+### 파일 목록
+
+**백엔드:**
+1. /e/elspa/app/models/knowledge_network.py
+2. /e/elspa/app/routers/20250529-1530-knowledge-network-router.py
+3. /e/elspa/app/services/knowledge_network_seeder.py
+
+**프론트엔드:**
+4. /e/elspa/frontend/src/lib/api/20250529-1530-knowledge-network-client.ts
+
+**문서:**
+5. /e/elspa/KNOWLEDGE-NETWORK-API.md
+
+**수정 파일:**
+6. /e/elspa/main.py (라우터 임포트 + 시드 자동화)
+7. /e/elspa/app/models/__init__.py (모델 등록)
+
+### Git 커밋
+- Commit: `fbbdfe5`
+- Message: `🚀 Feat: Order 049 - FastAPI 지식 네트워크 API 구현 (7개 엔드포인트)`
+
+---
+
