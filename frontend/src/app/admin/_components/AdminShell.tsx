@@ -32,26 +32,35 @@ export default function AdminShell({ children }: AdminShellProps) {
             <h2 className="text-3xl font-black text-[#8aebff] tracking-tighter drop-shadow-[0_0_8px_rgba(138,235,255,0.4)]">ELSPA</h2>
             <p className="text-[10px] font-mono text-indigo-300/60 tracking-widest mt-1 uppercase">Command Center</p>
           </div>
-          <nav className="flex flex-col gap-2">
-            <Link className="flex items-center gap-4 px-4 py-3 rounded-xl transition-all font-bold text-[#8aebff] bg-white/10 border-r-2 border-[#8aebff] shadow-[0_0_15px_rgba(34,211,238,0.2)]" href="/admin">
-              <span className="material-symbols-outlined">dashboard</span>
-              <span className="text-sm font-black">Dashboard</span>
+          <nav className="flex flex-col gap-1">
+            {/* Dashboard */}
+            <Link className="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all font-black text-[#8aebff] bg-white/10 border-l-2 border-[#8aebff] shadow-[0_0_15px_rgba(34,211,238,0.2)] text-sm" href="/admin">
+              <span className="material-symbols-outlined text-base">dashboard</span>
+              <span>Dashboard</span>
             </Link>
-            <Link className="flex items-center gap-4 px-4 py-3 rounded-xl text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all" href="/admin/therapist-schedule">
-              <span className="material-symbols-outlined">groups</span>
-              <span className="text-sm font-semibold">Therapists</span>
+
+            {/* Therapists */}
+            <Link className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all text-sm" href="/admin/therapist-schedule">
+              <span className="material-symbols-outlined text-base">people</span>
+              <span>Therapists</span>
             </Link>
-            <Link className="flex items-center gap-4 px-4 py-3 rounded-xl text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all" href="/admin/book-massage">
-              <span className="material-symbols-outlined">spa</span>
-              <span className="text-sm font-semibold">Book Massage</span>
+
+            {/* Massage Bookings */}
+            <Link className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all text-sm" href="/admin/book-massage">
+              <span className="material-symbols-outlined text-base">calendar_month</span>
+              <span>Bookings</span>
             </Link>
-            <Link className="flex items-center gap-4 px-4 py-3 rounded-xl text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all" href="/admin/payroll">
-              <span className="material-symbols-outlined">payments</span>
-              <span className="text-sm font-semibold">Payroll</span>
+
+            {/* Payroll */}
+            <Link className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all text-sm" href="/admin">
+              <span className="material-symbols-outlined text-base">payments</span>
+              <span>Payroll</span>
             </Link>
-            <Link className="flex items-center gap-4 px-4 py-3 rounded-xl text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all" href="/admin/policies">
-              <span className="material-symbols-outlined">settings</span>
-              <span className="text-sm font-semibold">Settings</span>
+
+            {/* Settings */}
+            <Link className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all text-sm" href="/admin/policies">
+              <span className="material-symbols-outlined text-base">settings</span>
+              <span>Settings</span>
             </Link>
           </nav>
         </div>
@@ -93,27 +102,27 @@ export default function AdminShell({ children }: AdminShellProps) {
         {children}
 
         {/* Mobile Navigation Footer */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-slate-900/80 backdrop-blur-md border-t border-indigo-500/10 z-50">
-          <div className="flex justify-around items-center px-4 py-2">
-            <Link href="/admin" className="flex flex-col items-center justify-center p-3 text-[#8aebff] rounded-lg text-[10px]">
-              <span className="material-symbols-outlined text-lg">dashboard</span>
-              <span className="font-bold">Dashboard</span>
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-indigo-500/10 z-50">
+          <div className="flex justify-around items-stretch">
+            <Link href="/admin" className="flex flex-col items-center justify-center flex-1 py-3 text-[#8aebff] hover:bg-white/5 transition-all text-[11px] font-bold">
+              <span className="material-symbols-outlined text-base">dashboard</span>
+              <span className="mt-1">Dashboard</span>
             </Link>
-            <Link href="/admin/therapist-schedule" className="flex flex-col items-center justify-center p-3 text-indigo-300/60 hover:text-white rounded-lg text-[10px]">
-              <span className="material-symbols-outlined text-lg">groups</span>
-              <span className="font-bold">Therapists</span>
+            <Link href="/admin/therapist-schedule" className="flex flex-col items-center justify-center flex-1 py-3 text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all text-[11px] font-bold">
+              <span className="material-symbols-outlined text-base">people</span>
+              <span className="mt-1">Therapists</span>
             </Link>
-            <Link href="/admin/book-massage" className="flex flex-col items-center justify-center p-3 text-indigo-300/60 hover:text-white rounded-lg text-[10px]">
-              <span className="material-symbols-outlined text-lg">spa</span>
-              <span className="font-bold">Book</span>
+            <Link href="/admin/book-massage" className="flex flex-col items-center justify-center flex-1 py-3 text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all text-[11px] font-bold">
+              <span className="material-symbols-outlined text-base">calendar_month</span>
+              <span className="mt-1">Bookings</span>
             </Link>
-            <Link href="/admin/payroll" className="flex flex-col items-center justify-center p-3 text-indigo-300/60 hover:text-white rounded-lg text-[10px]">
-              <span className="material-symbols-outlined text-lg">payments</span>
-              <span className="font-bold">Payroll</span>
+            <Link href="/admin" className="flex flex-col items-center justify-center flex-1 py-3 text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all text-[11px] font-bold">
+              <span className="material-symbols-outlined text-base">payments</span>
+              <span className="mt-1">Payroll</span>
             </Link>
-            <Link href="/admin/policies" className="flex flex-col items-center justify-center p-3 text-indigo-300/60 hover:text-white rounded-lg text-[10px]">
-              <span className="material-symbols-outlined text-lg">settings</span>
-              <span className="font-bold">Settings</span>
+            <Link href="/admin/policies" className="flex flex-col items-center justify-center flex-1 py-3 text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all text-[11px] font-bold">
+              <span className="material-symbols-outlined text-base">settings</span>
+              <span className="mt-1">Settings</span>
             </Link>
           </div>
         </nav>
