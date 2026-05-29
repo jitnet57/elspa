@@ -386,8 +386,10 @@ const createGuideSlice = (set: any): GuideState => ({
 
 const createMonthlySettlementSlice = (set: any): MonthlySettlementState => ({
   monthlySettlements: [],
+  isLoading: false,
+  error: null,
 
-  setMonthlySettlements: (settlements: MonthlySettlement[]) => set({ monthlySettlements: settlements }),
+  setMonthlySettlements: (settlements: MonthlySettlement[]) => set({ monthlySettlements: settlements, error: null }),
 
   addMonthlySettlement: (settlement: MonthlySettlement) => {
     set((state: any) => ({
@@ -416,6 +418,10 @@ const createMonthlySettlementSlice = (set: any): MonthlySettlementState => ({
       monthlySettlements: state.monthlySettlements.filter((s: MonthlySettlement) => s.id !== id),
     }));
   },
+
+  setLoading: (loading: boolean) => set({ isLoading: loading }),
+
+  setError: (error: string | null) => set({ error }),
 
   calculateMonthlySettlements: (month: string) => {
     set((state: any) => {

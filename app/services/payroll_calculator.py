@@ -44,8 +44,15 @@ class PayrollCalculator:
 
     @staticmethod
     def calculate_holiday_bonus(base_salary: Decimal, holiday_type: str, days_worked: int = 1) -> Decimal:
-        """공휴일 가산: 국가 200%, 특정 130%"""
-        daily_rate = base_salary / Decimal(15)
+        """
+        공휴일 가산
+
+        필리핀 표준:
+        - 일급 = 월급 / 20 (주5일, 4주 기준)
+        - 국가 공휴일: 일급 × 200% × 일수 (기본급의 2배)
+        - 특정 공휴일: 일급 × 130% × 일수 (기본급의 1.3배)
+        """
+        daily_rate = base_salary / Decimal(20)
         if holiday_type == "national":
             return daily_rate * Decimal(2) * days_worked
         elif holiday_type == "special":
@@ -54,10 +61,15 @@ class PayrollCalculator:
 
     @staticmethod
     def calculate_absence_deduction(base_salary: Decimal, days_absent: int) -> Decimal:
-        """결근 차감 (Manager만): 급여 / 15"""
+        """
+        결근 차감 (Manager만)
+
+        필리핀 표준: 월급 / 20 (주5일, 4주 기준)
+        일급 = 월급 / 20
+        """
         if days_absent <= 0:
             return Decimal(0)
-        return (base_salary / Decimal(15)) * days_absent
+        return (base_salary / Decimal(20)) * days_absent
 
     @staticmethod
     def calculate_commission(employee_type: str, session_count: int, session_price: Decimal = Decimal(100)) -> Decimal:

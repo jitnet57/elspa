@@ -344,6 +344,8 @@ export interface GuideState {
 
 export interface MonthlySettlementState {
   monthlySettlements: MonthlySettlement[];
+  isLoading: boolean;
+  error: string | null;
 
   // Actions
   setMonthlySettlements: (settlements: MonthlySettlement[]) => void;
@@ -351,6 +353,10 @@ export interface MonthlySettlementState {
   updateMonthlySettlement: (id: number, settlement: Partial<MonthlySettlement>) => void;
   updateSettlementStatus: (id: number, status: 'pending' | 'confirmed' | 'paid') => void;
   deleteMonthlySettlement: (id: number) => void;
+
+  // API 상태 관리
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
 
   // 월정산 자동 계산
   calculateMonthlySettlements: (month: string) => void;

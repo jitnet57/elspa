@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore } from '@/lib/store/store';
 import { exportSettlementReportCSV, downloadCSV } from '@/lib/utils/csv-export';
+import { getMonthlySettlements, getCompanySettlements, getGuideSettlements } from '@/lib/api/settlement-client';
 
 interface MonthlySettlement {
   id: number;
@@ -32,71 +33,83 @@ interface Guide {
   company_id: number;
 }
 
-const mockMonthlySettlements: MonthlySettlement[] = [
-  {
-    id: 1,
-    company_id: 1,
-    guide_id: 1,
-    settlement_month: '2026-05',
-    settlement_date: '2026-05-20',
-    total_sessions: 5,
-    total_revenue: 400000,
-    commission_rate: 30,
-    commission_amount: 120000,
-    payment_amount: 280000,
-    service_breakdown: { swedish: { sessions: 3, revenue: 240000 }, thai: { sessions: 2, revenue: 160000 } },
-    status: 'paid',
-    notes: '',
-    created_at: '2026-05-20',
-  },
-  {
-    id: 2,
-    company_id: 1,
-    guide_id: 2,
-    settlement_month: '2026-05',
-    settlement_date: '2026-05-20',
-    total_sessions: 4,
-    total_revenue: 360000,
-    commission_rate: 30,
-    commission_amount: 108000,
-    payment_amount: 252000,
-    service_breakdown: { thai: { sessions: 4, revenue: 360000 } },
-    status: 'paid',
-    notes: '',
-    created_at: '2026-05-20',
-  },
-];
-
 export default function SettlementReportPage() {
-  const { monthlySettlements, setMonthlySettlements, companies, setCompanies, guides, setGuides } = useStore();
+  const { monthlySettlements, setMonthlySettlements, isLoading, setLoading, error, setError, companies, setCompanies, guides, setGuides } = useStore();
   const [selectedMonth, setSelectedMonth] = useState('2026-05');
   const [reportType, setReportType] = useState<'monthly' | 'company' | 'guide'>('monthly');
 
-  if (monthlySettlements.length === 0) {
-    setMonthlySettlements(mockMonthlySettlements);
-  }
+  // API에서 정산 데이터 로드
+  useEffect(() => {
+    const fetchSettlements = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-  const mockCompanies: Company[] = [
-    { id: 1, name: 'ABC Travel Agency' },
-    { id: 2, name: 'XYZ Travel Agency' },
-    { id: 3, name: 'Global Tours' },
-  ];
-  const mockGuides: Guide[] = [
-    { id: 1, name: 'Sarah', company_id: 1 },
-    { id: 2, name: 'Emma', company_id: 1 },
-    { id: 3, name: 'Jessica', company_id: 1 },
-    { id: 4, name: 'Amanda', company_id: 2 },
-    { id: 5, name: 'Catherine', company_id: 2 },
-    { id: 6, name: 'Rachel', company_id: 3 },
-  ];
+        // API에서 월별 정산 데이터 조회
+        const settlements = await getMonthlySettlements(selectedMonth);
+        setMonthlySettlements(settlements);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : '정산 데이터 로드 실패';
+        setError(errorMessage);
+        console.error('Failed to load settlements:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (companies.length === 0) setCompanies(mockCompanies as any);
-  if (guides.length === 0) setGuides(mockGuides as any);
+    fetchSettlements();
+  }, [selectedMonth, setMonthlySettlements, setLoading, setError]);
 
-  const filteredSettlements = monthlySettlements.filter(s => s.settlement_month === selectedMonth);
+  // 회사와 가이드 데이터 로드 (초기 1회)
+  useEffect(() => {
+    const fetchCompaniesAndGuides = async () => {
+      try {
+        if (companies.length === 0) {
+          const companyData = await getCompanySettlements(selectedMonth);
+          setCompanies(companyData as any);
+        }
+        if (guides.length === 0) {
+          const guideData = await getGuideSettlements(selectedMonth);
+          setGuides(guideData as any);
+        }
+      } catch (err) {
+        console.error('Failed to load companies/guides:', err);
+        // 기본 데이터 설정
+        const defaultCompanies: Company[] = [
+          { id: 1, name: 'ABC Travel Agency' },
+          { id: 2, name: 'XYZ Travel Agency' },
+          { id: 3, name: 'Global Tours' },
+        ];
+        const defaultGuides: Guide[] = [
+          { id: 1, name: 'Sarah', company_id: 1 },
+          { id: 2, name: 'Emma', company_id: 1 },
+          { id: 3, name: 'Jessica', company_id: 1 },
+          { id: 4, name: 'Amanda', company_id: 2 },
+          { id: 5, name: 'Catherine', company_id: 2 },
+          { id: 6, name: 'Rachel', company_id: 3 },
+        ];
+        if (companies.length === 0) setCompanies(defaultCompanies as any);
+        if (guides.length === 0) setGuides(defaultGuides as any);
+      }
+    };
 
-  const getCompanyName = (id: number) => (companies as Company[]).find(c => c.id === id)?.name || 'Unknown';
-  const getGuideName = (id: number) => (guides as Guide[]).find(g => g.id === id)?.name || 'Unknown';
+    fetchCompaniesAndGuides();
+  }, [companies.length, guides.length, selectedMonth, setCompanies, setGuides]);
+
+  // 정산 데이터 필터링 (로딩 중일 때 빈 배열)
+  const filteredSettlements = isLoading ? [] : monthlySettlements.filter(s => s.settlement_month === selectedMonth);
+
+  // 헬퍼 함수: 회사명 조회
+  const getCompanyName = (id: number) => {
+    const company = (companies as Company[]).find(c => c.id === id);
+    return company?.name || `Company #${id}`;
+  };
+
+  // 헬퍼 함수: 가이드명 조회
+  const getGuideName = (id: number) => {
+    const guide = (guides as Guide[]).find(g => g.id === id);
+    return guide?.name || `Guide #${id}`;
+  };
 
   // Monthly statistics
   const monthlyStats = {
@@ -150,6 +163,27 @@ export default function SettlementReportPage() {
           </p>
         </div>
 
+        {/* Error Banner */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
+            <span className="text-red-600 text-2xl">⚠️</span>
+            <div>
+              <p className="text-red-800 font-semibold">데이터 로드 실패</p>
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="mb-6 p-6 bg-white border border-blue-200 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="animate-spin w-6 h-6 border-4 border-blue-200 border-t-blue-600 rounded-full"></div>
+              <p className="text-gray-700 font-medium">정산 데이터를 로드하는 중...</p>
+            </div>
+          </div>
+        )}
+
         {/* Month Selection & Report Type */}
         <div className="mb-8 flex flex-col md:flex-row gap-4 items-end">
           <div>
@@ -187,8 +221,8 @@ export default function SettlementReportPage() {
             onClick={() => {
               const csv = exportSettlementReportCSV(
                 filteredSettlements,
-                mockCompanies as any,
-                mockGuides as any,
+                companies as any,
+                guides as any,
                 selectedMonth,
                 reportType
               );
@@ -197,7 +231,8 @@ export default function SettlementReportPage() {
               downloadCSV(`정산보고서_${selectedMonth}_${typeText}.csv`, csv);
               alert('보고서가 다운로드되었습니다!');
             }}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50"
+            disabled={isLoading}
           >
             📥 Export CSV
           </button>

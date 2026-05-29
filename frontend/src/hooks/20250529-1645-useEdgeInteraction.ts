@@ -8,6 +8,16 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
 import * as THREE from 'three';
 
+// ============================================================
+// TypeScript 타입 확장: Windows 제스처 이벤트 지원
+// ============================================================
+declare global {
+  interface Window {
+    onmsgesturechange?: (event: Event) => void;
+    onmstouchstart?: (event: TouchEvent) => void;
+  }
+}
+
 /**
  * 📝 설명:
  * 연결선(edge)의 마우스 인터랙션을 관리하는 커스텀 훅입니다.
