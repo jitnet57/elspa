@@ -47,12 +47,12 @@ class PayrollCalculator:
         """
         공휴일 가산
 
-        필리핀 표준:
-        - 일급 = 월급 / 20 (주5일, 4주 기준)
-        - 국가 공휴일: 일급 × 200% × 일수 (기본급의 2배)
-        - 특정 공휴일: 일급 × 130% × 일수 (기본급의 1.3배)
+        정책:
+        - 일급 = 월급 / 15
+        - 국가 공휴일: 일급 × 200% × 일수 (기본급의 2배 추가 지급)
+        - 특정 공휴일: 일급 × 130% × 일수 (기본급의 1.3배 추가 지급)
         """
-        daily_rate = base_salary / Decimal(20)
+        daily_rate = base_salary / Decimal(15)
         if holiday_type == "national":
             return daily_rate * Decimal(2) * days_worked
         elif holiday_type == "special":
@@ -64,12 +64,21 @@ class PayrollCalculator:
         """
         결근 차감 (Manager만)
 
-        필리핀 표준: 월급 / 20 (주5일, 4주 기준)
-        일급 = 월급 / 20
+        정책:
+        - 일급 = 월급 / 15
+        - 13일 이상 출근 → 15일 급여 지급 (차감 없음)
+        - 13일 미만 출근 → 실제 부족 일수 차감
+
+        Args:
+            base_salary: 월 기본급
+            days_absent: 결근 일수
+
+        Returns:
+            차감액 (출근 일수가 13일 미만인 경우만)
         """
         if days_absent <= 0:
             return Decimal(0)
-        return (base_salary / Decimal(20)) * days_absent
+        return (base_salary / Decimal(15)) * days_absent
 
     @staticmethod
     def calculate_commission(employee_type: str, session_count: int, session_price: Decimal = Decimal(100)) -> Decimal:
@@ -349,10 +358,21 @@ class PayrollCalculator:
         for log in attendance_logs:
             late_deduction += calc.calculate_late_deduction(log.late_minutes)
 
-        # 결근 차감 (Manager만)
+        # 급여 특수 규칙 (Manager만)
+        # 정책: 13일 이상 출근 → 15일 급여 지급 (최소 보장)
+        #      13일 미만 출근 → 부족 일수 차감
         if employee.employee_type == EmployeeType.MANAGER:
-            absent_count = sum(1 for log in attendance_logs if log.is_absent)
-            absence_deduction = calc.calculate_absence_deduction(base_amount, absent_count)
+            days_worked = len([log for log in attendance_logs if not log.is_absent])
+
+            if days_worked >= 13:
+                # 13일 이상 출근 → 15일 급여 보장 (차감 없음)
+                absence_deduction = Decimal(0)
+                absent_count = 0
+            else:
+                # 13일 미만 출근 → 부족 일수 차감
+                days_short = 15 - days_worked
+                absence_deduction = calc.calculate_absence_deduction(base_amount, days_short)
+                absent_count = days_short
 
         sss_deduction = Decimal(0)
         ca_deduction = await calc.get_approved_ca_amount(employee.id, db)
