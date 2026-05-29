@@ -54,7 +54,21 @@ class PayrollCalculator:
 
     @staticmethod
     def calculate_absence_deduction(base_salary: Decimal, days_absent: int) -> Decimal:
-        """결근 차감 (Manager만): 급여 / 15"""
+        """
+        결근 차감 (Manager만)
+
+        정책:
+        - 일급 = 월급 / 15
+        - 13일 이상 출근 → 15일 급여 지급 (차감 없음)
+        - 13일 미만 출근 → 실제 부족 일수 차감
+
+        Args:
+            base_salary: 월 기본급
+            days_absent: 결근 일수
+
+        Returns:
+            차감액 (출근 일수가 13일 미만인 경우만)
+        """
         if days_absent <= 0:
             return Decimal(0)
         return (base_salary / Decimal(15)) * days_absent
@@ -148,6 +162,31 @@ class PayrollCalculator:
             select(func.sum(CashAdvance.amount)).where(
                 CashAdvance.employee_id == employee_id,
                 CashAdvance.status == CashAdvanceStatus.APPROVED
+            )
+        )
+        total = result.scalar()
+        return Decimal(str(total)) if total else Decimal(0)
+
+    @staticmethod
+    async def get_previous_thirteenth_month_deductions(employee_id: int, db: AsyncSession) -> Decimal:
+        """
+        13개월 보너스 누적 차감액 조회
+
+        직원이 이전 정산에서 이미 차감받은 13개월 보너스 총액
+        중복 차감 방지용 추적
+
+        Args:
+            employee_id: 직원 ID
+            db: AsyncSession
+
+        Returns:
+            이전 정산에서 차감된 13개월 보너스 총액 (Decimal)
+        """
+        result = await db.execute(
+            select(func.sum(PayrollRecord.thirteenth_month_deduction)).where(
+                PayrollRecord.employee_id == employee_id,
+                PayrollRecord.is_obsolete == False,
+                PayrollRecord.status != "draft"  # 최종 정산만 포함
             )
         )
         total = result.scalar()
@@ -337,22 +376,35 @@ class PayrollCalculator:
         for log in attendance_logs:
             late_deduction += calc.calculate_late_deduction(log.late_minutes)
 
-        # 결근 차감 (Manager만)
+        # 급여 특수 규칙 (Manager만)
+        # 정책: 13일 이상 출근 → 15일 급여 지급 (최소 보장)
+        #      13일 미만 출근 → 부족 일수 차감
         if employee.employee_type == EmployeeType.MANAGER:
-            absent_count = sum(1 for log in attendance_logs if log.is_absent)
-            absence_deduction = calc.calculate_absence_deduction(base_amount, absent_count)
+            days_worked = len([log for log in attendance_logs if not log.is_absent])
+
+            if days_worked >= 13:
+                # 13일 이상 출근 → 15일 급여 보장 (차감 없음)
+                absence_deduction = Decimal(0)
+                absent_count = 0
+            else:
+                # 13일 미만 출근 → 부족 일수 차감
+                days_short = 15 - days_worked
+                absence_deduction = calc.calculate_absence_deduction(base_amount, days_short)
+                absent_count = days_short
 
         sss_deduction = Decimal(0)
         ca_deduction = await calc.get_approved_ca_amount(employee.id, db)
 
         # 13개월 보너스 누적액 및 선지급 계산
+        # 정책: 누적액에서 이전 차감액을 제외한 새로운 부분만 차감
         thirteenth_month_accrual = calc.calculate_thirteenth_month_deduction(
             base_salary=base_amount,
             hire_date=employee.hire_date,
             reference_date=payroll_period.period_end
         )
-        # 선지급액은 누적액과 동일 (매 정산 시 누적액을 차감)
-        thirteenth_month_deduction = thirteenth_month_accrual
+        # 중복 차감 방지: 이전 정산에서 이미 차감한 금액을 제외
+        previous_deductions = await calc.get_previous_thirteenth_month_deductions(employee.id, db)
+        thirteenth_month_deduction = max(Decimal(0), thirteenth_month_accrual - previous_deductions)
 
         # 보건소 검사비 차감 (Therapist, 분기별 1회)
         health_check_deduction = calc.calculate_health_check_deduction(

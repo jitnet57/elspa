@@ -175,6 +175,31 @@ class PayrollCalculator:
         return Decimal(str(total)) if total else Decimal(0)
 
     @staticmethod
+    async def get_previous_thirteenth_month_deductions(employee_id: int, db: AsyncSession) -> Decimal:
+        """
+        13개월 보너스 누적 차감액 조회
+
+        직원이 이전 정산에서 이미 차감받은 13개월 보너스 총액
+        중복 차감 방지용 추적
+
+        Args:
+            employee_id: 직원 ID
+            db: AsyncSession
+
+        Returns:
+            이전 정산에서 차감된 13개월 보너스 총액 (Decimal)
+        """
+        result = await db.execute(
+            select(func.sum(PayrollRecord.thirteenth_month_deduction)).where(
+                PayrollRecord.employee_id == employee_id,
+                PayrollRecord.is_obsolete == False,
+                PayrollRecord.status != "draft"  # 최종 정산만 포함
+            )
+        )
+        total = result.scalar()
+        return Decimal(str(total)) if total else Decimal(0)
+
+    @staticmethod
     async def is_holiday(check_date, db: AsyncSession) -> Optional[str]:
         """특정 날짜가 공휴일인지 확인. None / 'national' / 'special'"""
         result = await db.execute(
@@ -378,13 +403,15 @@ class PayrollCalculator:
         ca_deduction = await calc.get_approved_ca_amount(employee.id, db)
 
         # 13개월 보너스 누적액 및 선지급 계산
+        # 정책: 누적액에서 이전 차감액을 제외한 새로운 부분만 차감
         thirteenth_month_accrual = calc.calculate_thirteenth_month_deduction(
             base_salary=base_amount,
             hire_date=employee.hire_date,
             reference_date=payroll_period.period_end
         )
-        # 선지급액은 누적액과 동일 (매 정산 시 누적액을 차감)
-        thirteenth_month_deduction = thirteenth_month_accrual
+        # 중복 차감 방지: 이전 정산에서 이미 차감한 금액을 제외
+        previous_deductions = await calc.get_previous_thirteenth_month_deductions(employee.id, db)
+        thirteenth_month_deduction = max(Decimal(0), thirteenth_month_accrual - previous_deductions)
 
         # 보건소 검사비 차감 (Therapist, 분기별 1회)
         health_check_deduction = calc.calculate_health_check_deduction(

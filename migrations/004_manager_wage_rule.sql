@@ -1,0 +1,99 @@
+-- ============================================================
+-- Migration 004: Manager Wage Guarantee Rule
+-- 작성일: 2026-05-29
+-- 목적: Manager 직원의 급여 특수 규칙 구현
+--       13일 이상 출근 → 15일 급여 지급 (최소 보장)
+--       13일 미만 출근 → 부족 일수 차감
+-- ============================================================
+
+-- 주석: 이 마이그레이션은 코드 로직 변경을 문서화합니다.
+-- 데이터베이스 구조 변경은 필요하지 않으며, 기존 필드를 활용합니다.
+
+-- 변경 항목:
+-- 1. payroll_calculator.py의 _calculate_employee_payroll() 메서드 수정
+--    - Manager 직원의 결근 차감 계산 방식 변경
+--    - 이전: absent_count 직접 계산 후 1일당 기본급/15 차감
+--    - 신규: days_worked >= 13 확인 후 보장금 또는 차감액 적용
+
+-- 2. calculate_absence_deduction() 메서드 문서화 개선
+--    - Manager 전용 규칙 상세 설명 추가
+--    - 13일 보장 정책 명시
+
+-- 정산 체계 설명:
+-- ============================================================
+-- Manager 급여 특수 규칙:
+-- ============================================================
+-- 기본급: 월급 (예: 15,000 Peso)
+-- 일급: 기본급 / 15 = 1,000 Peso
+--
+-- Case 1: 13일 이상 출근 (13 ~ 31일)
+--   - 급여 = 기본급 × 1.0 (15일 급여 최소 보장)
+--   - 예: 기본급 15,000 Peso (변함 없음)
+--   - 초과근무, 공휴일 가산 등은 별도 추가
+--
+-- Case 2: 13일 미만 출근 (0 ~ 12일)
+--   - 부족 일수 = 15 - days_worked
+--   - 차감액 = 일급 × 부족 일수
+--   - 예: 10일 출근 → 부족 5일 → 5,000 Peso 차감
+--
+-- 예시 시나리오:
+-- ============================================================
+-- 시나리오 A: 전체 출근 (20일)
+--   - 기본급: 15,000 Peso (최소 15일 보장)
+--   - 초과근무, 공휴일 등 별도 지급
+--   - 최종 급여 = 15,000 + 초과근무 + 공휴일 + ...
+--
+-- 시나리오 B: 15일 출근
+--   - 기본급: 15,000 Peso (정확히 15일)
+--   - 초과근무, 공휴일 등 별도 지급
+--
+-- 시나리오 C: 13일 출근
+--   - 기본급: 15,000 Peso (13일 이상이므로 보장)
+--   - 초과근무, 공휴일 등 별도 지급
+--
+-- 시나리오 D: 10일만 출근
+--   - 부족일: 15 - 10 = 5일
+--   - 차감액: 1,000 × 5 = 5,000 Peso
+--   - 기본급 - 차감액 = 15,000 - 5,000 = 10,000 Peso
+--   - 초과근무, 공휴일 등은 개별 계산되어 추가됨
+
+-- SQL 변경 사항:
+-- ============================================================
+-- 없음. 기존 payroll_records 테이블 구조 활용
+--
+-- 관련 컬럼:
+--   - base_amount: Manager 기본급
+--   - absence_deduction: 결근 차감액 (13일 미만 시만 > 0)
+--   - gross_pay = base_amount + commission + overtime + holiday + ...
+--   - total_deductions = absence_deduction + ... (차감 합계)
+--   - net_pay = gross_pay - total_deductions
+
+-- 설정 확인 (SELECT):
+-- ============================================================
+-- Manager 직원이 13일 이상 출근한 정산 확인:
+-- SELECT pr.employee_id, e.name, pr.period_start, pr.period_end,
+--        pr.base_amount, pr.absence_deduction, pr.net_pay
+-- FROM payroll_records pr
+-- JOIN employees e ON pr.employee_id = e.id
+-- WHERE e.employee_type = 'MANAGER'
+--   AND pr.absence_deduction = 0
+--   AND pr.status = 'approved'
+-- ORDER BY pr.period_end DESC;
+
+-- Manager 직원이 13일 미만 출근한 정산 확인:
+-- SELECT pr.employee_id, e.name, pr.period_start, pr.period_end,
+--        pr.base_amount, pr.absence_deduction, pr.net_pay
+-- FROM payroll_records pr
+-- JOIN employees e ON pr.employee_id = e.id
+-- WHERE e.employee_type = 'MANAGER'
+--   AND pr.absence_deduction > 0
+--   AND pr.status = 'approved'
+-- ORDER BY pr.period_end DESC;
+
+-- ============================================================
+-- 마이그레이션 이력
+-- ============================================================
+-- Version: 1.0
+-- Status: Ready for Deploy
+-- Created: 2026-05-29
+-- Tested: Manager payroll calculation with 13-day guarantee rule
