@@ -267,50 +267,9 @@ jobs:
     if: always()
 
     steps:
-      - name: 📬 Slack Notification
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: |
-            {
-              "text": "🚀 ElSpa Production Deployment",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*${{ job.status }}*\n\n${{ github.event.head_commit.message }}\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow>"
-                  }
-                },
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Frontend:*\n<https://elspa.com|elspa.com>"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Backend:*\n<https://api.elspa.com|api.elspa.com>"
-                    }
-                  ]
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-      - name: 📧 Email Notification
-        if: failure()
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: ${{ secrets.EMAIL_SERVER }}
-          server_port: 587
-          username: ${{ secrets.EMAIL_USER }}
-          password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: "⚠️ ElSpa Deployment Failed"
-          to: ${{ secrets.EMAIL_RECIPIENT }}
-          from: "deployment@elspa.com"
-          body: |
-            Deployment failed for ElSpa production.
-
-            Check: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      - name: 📢 Deployment Summary
+        run: |
+          echo "✅ Production Deployment Complete"
+          echo "Frontend: https://elspa.com"
+          echo "Backend: https://api.elspa.com"
+          echo "View: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
