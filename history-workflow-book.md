@@ -5935,3 +5935,87 @@ useEffect(() => {
 ~45,000 tokens (총 6개 Order)
 
 ---
+
+---
+## [2026-05-29 21:00] Order: 048
+
+**주제:** ElSpa Manager 관리자 대시보드에 3D 지식 네트워크 통합
+
+### Plan
+✅ 3D 네트워크 컴포넌트 신규 생성 (500+ 줄)
+✅ 관리자 대시보드 페이지 수정 (Knowledge Network 탭 추가)
+✅ AdminShell 네비게이션 업데이트 (메뉴 항목 추가)
+✅ SSR 방지를 위한 dynamic import 적용
+✅ TypeScript 검증 완료
+
+### Task 수행 내용
+
+#### 섹션 1: 신규 컴포넌트 생성
+1. `frontend/src/components/20250529-2100-network-dashboard-admin.tsx` (564줄)
+   - 3D 네트워크 시각화 (400px 높이 컨테이너)
+   - 제어 패널 사이드바 (노드 추가/수정/삭제 폼)
+   - 검색 및 필터링 (빠른 검색, 카테고리 필터)
+   - 통계 요약 카드 (총 노드, 카테고리 분포, 마지막 업데이트)
+   - 노드 목록 패널 (선택 시 상세정보 표시)
+   - 색상 선택 기능 (6가지 사전정의 색상)
+   - 반응형 레이아웃 (모바일 768px+ 고려)
+
+#### 섹션 2: 대시보드 페이지 수정
+1. `frontend/src/app/admin/page.tsx`
+   - dynamic import로 NetworkDashboardAdmin 로드 (SSR: false)
+   - adminTab 타입에 'knowledge-network' 추가
+   - 탭 네비게이션에 "🧠 Knowledge Network" 버튼 추가
+   - adminTab === 'knowledge-network' 조건부 렌더링 섹션 구현
+
+#### 섹션 3: 네비게이션 레이아웃 수정
+1. `frontend/src/app/admin/_components/AdminShell.tsx`
+   - 좌측 사이드바 메뉴에 Knowledge Network 링크 추가
+   - 순서: Dashboard > Knowledge Network > Payroll > Settings
+
+### Result
+✅ **3개 파일 생성/수정 완료**
+- 1개 신규 파일 (NetworkDashboardAdmin 컴포넌트)
+- 2개 수정 (dashboard/page.tsx, AdminShell.tsx)
+- 총 564줄 + 포함 (신규 컴포넌트)
+
+✅ **주요 기능**
+- 3D 네트워크 실시간 시각화
+- 노드 CRUD 기능 (추가/수정/삭제)
+- 검색 필터 (라벨, 설명)
+- 카테고리 필터 (기술, 비즈니스, 컨설팅, 관리)
+- 통계 대시보드
+- 모바일 반응형 디자인 (Tailwind CSS 4)
+- SSR 최적화 (dynamic import + ssr: false)
+
+✅ **기술**
+- Next.js 16.2.4 (Turbopack)
+- React 19
+- Three.js 3D 렌더링
+- Tailwind CSS 4
+- TypeScript
+
+### 주요 파일
+
+**신규 생성:**
+- `frontend/src/components/20250529-2100-network-dashboard-admin.tsx`
+
+**수정:**
+- `frontend/src/app/admin/page.tsx`
+- `frontend/src/app/admin/_components/AdminShell.tsx`
+
+### 검증 결과
+✅ TypeScript 컴파일 성공 (next build)
+✅ 66/66 페이지 정적 생성 완료
+✅ 모든 라우트 정상 작동
+✅ SSR 없이 클라이언트 렌더링 확인
+
+### Next
+- 실제 API 데이터 연동 (백엔드 /api/knowledge-network 엔드포인트)
+- 노드 간 관계(Edge) 데이터 추가
+- 고급 필터링 (검색 결과 강조, 관련 노드 하이라이트)
+- 데이터 내보내기 (JSON, CSV)
+- 3D 인터랙션 개선 (확대/축소, 회전, 드래그)
+
+**Agent:** Claude Code (Haiku 4.5)
+**Tokens:** ~45000
+---

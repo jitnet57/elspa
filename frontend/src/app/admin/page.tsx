@@ -3,19 +3,26 @@
 import { useState, useEffect } from 'react';
 import React from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { usePayrollStore } from '@/lib/store/payroll-store';
 import { usePayrollCalculation } from '@/hooks/usePayrollCalculation';
 
+// Lazy load 3D 네트워크 대시보드 (SSR 방지)
+const NetworkDashboardAdmin = dynamic(
+  () => import('@/components/20250529-2100-network-dashboard-admin'),
+  { ssr: false, loading: () => <div className="p-8 text-center text-indigo-300/50">3D 네트워크 로딩 중...</div> }
+);
+
 // ============================================================
 // 📌 컴포넌트명: AdminDashboard
-// 📋 목적: ElSpa 관리자 대시보드 - 페이롤 API 통합
-// 🔧 기능: KPI 카운터, 벤토 그리드, 실시간 급여 정산 테이블
+// 📋 목적: ElSpa 관리자 대시보드 - 페이롤 API 통합 + 3D 네트워크
+// 🔧 기능: KPI 카운터, 벤토 그리드, 실시간 급여 정산 테이블, 지식 네트워크
 // 📅 작성일: 2026-05-28
-// 🔄 업데이트: 2026-05-28 - 모킹 데이터 → API 통합
+// 🔄 업데이트: 2026-05-29 - 3D 네트워크 대시보드 통합
 // ============================================================
 export default function AdminDashboard() {
-  // Main tab: Dashboard vs Payroll Periods vs Payroll Calculation
-  const [adminTab, setAdminTab] = useState<'dashboard' | 'payroll' | 'payroll-calc'>('dashboard');
+  // Main tab: Dashboard vs Payroll Periods vs Payroll Calculation vs Knowledge Network
+  const [adminTab, setAdminTab] = useState<'dashboard' | 'payroll' | 'payroll-calc' | 'knowledge-network'>('dashboard');
 
   // Payroll Calculation API 훅
   const { calculateSingle, loading: apiLoading, error: apiError, result: apiResult, reset: resetCalc } = usePayrollCalculation();
@@ -190,6 +197,16 @@ export default function AdminDashboard() {
           }`}
         >
           💰 Payroll Calc
+        </button>
+        <button
+          onClick={() => setAdminTab('knowledge-network')}
+          className={`px-4 py-2 rounded-lg font-bold transition whitespace-nowrap ${
+            adminTab === 'knowledge-network'
+              ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+              : 'text-gray-400 hover:text-white'
+          }`}
+        >
+          🧠 Knowledge Network
         </button>
       </div>
 
@@ -806,6 +823,15 @@ export default function AdminDashboard() {
             </div>
           </div>
         </section>
+      )}
+
+      {adminTab === 'knowledge-network' && (
+        <>
+          {/* ============================================================
+              📊 3D 지식 네트워크 통합 섹션
+              ============================================================ */}
+          <NetworkDashboardAdmin />
+        </>
       )}
 
       {adminTab === 'payroll' && (

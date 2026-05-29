@@ -1,0 +1,27 @@
+{
+  "buildCommand": "echo 'Static website'",
+  "outputDirectory": "public",
+  "framework": null,
+  "public": true,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/docs/(.*)",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/markdown; charset=utf-8"
+        }
+      ]
+    }
+  ],
+  "env": {
+    "NEXT_PUBLIC_SITE_NAME": "ElSpa Business Strategy",
+    "NEXT_PUBLIC_DOCS_COUNT": "111"
+  }
+}
