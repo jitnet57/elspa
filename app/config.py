@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from typing import Optional
 import os
 
 
@@ -24,13 +25,13 @@ class Settings(BaseSettings):
     # Claude API
     anthropic_api_key: str = os.getenv("ANTHROPIC_API_KEY", "")
 
-    # Google OAuth (선택사항)
-    google_client_id: str = os.getenv("GOOGLE_CLIENT_ID", "")
-    google_client_secret: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
+    # Google OAuth (선택사항) - 필드 선택적 처리
+    google_client_id: Optional[str] = os.getenv("GOOGLE_CLIENT_ID")
+    google_client_secret: Optional[str] = os.getenv("GOOGLE_CLIENT_SECRET")
     google_oauth_redirect_uri: str = os.getenv("GOOGLE_OAUTH_REDIRECT_URI", "http://localhost:8000/auth/google/callback")
 
-    # Google Sheets API (선택사항)
-    google_sheet_id: str = os.getenv("GOOGLE_SHEET_ID", "")
+    # Google Sheets API (선택사항) - 필드 선택적 처리
+    google_sheet_id: Optional[str] = os.getenv("GOOGLE_SHEET_ID")
     google_sheet_range: str = os.getenv("GOOGLE_SHEET_RANGE", "Sheet1!A:Z")
 
     # Kakao Messenger

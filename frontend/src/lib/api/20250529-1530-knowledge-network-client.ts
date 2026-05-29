@@ -457,7 +457,7 @@ export type {
   CategoriesResponse,
   SearchRequest,
   EdgesResponse,
-  NetworkNode as EdgeInfo  // EdgeInfo 타입 별칭 제공
+  EdgeSearchResponse,
 };
 
 // 기본 export

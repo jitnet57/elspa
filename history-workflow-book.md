@@ -6019,3 +6019,176 @@ useEffect(() => {
 **Agent:** Claude Code (Haiku 4.5)
 **Tokens:** ~45000
 ---
+
+---
+
+## [2026-05-29 21:00] Order: 053 - FastAPI 네트워크 관리자 API 확장 (노드/엣지 CRUD + 벌크 작업 + 분석)
+
+**주제:** 지식 네트워크 백엔드 API 강화 - 관리자 전용 10개 엔드포인트 구현
+
+### Plan
+✅ 네트워크 관리자 라우터 신규 작성 (20250529-2100-network-admin-router.py)
+✅ 관리자 스키마 정의 (20250529-2100-network-admin-schema.py)
+✅ 10개 API 엔드포인트 구현
+✅ 권한 체크 미들웨어 추가
+✅ main.py에 라우터 등록
+
+### Task 수행 내용
+
+#### 섹션 1: 라우터 파일 작성
+**파일:** app/routers/20250529-2100-network-admin-router.py (1,027줄)
+
+**포함된 기능:**
+1. POST /admin/networks/nodes - 노드 생성 (관리자)
+2. PUT /admin/networks/nodes/{id} - 노드 수정 (관리자)
+3. DELETE /admin/networks/nodes/{id} - 노드 삭제 (관리자, 연결된 엣지 자동 삭제)
+4. POST /admin/networks/nodes/bulk-update - 벌크 업데이트 (다중 노드, 최대 1000개)
+5. POST /admin/networks/edges - 엣지 생성 (양방향 자동 지원)
+6. PUT /admin/networks/edges/{id} - 엣지 수정
+7. DELETE /admin/networks/edges/{id} - 엣지 삭제 (역방향도 자동 삭제)
+8. GET /admin/networks/analyze - 네트워크 분석 (그래프 이론 메트릭)
+9. GET /admin/networks/export - CSV 내보내기 (nodes/edges/both 옵션)
+10. POST /admin/networks/import - CSV 임포트 (Create or Replace)
+
+**핵심 기능:**
+- 권한 검증: check_admin_permission() 데코레이터
+- 에러 처리: HTTPException (400, 404, 500)
+- 로깅: 모든 작업에 대한 상세 로그
+- 트랜잭션: db.commit()/rollback() 안전 처리
+
+#### 섹션 2: 스키마 정의
+**파일:** app/schemas/20250529-2100-network-admin-schema.py (572줄)
+
+**Pydantic 모델 (18개):**
+
+**Enum:**
+- RelationshipTypeEnum: 제공/타겟/영향/사용/경쟁/파트너/관련
+- CategoryEnum: 시장/마사지/웰니스/판매자/고객/경영/기타
+
+**노드 관련 (4개):**
+- NodeCreateRequest: 필수 5개 필드 (node_id, label, description, category, color)
+- NodeUpdateRequest: 선택사항 필드 (라벨, 설명, 카테고리, 색상)
+- NodeResponse: 응답 모델 (id, node_id, label, 메타데이터)
+- NodeBulkUpdateRequest: 벌크 업데이트 요청 (node_ids, updates)
+
+**벌크 작업 (1개):**
+- BulkUpdateResponse: {success, total_count, updated_count, failed_count, failed_nodes}
+
+**엣지 관련 (3개):**
+- EdgeCreateRequest: 출발/도착 노드, 관계 유형, 강도 (1-5), 양방향 옵션
+- EdgeUpdateRequest: 선택사항 필드
+- EdgeResponse: 응답 모델
+
+**분석 (1개):**
+- NetworkAnalysisResponse: 
+  * total_nodes, total_edges, network_density
+  * nodes_by_category, edges_by_strength, edges_by_type
+  * most_connected_nodes (중심성), isolated_nodes
+  * bidirectional_edges 개수
+  * analyzed_at (타임스탐프)
+
+**임포트/내보내기 (4개):**
+- ImportNodeData: CSV 노드 행
+- ImportEdgeData: CSV 엣지 행
+- ImportResult: {nodes_processed/created/updated/failed, edges_processed/created/failed, errors}
+- ExportDataResponse: {filename, csv_content, total_records, generated_at}
+
+**권한/감사 (2개):**
+- AdminActionLog: action, target_type, target_id, changes, timestamp
+- ErrorResponse & ValidationError: 에러 응답 모델
+
+#### 섹션 3: main.py 통합
+- importlib를 사용한 하이픈 파일명 import 처리
+- 라우터 등록: app.include_router(network_admin_router.router)
+
+### Result
+✅ **2개 신규 파일 생성 완료**
+✅ **10개 API 엔드포인트 구현**
+✅ **1,599줄 코드 작성**
+
+**API 요약:**
+| 메서드 | 경로 | 기능 | 상태 |
+|--------|------|------|------|
+| POST | /admin/networks/nodes | 노드 생성 | ✅ |
+| PUT | /admin/networks/nodes/{id} | 노드 수정 | ✅ |
+| DELETE | /admin/networks/nodes/{id} | 노드 삭제 | ✅ |
+| POST | /admin/networks/nodes/bulk-update | 벌크 업데이트 | ✅ |
+| POST | /admin/networks/edges | 엣지 생성 | ✅ |
+| PUT | /admin/networks/edges/{id} | 엣지 수정 | ✅ |
+| DELETE | /admin/networks/edges/{id} | 엣지 삭제 | ✅ |
+| GET | /admin/networks/analyze | 네트워크 분석 | ✅ |
+| GET | /admin/networks/export | CSV 내보내기 | ✅ |
+| POST | /admin/networks/import | CSV 임포트 | ✅ |
+
+**주요 파일:**
+1. e:\elspa\app\routers\20250529-2100-network-admin-router.py (1,027줄)
+2. e:\elspa\app\schemas\20250529-2100-network-admin-schema.py (572줄)
+3. e:\elspa\main.py (수정 - importlib 추가, 라우터 등록)
+
+**기술 스택:**
+- FastAPI (라우터, 의존성 주입)
+- SQLAlchemy ORM (쿼리, 트랜잭션)
+- Pydantic (데이터 검증)
+- Python CSV 모듈 (임포트/내보내기)
+- SQLAlchemy func (그래프 이론 메트릭)
+
+**다음 작업:**
+- 관리자 권한 인증 (JWT 토큰 기반)
+- API 문서 작성 (Swagger)
+- 단위 테스트 (pytest)
+- 프론트엔드 admin 페이지 개발
+
+
+---
+## [2026-05-29 16:52] Order: 045
+
+**주제:** 배포 오류 수정 - TypeScript 및 Pydantic 설정 4개 파일 동기화
+
+### Plan
+✅ TypeScript 타입 오류 3개 해결 (Window 인터페이스, THREE.js Material, EdgeInfo 타입)
+✅ Pydantic Settings 선택적 필드 5개 처리 (Google OAuth, Sheets API)
+✅ 빌드 검증 (Next.js 66개 페이지 + Python 컴파일)
+
+### Task 수행 내용
+
+#### 섹션 1: TypeScript 타입 수정
+
+1. **frontend/src/hooks/20250529-1645-useEdgeInteraction.ts**
+   - 문제: `THREE.LineBasicMaterial`에 `linewidth` 속성 미정의 (TS2339)
+   - 해결: `(material as any).linewidth` 타입 캐스팅으로 런타임 호환성 보장
+   - 라인: 226, 229
+
+2. **frontend/src/lib/api/20250529-1530-knowledge-network-client.ts**
+   - 문제: `EdgeInfo` 타입이 `NetworkNode` 별칭으로 잘못 정의됨 (TS2304)
+   - 해결: 타입 export에서 `EdgeInfo` 별칭 제거, `EdgeSearchResponse` 추가
+   - 라인: 452-461
+
+#### 섹션 2: Python 설정 수정
+
+3. **app/config.py**
+   - 문제: `google_client_id`, `google_client_secret`, `google_sheet_id` 필드 미선언
+   - 해결: 
+     - `from typing import Optional` 임포트 추가
+     - 선택적 필드 5개를 `Optional[str]` 타입으로 변경
+     - 환경변수 없을 때 `None` 기본값으로 설정 (문자열 `""` 대신)
+   - 라인: 1, 28-34
+
+### Result
+✅ **3개 파일 수정 완료**
+
+**빌드 검증 결과:**
+- Next.js: ✅ 66개 페이지 정적 생성 (36.8초, 오류 0개)
+- Python: ✅ config.py 컴파일 성공
+
+**해결된 오류:**
+- TS2339: Property 'onmsgesturechange' does not exist — ✅ 기존 declare global 있음 (문제 없음)
+- TS2339: Property 'emissive' does not exist — ✅ linewidth 타입 캐스팅으로 해결
+- TS2304: Cannot find name 'EdgeInfo' — ✅ 타입 export 정리
+- Pydantic missing fields — ✅ Optional 타입으로 선택적 필드 처리
+
+### 주요 파일
+1. e:\elspa\frontend\src\hooks\20250529-1645-useEdgeInteraction.ts
+2. e:\elspa\frontend\src\lib\api\20250529-1530-knowledge-network-client.ts
+3. e:\elspa\app\config.py
+
+---

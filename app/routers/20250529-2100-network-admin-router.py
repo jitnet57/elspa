@@ -39,21 +39,24 @@ import uuid
 from app.database import get_db
 from app.models.knowledge_network import KnowledgeNetworkNode
 from app.models.network_edge import KnowledgeNetworkEdge
-from app.schemas.network_admin_schema import (
-    NodeCreateRequest,
-    NodeUpdateRequest,
-    NodeResponse,
-    NodeBulkUpdateRequest,
-    BulkUpdateResponse,
-    EdgeCreateRequest,
-    EdgeUpdateRequest,
-    EdgeResponse,
-    NetworkAnalysisResponse,
-    ImportResult,
-    ExportDataResponse,
-    ImportNodeData,
-    ImportEdgeData,
-)
+
+# Import schemas with dynamic module loader for hyphenated filename
+import importlib
+network_admin_schema = importlib.import_module("app.schemas.20250529-2100-network-admin-schema")
+NodeCreateRequest = network_admin_schema.NodeCreateRequest
+NodeUpdateRequest = network_admin_schema.NodeUpdateRequest
+NodeResponse = network_admin_schema.NodeResponse
+NodeBulkUpdateRequest = network_admin_schema.NodeBulkUpdateRequest
+BulkUpdateResponse = network_admin_schema.BulkUpdateResponse
+EdgeCreateRequest = network_admin_schema.EdgeCreateRequest
+EdgeUpdateRequest = network_admin_schema.EdgeUpdateRequest
+EdgeResponse = network_admin_schema.EdgeResponse
+NetworkAnalysisResponse = network_admin_schema.NetworkAnalysisResponse
+ImportResult = network_admin_schema.ImportResult
+ExportDataResponse = network_admin_schema.ExportDataResponse
+ImportNodeData = network_admin_schema.ImportNodeData
+ImportEdgeData = network_admin_schema.ImportEdgeData
+
 from app.utils.logging_config import get_logger
 
 # 로깅
