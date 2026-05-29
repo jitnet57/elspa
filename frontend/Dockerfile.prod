@@ -1,0 +1,74 @@
+# ============================================================
+# 📌 Dockerfile: Next.js 프로덕션 (멀티스테이지 빌드)
+# 📋 목적: 최적화된 정적 사이트 생성 및 배포
+# 📅 작성일: 2026-05-29
+# ============================================================
+
+# Stage 1: 빌드 스테이지
+FROM node:20-alpine as builder
+
+WORKDIR /app
+
+# 필수 시스템 패키지 설치
+RUN apk add --no-cache libc6-compat
+
+# 의존성 파일 복사
+COPY package.json package-lock.json* ./
+
+# 의존성 설치 (프로덕션 환경)
+RUN npm ci --only=production && \
+    npm ci
+
+# 애플리케이션 소스 복사
+COPY . .
+
+# 환경 변수 설정
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    NEXT_ENV=production
+
+# 프로덕션 빌드 (정적 생성)
+RUN npm run build
+
+# Stage 2: 서빙 스테이지
+FROM node:20-alpine
+
+WORKDIR /app
+
+# 필수 패키지 설치
+RUN apk add --no-cache \
+    curl \
+    dumb-init
+
+# 비루트 사용자 생성 (보안)
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001
+
+# 빌드 스테이지에서 필요한 파일 복사
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/out ./out
+COPY --from=builder /app/next.config.ts ./
+COPY --from=builder /app/package.json ./
+
+# 권한 설정
+RUN chown -R nextjs:nodejs /app
+
+# 사용자 변경
+USER nextjs
+
+# 환경 변수
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    NODE_ENV=production \
+    PORT=3000
+
+# 헬스체크
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000 || exit 1
+
+# 포트 노출
+EXPOSE 3000
+
+# dumb-init를 사용하여 시작 (신호 처리 개선)
+ENTRYPOINT ["dumb-init", "--"]
+
+# 정적 파일 서빙 (http-server 또는 Vercel에서 자동 처리)
+CMD ["npx", "http-server", "out", "-p", "3000", "-g"]

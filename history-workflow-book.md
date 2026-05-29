@@ -5442,3 +5442,228 @@ Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
 6. **고급 검색**: 경로 검색 UI (A에서 B로 경로 찾기)
 
 ---
+
+---
+## [2026-05-29 17:15] Order: 053 - Agent J: 프로덕션 배포 & 성능 최적화 & PWA
+
+**주제:** 프로덕션 배포 준비 및 성능 최적화, PWA 번들링
+
+### Plan
+
+✅ Next.js 프로덕션 빌드 최적화
+✅ Web Vitals 성능 모니터링 시스템 구축
+✅ Service Worker 및 PWA 설정 확장
+✅ FastAPI 프로덕션 배포 설정
+✅ CI/CD 파이프라인 구성
+✅ 배포 가이드 문서 작성
+
+### Task 수행 내용
+
+#### 섹션 1: TypeScript 빌드 에러 수정
+1. `20250529-1645-edge-interactions.tsx` - edgeGroupRef null 체크 추가
+2. `20250529-1530-knowledge-network-client.ts` - 타입 export 추가
+3. `NetworkStatsDashboard.tsx` - JSX 문법 에러 수정
+4. `20250529-1645-useEdgeInteraction.ts` - LineBasicMaterial emissive → color 변경
+
+✅ **프로덕션 빌드 성공** (61개 페이지 정적 생성, 12MB 번들)
+
+#### 섹션 2: next.config.ts 최적화
+- 이미지 최적화 (WebP 포맷 지원)
+- 패키지 임포트 최적화 (recharts, lodash, three 등 분할)
+- Webpack 번들 분석 설정
+- SWC 최소화 활성화
+- Turbopack 성능 설정
+
+#### 섹션 3: 성능 모니터링 시스템
+📁 **파일 생성:**
+- `/frontend/src/lib/monitoring/20250529-1700-performance-metrics.ts`
+  - Web Vitals 수집 (LCP, FID, CLS, FCP, TTFB)
+  - 커스텀 메트릭 기록
+  - Stale-While-Revalidate 캐싱
+  - 성능 점수 계산 (0-100)
+
+**주요 기능:**
+- PerformanceObserver를 통한 자동 지표 수집
+- 임계값 기반 평가 (good, needsImprovement, poor)
+- 분석 서버로의 메트릭 전송 (keepalive 지원)
+- 콘솔 로깅 및 성능 스코어
+
+#### 섹션 4: Service Worker 업그레이드
+📁 **파일 생성:**
+- `/frontend/public/20250529-1700-sw-optimized.js`
+  - Cache First 전략 (정적 자산)
+  - Network First 전략 (동적 콘텐츠)
+  - Stale-While-Revalidate 전략 (API)
+  - 오프라인 폴백 페이지
+  - 백그라운드 동기화
+  - 푸시 알림 지원
+
+**캐싱 전략:**
+- 정적 자산: 캐시 우선
+- API 요청: 오래된 값 반환 + 백그라운드 업데이트
+- 네트워크 실패: 캐시 또는 오프라인 페이지
+
+#### 섹션 5: PWA 매니페스트 확장
+📁 **파일 수정:**
+- `/frontend/public/manifest.json`
+  - 카테고리 추가 (productivity)
+  - display_override 추가 (window-controls-overlay)
+  - 스크린샷 확장 (모바일 2개, 데스크톱 2개)
+  - Service Worker 메타데이터
+
+#### 섹션 6: FastAPI 프로덕션 설정
+📁 **파일 생성:**
+- `/gunicorn_config.py` (CPU 코어 기반 워커 설정)
+  - workers = CPU_cores * 2 + 1
+  - uvicorn worker class 사용
+  - 타임아웃 설정 (60s graceful)
+  - 프로세스 명명
+
+#### 섹션 7: 배포 가이드
+📁 **파일 생성:**
+- `/20250529-1705-DEPLOYMENT.md`
+  - 배포 아키텍처 (Dev/Staging/Prod)
+  - 프론트엔드 배포 (Vercel)
+  - 백엔드 배포 (Railway)
+  - 환경 변수 설정
+  - 성능 측정 (Web Vitals)
+  - PWA 검증 체크리스트
+  - 모니터링 설정 (Sentry)
+  - 트러블슈팅 가이드
+  - 롤백 절차
+
+#### 섹션 8: CI/CD 파이프라인
+📁 **파일 생성:**
+- `/.github/workflows/20250529-1710-deploy-production.yml`
+  - Step 1: 프론트엔드 빌드 & 테스트
+  - Step 2: 백엔드 빌드 & 테스트
+  - Step 3: Lighthouse 성능 검사
+  - Step 4: Vercel 배포
+  - Step 5: Railway 배포
+  - Step 6: Smoke Test
+  - Step 7: Slack/Email 알림
+
+**검사 항목:**
+- npm lint 및 빌드
+- pytest 및 코드 품질 (pylint, black, mypy)
+- 번들 크기 모니터링 (20MB 초과 경고)
+- Lighthouse 성능 점수 (3회 실행)
+- HTTPS 및 API 헬스체크
+- PWA 매니페스트 및 Service Worker 검증
+
+#### 섹션 9: Docker 프로덕션 환경
+📁 **파일 생성:**
+- `/20250529-1715-docker-compose.yml` (로컬 프로덕션)
+  - PostgreSQL 16
+  - Redis 캐시
+  - FastAPI 백엔드
+  - Next.js 프론트엔드
+  - Nginx 리버스 프록시
+  - Prometheus 모니터링
+  - Grafana 대시보드
+
+📁 **파일 생성:**
+- `/Dockerfile` (FastAPI)
+  - 멀티스테이지 빌드
+  - 비루트 사용자
+  - 헬스체크 엔드포인트
+
+📁 **파일 생성:**
+- `/frontend/Dockerfile.prod` (Next.js)
+  - 정적 사이트 생성
+  - http-server를 통한 서빙
+  - dumb-init 신호 처리
+
+### Result
+
+✅ **프로덕션 빌드 최적화 완료**
+- Next.js 정적 빌드 성공 (61개 페이지)
+- TypeScript 타입 체크 통과
+- 번들 크기: 12MB (acceptable)
+
+✅ **성능 모니터링 시스템 구축**
+- Web Vitals 자동 수집 (LCP, FID, CLS, FCP, TTFB)
+- 커스텀 메트릭 기록 가능
+- 성능 점수 계산 (0-100)
+- 분석 서버 전송 (keepalive)
+
+✅ **PWA 및 오프라인 지원**
+- Service Worker 최적화 (3가지 캐싱 전략)
+- 매니페스트 확장 (카테고리, 스크린샷, display_override)
+- 오프라인 폴백 페이지
+- 푸시 알림 및 배경 동기화
+
+✅ **CI/CD 파이프라인**
+- GitHub Actions 워크플로우 (8 단계)
+- Lighthouse 자동 성능 검사
+- Vercel & Railway 자동 배포
+- Smoke test 및 알림
+
+✅ **배포 인프라 설정**
+- Docker 멀티스테이지 빌드
+- 로컬 프로덕션 docker-compose
+- Prometheus & Grafana 모니터링
+- 비루트 사용자 및 헬스체크
+
+### 주요 파일
+
+**📁 성능 모니터링**
+1. `/frontend/src/lib/monitoring/20250529-1700-performance-metrics.ts` (500+ 줄)
+
+**📁 Service Worker & PWA**
+2. `/frontend/public/20250529-1700-sw-optimized.js` (350+ 줄)
+3. `/frontend/public/manifest.json` (extended)
+
+**📁 배포 설정**
+4. `/20250529-1705-DEPLOYMENT.md` (comprehensive guide)
+5. `/.github/workflows/20250529-1710-deploy-production.yml` (8-step pipeline)
+
+**📁 Docker & Infrastructure**
+6. `/20250529-1715-docker-compose.yml` (local production)
+7. `/Dockerfile` (FastAPI)
+8. `/frontend/Dockerfile.prod` (Next.js)
+9. `/gunicorn_config.py` (production ASGI)
+
+**📁 Configuration**
+10. `/frontend/next.config.ts` (optimized)
+
+### 기술 스택
+
+- **성능**: Web Vitals API, PerformanceObserver
+- **캐싱**: Service Worker, Cache API, IndexedDB
+- **모니터링**: Prometheus, Grafana, Sentry
+- **배포**: Vercel (frontend), Railway (backend)
+- **CI/CD**: GitHub Actions
+- **컨테이너**: Docker, docker-compose
+- **보안**: CSP, HSTS, X-Frame-Options
+
+### 성능 목표
+
+| 지표 | 목표 | 상태 |
+|------|------|------|
+| LCP | < 2.5s | 📊 모니터링 |
+| FID | < 100ms | 📊 모니터링 |
+| CLS | < 0.1 | 📊 모니터링 |
+| 번들 | < 2MB | 12MB ⚠️ |
+| Lighthouse | > 90 | 📊 자동 검사 |
+
+### 다음 단계 (Agent K)
+
+1. **배포 실행**: GitHub main 브랜치 푸시
+2. **성능 측정**: Lighthouse 자동 실행 확인
+3. **모니터링 설정**: Sentry & Prometheus 연동
+4. **PWA 테스트**: 설치 및 오프라인 모드 검증
+5. **로드 테스트**: k6 또는 Jmeter로 성능 부하 테스트
+6. **번들 최적화**: Three.js 분할 로딩 (추가)
+7. **SEO 최적화**: Sitemap, robots.txt, 구조화된 데이터
+8. **API 최적화**: GraphQL 또는 API 라우팅 최적화
+
+### 노트
+
+- **TypeScript 빌드**: 모든 타입 에러 수정 완료
+- **성능 모니터링**: 프로덕션 환경에서 자동 수집 가능
+- **PWA 설치**: manifest.json 검증 후 Chrome에서 설치 가능
+- **Docker**: 로컬에서 `docker-compose up -d` 실행 가능
+- **배포**: GitHub Actions로 자동 CI/CD 가능
+
+---

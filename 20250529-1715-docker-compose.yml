@@ -1,0 +1,207 @@
+version: "3.9"
+
+# ============================================================
+# 📌 로컬 프로덕션 환경 (Docker Compose)
+# 📋 목적: 프로덕션 배포 전 로컬에서 테스트
+# ============================================================
+
+services:
+  # ============================================================
+  # 1. PostgreSQL 데이터베이스
+  # ============================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: elspa-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-elspa}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-elspa_dev}
+      POSTGRES_DB: ${DB_NAME:-elspa}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/01-init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-elspa}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - elspa-network
+
+  # ============================================================
+  # 2. Redis 캐시 (선택)
+  # ============================================================
+  redis:
+    image: redis:7-alpine
+    container_name: elspa-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - elspa-network
+
+  # ============================================================
+  # 3. FastAPI 백엔드
+  # ============================================================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: elspa-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # 데이터베이스
+      DATABASE_URL: postgresql://${DB_USER:-elspa}:${DB_PASSWORD:-elspa_dev}@postgres:5432/${DB_NAME:-elspa}
+      REDIS_URL: redis://redis:6379/0
+
+      # API 설정
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      ENVIRONMENT: production
+      LOG_LEVEL: info
+
+      # CORS
+      ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:8000,http://frontend:3000"
+
+      # 보안
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-prod}
+      JWT_ALGORITHM: HS256
+      JWT_EXPIRATION_HOURS: 24
+
+      # 모니터링
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      ENABLE_METRICS: "true"
+    volumes:
+      - ./app:/app/app
+      - ./logs:/app/logs
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - elspa-network
+    restart: unless-stopped
+
+  # ============================================================
+  # 4. Next.js 프론트엔드
+  # ============================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: elspa-frontend
+    depends_on:
+      - backend
+    environment:
+      # API 설정
+      NEXT_PUBLIC_API_URL: http://backend:8000
+      NEXT_PUBLIC_ANALYTICS_ENDPOINT: http://backend:8000/api/metrics
+
+      # 기능 플래그
+      NEXT_PUBLIC_ENABLE_3D_NETWORK: "true"
+      NEXT_PUBLIC_ENABLE_OFFLINE_MODE: "true"
+      NEXT_PUBLIC_ENABLE_PWA: "true"
+
+      # 성능
+      NEXT_PUBLIC_PERFORMANCE_THRESHOLD_LCP: 2500
+      NEXT_PUBLIC_PERFORMANCE_THRESHOLD_FID: 100
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - elspa-network
+    restart: unless-stopped
+
+  # ============================================================
+  # 5. Nginx 리버스 프록시 (선택)
+  # ============================================================
+  nginx:
+    image: nginx:alpine
+    container_name: elspa-nginx
+    depends_on:
+      - backend
+      - frontend
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - elspa-network
+    restart: unless-stopped
+
+  # ============================================================
+  # 6. Prometheus 모니터링 (선택)
+  # ============================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: elspa-prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    ports:
+      - "9090:9090"
+    networks:
+      - elspa-network
+
+  # ============================================================
+  # 7. Grafana 대시보드 (선택)
+  # ============================================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: elspa-grafana
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_USER: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3001:3000"
+    networks:
+      - elspa-network
+
+# ============================================================
+# 볼륨 정의
+# ============================================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+# ============================================================
+# 네트워크 정의
+# ============================================================
+networks:
+  elspa-network:
+    driver: bridge

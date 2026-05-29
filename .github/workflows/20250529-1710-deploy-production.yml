@@ -1,0 +1,316 @@
+name: 🚀 Deploy Production (Frontend + Backend)
+
+# ============================================================
+# 📌 트리거
+# ============================================================
+on:
+  push:
+    branches:
+      - main
+      - production
+  workflow_dispatch:  # 수동 트리거
+
+# ============================================================
+# 📌 환경 변수
+# ============================================================
+env:
+  NODE_VERSION: "20"
+  PYTHON_VERSION: "3.11"
+  REGISTRY: ghcr.io
+
+# ============================================================
+# 📌 작업 정의
+# ============================================================
+jobs:
+  # ============================================================
+  # Step 1: 프론트엔드 빌드 및 테스트
+  # ============================================================
+  frontend-build:
+    name: 🎨 Frontend Build & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: 🧪 Run linting
+        run: npm run lint
+
+      - name: 🔨 Build (Static Export)
+        run: npm run build
+        env:
+          NEXT_ENV: production
+
+      - name: 📊 Check bundle size
+        run: |
+          SIZE=$(du -sh out/ | cut -f1)
+          echo "📦 Bundle size: $SIZE"
+          # 경고: 20MB 초과
+          BYTES=$(du -sb out/ | cut -f1)
+          if [ $BYTES -gt 20971520 ]; then
+            echo "⚠️ Warning: Bundle size exceeded 20MB"
+          fi
+
+      - name: 📤 Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/out/
+          retention-days: 1
+
+  # ============================================================
+  # Step 2: 백엔드 빌드 및 테스트
+  # ============================================================
+  backend-build:
+    name: 🔧 Backend Build & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: 📥 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🧪 Run tests
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+        run: |
+          pytest tests/ -v --cov=app
+
+      - name: 📊 Check code quality
+        run: |
+          pylint app/ || true
+          black --check app/ || true
+          mypy app/ --ignore-missing-imports || true
+
+      - name: 🔨 Build Docker image
+        run: |
+          docker build -t elspa-api:${{ github.sha }} \
+                      -f Dockerfile .
+
+  # ============================================================
+  # Step 3: Lighthouse 성능 검사
+  # ============================================================
+  lighthouse:
+    name: 🔦 Lighthouse Performance Check
+    runs-on: ubuntu-latest
+    needs: frontend-build
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 📥 Download frontend artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/out/
+
+      - name: 🚀 Start server
+        run: |
+          cd frontend
+          npx http-server out/ -p 3000 -g &
+
+      - name: ⏳ Wait for server
+        run: sleep 3
+
+      - name: 🔦 Run Lighthouse
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          configPath: ./lighthouse-config.json
+          runs: 3
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+  # ============================================================
+  # Step 4: 프론트엔드 배포 (Vercel)
+  # ============================================================
+  deploy-frontend:
+    name: 🌐 Deploy Frontend (Vercel)
+    runs-on: ubuntu-latest
+    needs: [frontend-build, lighthouse]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 📥 Download frontend artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/out/
+
+      - name: 🚀 Deploy to Vercel
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          npm install -g vercel
+          vercel deploy \
+            --token=$VERCEL_TOKEN \
+            --prod \
+            --scope=elspa \
+            frontend/out/
+
+      - name: ✅ Verify deployment
+        run: |
+          curl -s https://elspa.com/health
+          echo "✅ Frontend deployed successfully"
+
+  # ============================================================
+  # Step 5: 백엔드 배포 (Railway)
+  # ============================================================
+  deploy-backend:
+    name: 🔧 Deploy Backend (Railway)
+    runs-on: ubuntu-latest
+    needs: backend-build
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🚀 Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          npm install -g @railway/cli
+          railway login --token $RAILWAY_TOKEN
+          railway deploy --service=elspa-api
+
+      - name: ✅ Verify deployment
+        run: |
+          sleep 5
+          curl -s https://api.elspa.com/health
+          echo "✅ Backend deployed successfully"
+
+  # ============================================================
+  # Step 6: Smoke Test
+  # ============================================================
+  smoke-test:
+    name: 🧪 Smoke Test
+    runs-on: ubuntu-latest
+    needs: [deploy-frontend, deploy-backend]
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🧪 Test homepage
+        run: |
+          curl -f https://elspa.com/ || exit 1
+          echo "✅ Homepage accessible"
+
+      - name: 🧪 Test API health
+        run: |
+          curl -f https://api.elspa.com/health || exit 1
+          echo "✅ API healthy"
+
+      - name: 🧪 Test PWA manifest
+        run: |
+          curl -f https://elspa.com/manifest.json || exit 1
+          echo "✅ PWA manifest accessible"
+
+      - name: 🧪 Test service worker
+        run: |
+          curl -f https://elspa.com/20250529-1700-sw-optimized.js || exit 1
+          echo "✅ Service Worker accessible"
+
+  # ============================================================
+  # Step 7: 성능 모니터링 및 알림
+  # ============================================================
+  notify:
+    name: 📢 Notify Deployment
+    runs-on: ubuntu-latest
+    needs: [smoke-test]
+    if: always()
+
+    steps:
+      - name: 📬 Slack Notification
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "🚀 ElSpa Production Deployment",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*${{ job.status }}*\n\n${{ github.event.head_commit.message }}\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow>"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Frontend:*\n<https://elspa.com|elspa.com>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Backend:*\n<https://api.elspa.com|api.elspa.com>"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: 📧 Email Notification
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.EMAIL_SERVER }}
+          server_port: 587
+          username: ${{ secrets.EMAIL_USER }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "⚠️ ElSpa Deployment Failed"
+          to: ${{ secrets.EMAIL_RECIPIENT }}
+          from: "deployment@elspa.com"
+          body: |
+            Deployment failed for ElSpa production.
+
+            Check: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

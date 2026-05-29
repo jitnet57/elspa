@@ -9,7 +9,8 @@
   "orientation": "portrait-primary",
   "theme_color": "#d4af37",
   "background_color": "#ffffff",
-  "categories": ["health", "wellness", "lifestyle"],
+  "categories": ["health", "wellness", "lifestyle", "productivity"],
+  "display_override": ["window-controls-overlay", "standalone", "browser"],
   "screenshots": [
     {
       "src": "/screenshots/mobile-1.png",
@@ -18,7 +19,19 @@
       "type": "image/png"
     },
     {
+      "src": "/screenshots/mobile-2.png",
+      "sizes": "540x720",
+      "form_factor": "narrow",
+      "type": "image/png"
+    },
+    {
       "src": "/screenshots/desktop-1.png",
+      "sizes": "1280x720",
+      "form_factor": "wide",
+      "type": "image/png"
+    },
+    {
+      "src": "/screenshots/desktop-2.png",
       "sizes": "1280x720",
       "form_factor": "wide",
       "type": "image/png"
@@ -101,5 +114,15 @@
       "url": "url"
     }
   },
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+
+  "note": "⭐ 프로덕션 PWA 설정 (2026-05-29)",
+  "categories_extended": ["productivity", "education", "utilities"],
+  "screenshot_quality": "high",
+  "orientation_lock": "portrait-primary",
+  "supports_offline": true,
+  "service_worker": {
+    "src": "/20250529-1700-sw-optimized.js",
+    "scope": "/"
+  }
 }

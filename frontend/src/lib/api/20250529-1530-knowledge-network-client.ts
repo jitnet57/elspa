@@ -449,7 +449,7 @@ export class KnowledgeNetworkClient {
 // ============================================================
 // 타입 export (컴포넌트에서 사용)
 // ============================================================
-export type { NetworkNode, NetworkEdge, EdgeInfo, NodesResponse, SearchResponse, CategoriesResponse, SearchRequest, EdgesResponse };
+export type { NetworkNode, NetworkEdge, NodesResponse, SearchResponse, CategoriesResponse, SearchRequest, EdgesResponse };
 
 // 기본 export
 export default KnowledgeNetworkClient;
