@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useStore } from '@/lib/store/store';
 import { exportSettlementReportCSV, downloadCSV } from '@/lib/utils/csv-export';
-import { getMonthlySettlements, getCompanySettlements, getGuideSettlements } from '@/lib/api/settlement-client';
+import { getCompanySettlements, getGuideSettlements } from '@/lib/api/settlement-client';
 
 interface MonthlySettlement {
   id: number;
@@ -34,31 +34,31 @@ interface Guide {
 }
 
 export default function SettlementReportPage() {
-  const { monthlySettlements, setMonthlySettlements, isLoading, setLoading, error, setError, companies, setCompanies, guides, setGuides } = useStore();
+  const {
+    monthlySettlements,
+    isLoading,
+    error,
+    fetchMonthlySettlements,
+    companies,
+    setCompanies,
+    guides,
+    setGuides
+  } = useStore();
   const [selectedMonth, setSelectedMonth] = useState('2026-05');
   const [reportType, setReportType] = useState<'monthly' | 'company' | 'guide'>('monthly');
 
   // API에서 정산 데이터 로드
   useEffect(() => {
-    const fetchSettlements = async () => {
+    const loadData = async () => {
       try {
-        setLoading(true);
-        setError(null);
-
-        // API에서 월별 정산 데이터 조회
-        const settlements = await getMonthlySettlements(selectedMonth);
-        setMonthlySettlements(settlements);
+        await fetchMonthlySettlements(selectedMonth);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : '정산 데이터 로드 실패';
-        setError(errorMessage);
         console.error('Failed to load settlements:', err);
-      } finally {
-        setLoading(false);
       }
     };
 
-    fetchSettlements();
-  }, [selectedMonth, setMonthlySettlements, setLoading, setError]);
+    loadData();
+  }, [selectedMonth, fetchMonthlySettlements]);
 
   // 회사와 가이드 데이터 로드 (초기 1회)
   useEffect(() => {
@@ -165,12 +165,20 @@ export default function SettlementReportPage() {
 
         {/* Error Banner */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
-            <span className="text-red-600 text-2xl">⚠️</span>
-            <div>
-              <p className="text-red-800 font-semibold">데이터 로드 실패</p>
-              <p className="text-red-700 text-sm">{error}</p>
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="text-red-600 text-2xl">⚠️</span>
+              <div>
+                <p className="text-red-800 font-semibold">데이터 로드 실패</p>
+                <p className="text-red-700 text-sm">{error}</p>
+              </div>
             </div>
+            <button
+              onClick={() => fetchMonthlySettlements(selectedMonth)}
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors flex-shrink-0"
+            >
+              🔄 재시도
+            </button>
           </div>
         )}
 

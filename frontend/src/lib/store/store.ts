@@ -423,6 +423,27 @@ const createMonthlySettlementSlice = (set: any): MonthlySettlementState => ({
 
   setError: (error: string | null) => set({ error }),
 
+  fetchMonthlySettlements: async (month: string) => {
+    // ============================================================
+    // 📌 함수명: fetchMonthlySettlements
+    // 📋 목적: API에서 월별 정산 데이터를 비동기로 로드
+    // 🔧 매개변수: month (string) - "YYYY-MM" 형식
+    // 📤 반환값: Promise<void>
+    // 📅 작성일: 2026-05-29
+    // ============================================================
+    const { getMonthlySettlements } = await import('@/lib/api/settlement-client');
+
+    try {
+      set({ isLoading: true, error: null });
+      const data = await getMonthlySettlements(month);
+      set({ monthlySettlements: data, isLoading: false });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : '월별 정산 데이터 로드 실패';
+      set({ error: errorMessage, isLoading: false });
+      throw err;
+    }
+  },
+
   calculateMonthlySettlements: (month: string) => {
     set((state: any) => {
       const { therapistSettlements, guides, companies, monthlySettlements: existingSettlements } = state;

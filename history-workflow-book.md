@@ -6192,3 +6192,140 @@ useEffect(() => {
 3. e:\elspa\app\config.py
 
 ---
+
+---
+## [2025-05-29 21:00] Order: 051 - 관리자 대시보드 네트워크 통계 위젯 구현
+
+**주제:** 관리자 대시보드용 네트워크 분석 통계 위젯 및 시각화 (1055줄, 12+ 차트)
+
+### Plan
+✅ 통계 위젯 4개 카드 구현 (노드 수, 연결선 수, 중심성, 클러스터)
+✅ Recharts 기반 시각화 차트 6개 (파이, 막대, 선 그래프, 수평 막대)
+✅ Zustand 상태 관리 + 30초 캐싱 훅
+✅ API 통합 (모의 데이터 + 실제 API 가능)
+✅ TypeScript 완전 타입 안전성
+
+### Task 수행 내용
+
+#### 섹션 1: 통계 위젯 컴포넌트 (367줄)
+**파일:** `frontend/src/components/20250529-2100-network-stats-widgets.tsx`
+- StatCard 컴포넌트 (단일 카드, 아이콘, 트렌드, 미니차트)
+- NetworkStatsWidgets 그룹 (4개 카드 그리드)
+- 카드 내용:
+  * 총 노드 수 + 추세 (12.5% 증가, 면적 차트)
+  * 총 연결선 수 + 밀도 (8.3% 증가, 선 차트)
+  * 평균 중심성 + 순위 (5.2% 증가, 면적 차트)
+  * 클러스터 수 + 분포 (3.1% 감소, 막대 차트)
+- 추가 섹션:
+  * 네트워크 밀도 진행바
+  * 중심 노드 순위 (상위 5)
+  * 주요 지표 (평균 차수, 지름, 경로 길이, 집중화 계수)
+
+#### 섹션 2: 네트워크 차트 시각화 (369줄)
+**파일:** `frontend/src/components/20250529-2100-network-charts.tsx`
+- ChartContainer 래퍼 컴포넌트 (재사용 가능)
+- 6개 차트 구현:
+  1. 노드 카테고리 분포 (파이 차트) — 5개 카테고리
+  2. 관계 타입별 강도 (수평 막대) — 강도 + 빈도
+  3. 시간별 네트워크 변화 (다중 선 그래프) — 노드/연결선/밀도
+  4. 중심성 순위 (수평 막대) — 상위 6개 노드
+  5. 클러스터 분포 (막대) — 노드 수 + 연결선 수
+  6. 모듈성 점수 (막대) — 커뮤니티 검출 품질
+- 색상 팔레트 (10색 + 라이트 버전)
+- 커스텀 Tooltip
+- 네트워크 메트릭 요약 섹션 (4개 지표)
+- 주요 발견사항 섹션
+
+#### 섹션 3: 상태 관리 훅 (319줄)
+**파일:** `frontend/src/hooks/20250529-2100-useNetworkStats.ts`
+- Zustand 스토어 구현:
+  * stats (NetworkStats)
+  * historicalData (30일 이력)
+  * isLoading, error
+  * lastFetchTime (캐시 시간)
+- useNetworkStats 훅:
+  * 자동 갱신 (30초 TTL)
+  * 모의 데이터 생성 (API 없을 때 폴백)
+  * 히스토리 데이터 생성 (30일)
+  * 수동 갱신 (refetch 함수)
+- 유틸리티 함수 5개:
+  * calculateNetworkDensity
+  * calculateAverageDegree
+  * normalizeCentrality
+  * calculateGrowthRate
+  * generateMockStats / generateMockHistoricalData
+
+### 기술 스택
+- **프레임워크:** React 19 + Next.js 16
+- **상태 관리:** Zustand 5
+- **시각화:** Recharts 2.x
+- **UI 아이콘:** Lucide React
+- **스타일:** Tailwind CSS 4
+- **언어:** TypeScript (완전 타입 안전)
+
+### Result
+✅ **3개 파일 신규 생성 완료 (1055줄)**
+- network-stats-widgets.tsx: 367줄
+- network-charts.tsx: 369줄
+- useNetworkStats.ts: 319줄
+
+✅ **통계 카드 4개 구현**
+- 총 노드 수 카드 (아이콘 + 미니 차트 + 추세)
+- 총 연결선 수 카드 (아이콘 + 미니 차트 + 추세)
+- 평균 중심성 카드 (아이콘 + 미니 차트 + 추세)
+- 클러스터 수 카드 (아이콘 + 미니 차트 + 추세)
+
+✅ **시각화 차트 6개 구현**
+- 파이 차트: 노드 카테고리 분포 (5개 범주)
+- 막대 차트: 관계 타입별 강도 (5개 타입)
+- 다중 선 그래프: 시간별 네트워크 변화 (3개 지표)
+- 수평 막대 1: 중심성 순위 (상위 6)
+- 막대 차트: 클러스터 분포 (5개 클러스터)
+- 막대 차트: 모듈성 점수 (5개 클러스터)
+
+✅ **추가 섹션**
+- 네트워크 밀도 진행바
+- 중심 노드 순위 (상위 5)
+- 주요 지표 4개 (차수, 지름, 경로 길이, 집중화)
+- 네트워크 메트릭 요약
+- 주요 발견사항
+
+✅ **상태 관리 완성**
+- Zustand 스토어 (4개 상태)
+- 30초 TTL 캐싱
+- 자동 갱신 (useEffect)
+- 모의 데이터 생성 함수
+- 히스토리 데이터 생성
+- 유틸리티 함수 5개
+
+### 주요 특징
+1. **반응형 레이아웃:** grid 기반 (모바일, 태블릿, 데스크톱)
+2. **접근성:** aria-labels, 명확한 색상 대비
+3. **성능:** 메모이제이션, 동적 임포트 가능
+4. **에러 처리:** 폴백 데이터, 에러 메시지
+5. **로딩 상태:** Skeleton UI (animate-pulse)
+6. **타입 안전:** 완전한 TypeScript 타입 정의
+
+### API 통합 (Ready)
+모의 데이터 사용 중이며, 다음 엔드포인트 준비 완료:
+```
+GET /api/network/stats
+→ { stats: NetworkStats, historicalData: HistoricalDataPoint[] }
+```
+
+### Next Steps
+1. 백엔드 `/api/network/stats` 엔드포인트 구현
+2. useNetworkStats 훅의 실제 API 호출 활성화 (주석 처리된 부분)
+3. 관리자 대시보드 페이지에 컴포넌트 임포트
+4. 다크 모드 스타일 추가 (선택사항)
+5. 실시간 업데이트 WebSocket 통합 (선택사항)
+
+### 생성된 파일
+1. `/frontend/src/components/20250529-2100-network-stats-widgets.tsx` (367줄)
+2. `/frontend/src/components/20250529-2100-network-charts.tsx` (369줄)
+3. `/frontend/src/hooks/20250529-2100-useNetworkStats.ts` (319줄)
+
+### 토큰 사용량
+예상: ~2,500 tokens (Claude Haiku)
+
+---
