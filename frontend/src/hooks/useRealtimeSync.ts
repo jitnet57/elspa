@@ -133,6 +133,7 @@ export function useRealtimeSync(options: UseRealtimeSyncOptions = {}): UseRealti
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectCountRef = useRef(0);
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
@@ -147,10 +148,13 @@ export function useRealtimeSync(options: UseRealtimeSyncOptions = {}): UseRealti
     setIsConnecting(true);
 
     try {
-      // WebSocket URL 구성 (프로토콜 자동 선택)
-      const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const host = typeof window !== 'undefined' ? window.location.host : 'localhost:8000';
-      const wsUrl = `${protocol}//${host}/ws/monitor`;
+      // WebSocket URL 구성 (환경 변수 사용)
+      let wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws';
+
+      // 개발 환경에서 /monitor 경로 추가
+      if (!wsUrl.includes('/monitor')) {
+        wsUrl = wsUrl.endsWith('/') ? wsUrl + 'monitor' : wsUrl + '/monitor';
+      }
 
       console.log(`🔌 Monitor WebSocket 연결 중... (${wsUrl})`);
       wsRef.current = new WebSocket(wsUrl);
@@ -161,6 +165,7 @@ export function useRealtimeSync(options: UseRealtimeSyncOptions = {}): UseRealti
 
       wsRef.current.onopen = () => {
         console.log('✅ Monitor WebSocket 연결됨');
+        reconnectCountRef.current = 0; // 재연결 카운트 초기화
         setIsConnected(true);
         setIsConnecting(false);
 
@@ -193,12 +198,16 @@ export function useRealtimeSync(options: UseRealtimeSyncOptions = {}): UseRealti
         setIsConnected(false);
         setIsConnecting(false);
 
-        // 3초 후 자동 재연결
-        if (enabled) {
+        // 최대 5회까지만 자동 재연결 시도
+        if (enabled && reconnectCountRef.current < 5) {
+          reconnectCountRef.current += 1;
+          const delay = Math.min(3000 * reconnectCountRef.current, 30000); // 최대 30초
+          console.log(`🔄 Monitor WebSocket 재연결 시도... (${reconnectCountRef.current}/5, ${delay}ms 후)`);
           reconnectTimeoutRef.current = setTimeout(() => {
-            console.log('🔄 Monitor WebSocket 재연결 시도...');
             connect();
-          }, 3000);
+          }, delay);
+        } else if (enabled && reconnectCountRef.current >= 5) {
+          console.error('❌ WebSocket 재연결 최대 횟수 초과. 백엔드 서버를 확인하세요.');
         }
       };
     } catch (error) {
