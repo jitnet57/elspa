@@ -6329,3 +6329,59 @@ GET /api/network/stats
 예상: ~2,500 tokens (Claude Haiku)
 
 ---
+
+---
+## [2026-05-30 10:15] Order: 056 - Settlement Report API 클라이언트 구현 (Phase 2A)
+
+**주제:** 월정산 리포트 API 클라이언트 및 페이지 리팩토링
+
+### Plan
+✅ settlement-client.ts 파일 작성 (월정산, 회사별, 가이드별 조회 함수)
+✅ Store 확장 (fetchMonthlySettlements 메서드 추가)
+✅ settlement-report/page.tsx 리팩토링 (mock 제거, API 통합)
+✅ 로딩/에러 상태 UI 개선 (재시도 버튼 추가)
+✅ TypeScript 빌드 검증
+
+### Task 수행 내용
+
+#### 섹션 1: API 클라이언트 작성
+1. **settlement-client.ts** (e:\elspa\frontend\src\lib\api\settlement-client.ts)
+   - getMonthlySettlements(month): 월별 정산 조회 → /api/settlements/report?month=YYYY-MM
+   - getCompanySettlements(month): 회사별 정산 → /api/settlements/companies?month=YYYY-MM
+   - getGuideSettlements(month): 가이드별 정산 → /api/settlements/guides?month=YYYY-MM
+   - getSettlementReport(month): 통합 정산 리포트 → /api/settlements/report?month=YYYY-MM
+   - handleResponse() 에러 처리 유틸리티 함수
+
+#### 섹션 2: Store 확장
+1. **store.ts** - createMonthlySettlementSlice 수정
+   - fetchMonthlySettlements(month): async 메서드 추가
+   - 동적 임포트로 settlement-client 로드
+   - try-catch로 API 호출 및 상태 관리
+   - isLoading, error 상태 자동 관리
+
+#### 섹션 3: Page 리팩토링
+1. **settlement-report/page.tsx** 수정
+   - mock 데이터 함수 제거 (mockMonthlySettlements, mockCompanies 제거)
+   - getMonthlySettlements 임포트 제거 (store의 fetchMonthlySettlements 사용)
+   - useEffect 로직 단순화 (store 메서드 활용)
+   - 에러 배너에 재시도 버튼 추가
+   - 로딩 상태 스켈레톤 UI 유지
+
+### Result
+✅ **3개 파일 수정 완료**
+- settlement-client.ts: 4개 API 함수 작성
+- store.ts: fetchMonthlySettlements 메서드 추가
+- settlement-report/page.tsx: API 통합 리팩토링
+- npm run build: 성공 (0 에러)
+
+**주요 개선사항:**
+- payroll-client.ts 패턴 일관성 유지
+- Store 기반 상태 관리로 재사용성 향상
+- 에러 처리 및 사용자 경험 개선
+
+**빌드 결과:**
+✅ Compiled successfully in 37.4s
+✅ 66/66 페이지 생성 완료
+✅ /admin/settlement-report 포함 (정상 빌드)
+
+---
