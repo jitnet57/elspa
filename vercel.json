@@ -1,5 +1,33 @@
 {
   "$schema": "https://vercel.com/schemas/vercel.json",
   "version": 2,
-  "framework": "nextjs"
+  "env": {
+    "NEXT_PUBLIC_API_URL": "@next_public_api_url",
+    "NEXT_PUBLIC_WS_URL": "@next_public_ws_url"
+  },
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python",
+      "config": { "maxLambdaSize": "50mb" }
+    },
+    {
+      "src": "frontend",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/ws/(.*)",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend"
+    }
+  ]
 }
