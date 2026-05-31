@@ -8,10 +8,10 @@ build/
 .pytest_cache/
 .coverage
 
-# Environment
+# Environment (모든 .env 파일 무시, 단 예제 템플릿은 추적)
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
 # IDE
 .vscode/
