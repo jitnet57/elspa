@@ -8,7 +8,7 @@
 'use client';
 
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { getApiClient } from '@/lib/api/mock-adapter';
+import { getApiClient } from '@/lib/api/get-client';
 
 interface Therapist {
   id: number;

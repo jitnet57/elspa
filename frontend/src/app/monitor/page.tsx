@@ -1,150 +1,44 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import BedLayoutView from './components/BedLayoutView';
 import TherapistScheduleView from './components/TherapistScheduleView';
 import BookingModal from './components/BookingModal';
-import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 
 /**
  * ============================================================
  * 📌 페이지: Monitor
- * 📋 목적: 실시간 침대 상태, 테라피스트 스케줄, 예약 관리 통합 모니터
+ * 📋 목적: 침대 상태, 테라피스트 스케줄, 예약 관리 통합 모니터
  * 🎨 탭: Real-time Bed Mode, Therapist Daily Schedule, BOOKING WITH THERAPIST
- * 📅 작성일: 2026-05-28
+ * 📅 작성일: 2026-05-28 / 개정: 2026-05-31
  * ============================================================
  *
- * 기능:
- *   - WebSocket 실시간 동기화 (침대/예약/테라피스트)
- *   - 연결 상태 표시 (Green: connected, Red: disconnected)
- *   - 새 데이터 받으면 로컬 상태 업데이트
+ * 데이터 동기화:
+ *   - ❌ WebSocket/실시간 연결 제거 (백엔드 불필요)
+ *   - ✅ 5초 폴링으로 Supabase에서 직접 조회 (useGetBeds / useGetTherapists)
+ *   - ✅ 변경 즉시 Supabase 저장, 1시간 단위 Google Sheet 백업(Apps Script)
  */
 
 export default function MonitorPage() {
   const [activeTab, setActiveTab] = useState<'beds' | 'schedule' | 'booking'>('beds');
   const [showBookingModal, setShowBookingModal] = useState(false);
-  const [realtimeData, setRealtimeData] = useState<any>(null);
-  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'connecting'>('disconnected');
-
-  // ============================================================
-  // WebSocket 실시간 동기화 Hook
-  // ============================================================
-
-  const { isConnected, isConnecting } = useRealtimeSync({
-    onBedStatusChanged: (data) => {
-      console.log('🔄 침대 상태 변경 수신:', data);
-      setRealtimeData((prev: any) => ({
-        ...prev,
-        bedUpdate: {
-          type: 'bed_status_changed',
-          data,
-          timestamp: new Date().toISOString(),
-        },
-      }));
-    },
-    onBookingAdded: (data) => {
-      console.log('🔄 새 예약 수신:', data);
-      setRealtimeData((prev: any) => ({
-        ...prev,
-        bookingUpdate: {
-          type: 'booking_added',
-          data,
-          timestamp: new Date().toISOString(),
-        },
-      }));
-    },
-    onBookingCompleted: (data) => {
-      console.log('🔄 예약 완료 수신:', data);
-      setRealtimeData((prev: any) => ({
-        ...prev,
-        bookingUpdate: {
-          type: 'booking_completed',
-          data,
-          timestamp: new Date().toISOString(),
-        },
-      }));
-    },
-    onBookingCancelled: (data) => {
-      console.log('🔄 예약 취소 수신:', data);
-      setRealtimeData((prev: any) => ({
-        ...prev,
-        bookingUpdate: {
-          type: 'booking_cancelled',
-          data,
-          timestamp: new Date().toISOString(),
-        },
-      }));
-    },
-    onTherapistCheckin: (data) => {
-      console.log('🔄 테라피스트 체크인 수신:', data);
-      setRealtimeData((prev: any) => ({
-        ...prev,
-        therapistUpdate: {
-          type: 'therapist_checkin',
-          data,
-          timestamp: new Date().toISOString(),
-        },
-      }));
-    },
-    onTherapistCheckout: (data) => {
-      console.log('🔄 테라피스트 체크아웃 수신:', data);
-      setRealtimeData((prev: any) => ({
-        ...prev,
-        therapistUpdate: {
-          type: 'therapist_checkout',
-          data,
-          timestamp: new Date().toISOString(),
-        },
-      }));
-    },
-  });
-
-  // ============================================================
-  // 연결 상태 업데이트
-  // ============================================================
-
-  useEffect(() => {
-    if (isConnecting) {
-      setConnectionStatus('connecting');
-    } else if (isConnected) {
-      setConnectionStatus('connected');
-    } else {
-      setConnectionStatus('disconnected');
-    }
-  }, [isConnected, isConnecting]);
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex justify-between items-center">
-          {/* WebSocket 연결 상태 표시 */}
+          {/* 폴링 기반 상태 표시 (WebSocket 제거) */}
           <div className="flex items-center gap-2">
-            <div
-              className={`w-3 h-3 rounded-full animate-pulse ${
-                connectionStatus === 'connected'
-                  ? 'bg-green-500'
-                  : connectionStatus === 'connecting'
-                    ? 'bg-yellow-500'
-                    : 'bg-red-500'
-              }`}
-            />
-            <span className="text-sm font-medium text-gray-600">
-              {connectionStatus === 'connected'
-                ? '🟢 Connected'
-                : connectionStatus === 'connecting'
-                  ? '🟡 Connecting...'
-                  : '🔴 Disconnected'}
-            </span>
+            <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-sm font-medium text-gray-600">🟢 Live (5s polling)</span>
           </div>
 
           <div className="flex gap-4">
             <button
               onClick={() => setActiveTab('beds')}
               className={`px-6 py-2 rounded-lg font-bold transition whitespace-nowrap ${
-                activeTab === 'beds'
-                  ? 'bg-gray-200 text-gray-800'
-                  : 'text-gray-600 hover:text-gray-800'
+                activeTab === 'beds' ? 'bg-gray-200 text-gray-800' : 'text-gray-600 hover:text-gray-800'
               }`}
             >
               🛏️ Real-time Bed Mode
@@ -181,25 +75,14 @@ export default function MonitorPage() {
         </div>
       </div>
 
-      {/* Content */}
+      {/* Content (각 뷰는 자체 폴링으로 데이터 조회) */}
       <div className="flex-1 overflow-hidden bg-white">
-        {/* 실시간 데이터를 자식 컴포넌트로 전달 */}
-        {activeTab === 'beds' && <BedLayoutView realtimeData={realtimeData} />}
-        {activeTab === 'schedule' && <TherapistScheduleView realtimeData={realtimeData} />}
+        {activeTab === 'beds' && <BedLayoutView />}
+        {activeTab === 'schedule' && <TherapistScheduleView />}
       </div>
 
       {/* Booking Modal */}
-      {showBookingModal && (
-        <BookingModal onClose={() => setShowBookingModal(false)} />
-      )}
-
-      {/* Debug Info (개발 중 상태 확인용) */}
-      {process.env.NODE_ENV === 'development' && realtimeData && (
-        <div className="fixed bottom-4 right-4 bg-gray-800 text-white text-xs p-3 rounded-lg max-w-xs max-h-32 overflow-y-auto">
-          <p className="font-bold mb-1">📡 Realtime Update:</p>
-          <pre>{JSON.stringify(realtimeData, null, 2)}</pre>
-        </div>
-      )}
+      {showBookingModal && <BookingModal onClose={() => setShowBookingModal(false)} />}
     </div>
   );
 }
