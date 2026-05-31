@@ -1,16 +1,16 @@
 /**
- * 📌 Payroll API Client
- * 📋 목적: 급여 정산 API와 통신하는 HTTP 클라이언트 함수 모음
- * 🔧 포함: 직원, 현금선금, 출퇴근, 공휴일, 정산 기간, 정산 결과 API
- * 📅 작성일: 2026-05-22
+ * 📌 Payroll API Client — Supabase 직결 (백엔드 없음)
+ * 📋 기존 fetch(API_URL) 호출을 supabase-js로 교체. 함수 시그니처는 동일하게 유지하여
+ *    관리자 페이지(employees/attendance/cash-advance/holidays/records) 수정 불필요.
+ * 📅 작성일: 2026-05-22 / 개정: 2026-05-31 (Supabase 직결 + 계산 로직 프론트 이식)
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { getSupabase } from '@/lib/supabase/client';
+import { calculateEmployeePayroll, type CalcAttendance } from '@/lib/payroll/calc';
 
 // ============================================================
-// 타입 정의
+// 타입 정의 (변경 없음 — 기존 페이지 호환)
 // ============================================================
-
 export interface Employee {
   id: number;
   name: string;
@@ -103,374 +103,241 @@ export interface PayrollRecord {
 }
 
 // ============================================================
-// 에러 처리 유틸리티
+// 공통: Supabase 핸들 (미설정 시 명확한 에러)
 // ============================================================
-
-async function handleResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    const errorMessage =
-      errorData.error_message ||
-      errorData.detail ||
-      `API 요청 실패 (${response.status})`;
-    throw new Error(errorMessage);
-  }
-  return response.json();
+function sb() {
+  const client = getSupabase();
+  if (!client) throw new Error('Supabase 미설정 — NEXT_PUBLIC_SUPABASE_* 환경변수를 확인하세요.');
+  return client;
 }
+const sum = (rows: any[] | null, key: string) =>
+  (rows ?? []).reduce((s, r) => s + (Number(r[key]) || 0), 0);
 
 // ============================================================
-// Payroll Period API
+// Payroll Period
 // ============================================================
-
 export async function getPayrollPeriods(params?: {
-  skip?: number;
-  limit?: number;
-  pay_group?: string;
-  status?: string;
+  skip?: number; limit?: number; pay_group?: string; status?: string;
 }): Promise<PayrollPeriod[]> {
-  const searchParams = new URLSearchParams();
-  if (params?.skip) searchParams.append('skip', params.skip.toString());
-  if (params?.limit) searchParams.append('limit', params.limit.toString());
-  if (params?.pay_group) searchParams.append('pay_group', params.pay_group);
-  if (params?.status) searchParams.append('status', params.status);
-
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/periods?${searchParams.toString()}`,
-    { cache: 'no-store' }
-  );
-
-  return handleResponse<PayrollPeriod[]>(response);
+  let q = sb().from('payroll_periods').select('*').order('period_end', { ascending: false });
+  if (params?.pay_group) q = q.eq('pay_group', params.pay_group);
+  if (params?.status) q = q.eq('status', params.status);
+  const { data, error } = await q;
+  if (error) throw error;
+  return (data ?? []) as PayrollPeriod[];
 }
 
 export async function getPayrollPeriod(id: number): Promise<PayrollPeriod> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/periods/${id}`,
-    { cache: 'no-store' }
-  );
-
-  return handleResponse<PayrollPeriod>(response);
+  const { data, error } = await sb().from('payroll_periods').select('*').eq('id', id).single();
+  if (error) throw error;
+  return data as PayrollPeriod;
 }
 
-export async function calculatePayroll(periodId: number): Promise<any> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/periods/${periodId}/calculate`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      cache: 'no-store',
-    }
-  );
+/**
+ * 정산 계산 — 프론트에서 계산 후 payroll_records에 저장 (백엔드 calculate 대체)
+ */
+export async function calculatePayroll(periodId: number): Promise<{ records: PayrollRecord[] }> {
+  const s = sb();
+  const period = await getPayrollPeriod(periodId);
 
-  return handleResponse(response);
+  const { data: employees, error: empErr } = await s
+    .from('employees').select('*').eq('pay_group', period.pay_group).eq('is_active', true);
+  if (empErr) throw empErr;
+
+  const records: PayrollRecord[] = [];
+
+  for (const emp of (employees ?? []) as Employee[]) {
+    // 근태
+    const { data: att } = await s.from('attendance_logs').select('*')
+      .eq('employee_id', emp.id)
+      .gte('work_date', period.period_start)
+      .lte('work_date', period.period_end);
+
+    // 승인 CA 합계
+    const { data: ca } = await s.from('cash_advances').select('amount')
+      .eq('employee_id', emp.id).eq('status', 'approved');
+
+    // 이전 13개월 누적 차감
+    const { data: prev } = await s.from('payroll_records').select('thirteenth_month_deduction')
+      .eq('employee_id', emp.id).eq('is_obsolete', false).neq('status', 'draft');
+
+    // 커미션 (therapist/nail): 기간 내 예약 pay 합계 (이름 매칭, 근사)
+    let commissionAmount = 0;
+    if (emp.employee_type === 'therapist' || (emp.employee_type as string) === 'nail') {
+      const { data: bk } = await s.from('bookings').select('pay')
+        .eq('therapist_name', emp.name)
+        .gte('booking_date', period.period_start)
+        .lte('booking_date', period.period_end)
+        .neq('status', 'deleted');
+      commissionAmount = sum(bk, 'pay');
+    }
+
+    const computed = calculateEmployeePayroll(
+      { id: emp.id, name: emp.name, employee_type: emp.employee_type, base_salary: emp.base_salary, hire_date: emp.hire_date },
+      (att ?? []) as CalcAttendance[],
+      {
+        periodStart: period.period_start,
+        periodEnd: period.period_end,
+        commissionAmount,
+        approvedCaAmount: sum(ca, 'amount'),
+        previousThirteenthDeductions: sum(prev, 'thirteenth_month_deduction'),
+      }
+    );
+
+    // 기존 (period, employee) 레코드 정리 후 삽입 (중복 방지)
+    await s.from('payroll_records').delete().eq('payroll_period_id', periodId).eq('employee_id', emp.id);
+    const { data: inserted, error: insErr } = await s.from('payroll_records').insert({
+      payroll_period_id: periodId,
+      employee_id: emp.id,
+      ...computed,
+      status: 'draft',
+    }).select().single();
+    if (insErr) throw insErr;
+    records.push({ ...(inserted as PayrollRecord), employee_name: emp.name });
+  }
+
+  return { records };
 }
 
 export async function approvePeriod(periodId: number): Promise<PayrollPeriod> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/periods/${periodId}/approve`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      cache: 'no-store',
-    }
-  );
-
-  return handleResponse<PayrollPeriod>(response);
+  const s = sb();
+  await s.from('payroll_records').update({ status: 'approved' }).eq('payroll_period_id', periodId);
+  const { data, error } = await s.from('payroll_periods').update({ status: 'approved' }).eq('id', periodId).select().single();
+  if (error) throw error;
+  return data as PayrollPeriod;
 }
 
 // ============================================================
-// Employee API
+// Employee
 // ============================================================
-
-export async function getEmployees(params?: {
-  skip?: number;
-  limit?: number;
-  employee_type?: string;
-}): Promise<Employee[]> {
-  const searchParams = new URLSearchParams();
-  if (params?.skip) searchParams.append('skip', params.skip.toString());
-  if (params?.limit) searchParams.append('limit', params.limit.toString());
-  if (params?.employee_type) searchParams.append('employee_type', params.employee_type);
-
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/employees?${searchParams.toString()}`,
-    { cache: 'no-store' }
-  );
-
-  return handleResponse<Employee[]>(response);
+export async function getEmployees(params?: { skip?: number; limit?: number; employee_type?: string }): Promise<Employee[]> {
+  let q = sb().from('employees').select('*').order('id', { ascending: true });
+  if (params?.employee_type) q = q.eq('employee_type', params.employee_type);
+  const { data, error } = await q;
+  if (error) throw error;
+  return (data ?? []) as Employee[];
 }
 
 export async function getEmployee(id: number): Promise<Employee> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/employees/${id}`,
-    { cache: 'no-store' }
-  );
-
-  return handleResponse<Employee>(response);
+  const { data, error } = await sb().from('employees').select('*').eq('id', id).single();
+  if (error) throw error;
+  return data as Employee;
 }
 
 export async function createEmployee(data: Partial<Employee>): Promise<Employee> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/employees`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-      cache: 'no-store',
-    }
-  );
-
-  return handleResponse<Employee>(response);
+  const { data: row, error } = await sb().from('employees').insert(data).select().single();
+  if (error) throw error;
+  return row as Employee;
 }
 
 export async function updateEmployee(id: number, data: Partial<Employee>): Promise<Employee> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/employees/${id}`,
-    {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-      cache: 'no-store',
-    }
-  );
-
-  return handleResponse<Employee>(response);
+  const { data: row, error } = await sb().from('employees').update(data).eq('id', id).select().single();
+  if (error) throw error;
+  return row as Employee;
 }
 
 export async function deleteEmployee(id: number): Promise<void> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/employees/${id}`,
-    {
-      method: 'DELETE',
-      cache: 'no-store',
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error('직원 삭제 실패');
-  }
+  const { error } = await sb().from('employees').delete().eq('id', id);
+  if (error) throw new Error('직원 삭제 실패');
 }
 
 // ============================================================
-// Cash Advance API
+// Cash Advance
 // ============================================================
-
-export async function getCashAdvances(params?: {
-  skip?: number;
-  limit?: number;
-  status?: string;
-}): Promise<CashAdvance[]> {
-  const searchParams = new URLSearchParams();
-  if (params?.skip) searchParams.append('skip', params.skip.toString());
-  if (params?.limit) searchParams.append('limit', params.limit.toString());
-  if (params?.status) searchParams.append('status', params.status);
-
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/cash-advance?${searchParams.toString()}`,
-    { cache: 'no-store' }
-  );
-
-  return handleResponse<CashAdvance[]>(response);
+export async function getCashAdvances(params?: { skip?: number; limit?: number; status?: string }): Promise<CashAdvance[]> {
+  let q = sb().from('cash_advances').select('*').order('request_date', { ascending: false });
+  if (params?.status) q = q.eq('status', params.status);
+  const { data, error } = await q;
+  if (error) throw error;
+  return (data ?? []) as CashAdvance[];
 }
 
 export async function createCashAdvance(data: Partial<CashAdvance>): Promise<CashAdvance> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/cash-advance`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-      cache: 'no-store',
-    }
-  );
-
-  return handleResponse<CashAdvance>(response);
+  const { data: row, error } = await sb().from('cash_advances').insert(data).select().single();
+  if (error) throw error;
+  return row as CashAdvance;
 }
 
-export async function updateCashAdvanceStatus(
-  id: number,
-  status: string
-): Promise<CashAdvance> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/cash-advance/${id}`,
-    {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status }),
-      cache: 'no-store',
-    }
-  );
-
-  return handleResponse<CashAdvance>(response);
+export async function updateCashAdvanceStatus(id: number, status: string): Promise<CashAdvance> {
+  const { data: row, error } = await sb().from('cash_advances').update({ status }).eq('id', id).select().single();
+  if (error) throw error;
+  return row as CashAdvance;
 }
 
 // ============================================================
-// Attendance API
+// Attendance
 // ============================================================
-
-export async function getAttendance(params?: {
-  skip?: number;
-  limit?: number;
-  work_date?: string;
-  employee_id?: number;
-}): Promise<AttendanceLog[]> {
-  const searchParams = new URLSearchParams();
-  if (params?.skip) searchParams.append('skip', params.skip.toString());
-  if (params?.limit) searchParams.append('limit', params.limit.toString());
-  if (params?.work_date) searchParams.append('work_date', params.work_date);
-  if (params?.employee_id) searchParams.append('employee_id', params.employee_id.toString());
-
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/attendance?${searchParams.toString()}`,
-    { cache: 'no-store' }
-  );
-
-  return handleResponse<AttendanceLog[]>(response);
+export async function getAttendance(params?: { skip?: number; limit?: number; work_date?: string; employee_id?: number }): Promise<AttendanceLog[]> {
+  let q = sb().from('attendance_logs').select('*').order('work_date', { ascending: false });
+  if (params?.work_date) q = q.eq('work_date', params.work_date);
+  if (params?.employee_id) q = q.eq('employee_id', params.employee_id);
+  const { data, error } = await q;
+  if (error) throw error;
+  return (data ?? []) as AttendanceLog[];
 }
 
 export async function createAttendance(data: Partial<AttendanceLog>): Promise<AttendanceLog> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/attendance`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-      cache: 'no-store',
-    }
-  );
-
-  return handleResponse<AttendanceLog>(response);
+  const { data: row, error } = await sb().from('attendance_logs').insert(data).select().single();
+  if (error) throw error;
+  return row as AttendanceLog;
 }
 
-export async function updateAttendance(
-  id: number,
-  data: Partial<AttendanceLog>
-): Promise<AttendanceLog> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/attendance/${id}`,
-    {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-      cache: 'no-store',
-    }
-  );
-
-  return handleResponse<AttendanceLog>(response);
+export async function updateAttendance(id: number, data: Partial<AttendanceLog>): Promise<AttendanceLog> {
+  const { data: row, error } = await sb().from('attendance_logs').update(data).eq('id', id).select().single();
+  if (error) throw error;
+  return row as AttendanceLog;
 }
 
 export async function deleteAttendance(id: number): Promise<void> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/attendance/${id}`,
-    {
-      method: 'DELETE',
-      cache: 'no-store',
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error('출퇴근 기록 삭제 실패');
-  }
+  const { error } = await sb().from('attendance_logs').delete().eq('id', id);
+  if (error) throw new Error('출퇴근 기록 삭제 실패');
 }
 
 // ============================================================
-// Holiday API
+// Holiday
 // ============================================================
-
-export async function getHolidays(params?: {
-  skip?: number;
-  limit?: number;
-  holiday_type?: string;
-}): Promise<PhilippineHoliday[]> {
-  const searchParams = new URLSearchParams();
-  if (params?.skip) searchParams.append('skip', params.skip.toString());
-  if (params?.limit) searchParams.append('limit', params.limit.toString());
-  if (params?.holiday_type) searchParams.append('holiday_type', params.holiday_type);
-
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/holidays?${searchParams.toString()}`,
-    { cache: 'no-store' }
-  );
-
-  return handleResponse<PhilippineHoliday[]>(response);
+export async function getHolidays(params?: { skip?: number; limit?: number; holiday_type?: string }): Promise<PhilippineHoliday[]> {
+  let q = sb().from('philippine_holidays').select('*').order('holiday_date', { ascending: true });
+  if (params?.holiday_type) q = q.eq('holiday_type', params.holiday_type);
+  const { data, error } = await q;
+  if (error) throw error;
+  return (data ?? []) as PhilippineHoliday[];
 }
 
 export async function createHoliday(data: Partial<PhilippineHoliday>): Promise<PhilippineHoliday> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/holidays`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-      cache: 'no-store',
-    }
-  );
-
-  return handleResponse<PhilippineHoliday>(response);
+  const { data: row, error } = await sb().from('philippine_holidays').insert(data).select().single();
+  if (error) throw error;
+  return row as PhilippineHoliday;
 }
 
-export async function updateHoliday(
-  id: number,
-  data: Partial<PhilippineHoliday>
-): Promise<PhilippineHoliday> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/holidays/${id}`,
-    {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-      cache: 'no-store',
-    }
-  );
-
-  return handleResponse<PhilippineHoliday>(response);
+export async function updateHoliday(id: number, data: Partial<PhilippineHoliday>): Promise<PhilippineHoliday> {
+  const { data: row, error } = await sb().from('philippine_holidays').update(data).eq('id', id).select().single();
+  if (error) throw error;
+  return row as PhilippineHoliday;
 }
 
 export async function deleteHoliday(id: number): Promise<void> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/holidays/${id}`,
-    {
-      method: 'DELETE',
-      cache: 'no-store',
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error('공휴일 삭제 실패');
-  }
+  const { error } = await sb().from('philippine_holidays').delete().eq('id', id);
+  if (error) throw new Error('공휴일 삭제 실패');
 }
 
 // ============================================================
-// Payroll Record API (조회 전용)
+// Payroll Record (조회)
 // ============================================================
-
 export async function getPayrollRecords(params?: {
-  skip?: number;
-  limit?: number;
-  payroll_period_id?: number;
-  employee_id?: number;
-  status?: string;
+  skip?: number; limit?: number; payroll_period_id?: number; employee_id?: number; status?: string;
 }): Promise<PayrollRecord[]> {
-  const searchParams = new URLSearchParams();
-  if (params?.skip) searchParams.append('skip', params.skip.toString());
-  if (params?.limit) searchParams.append('limit', params.limit.toString());
-  if (params?.payroll_period_id)
-    searchParams.append('payroll_period_id', params.payroll_period_id.toString());
-  if (params?.employee_id) searchParams.append('employee_id', params.employee_id.toString());
-  if (params?.status) searchParams.append('status', params.status);
-
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/records?${searchParams.toString()}`,
-    { cache: 'no-store' }
-  );
-
-  return handleResponse<PayrollRecord[]>(response);
+  let q = sb().from('payroll_records').select('*').eq('is_obsolete', false).order('id', { ascending: true });
+  if (params?.payroll_period_id) q = q.eq('payroll_period_id', params.payroll_period_id);
+  if (params?.employee_id) q = q.eq('employee_id', params.employee_id);
+  if (params?.status) q = q.eq('status', params.status);
+  const { data, error } = await q;
+  if (error) throw error;
+  return (data ?? []) as PayrollRecord[];
 }
 
 export async function getPayrollRecord(id: number): Promise<PayrollRecord> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/payroll/records/${id}`,
-    { cache: 'no-store' }
-  );
-
-  return handleResponse<PayrollRecord>(response);
+  const { data, error } = await sb().from('payroll_records').select('*').eq('id', id).single();
+  if (error) throw error;
+  return data as PayrollRecord;
 }
