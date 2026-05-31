@@ -24,7 +24,7 @@
  *    - 온라인 복귀 시 대기 중인 요청 재전송
  */
 
-const CACHE_PREFIX = "elspa-v1";
+const CACHE_PREFIX = "elspa-v2";
 const STATIC_CACHE = `${CACHE_PREFIX}-static`;
 const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic`;
 const API_CACHE = `${CACHE_PREFIX}-api`;
