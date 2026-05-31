@@ -24,8 +24,8 @@
 **Supabase 정보**:
 ```
 Project URL: https://xmdjtkvauhngofsckrwa.supabase.co
-Publishable Key: sb_publishable_5Nny2FZKFX7kSk81FPiqOg_1fUckbhT
-Secret Key: sb_secret_uilSbI4hNLZSIMCAO6wy1Q_JWShtkeN
+Publishable Key: <SUPABASE_PUBLISHABLE_KEY>  # ⚠️ 마스킹됨 (재발급 필요)
+Secret Key: <SUPABASE_SECRET_KEY>  # ⚠️ 마스킹됨 (재발급 필요)
 JWT (anon): eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 JWT (service_role): eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```

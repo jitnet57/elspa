@@ -32,7 +32,7 @@
 5. Root Directory: api
 6. 환경변수 추가:
    - GOOGLE_CLIENT_ID=104694066545-vtgespl9ho6b4gmcolgdrpuloankttgq.apps.googleusercontent.com
-   - GOOGLE_CLIENT_SECRET=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
+   - GOOGLE_CLIENT_SECRET=<GOOGLE_CLIENT_SECRET>  # ⚠️ 실제 값은 .env에만 보관 (재발급 필요)
    - GOOGLE_SHEET_ID=1-WRjYvp33RQ3vJBSJ7RIW1g6P5pZjKqy_vPeVtA7mf8
    - SUPABASE_URL=https://qnqhqrpvqjhqarbufzqd.supabase.co
    - SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
