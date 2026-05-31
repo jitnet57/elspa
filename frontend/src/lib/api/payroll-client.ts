@@ -153,13 +153,37 @@ export async function calculatePayroll(periodId: number): Promise<{ records: Pay
       .gte('work_date', period.period_start)
       .lte('work_date', period.period_end);
 
-    // 승인 CA 합계
-    const { data: ca } = await s.from('cash_advances').select('amount')
-      .eq('employee_id', emp.id).eq('status', 'approved');
+    // 승인 CA 합계 — 미정산(settled_payroll_id IS NULL)만 합산하여 이중차감 방지
+    const { data: ca } = await s.from('cash_advances').select('id, amount')
+      .eq('employee_id', emp.id).eq('status', 'approved').is('settled_payroll_id', null);
 
     // 이전 13개월 누적 차감
     const { data: prev } = await s.from('payroll_records').select('thirteenth_month_deduction')
       .eq('employee_id', emp.id).eq('is_obsolete', false).neq('status', 'draft');
+
+    // SSS 직원부담금 — base_salary가 속하는 구간의 employee_share (구간 없으면 0)
+    const { data: sssBracket } = await s.from('sss_brackets').select('employee_share')
+      .lte('salary_from', emp.base_salary)
+      .gte('salary_to', emp.base_salary)
+      .limit(1)
+      .maybeSingle();
+    const sssDeduction = Number(sssBracket?.employee_share) || 0;
+
+    // 보건검진 실비 원장 — 정산기간 내 check_date 합계 (있으면 override)
+    const { data: healthLogs } = await s.from('health_check_logs').select('amount')
+      .eq('employee_id', emp.id)
+      .gte('check_date', period.period_start)
+      .lte('check_date', period.period_end);
+    const healthCheckOverride = (healthLogs && healthLogs.length > 0)
+      ? sum(healthLogs, 'amount')
+      : undefined;
+
+    // 13개월 선지급 — 정산기간 내 pay_date 합계
+    const { data: thAdv } = await s.from('thirteenth_month_advances').select('amount')
+      .eq('employee_id', emp.id)
+      .gte('pay_date', period.period_start)
+      .lte('pay_date', period.period_end);
+    const thirteenthAdvances = sum(thAdv, 'amount');
 
     // 커미션 (therapist/nail): 기간 내 예약 pay 합계 (이름 매칭, 근사)
     let commissionAmount = 0;
@@ -181,6 +205,9 @@ export async function calculatePayroll(periodId: number): Promise<{ records: Pay
         commissionAmount,
         approvedCaAmount: sum(ca, 'amount'),
         previousThirteenthDeductions: sum(prev, 'thirteenth_month_deduction'),
+        sssDeduction,
+        healthCheckOverride,
+        thirteenthAdvances,
       }
     );
 
@@ -193,7 +220,16 @@ export async function calculatePayroll(periodId: number): Promise<{ records: Pay
       status: 'draft',
     }).select().single();
     if (insErr) throw insErr;
-    records.push({ ...(inserted as PayrollRecord), employee_name: emp.name });
+    const insertedRecord = inserted as PayrollRecord;
+    records.push({ ...insertedRecord, employee_name: emp.name });
+
+    // 정산 후 CA settled 처리 — 이번에 차감한 미정산 CA들을 settled로 마킹 (이중차감 방지)
+    const caIds = ((ca ?? []) as { id: number }[]).map((c) => c.id);
+    if (caIds.length > 0) {
+      await s.from('cash_advances')
+        .update({ status: 'settled', settled_payroll_id: insertedRecord.id })
+        .in('id', caIds);
+    }
   }
 
   return { records };

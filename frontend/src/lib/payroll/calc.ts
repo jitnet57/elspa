@@ -36,6 +36,9 @@ export interface CalcContext {
   commissionAmount?: number;     // Therapist/Nail: 예약 기반 커미션 (외부 계산값)
   approvedCaAmount?: number;     // 승인된 CA 합계
   previousThirteenthDeductions?: number; // 이전 정산 13개월 누적 차감
+  sssDeduction?: number;         // SSS 직원부담금 (sss_brackets 구간 조회값, 미전달 시 0)
+  healthCheckOverride?: number;  // 보건검진 실비 원장 합계 (number면 규칙계산 대신 이 값 사용)
+  thirteenthAdvances?: number;   // 13개월 선지급 누계 (적립액에서 추가 차감)
 }
 
 export interface PayrollComputed {
@@ -147,15 +150,21 @@ export function calculateEmployeePayroll(
     if (daysWorked < 13) absence = absenceDeduction(base, 15 - daysWorked);
   }
 
-  const sss = 0;
+  // SSS 직원부담금 — sss_brackets 구간 조회값 (미전달 시 0)
+  const sss = ctx.sssDeduction ?? 0;
   const ca = ctx.approvedCaAmount ?? 0;
 
-  // 13개월
+  // 13개월: 적립액에서 이전 차감분 + 선지급 누계를 함께 차감
   const accrual = thirteenthMonthAccrual(base, employee.hire_date, ctx.periodEnd);
-  const thirteenthDeduction = Math.max(0, accrual - (ctx.previousThirteenthDeductions ?? 0));
+  const thirteenthDeduction = Math.max(
+    0,
+    accrual - (ctx.previousThirteenthDeductions ?? 0) - (ctx.thirteenthAdvances ?? 0)
+  );
 
-  // 보건소
-  const health = healthCheckDeduction(type, ctx.periodEnd);
+  // 보건소: 실비 원장(healthCheckOverride)이 number면 그 값, 아니면 규칙계산
+  const health = typeof ctx.healthCheckOverride === 'number'
+    ? ctx.healthCheckOverride
+    : healthCheckDeduction(type, ctx.periodEnd);
 
   const totalDeductions = late + absence + sss + ca + thirteenthDeduction + health;
   const net = Math.max(gross - totalDeductions, 0);
