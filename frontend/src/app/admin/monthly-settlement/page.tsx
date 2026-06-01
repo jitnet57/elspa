@@ -302,6 +302,27 @@ export default function MonthlySettlementPage() {
                 📥 Export CSV
               </button>
             </div>
+            <div className="flex items-end">
+              <button
+                onClick={async () => {
+                  try {
+                    const { applyReferralSettlements } = await import('@/lib/api/referral-settlement');
+                    const { count, aggs } = await applyReferralSettlements(selectedMonth);
+                    if (count === 0) {
+                      alert('이 달 예약에 업체/가이드 레퍼럴(노트)이 없습니다.\n예약창의 업체명(노트)에서 업체·가이드를 선택하면 자동 집계됩니다.');
+                    } else {
+                      alert(`✅ 레퍼럴 ${count}건을 월정산에 반영했습니다.\n` + aggs.map((a: any) => `· ${a.guide?.name ?? a.company.name}: 매출 ₱${a.revenue} → 수수료 ₱${a.commission_amount}`).join('\n'));
+                      location.reload();
+                    }
+                  } catch (e) {
+                    alert(e instanceof Error ? e.message : '반영 실패');
+                  }
+                }}
+                className="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors whitespace-nowrap"
+              >
+                🔄 예약→월정산 반영
+              </button>
+            </div>
           </div>
 
           <div className="text-sm text-gray-600">
