@@ -2,7 +2,7 @@
 // 오프라인 지원 및 캐싱 전략
 // 배포할 때마다 버전을 올려서 캐시를 무효화합니다
 
-const CACHE_VERSION = '20260601-v6'; // YYYYMMDD-X 형식 (배포할 때마다 증가) — v6: 테라피스트 타임라인 + 30행 예약표
+const CACHE_VERSION = '20260601-v7'; // YYYYMMDD-X 형식 (배포할 때마다 증가) — v7: 테라피스트 스케줄/예약 DB(Supabase)+구글시트 연동
 const CACHE_NAME = `elspa-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
