@@ -6421,3 +6421,48 @@ GET /api/network/stats
 - npm run build: 성공 (67/67 페이지, 0 에러) ✓
 
 ---
+
+---
+## [2026-06-01 14:50] Order: 062 - 빌드 & Cloudflare Pages 배포 (CI 정상화)
+
+**주제:** Order 061 작업분 프로덕션 배포 + 깨진 CI/배포 파이프라인 정상화
+
+### Plan
+✅ 프론트 프로덕션 빌드 검증
+✅ main 푸시 → 배포 트리거
+✅ 배포 실패 원인 추적 및 수정
+✅ 프로덕션 사이트 라이브 검증
+
+### Task 수행 내용
+
+#### 섹션 1: 배포 차단 이슈 해결 (3중 블로커)
+1. **npm ci 락파일 드리프트** — package-lock.json 에 @emnapi/core·runtime optional 노드 누락
+   → node_modules+lock 완전 재설치로 노드 포함, 모든 워크플로우 install 을 `npm ci || npm install` 폴백 처리
+2. **워크플로우 구조 불일치** — deploy-cloudflare.yml 이 옛 프론트+백엔드 구조
+   → 백엔드(Python/Railway) 단계 제거, 빌드+배포 단일 잡, 배포 디렉터리 frontend/.next → frontend/out (output:export)
+   → deploy-production.yml 자동 트리거 제거(수동 전용), 빈 deploy.yml 삭제
+3. **GitHub Action 시크릿 부재** — CLOUDFLARE_* 시크릿 0개 → apiToken 오류
+
+#### 섹션 2: 실제 배포 경로 확인
+1. **Cloudflare Pages Git 연동(elspa 프로젝트)** 이 main 푸시마다 자체 빌드·배포 중이었음 (GitHub Action 과 별개)
+2. 모든 커밋(4cd243d/41b4fc8/67882b8)이 elspa.pages.dev 에 자동 배포 확인
+3. package.json deploy 스크립트 프로젝트명 수정 (elspa-frontend → elspa)
+4. deploy-cloudflare.yml 을 수동 전용으로 전환 (실제 배포는 Cloudflare Git 연동 담당)
+
+### Result
+✅ **프로덕션 배포 완료 & 검증**
+- https://elspa.pages.dev → HTTP 200
+- /admin/deductions → 200, 공제·선지급·SSS·13개월 내용 반영 확인
+- 최신 커밋 67882b8 Production/main 배포 (7분 전)
+- 빌드: 67/67 페이지, 0 에러
+
+**주요 파일:**
+- frontend/package-lock.json (재생성), package.json (deploy 스크립트)
+- .github/workflows/deploy-cloudflare.yml, deploy-production.yml, e2e-tests.yml, pr-check.yml
+- deploy.yml 삭제
+
+**남은 권고:**
+- 노출된 PAT(ghp_NE0m…) 재발급 필요
+- e2e-tests.yml 은 별도 점검 필요(테스트 실행 단계)
+
+---
