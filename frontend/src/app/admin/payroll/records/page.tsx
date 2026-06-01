@@ -28,12 +28,15 @@ const TYPE_ORDER: EmpType[] = ['manager', 'therapist', 'driver', 'nail', 'hollys
 
 // 정산기간마다 달라지는 입력값(원천) — payroll_records.notes(JSON)에 저장
 interface Raw {
-  days_worked: number; overtime_minutes: number; national_days: number; special_days: number; late_minutes: number;
+  days_worked: number; overtime_minutes: number;
+  national_ot_min: number; special_ot_min: number; // 공휴일 야근(분) — 공휴일 시급 적용
+  national_days: number; special_days: number; late_minutes: number;
   commission: number; driving_allowance: number; meal_allowance: number;
   sss: number; cash_advance: number; health_check: number; thirteenth: number; absence: number;
 }
 const emptyRaw = (): Raw => ({
-  days_worked: 0, overtime_minutes: 0, national_days: 0, special_days: 0, late_minutes: 0,
+  days_worked: 0, overtime_minutes: 0, national_ot_min: 0, special_ot_min: 0,
+  national_days: 0, special_days: 0, late_minutes: 0,
   commission: 0, driving_allowance: 0, meal_allowance: 0,
   sss: 0, cash_advance: 0, health_check: 0, thirteenth: 0, absence: 0,
 });
@@ -55,7 +58,12 @@ function computeRow(r: Row, s: PayrollSettings) {
   const commission = r.type === 'therapist' ? r.commission : 0;
   const driving = r.type === 'driver' ? r.driving_allowance : 0;
   const meal = r.meal_allowance;
-  const overtime = r.overtime_minutes >= s.overtimeMinThreshold ? Math.round((r.overtime_minutes / 60) * s.overtimeHourlyRate) : 0;
+  // 평일 야근 (40분 임계) + 공휴일 야근(공휴일 시급 적용)
+  const normalOt = r.overtime_minutes >= s.overtimeMinThreshold ? Math.round((r.overtime_minutes / 60) * s.overtimeHourlyRate) : 0;
+  const natOt = Math.round((r.national_ot_min / 60) * s.nationalHolidayOtRate);
+  const specOt = Math.round((r.special_ot_min / 60) * s.specialHolidayOtRate);
+  const overtime = normalOt + natOt + specOt;
+  // 공휴일 (일) 가산 — 일급 기준
   const holiday = Math.round(daily * (s.nationalHolidayMultiplier - 1) * r.national_days + daily * (s.specialHolidayMultiplier - 1) * r.special_days);
   const gross = base + commission + driving + meal + overtime + holiday;
   const lateDed = Math.max(0, r.late_minutes - s.lateGraceMinutes) * s.latePerMinute;
@@ -136,7 +144,9 @@ export default function PayrollSettlementPage() {
     setRows((prev) => prev.map((r) => (r.emp.id === row.emp.id ? { ...r, saving: true } : r)));
     const c = computeRow(row, settings);
     const raw: Raw = {
-      days_worked: row.days_worked, overtime_minutes: row.overtime_minutes, national_days: row.national_days,
+      days_worked: row.days_worked, overtime_minutes: row.overtime_minutes,
+      national_ot_min: row.national_ot_min, special_ot_min: row.special_ot_min,
+      national_days: row.national_days,
       special_days: row.special_days, late_minutes: row.late_minutes, commission: row.commission,
       driving_allowance: row.driving_allowance, meal_allowance: row.meal_allowance, sss: row.sss,
       cash_advance: row.cash_advance, health_check: row.health_check, thirteenth: row.thirteenth, absence: row.absence,
@@ -190,7 +200,8 @@ export default function PayrollSettlementPage() {
           <p className="font-bold mb-1">🧮 급여 규칙 (격주 {FULL_DAYS}근무일 · 단가는 설정값)</p>
           <ul className="list-disc pl-5 space-y-0.5 text-indigo-800">
             <li>테라피스트=수수료 / 매니저=만근 전액 / 다른직원=개별 일급×출근일 (드라이버 +운행수당 +식비 {peso(200)}/2주)</li>
-            <li>야근 {settings.overtimeMinThreshold}분↑ 1h당 {peso(settings.overtimeHourlyRate)} · 공휴일 국가 {Math.round(settings.nationalHolidayMultiplier*100)}%/특별 {Math.round(settings.specialHolidayMultiplier*100)}%</li>
+            <li>평일야근 {settings.overtimeMinThreshold}분↑ 1h당 {peso(settings.overtimeHourlyRate)} · <b>공휴일 야근</b> 국가 {peso(settings.nationalHolidayOtRate)}/h·특별 {peso(settings.specialHolidayOtRate)}/h</li>
+            <li>공휴일(일) 가산 국가 {Math.round(settings.nationalHolidayMultiplier*100)}%/특별 {Math.round(settings.specialHolidayMultiplier*100)}% (일급 기준)</li>
             <li>지각 {settings.lateGraceMinutes}분 유예 후 1분당 {peso(settings.latePerMinute)} · SSS 선지급(인보이스·전액회수)</li>
           </ul>
         </div>
@@ -295,7 +306,9 @@ function DetailModal({ row, s, onClose, onChange, onSave }: {
             {row.type === 'therapist' && field('수수료(정해진 금액)', row.commission, (v) => onChange(id, { commission: v }))}
             {row.type === 'driver' && field('운행수당', row.driving_allowance, (v) => onChange(id, { driving_allowance: v }))}
             {field('식비', row.meal_allowance, (v) => onChange(id, { meal_allowance: v }))}
-            {field('야근(분)', row.overtime_minutes, (v) => onChange(id, { overtime_minutes: v }))}
+            {field('평일 야근(분)', row.overtime_minutes, (v) => onChange(id, { overtime_minutes: v }))}
+            {field('국가공휴일 야근(분)', row.national_ot_min, (v) => onChange(id, { national_ot_min: v }))}
+            {field('특별공휴일 야근(분)', row.special_ot_min, (v) => onChange(id, { special_ot_min: v }))}
             {field('국가공휴일(일)', row.national_days, (v) => onChange(id, { national_days: v }))}
             {field('특별공휴일(일)', row.special_days, (v) => onChange(id, { special_days: v }))}
             <div className="flex justify-between font-bold border-t border-green-200 pt-2 mt-1"><span>총 지급</span><span className="text-green-700">{peso(c.gross)}</span></div>

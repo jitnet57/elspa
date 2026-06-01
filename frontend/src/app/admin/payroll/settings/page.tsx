@@ -93,6 +93,20 @@ export default function PayrollSettingsPage() {
           onChange={(v) => update({ overtimeMinThreshold: v })}
         />
         <Field
+          label="🇵🇭 국가공휴일 야근 시급"
+          desc="국가 공휴일에 한 야근의 시급 (= 국가공휴일 야근시간 × 이 시급)"
+          value={s.nationalHolidayOtRate}
+          suffix="₱ / 시간"
+          onChange={(v) => update({ nationalHolidayOtRate: v })}
+        />
+        <Field
+          label="🎌 특별공휴일 야근 시급"
+          desc="특별 공휴일에 한 야근의 시급 (= 특별공휴일 야근시간 × 이 시급)"
+          value={s.specialHolidayOtRate}
+          suffix="₱ / 시간"
+          onChange={(v) => update({ specialHolidayOtRate: v })}
+        />
+        <Field
           label="⏰ 지각 유예 (분)"
           desc="이 분까지는 지각 차감 없음 (유예 초과분부터 차감)"
           value={s.lateGraceMinutes}

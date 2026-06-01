@@ -2,7 +2,7 @@
 // 오프라인 지원 및 캐싱 전략
 // 배포할 때마다 버전을 올려서 캐시를 무효화합니다
 
-const CACHE_VERSION = '20260602-v27'; // v27: 급여정산 DB 연동(employees/payroll_records)
+const CACHE_VERSION = '20260602-v28'; // v28: 공휴일 야근 시급(국가/특별) 설정+계산
 const CACHE_NAME = `elspa-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
