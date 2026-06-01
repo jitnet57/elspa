@@ -1,67 +1,52 @@
 'use client';
 
-import { useState } from 'react';
-import { useStore } from '@/lib/store/store';
-import { Company } from '@/lib/store/types';
-
-const mockCompanies: Company[] = [
-  {
-    id: 1,
-    name: 'ABC여행사',
-    representative: '김철수',
-    phone: '02-1234-5678',
-    address: '서울시 강남구 테헤란로 123',
-    settlement_day: 20,
-    commission_rate: 30,
-    status: 'active',
-    created_at: '2026-01-01',
-    gcash_number: '09123456789',
-    bank_name: '신한은행',
-    bank_account: '110-123-456789',
-    bank_holder: '김철수',
-  },
-  {
-    id: 2,
-    name: 'XYZ여행사',
-    representative: '이영희',
-    phone: '02-9876-5432',
-    address: '서울시 서초구 서초대로 456',
-    settlement_day: 5,
-    commission_rate: 25,
-    status: 'active',
-    created_at: '2026-01-15',
-    gcash_number: '09987654321',
-    bank_name: '우리은행',
-    bank_account: '220-456-789012',
-    bank_holder: '이영희',
-  },
-  {
-    id: 3,
-    name: '글로벌투어',
-    representative: '박민수',
-    phone: '02-5555-6666',
-    address: '서울시 마포구 중앙로 789',
-    settlement_day: 15,
-    commission_rate: 28,
-    status: 'active',
-    created_at: '2026-02-01',
-    gcash_number: '09555666777',
-    bank_name: '국민은행',
-    bank_account: '330-789-012345',
-    bank_holder: '박민수',
-  },
-];
+import { useState, useEffect, useCallback } from 'react';
+import {
+  Company,
+  Guide,
+  getCompanies,
+  createCompany,
+  updateCompany as apiUpdateCompany,
+  deleteCompany as apiDeleteCompany,
+  getGuides,
+} from '@/lib/api/companies-client';
 
 export default function CompaniesPage() {
-  const { companies, setCompanies, addCompany, updateCompany, deleteCompany } = useStore();
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [guides, setGuides] = useState<Guide[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [formData, setFormData] = useState<Partial<Company>>({});
 
-  // Initialize mock data
-  if (companies.length === 0) {
-    setCompanies(mockCompanies);
-  }
+  // ============================================================
+  // 📌 loadData: Supabase에서 업체/가이드 목록 로드
+  // ============================================================
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [companyRows, guideRows] = await Promise.all([
+        getCompanies(),
+        // 가이드 조회 실패해도 업체 목록은 표시되도록 (가이드 수는 부가정보)
+        getGuides().catch(() => [] as Guide[]),
+      ]);
+      setCompanies(companyRows);
+      setGuides(guideRows);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred while loading companies');
+      console.error('Company data query error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleOpenModal = (company?: Company) => {
     if (company) {
@@ -80,47 +65,59 @@ export default function CompaniesPage() {
     setFormData({});
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.name || !formData.representative || !formData.phone) {
       alert('Please fill in all required fields');
       return;
     }
 
-    if (selectedCompany) {
-      updateCompany(selectedCompany.id, formData);
-      alert('Company information has been updated');
-    } else {
-      const newCompany: Company = {
-        id: Math.max(...companies.map(c => c.id), 0) + 1,
-        name: formData.name!,
-        representative: formData.representative!,
-        phone: formData.phone!,
-        address: formData.address || '',
-        settlement_day: formData.settlement_day || 20,
-        commission_rate: formData.commission_rate || 30,
-        status: 'active',
-        created_at: new Date().toISOString().split('T')[0],
-        gcash_number: formData.gcash_number,
-        bank_name: formData.bank_name,
-        bank_account: formData.bank_account,
-        bank_holder: formData.bank_holder,
-      };
-      addCompany(newCompany);
-      alert('New company has been registered');
+    const payload: Partial<Company> = {
+      name: formData.name,
+      representative: formData.representative,
+      phone: formData.phone,
+      address: formData.address || '',
+      settlement_day: formData.settlement_day ?? 20,
+      commission_rate: formData.commission_rate ?? 30,
+      status: formData.status ?? 'active',
+      gcash_number: formData.gcash_number,
+      bank_name: formData.bank_name,
+      bank_account: formData.bank_account,
+      bank_holder: formData.bank_holder,
+    };
+
+    try {
+      setSaving(true);
+      if (selectedCompany) {
+        await apiUpdateCompany(selectedCompany.id, payload);
+        alert('Company information has been updated');
+      } else {
+        await createCompany(payload);
+        alert('New company has been registered');
+      }
+      handleCloseModal();
+      await loadData();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to save company');
+      console.error('Company save error:', err);
+    } finally {
+      setSaving(false);
     }
-    handleCloseModal();
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm('Are you sure you want to delete this company?')) {
-      deleteCompany(id);
+  const handleDelete = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this company?')) return;
+    try {
+      await apiDeleteCompany(id);
       alert('Company has been deleted');
+      await loadData();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete company');
+      console.error('Company delete error:', err);
     }
   };
 
   const guideCountByCompany = (companyId: number) => {
-    // Currently displays 0, will be updated when guide data integration is complete
-    return 0;
+    return guides.filter(g => g.company_id === companyId).length;
   };
 
   return (
@@ -136,6 +133,13 @@ export default function CompaniesPage() {
           </p>
         </div>
 
+        {/* Error message */}
+        {error && (
+          <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700">
+            ⚠️ {error}
+          </div>
+        )}
+
         {/* Action buttons */}
         <div className="mb-8">
           <button
@@ -148,7 +152,11 @@ export default function CompaniesPage() {
 
         {/* Company list */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {companies.length === 0 ? (
+          {loading ? (
+            <div className="col-span-full text-center py-12 text-gray-500">
+              Loading data...
+            </div>
+          ) : companies.length === 0 ? (
             <div className="col-span-full text-center py-12 text-gray-500">
               No registered companies
             </div>
@@ -326,9 +334,10 @@ export default function CompaniesPage() {
                   </button>
                   <button
                     onClick={handleSubmit}
-                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded transition-colors"
+                    disabled={saving}
+                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded transition-colors"
                   >
-                    {selectedCompany ? 'Update' : 'Register'}
+                    {saving ? 'Saving...' : selectedCompany ? 'Update' : 'Register'}
                   </button>
                 </div>
               </div>

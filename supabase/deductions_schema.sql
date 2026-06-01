@@ -91,19 +91,33 @@ begin
 end $$;
 
 -- ============================================================
--- 5) sss_brackets 시드 (필리핀 SSS 2024 기준 근사값)
--- ⚠️ 근사값입니다 — 실제 법정 SSS contribution table 과 정확히 일치하지
---    않을 수 있으므로 운영 전 최신 공식표로 검토/교체 필요.
+-- 5) sss_brackets 시드 (필리핀 SSS 2024 정규(Regular SS) 스케줄 기준)
+-- ------------------------------------------------------------
+-- ⚠️ 본 시드는 2024 SSS 정규(Regular SS) 기여 스케줄(Contribution
+--    Schedule)을 근사한 값입니다. EC(고용보상기여) 및 MPF(WISP/
+--    Mandatory Provident Fund) 분담분은 제외하였으며, 총 기여율 14%
+--    (직원 4.5% + 사업주 9.5%)만 반영합니다.
+-- ⚠️ MSC(월 급여 크레딧) 4,000 미만은 4,000으로 처리하고, 이후 500
+--    단위로 30,000까지 적용합니다.
+-- ⚠️ SSS 기여율/구간은 시행 시점·연도·정부 고시에 따라 변경될 수
+--    있으므로, 운영 적용 전 반드시 최신 공식 SSS Contribution
+--    Schedule 과 대조하여 검증하시기 바랍니다.
+-- ⚠️ 면책: 본 데이터는 참고용 근사치이며 법적·회계적 정확성을 보장
+--    하지 않습니다. 실제 급여·세무 처리에 대한 책임은 사용자(운영자)
+--    에게 있으며, 작성자는 어떠한 법적 책임도 지지 않습니다.
+-- ------------------------------------------------------------
+-- 계산식:
+--   msc            = generate_series(4000, 30000, 500)  -- 53개
+--   salary_from    = msc - 250  (최저 구간은 0)
+--   salary_to      = msc + 250  (최고 구간은 999999)
+--   employee_share = msc * 0.045   (직원 4.5%)
+--   employer_share = msc * 0.095   (사업주 9.5%)
 -- ============================================================
 insert into public.sss_brackets (salary_from, salary_to, employee_share, employer_share)
-select * from (values
-  (0,        4250,    180.00,  390.00),
-  (4250,     8250,    315.00,  675.00),
-  (8250,     12250,   495.00,  1035.00),
-  (12250,    16250,   675.00,  1395.00),
-  (16250,    20250,   855.00,  1755.00),
-  (20250,    24250,   1035.00, 2115.00),
-  (24250,    28250,   1215.00, 2475.00),
-  (28250,    999999,  1350.00, 2730.00)
-) as v(salary_from, salary_to, employee_share, employer_share)
+select
+  case when msc = 4000  then 0      else msc - 250 end                 as salary_from,
+  case when msc = 30000 then 999999 else msc + 250 end                 as salary_to,
+  round(msc * 0.045, 2)                                                as employee_share,
+  round(msc * 0.095, 2)                                                as employer_share
+from generate_series(4000, 30000, 500) as msc
 where not exists (select 1 from public.sss_brackets);

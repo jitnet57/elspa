@@ -6385,3 +6385,39 @@ GET /api/network/stats
 ✅ /admin/settlement-report 포함 (정상 빌드)
 
 ---
+
+---
+## [2026-06-01 13:32] Order: 061 - Companies/Monthly-Settlement Supabase 직결 + SSS 시드 정규화
+
+**주제:** 관리자 업체/월정산 페이지를 mock 제거 후 Supabase 직결로 전환, 공제 메뉴 노출, SSS 기여표 시드 정규화
+
+### Plan
+✅ companies/page.tsx mock 제거 → companies-client (getCompanies/createCompany/updateCompany/deleteCompany/getGuides) 직결
+✅ monthly-settlement/page.tsx mock 제거 → getCompanies/getGuides/getMonthlySettlements 병렬 로드
+✅ AdminShell.tsx + admin/page.tsx 에 "공제/선지급 관리" 네비게이션 노출
+✅ companies-client.ts 타입 보강 (Company.bank_holder, Guide.status)
+✅ deductions_schema.sql SSS 시드를 2024 Regular SS 스케줄 기반 generate_series 로 정규화 + 면책 주석
+✅ 프로덕션 빌드 검증 후 배포
+
+### Task 수행 내용
+
+#### 섹션 1: 프론트엔드 Supabase 직결
+1. companies/page.tsx — useStore mock 제거, useEffect+useCallback 로 loadData, 로딩/에러/저장 상태 UI, 가이드 수 실집계
+2. monthly-settlement/page.tsx — mockCompanies/mockGuides/mockMonthlySettlements 제거, 3종 병렬 로드 + optional 필드 정규화
+3. companies-client.ts — Company.bank_holder, Guide.status 필드 추가
+
+#### 섹션 2: 네비게이션
+1. AdminShell.tsx — 💸 공제/선지급 관리 사이드바 링크
+2. admin/page.tsx — 대시보드 퀵링크에 공제/선지급 추가
+
+#### 섹션 3: DB 시드
+1. deductions_schema.sql — sss_brackets 시드를 generate_series(4000,30000,500) 기반 MSC×(4.5%/9.5%) 계산식으로 교체, 면책/검증 주석 추가
+
+### Result
+✅ **6개 파일 수정 완료**
+- companies/monthly-settlement: mock → Supabase 직결 ✓
+- 공제/선지급 네비게이션 노출 ✓
+- SSS 시드 정규화 (53개 구간) ✓
+- npm run build: 성공 (67/67 페이지, 0 에러) ✓
+
+---

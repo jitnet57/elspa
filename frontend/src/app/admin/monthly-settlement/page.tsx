@@ -4,6 +4,11 @@ import { useState, useEffect, useMemo } from 'react';
 import { useStore } from '@/lib/store/store';
 import { PriceDisplay } from '@/components/PriceDisplay';
 import { exportMonthlySettlementCSV, downloadCSV } from '@/lib/utils/csv-export';
+import {
+  getCompanies,
+  getGuides,
+  getMonthlySettlements,
+} from '@/lib/api/companies-client';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 interface MonthlySettlement {
@@ -45,62 +50,6 @@ interface Guide {
   company_id: number;
 }
 
-const mockMonthlySettlements: MonthlySettlement[] = [
-  // Makati Spa Center settlements
-  { id: 1, company_id: 1, guide_id: 1, settlement_month: '2026-05', settlement_date: '2026-05-05', total_sessions: 25, total_revenue: 150000, commission_rate: 25, commission_amount: 37500, payment_amount: 112500, service_breakdown: { swedish: { sessions: 15, revenue: 90000 }, thai: { sessions: 10, revenue: 60000 } }, status: 'paid', notes: 'Paid', created_at: '2026-05-05' },
-  // BGC Wellness Hub settlements
-  { id: 2, company_id: 2, guide_id: 2, settlement_month: '2026-05', settlement_date: '2026-05-05', total_sessions: 20, total_revenue: 120000, commission_rate: 25, commission_amount: 30000, payment_amount: 90000, service_breakdown: { thai: { sessions: 12, revenue: 72000 }, foot: { sessions: 8, revenue: 48000 } }, status: 'paid', notes: 'Paid', created_at: '2026-05-05' },
-  // Taguig Health Spa settlements
-  { id: 3, company_id: 3, guide_id: 3, settlement_month: '2026-05', settlement_date: '2026-05-05', total_sessions: 18, total_revenue: 95000, commission_rate: 25, commission_amount: 23750, payment_amount: 71250, service_breakdown: { hotstone: { sessions: 10, revenue: 50000 }, aroma: { sessions: 8, revenue: 45000 } }, status: 'pending', notes: '', created_at: '2026-05-05' },
-  // Pasig Relax Resort settlements
-  { id: 4, company_id: 4, guide_id: 4, settlement_month: '2026-05', settlement_date: '2026-05-10', total_sessions: 30, total_revenue: 180000, commission_rate: 25, commission_amount: 45000, payment_amount: 135000, service_breakdown: { swedish: { sessions: 18, revenue: 108000 }, thai: { sessions: 12, revenue: 72000 } }, status: 'confirmed', notes: 'Confirmed', created_at: '2026-05-10' },
-  // Quezon City Massage settlements
-  { id: 5, company_id: 5, guide_id: 5, settlement_month: '2026-05', settlement_date: '2026-05-15', total_sessions: 22, total_revenue: 110000, commission_rate: 25, commission_amount: 27500, payment_amount: 82500, service_breakdown: { foot: { sessions: 14, revenue: 70000 }, aroma: { sessions: 8, revenue: 40000 } }, status: 'pending', notes: '', created_at: '2026-05-15' },
-  // Ortigas Wellness settlements
-  { id: 6, company_id: 6, guide_id: 6, settlement_month: '2026-05', settlement_date: '2026-05-10', total_sessions: 28, total_revenue: 165000, commission_rate: 25, commission_amount: 41250, payment_amount: 123750, service_breakdown: { swedish: { sessions: 16, revenue: 96000 }, thai: { sessions: 12, revenue: 69000 } }, status: 'confirmed', notes: 'Confirmed', created_at: '2026-05-10' },
-  // Manila Health Spa settlements
-  { id: 7, company_id: 7, guide_id: 7, settlement_month: '2026-05', settlement_date: '2026-05-20', total_sessions: 24, total_revenue: 140000, commission_rate: 25, commission_amount: 35000, payment_amount: 105000, service_breakdown: { hotstone: { sessions: 14, revenue: 70000 }, foot: { sessions: 10, revenue: 70000 } }, status: 'pending', notes: '', created_at: '2026-05-20' },
-  // Cavite Spa Lounge settlements
-  { id: 8, company_id: 8, guide_id: 8, settlement_month: '2026-05', settlement_date: '2026-05-15', total_sessions: 16, total_revenue: 85000, commission_rate: 25, commission_amount: 21250, payment_amount: 63750, service_breakdown: { swedish: { sessions: 10, revenue: 60000 }, aroma: { sessions: 6, revenue: 25000 } }, status: 'confirmed', notes: 'Confirmed', created_at: '2026-05-15' },
-  // Antipolo Therapy Center settlements
-  { id: 9, company_id: 9, guide_id: 9, settlement_month: '2026-05', settlement_date: '2026-05-25', total_sessions: 19, total_revenue: 105000, commission_rate: 25, commission_amount: 26250, payment_amount: 78750, service_breakdown: { thai: { sessions: 11, revenue: 66000 }, foot: { sessions: 8, revenue: 39000 } }, status: 'pending', notes: '', created_at: '2026-05-25' },
-  // Laguna Premium Spa settlements
-  { id: 10, company_id: 10, guide_id: 10, settlement_month: '2026-05', settlement_date: '2026-05-05', total_sessions: 26, total_revenue: 175000, commission_rate: 25, commission_amount: 43750, payment_amount: 131250, service_breakdown: { swedish: { sessions: 16, revenue: 96000 }, thai: { sessions: 10, revenue: 60000 } }, status: 'paid', notes: 'Paid', created_at: '2026-05-05' },
-];
-
-const mockCompanies: Company[] = [
-  { id: 1, name: 'Makati Spa Center', settlement_day: 5, commission_rate: 25, representative: 'Juan Santos', phone: '+63-02-1234-5678', address: 'Makati, Manila', status: 'active', created_at: '2026-01-01' },
-  { id: 2, name: 'BGC Wellness Hub', settlement_day: 5, commission_rate: 25, representative: 'Maria Garcia', phone: '+63-02-2345-6789', address: 'BGC, Taguig', status: 'active', created_at: '2026-01-01' },
-  { id: 3, name: 'Taguig Health Spa', settlement_day: 5, commission_rate: 25, representative: 'Carlos Cruz', phone: '+63-02-3456-7890', address: 'Taguig, Manila', status: 'active', created_at: '2026-01-01' },
-  { id: 4, name: 'Pasig Relax Resort', settlement_day: 10, commission_rate: 25, representative: 'Ana Reyes', phone: '+63-02-4567-8901', address: 'Pasig City', status: 'active', created_at: '2026-01-01' },
-  { id: 5, name: 'Quezon City Massage', settlement_day: 15, commission_rate: 25, representative: 'Roberto Flores', phone: '+63-02-5678-9012', address: 'Quezon City', status: 'active', created_at: '2026-01-01' },
-  { id: 6, name: 'Ortigas Wellness', settlement_day: 10, commission_rate: 25, representative: 'Rosa Mendoza', phone: '+63-02-6789-0123', address: 'Ortigas, Pasig', status: 'active', created_at: '2026-01-01' },
-  { id: 7, name: 'Manila Health Spa', settlement_day: 20, commission_rate: 25, representative: 'Miguel Rodriguez', phone: '+63-02-7890-1234', address: 'Manila', status: 'active', created_at: '2026-01-01' },
-  { id: 8, name: 'Cavite Spa Lounge', settlement_day: 15, commission_rate: 25, representative: 'Teresa Santos', phone: '+63-046-234-5678', address: 'Cavite', status: 'active', created_at: '2026-01-01' },
-  { id: 9, name: 'Antipolo Therapy Center', settlement_day: 25, commission_rate: 25, representative: 'Francisco Lopez', phone: '+63-046-345-6789', address: 'Antipolo City', status: 'active', created_at: '2026-01-01' },
-  { id: 10, name: 'Laguna Premium Spa', settlement_day: 5, commission_rate: 25, representative: 'Luz Fernandez', phone: '+63-049-456-7890', address: 'Laguna', status: 'active', created_at: '2026-01-01' },
-];
-
-const mockGuides: Guide[] = [
-  // Makati Spa Center (company_id: 1)
-  { id: 1, name: 'Sarah', company_id: 1 },
-  { id: 2, name: 'Emma', company_id: 1 },
-  { id: 3, name: 'Jessica', company_id: 1 },
-  // BGC Wellness Hub (company_id: 2)
-  { id: 4, name: 'Amanda', company_id: 2 },
-  { id: 5, name: 'Catherine', company_id: 2 },
-  // Taguig Health Spa (company_id: 3)
-  { id: 6, name: 'Rachel', company_id: 3 },
-  // Pasig Relax Resort (company_id: 4)
-  { id: 7, name: 'Monica', company_id: 4 },
-  // Quezon City Massage (company_id: 5)
-  { id: 8, name: 'Diana', company_id: 5 },
-  // Ortigas Wellness (company_id: 6)
-  { id: 9, name: 'Michelle', company_id: 6 },
-  // Manila Health Spa (company_id: 7)
-  { id: 10, name: 'Angela', company_id: 7 },
-];
-
 export default function MonthlySettlementPage() {
   const { rates, addNotification } = useStore();
   const [settlements, setSettlements] = useState<MonthlySettlement[]>([]);
@@ -116,15 +65,32 @@ export default function MonthlySettlementPage() {
   const [selectedSettlement, setSelectedSettlement] = useState<MonthlySettlement | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  // Initial data load
+  // ============================================================
+  // 📌 Initial data load — Supabase 직결 (companies-client)
+  // 📋 회사/가이드/월정산을 병렬 로드. 빈 데이터/미설정 시 빈 표로 처리.
+  // ============================================================
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        // Use mock data (actual API integration after backend is ready)
-        setSettlements(mockMonthlySettlements);
-        setCompanies(mockCompanies);
-        setGuides(mockGuides);
+        const [companyRows, guideRows, settlementRows] = await Promise.all([
+          getCompanies(),
+          getGuides(),
+          getMonthlySettlements(),
+        ]);
+
+        setCompanies(companyRows as Company[]);
+        setGuides(guideRows as Guide[]);
+        // 클라이언트 타입의 optional 필드를 화면용 비-optional 형태로 정규화
+        setSettlements(
+          settlementRows.map(s => ({
+            ...s,
+            guide_id: s.guide_id ?? 0,
+            settlement_date: s.settlement_date ?? '',
+            service_breakdown: s.service_breakdown ?? {},
+            created_at: s.created_at ?? '',
+          })) as MonthlySettlement[]
+        );
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');

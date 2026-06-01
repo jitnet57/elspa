@@ -18,6 +18,7 @@ export interface Company {
   gcash_number?: string;
   bank_name?: string;
   bank_account?: string;
+  bank_holder?: string;
   created_at?: string;
 }
 
@@ -26,6 +27,7 @@ export interface Guide {
   name: string;
   company_id: number;
   commission_rate?: number;
+  status?: 'active' | 'inactive';
 }
 
 export interface MonthlySettlement {
