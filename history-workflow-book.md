@@ -6466,3 +6466,25 @@ GET /api/network/stats
 - e2e-tests.yml 은 별도 점검 필요(테스트 실행 단계)
 
 ---
+
+---
+## [2026-06-01 15:13] Order: 063 - Monitor WebSocket 에러 제거 (SW 캐시 무효화 + 고아 코드 삭제)
+
+**주제:** /ws/monitor WebSocket 콘솔 에러 해결 (백엔드 없음)
+
+### 진단
+- monitor/bed 페이지는 이미 폴링으로 revamp 완료, /ws/monitor 훅(useRealtimeSync)은 어디서도 import 안 되는 고아 코드
+- 콘솔 에러 원인: 서비스워커 캐시(elspa-20260518-v3)가 revamp 이전 옛 번들을 cache-first 로 계속 서빙
+
+### Task
+1. public/service-worker.js: CACHE_VERSION 20260518-v3 → 20260601-v4 (옛 캐시 강제 무효화)
+2. 고아 WebSocket 훅 삭제: useRealtimeSync.ts(332줄), useNetworkWebSocket.ts(232줄)
+   - useDriverWebSocket 은 드라이버 추적에서 실사용 중이라 보존
+3. 빌드 검증(67/67) 후 Cloudflare Pages 배포
+
+### Result
+✅ SW v4 배포 — 클라이언트 재방문 시 옛 캐시 자동 삭제 + 새 번들 로드
+✅ /ws/monitor WebSocket 코드 소스에서 완전 제거
+✅ 배포: https://elspa.pages.dev (dccbdbde)
+
+---

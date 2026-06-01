@@ -6,7 +6,15 @@
       "Bash(awk '{print $1}')",
       "Bash(curl -s -H 'Authorization: token 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' https://api.github.com/user)",
       "Bash(sed 's#src/##')",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(curl -s -H \"Authorization: token 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\" \"https://api.github.com/repos/jitnet57/elspa/actions/runs?per_page=3\")",
+      "Bash(curl -s -H 'Authorization: token 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' https://api.github.com/repos/jitnet57/elspa/actions/runs/26737971341/jobs)",
+      "Bash(python3 -c ' *)",
+      "Bash(cd /Users/kwangseobpark/elspa/frontend && rm -f package-lock.json && npm install 2>&1 | tail -6 *)",
+      "Bash(curl -s -H 'Authorization: token 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' https://api.github.com/repos/jitnet57/elspa/actions/runs/26738673736/jobs)",
+      "Bash(curl -s -H 'Authorization: token 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' https://api.github.com/repos/jitnet57/elspa/actions/runs/26739077899/jobs)",
+      "Bash(curl -s -H 'Authorization: token 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' https://api.github.com/repos/jitnet57/elspa/actions/secrets?per_page=100)",
+      "Bash(npx wrangler *)"
     ]
   }
 }
