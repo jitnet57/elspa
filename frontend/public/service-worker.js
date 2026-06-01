@@ -2,7 +2,7 @@
 // 오프라인 지원 및 캐싱 전략
 // 배포할 때마다 버전을 올려서 캐시를 무효화합니다
 
-const CACHE_VERSION = '20260601-v4'; // YYYYMMDD-X 형식 (배포할 때마다 증가) — v4: revamp 이전 WebSocket 번들 강제 무효화
+const CACHE_VERSION = '20260601-v5'; // YYYYMMDD-X 형식 (배포할 때마다 증가) — v5: 모니터 베드 진행/예약 표시 갱신
 const CACHE_NAME = `elspa-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
