@@ -2,39 +2,35 @@
 
 import { useState } from 'react';
 import { therapyBeds, getBedsByRoom, therapists, type TherapyBed } from '@/app/admin/massage/mockData/bookingData';
-import { SERVICES, autoEndTime } from './booking-helpers';
-import { saveBookingToSheet } from '@/lib/services/booking-sheet';
-import { supabaseApiAdapter } from '@/lib/api/supabase-adapter';
+import NewMassagePanel from './NewMassagePanel';
 
 // 📌 테라피스트 id → 정보 매핑 (진행중 표시용)
 const therapistById = new Map(therapists.map((t) => [t.id, t]));
 
 /**
  * 📌 컴포넌트: BedLayoutView
- * 📋 목적: 침대 상태 표시 + 클릭 시 booking-with-therapist 형태 예약창
- * 🔌 저장: Supabase(createBooking) + 구글시트(Apps Script) 동시
- * 📅 작성일: 2026-05-28 / 개정: 2026-06-01 (예약창을 테라피스트 예약 형태로)
+ * 📋 침대 상태 표시 + 예약(데일리 예약창 공용)
+ *    - 빈 베드: 바로 예약창
+ *    - 진행중 베드: 현재정보 + 편집(비밀번호 1234 임시) → 예약창
+ * 📅 개정: 2026-06-01
  */
 
+const EDIT_PASSWORD = '1234'; // 임시 편집 비밀번호
 const today = () => new Date().toISOString().split('T')[0];
 
 export default function BedLayoutView() {
   const [selectedBed, setSelectedBed] = useState<TherapyBed | null>(null);
-  const [form, setForm] = useState({ therapistName: '', service: SERVICES[0]?.name ?? '', startTime: '10:00', guestName: '' });
-  const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState('');
+  const [showPanel, setShowPanel] = useState(false);   // 예약창
+  const [pwOpen, setPwOpen] = useState(false);          // 비밀번호 모달
+  const [pw, setPw] = useState('');
+  const [pwErr, setPwErr] = useState('');
 
-  const room1Beds = getBedsByRoom('room1');
-  const room2Beds = getBedsByRoom('room2');
-  const room3Beds = getBedsByRoom('room3');
-  const room4Beds = getBedsByRoom('room4');
   const rooms = [
-    { id: 'room1', name: '마사지룸1', beds: room1Beds },
-    { id: 'room2', name: '마사지룸2', beds: room2Beds },
-    { id: 'room3', name: 'VIP실', beds: room3Beds },
-    { id: 'room4', name: '기타실', beds: room4Beds },
+    { id: 'room1', name: '마사지룸1', beds: getBedsByRoom('room1') },
+    { id: 'room2', name: '마사지룸2', beds: getBedsByRoom('room2') },
+    { id: 'room3', name: 'VIP실', beds: getBedsByRoom('room3') },
+    { id: 'room4', name: '기타실', beds: getBedsByRoom('room4') },
   ];
-
   const summary = {
     available: therapyBeds.filter((b) => b.status === 'available').length,
     occupied: therapyBeds.filter((b) => b.status === 'occupied').length,
@@ -42,48 +38,34 @@ export default function BedLayoutView() {
     maintenance: therapyBeds.filter((b) => b.status === 'maintenance').length,
   };
 
-  const openBed = (bed: TherapyBed) => {
+  const bedNo = (bed: TherapyBed) => bed.name.split('-')[1] ?? bed.name;
+  const currentTherapist = selectedBed?.therapistId ? therapistById.get(selectedBed.therapistId)?.name : undefined;
+
+  const clickBed = (bed: TherapyBed) => {
     setSelectedBed(bed);
-    setForm({ therapistName: '', service: SERVICES[0]?.name ?? '', startTime: '10:00', guestName: '' });
-    setMsg('');
+    setShowPanel(false);
+    setPwOpen(false);
+    setPw('');
+    setPwErr('');
+    // 빈/정리/점검 베드는 바로 예약창, 진행중 베드는 정보 모달
+    if (bed.status !== 'occupied') setShowPanel(true);
   };
 
-  const bedNo = (bed: TherapyBed) => bed.name.split('-')[1] ?? bed.name;
-  const endTime = autoEndTime(form.startTime, form.service);
-
-  const handleSave = async () => {
-    if (!selectedBed) return;
-    if (!form.therapistName) return setMsg('테라피스트를 선택하세요.');
-    if (!form.guestName.trim()) return setMsg('고객 이름을 입력하세요.');
-    setSaving(true);
-    setMsg('');
-
-    const payloadDate = today();
-    let dbOk = false;
-    try {
-      await supabaseApiAdapter.createBooking({
-        booking_date: payloadDate,
-        treatment: form.service,
-        start_time: form.startTime,
-        end_time: endTime,
-        guest_name: form.guestName,
-        therapist_name: form.therapistName,
-        room_num: bedNo(selectedBed),
-        status: 'normal',
-      });
-      dbOk = true;
-    } catch (err) {
-      console.warn('DB 저장 실패(Supabase 미설정?):', err);
+  const verifyPw = () => {
+    if (pw === EDIT_PASSWORD) {
+      setPwOpen(false);
+      setShowPanel(true); // 예약창(편집) 오픈
+    } else {
+      setPwErr('비밀번호가 올바르지 않습니다.');
     }
-    const sheetOk = await saveBookingToSheet({
-      therapist: form.therapistName, service: form.service, date: payloadDate,
-      time: form.startTime, endTime, guestName: form.guestName, roomNumber: bedNo(selectedBed), notes: '',
-    });
+  };
 
-    setSaving(false);
-    if (!dbOk && !sheetOk) { setMsg('저장 실패 — DB/시트 연결을 확인하세요.'); return; }
-    alert(`예약 저장됨 — Bed ${bedNo(selectedBed)} · ${form.therapistName} · ${form.service} (${form.startTime}~${endTime})`);
+  const closeAll = () => {
     setSelectedBed(null);
+    setShowPanel(false);
+    setPwOpen(false);
+    setPw('');
+    setPwErr('');
   };
 
   return (
@@ -101,76 +83,76 @@ export default function BedLayoutView() {
             <h2 className="text-xl font-bold text-gray-800 mb-3">{room.name} ({room.beds.length})</h2>
             <div className="grid grid-cols-10 gap-2">
               {room.beds.map((bed) => (
-                <BedCard key={bed.id} bed={bed} onClick={() => openBed(bed)} />
+                <BedCard key={bed.id} bed={bed} onClick={() => clickBed(bed)} />
               ))}
             </div>
           </div>
         ))}
       </div>
 
-      {/* 예약창 (booking-with-therapist 형태) */}
-      {selectedBed && (
+      {/* 진행중 베드: 현재정보 + 편집(비밀번호) */}
+      {selectedBed && selectedBed.status === 'occupied' && !showPanel && !pwOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full">
             <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-5 rounded-t-2xl flex justify-between items-start">
               <div>
                 <h2 className="text-2xl font-black">Bed {bedNo(selectedBed)}</h2>
                 <p className="text-sm opacity-90">Room: {selectedBed.roomNumber}</p>
               </div>
-              <button onClick={() => setSelectedBed(null)} className="text-2xl font-bold hover:opacity-80">✕</button>
+              <button onClick={closeAll} className="text-2xl font-bold hover:opacity-80">✕</button>
             </div>
-
             <div className="p-6 space-y-4">
-              {selectedBed.status === 'occupied' ? (
-                <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 space-y-1">
-                  <p className="text-xs text-gray-600 font-semibold">현재 진행중</p>
-                  <p className="text-sm font-bold text-gray-800">테라피스트: {selectedBed.therapistId ? therapistById.get(selectedBed.therapistId)?.name : '-'}</p>
-                  <p className="text-sm font-bold text-gray-800">시술: {selectedBed.serviceName ?? '-'}</p>
-                  <p className="text-sm font-bold text-green-600">종료: {selectedBed.endTime ?? '-'}</p>
-                </div>
-              ) : (
-                <>
-                  {/* 테라피스트 */}
-                  <div>
-                    <label className="text-sm font-bold text-gray-700">🧑‍⚕️ 테라피스트</label>
-                    <select value={form.therapistName} onChange={(e) => setForm({ ...form, therapistName: e.target.value })} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm">
-                      <option value="">선택…</option>
-                      {therapists.map((t) => <option key={t.id} value={t.name}>{t.name}</option>)}
-                    </select>
-                  </div>
-                  {/* 마사지 종류 */}
-                  <div>
-                    <label className="text-sm font-bold text-gray-700">💆 마사지 종류</label>
-                    <select value={form.service} onChange={(e) => setForm({ ...form, service: e.target.value })} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm">
-                      {SERVICES.map((s) => <option key={s.name} value={s.name}>{s.name} ({s.duration}분)</option>)}
-                    </select>
-                  </div>
-                  {/* 시작/종료 */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-sm font-bold text-gray-700">시작 시간</label>
-                      <input type="time" value={form.startTime} onChange={(e) => setForm({ ...form, startTime: e.target.value })} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm" />
-                    </div>
-                    <div>
-                      <label className="text-sm font-bold text-gray-700">종료 (자동)</label>
-                      <input value={endTime} readOnly className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-gray-100 font-bold text-blue-700" />
-                    </div>
-                  </div>
-                  {/* 고객 */}
-                  <div>
-                    <label className="text-sm font-bold text-gray-700">고객 이름</label>
-                    <input value={form.guestName} onChange={(e) => setForm({ ...form, guestName: e.target.value })} placeholder="예: 김철수" className="w-full mt-1 px-3 py-2 border rounded-lg text-sm" />
-                  </div>
-                  {msg && <p className="text-sm text-red-600 font-semibold">{msg}</p>}
-                  <button onClick={handleSave} disabled={saving} className="w-full px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold">
-                    {saving ? '저장 중…' : '📋 예약 저장 (DB + 구글시트)'}
-                  </button>
-                </>
-              )}
-              <button onClick={() => setSelectedBed(null)} className="w-full px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-bold">닫기</button>
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 space-y-1">
+                <p className="text-xs text-gray-600 font-semibold">현재 진행중</p>
+                <p className="text-sm font-bold text-gray-800">테라피스트: {currentTherapist ?? '-'}</p>
+                <p className="text-sm font-bold text-gray-800">시술: {selectedBed.serviceName ?? '-'}</p>
+                <p className="text-sm font-bold text-green-600">종료: {selectedBed.endTime ?? '-'}</p>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => { setPwOpen(true); setPw(''); setPwErr(''); }} className="flex-1 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-bold">✏️ 편집</button>
+                <button onClick={closeAll} className="flex-1 px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-bold">닫기</button>
+              </div>
             </div>
           </div>
         </div>
+      )}
+
+      {/* 비밀번호 모달 (편집 진입) */}
+      {pwOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full">
+            <div className="bg-red-500 text-white p-5 rounded-t-xl"><h2 className="text-xl font-black">🔐 편집 비밀번호</h2></div>
+            <div className="p-6 space-y-3">
+              <p className="text-sm text-gray-700 font-semibold">예약을 편집하려면 비밀번호를 입력하세요. (임시: 1234)</p>
+              <input
+                type="password"
+                value={pw}
+                onChange={(e) => { setPw(e.target.value); setPwErr(''); }}
+                onKeyDown={(e) => e.key === 'Enter' && verifyPw()}
+                placeholder="비밀번호"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-red-500"
+                autoFocus
+              />
+              {pwErr && <p className="text-sm text-red-600 font-semibold">{pwErr}</p>}
+              <div className="flex gap-2">
+                <button onClick={() => { setPwOpen(false); setPw(''); setPwErr(''); }} className="flex-1 px-4 py-2 bg-gray-200 rounded-lg font-bold">취소</button>
+                <button onClick={verifyPw} className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-bold">확인</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 데일리 예약창(공용) — 빈 베드 신규 / 진행중 베드 편집(비밀번호 통과 후) */}
+      {selectedBed && showPanel && (
+        <NewMassagePanel
+          date={today()}
+          prefillRoom={bedNo(selectedBed)}
+          prefillTherapist={currentTherapist}
+          title={selectedBed.status === 'occupied' ? '✏️ 예약 편집' : '+ Start New Massage'}
+          onClose={closeAll}
+          onSaved={closeAll}
+        />
       )}
     </>
   );

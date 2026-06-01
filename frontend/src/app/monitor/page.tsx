@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useT, useLang, setLang } from '@/lib/i18n';
 import BedLayoutView from './components/BedLayoutView';
 import DailyTherapistSchedule from './components/DailyTherapistSchedule';
 import BookingSheetTable from './components/BookingSheetTable';
@@ -21,6 +22,8 @@ import BookingSheetTable from './components/BookingSheetTable';
 
 export default function MonitorPage() {
   const [activeTab, setActiveTab] = useState<'beds' | 'schedule' | 'booking'>('beds');
+  const t = useT();
+  const lang = useLang();
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -30,7 +33,7 @@ export default function MonitorPage() {
           {/* 폴링 기반 상태 표시 (WebSocket 제거) */}
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-sm font-medium text-gray-600">🟢 Live (5s polling)</span>
+            <span className="text-sm font-medium text-gray-600">🟢 {t('Live (5s polling)', '실시간 (5초 폴링)')}</span>
           </div>
 
           <div className="flex gap-4">
@@ -40,7 +43,7 @@ export default function MonitorPage() {
                 activeTab === 'beds' ? 'bg-gray-200 text-gray-800' : 'text-gray-600 hover:text-gray-800'
               }`}
             >
-              🛏️ Real-time Bed Mode
+              🛏️ {t('Real-time Bed Mode', '실시간 베드 모드')}
             </button>
             <button
               onClick={() => setActiveTab('schedule')}
@@ -50,7 +53,7 @@ export default function MonitorPage() {
                   : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
               }`}
             >
-              📅 Therapist Daily Schedule
+              📅 {t('Therapist Daily Schedule', '테라피스트 일일 스케줄')}
             </button>
             <button
               onClick={() => setActiveTab('booking')}
@@ -60,12 +63,12 @@ export default function MonitorPage() {
                   : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
               }`}
             >
-              📊 BOOKING WITH THERAPIST
+              📊 {t('BOOKING WITH THERAPIST', '테라피스트 예약')}
             </button>
           </div>
           <div className="flex gap-2">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold">EN</button>
-            <button className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-bold">KO</button>
+            <button onClick={() => setLang('en')} className={`px-4 py-2 rounded-lg font-bold ${lang === 'en' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}>EN</button>
+            <button onClick={() => setLang('ko')} className={`px-4 py-2 rounded-lg font-bold ${lang === 'ko' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}>KO</button>
             <button className="p-2 text-gray-600 hover:text-gray-800">⚙️</button>
           </div>
         </div>
