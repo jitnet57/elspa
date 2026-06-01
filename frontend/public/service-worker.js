@@ -2,7 +2,7 @@
 // 오프라인 지원 및 캐싱 전략
 // 배포할 때마다 버전을 올려서 캐시를 무효화합니다
 
-const CACHE_VERSION = '20260601-v8'; // YYYYMMDD-X 형식 (배포할 때마다 증가) — v8: DB 시드/안정화
+const CACHE_VERSION = '20260601-v9'; // v9: 월정산/정산리포트 네비 링크 추가
 const CACHE_NAME = `elspa-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
