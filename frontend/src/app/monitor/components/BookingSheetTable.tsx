@@ -21,22 +21,20 @@ const ROW_COUNT = 30;
 interface Row {
   bookingId?: number;   // 있으면 기존 예약(수정), 없으면 신규(등록)
   therapistName: string;
-  service: string;
+  service: string;      // 트리트먼트
   startTime: string;
   guestName: string;
-  roomNumber: string;
+  roomNumber: string;   // 방번호
+  note: string;         // 업체명(노트)
+  pay: number;          // 지불
+  tip: number;          // 팁
   saved: boolean;
   saving: boolean;
 }
 
 const emptyRow = (): Row => ({
-  therapistName: '',
-  service: '',
-  startTime: '',
-  guestName: '',
-  roomNumber: '',
-  saved: false,
-  saving: false,
+  therapistName: '', service: '', startTime: '', guestName: '', roomNumber: '',
+  note: '', pay: 0, tip: 0, saved: false, saving: false,
 });
 
 const padTo30 = (rows: Row[]): Row[] => {
@@ -72,6 +70,9 @@ export default function BookingSheetTable() {
         startTime: b.start_time ?? '',
         guestName: b.guest_name ?? '',
         roomNumber: b.room_num ?? '',
+        note: b.note ?? '',
+        pay: Number(b.pay) || 0,
+        tip: Number(b.tip) || 0,
         saved: true,
         saving: false,
       }));
@@ -106,6 +107,9 @@ export default function BookingSheetTable() {
       guest_name: r.guestName,
       therapist_name: r.therapistName,
       room_num: r.roomNumber,
+      note: r.note,
+      pay: r.pay,
+      tip: r.tip,
       status: 'normal',
     };
 
@@ -133,7 +137,7 @@ export default function BookingSheetTable() {
       endTime: endTimeOf(r),
       guestName: r.guestName,
       roomNumber: r.roomNumber,
-      notes: '',
+      notes: `${r.note}${r.pay ? ` | pay:${r.pay}` : ''}${r.tip ? ` | tip:${r.tip}` : ''}`,
     });
 
     setRows((prev) =>
@@ -200,49 +204,55 @@ export default function BookingSheetTable() {
 
       {/* 30행 예약표 */}
       <div className="px-4 py-4 overflow-x-auto">
-        <table className="w-full min-w-[860px] text-sm border-collapse">
+        <table className="w-full min-w-[1100px] text-sm border-collapse">
           <thead>
             <tr className="text-left text-indigo-200 border-b border-white/10">
               <th className="px-2 py-2 w-10">#</th>
               <th className="px-2 py-2">테라피스트</th>
-              <th className="px-2 py-2">마사지</th>
+              <th className="px-2 py-2">트리트먼트</th>
               <th className="px-2 py-2 w-28">시작</th>
-              <th className="px-2 py-2 w-24">종료(자동)</th>
-              <th className="px-2 py-2">고객</th>
-              <th className="px-2 py-2 w-20">룸</th>
-              <th className="px-2 py-2 w-20">저장</th>
+              <th className="px-2 py-2 w-20">종료</th>
+              <th className="px-2 py-2 w-24">방번호</th>
+              <th className="px-2 py-2">고객이름</th>
+              <th className="px-2 py-2">업체명(노트)</th>
+              <th className="px-2 py-2 w-24">지불</th>
+              <th className="px-2 py-2 w-20">팁</th>
+              <th className="px-2 py-2 w-16">저장</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((r, i) => (
+            {rows.map((r, i) => {
+              const inp = 'w-full bg-slate-800 border border-white/10 rounded px-2 py-1.5 text-white placeholder-slate-500';
+              return (
               <tr key={i} className={`border-b border-white/5 ${r.saved ? 'bg-emerald-900/30' : ''}`}>
                 <td className="px-2 py-1 text-slate-400">{i + 1}</td>
                 <td className="px-2 py-1">
-                  <input
-                    list="bk-therapist-options"
-                    value={r.therapistName}
-                    onChange={(e) => update(i, { therapistName: e.target.value })}
-                    placeholder="검색/선택…"
-                    className="w-full bg-slate-800 border border-white/10 rounded px-2 py-1.5 text-white placeholder-slate-500"
-                  />
+                  <input list="bk-therapist-options" value={r.therapistName} onChange={(e) => update(i, { therapistName: e.target.value })} placeholder="검색/선택…" className={inp} />
                 </td>
                 <td className="px-2 py-1">
-                  <select value={r.service} onChange={(e) => update(i, { service: e.target.value })} className="w-full bg-slate-800 border border-white/10 rounded px-2 py-1.5">
+                  <select value={r.service} onChange={(e) => update(i, { service: e.target.value })} className={inp}>
                     <option value="">선택…</option>
-                    {SERVICES.map((s) => (
-                      <option key={s.name} value={s.name}>{s.name} ({s.duration}분)</option>
-                    ))}
+                    {SERVICES.map((s) => (<option key={s.name} value={s.name}>{s.name} ({s.duration}분)</option>))}
                   </select>
                 </td>
                 <td className="px-2 py-1">
-                  <input type="time" value={r.startTime} onChange={(e) => update(i, { startTime: e.target.value })} className="w-full bg-slate-800 border border-white/10 rounded px-2 py-1.5" />
+                  <input type="time" value={r.startTime} onChange={(e) => update(i, { startTime: e.target.value })} className={inp} />
                 </td>
                 <td className="px-2 py-1 font-bold text-cyan-300">{endTimeOf(r) || '—'}</td>
                 <td className="px-2 py-1">
-                  <input value={r.guestName} onChange={(e) => update(i, { guestName: e.target.value })} placeholder="고객명" className="w-full bg-slate-800 border border-white/10 rounded px-2 py-1.5" />
+                  <input list="bk-room-options" value={r.roomNumber} onChange={(e) => update(i, { roomNumber: e.target.value })} placeholder="빈룸" className={inp} />
                 </td>
                 <td className="px-2 py-1">
-                  <input list="bk-room-options" value={r.roomNumber} onChange={(e) => update(i, { roomNumber: e.target.value })} placeholder="빈룸 검색" className="w-full bg-slate-800 border border-white/10 rounded px-2 py-1.5 text-white placeholder-slate-500" />
+                  <input value={r.guestName} onChange={(e) => update(i, { guestName: e.target.value })} placeholder="고객명" className={inp} />
+                </td>
+                <td className="px-2 py-1">
+                  <input value={r.note} onChange={(e) => update(i, { note: e.target.value })} placeholder="업체명/노트" className={inp} />
+                </td>
+                <td className="px-2 py-1">
+                  <input type="number" value={r.pay || ''} onChange={(e) => update(i, { pay: Number(e.target.value) || 0 })} placeholder="0" className={inp + ' text-right'} />
+                </td>
+                <td className="px-2 py-1">
+                  <input type="number" value={r.tip || ''} onChange={(e) => update(i, { tip: Number(e.target.value) || 0 })} placeholder="0" className={inp + ' text-right'} />
                 </td>
                 <td className="px-2 py-1">
                   <button onClick={() => saveRow(i)} disabled={!isFilled(r) || r.saving} className={`w-full px-2 py-1.5 rounded font-bold text-xs ${r.saved ? 'bg-emerald-600' : 'bg-blue-600 hover:bg-blue-700 disabled:opacity-30'}`}>
@@ -250,7 +260,7 @@ export default function BookingSheetTable() {
                   </button>
                 </td>
               </tr>
-            ))}
+            );})}
           </tbody>
         </table>
       </div>
