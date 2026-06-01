@@ -1,104 +1,59 @@
 /**
  * ============================================================
- * 📌 정산 API 클라이언트
- * 📋 목적: 월정산 시스템 API 통합
- * 🔧 기능:
- *   - getMonthlySettlements(month) - 월별 정산 데이터 조회
- *   - getCompanySettlements(month) - 회사별 정산 조회
- *   - getGuideSettlements(month) - 가이드별 정산 조회
- * 📅 작성일: 2026-05-29
+ * 📌 정산 API 클라이언트 (Supabase 직결)
+ * 📋 목적: 월정산 리포트가 Supabase(monthly_settlements/companies/guides)를
+ *         직접 조회하도록 함. (백엔드/OAuth 토큰 불필요)
+ * 🔗 데이터: companies-client(Supabase) 위임 → 구글시트는 Apps Script syncAll 미러
+ * 📅 작성일: 2026-05-29 / 개정: 2026-06-01 (authenticatedGet 제거 → Supabase 직결)
  * ============================================================
  */
 
-import { authenticatedGet } from './authenticated-client';
+import {
+  getMonthlySettlements as supaGetMonthlySettlements,
+  getCompanies,
+  getGuides,
+} from './companies-client';
 
-/**
- * 월별 정산 데이터 조회
- *
- * @param month - 조회 월 (예: "2026-05")
- * @returns MonthlySettlement[] 배열
- *
- * @example
- * const settlements = await getMonthlySettlements("2026-05");
- */
+/** 월별 정산 데이터 조회 (Supabase monthly_settlements, 월 필터) */
 export async function getMonthlySettlements(month: string): Promise<any[]> {
   try {
-    const response = await authenticatedGet<{ settlements: any[] }>(
-      `/api/settlements/monthly?month=${month}`
-    );
-    return response.settlements || [];
+    return await supaGetMonthlySettlements({ settlement_month: month });
   } catch (error) {
-    console.error(`Failed to fetch monthly settlements for ${month}:`, error);
-    throw error;
+    console.error(`월정산 조회 실패 (${month}):`, error);
+    return [];
   }
 }
 
-/**
- * 회사별 정산 데이터 조회
- *
- * @param month - 조회 월 (예: "2026-05")
- * @returns Company[] 배열
- *
- * @example
- * const companies = await getCompanySettlements("2026-05");
- */
-export async function getCompanySettlements(month: string): Promise<any[]> {
+/** 회사 목록 조회 (리포트의 회사명 매핑/회사별 통계용) */
+export async function getCompanySettlements(_month: string): Promise<any[]> {
   try {
-    const response = await authenticatedGet<{ companies: any[] }>(
-      `/api/settlements/company?month=${month}`
-    );
-    return response.companies || [];
+    return await getCompanies();
   } catch (error) {
-    console.error(`Failed to fetch company settlements for ${month}:`, error);
-    throw error;
+    console.error('회사 조회 실패:', error);
+    return [];
   }
 }
 
-/**
- * 가이드별 정산 데이터 조회
- *
- * @param month - 조회 월 (예: "2026-05")
- * @returns Guide[] 배열
- *
- * @example
- * const guides = await getGuideSettlements("2026-05");
- */
-export async function getGuideSettlements(month: string): Promise<any[]> {
+/** 가이드 목록 조회 (리포트의 가이드명 매핑/가이드별 통계용) */
+export async function getGuideSettlements(_month: string): Promise<any[]> {
   try {
-    const response = await authenticatedGet<{ guides: any[] }>(
-      `/api/settlements/guide?month=${month}`
-    );
-    return response.guides || [];
+    return await getGuides();
   } catch (error) {
-    console.error(`Failed to fetch guide settlements for ${month}:`, error);
-    throw error;
+    console.error('가이드 조회 실패:', error);
+    return [];
   }
 }
 
-/**
- * 모든 정산 데이터 통합 조회
- *
- * @param month - 조회 월 (예: "2026-05")
- * @returns 정산 데이터 전체
- *
- * @example
- * const allSettlements = await getAllSettlements("2026-05");
- */
+/** 월정산 + 회사 + 가이드 통합 조회 */
 export async function getAllSettlements(month: string): Promise<{
   settlements: any[];
   companies: any[];
   guides: any[];
 }> {
-  try {
-    const [settlements, companies, guides] = await Promise.all([
-      getMonthlySettlements(month),
-      getCompanySettlements(month),
-      getGuideSettlements(month),
-    ]);
-
-    return { settlements, companies, guides };
-  } catch (error) {
-    console.error(`Failed to fetch all settlements for ${month}:`, error);
-    throw error;
-  }
+  const [settlements, companies, guides] = await Promise.all([
+    getMonthlySettlements(month),
+    getCompanies().catch(() => []),
+    getGuides().catch(() => []),
+  ]);
+  return { settlements, companies, guides };
 }

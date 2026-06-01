@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Edit2, Trash2, ArrowUp, ArrowDown, ArrowLeftRight } from 'lucide-react';
 
 interface SettingsSection {
   id: string;
@@ -111,48 +111,170 @@ export default function PoliciesPage() {
 // ============================================================
 // 베드 그룹 관리 컴포넌트
 // ============================================================
+interface BedGroup {
+  id: number;
+  name: string;
+  beds: number;
+  status: string;
+}
+
+const DEFAULT_BED_GROUPS: BedGroup[] = [
+  { id: 1, name: '🛏️ 마사지실1', beds: 30, status: '정상' },
+  { id: 2, name: '🛏️ 마사지실2', beds: 30, status: '정상' },
+  { id: 3, name: '👑 VIP실', beds: 14, status: '정상' },
+  { id: 4, name: '🏢 기타실', beds: 12, status: '정상' },
+];
+const BED_GROUPS_KEY = 'elspa.bedGroups';
+
 function BedGroupsContent() {
-  const [bedGroups] = useState([
-    { id: 1, name: '🛏️ 마사지실1', beds: 30, status: '정상' },
-    { id: 2, name: '🛏️ 마사지실2', beds: 30, status: '정상' },
-    { id: 3, name: '👑 VIP실', beds: 14, status: '정상' },
-    { id: 4, name: '🏢 기타실', beds: 12, status: '정상' },
-  ]);
+  const [groups, setGroups] = useState<BedGroup[]>(DEFAULT_BED_GROUPS);
+  const [editing, setEditing] = useState<BedGroup | null>(null);
+  const [moveOpen, setMoveOpen] = useState(false);
+
+  // 로드/저장 (localStorage 영속)
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(BED_GROUPS_KEY);
+      if (raw) setGroups(JSON.parse(raw));
+    } catch {}
+  }, []);
+  const persist = (next: BedGroup[]) => {
+    setGroups(next);
+    try { localStorage.setItem(BED_GROUPS_KEY, JSON.stringify(next)); } catch {}
+  };
+
+  const totalBeds = groups.reduce((s, g) => s + g.beds, 0);
+
+  const addGroup = () => {
+    const id = Math.max(0, ...groups.map(g => g.id)) + 1;
+    const g: BedGroup = { id, name: '🆕 새 그룹', beds: 0, status: '정상' };
+    persist([...groups, g]);
+    setEditing(g);
+  };
+  const removeGroup = (id: number) => {
+    if (confirm('이 그룹을 삭제할까요?')) persist(groups.filter(g => g.id !== id));
+  };
+  const moveGroup = (idx: number, dir: -1 | 1) => {
+    const j = idx + dir;
+    if (j < 0 || j >= groups.length) return;
+    const next = [...groups];
+    [next[idx], next[j]] = [next[j], next[idx]];
+    persist(next);
+  };
+  const saveEdit = (g: BedGroup) => {
+    persist(groups.map(x => (x.id === g.id ? g : x)));
+    setEditing(null);
+  };
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">마사지실 침대 구성</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-          <Plus size={18} />
-          새 그룹 추가
-        </button>
+      <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">마사지실 침대 구성</h2>
+          <p className="text-sm text-gray-500 mt-1">총 {totalBeds}개 침대 · {groups.length}개 그룹</p>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={() => setMoveOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">
+            <ArrowLeftRight size={18} /> 베드 이동
+          </button>
+          <button onClick={addGroup} className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+            <Plus size={18} /> 새 그룹 추가
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {bedGroups.map(group => (
+        {groups.map((group, idx) => (
           <div key={group.id} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition">
             <div className="flex justify-between items-start mb-3">
               <div>
                 <div className="font-bold text-lg text-gray-900">{group.name}</div>
                 <div className="text-sm text-gray-500">총 {group.beds}개 침대</div>
               </div>
-              <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
-                {group.status}
-              </span>
+              <div className="flex items-center gap-1">
+                {/* 순서 이동 */}
+                <button onClick={() => moveGroup(idx, -1)} disabled={idx === 0} className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30" title="위로"><ArrowUp size={16} /></button>
+                <button onClick={() => moveGroup(idx, 1)} disabled={idx === groups.length - 1} className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30" title="아래로"><ArrowDown size={16} /></button>
+                <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold ml-1">{group.status}</span>
+              </div>
             </div>
             <div className="flex gap-2">
-              <button className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50 transition">
-                <Edit2 size={14} />
-                편집
+              <button onClick={() => setEditing(group)} className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50 transition">
+                <Edit2 size={14} /> 편집
               </button>
-              <button className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm border border-red-300 text-red-600 rounded hover:bg-red-50 transition">
-                <Trash2 size={14} />
-                삭제
+              <button onClick={() => removeGroup(group.id)} className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm border border-red-300 text-red-600 rounded hover:bg-red-50 transition">
+                <Trash2 size={14} /> 삭제
               </button>
             </div>
           </div>
         ))}
+      </div>
+
+      {/* 편집 모달 */}
+      {editing && (
+        <EditGroupModal group={editing} onClose={() => setEditing(null)} onSave={saveEdit} />
+      )}
+      {/* 베드 이동 모달 */}
+      {moveOpen && (
+        <MoveBedsModal groups={groups} onClose={() => setMoveOpen(false)} onMove={persist} />
+      )}
+    </div>
+  );
+}
+
+function EditGroupModal({ group, onClose, onSave }: { group: BedGroup; onClose: () => void; onSave: (g: BedGroup) => void }) {
+  const [name, setName] = useState(group.name);
+  const [beds, setBeds] = useState(group.beds);
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
+        <h3 className="text-lg font-bold mb-4">그룹 편집</h3>
+        <label className="text-sm font-semibold text-gray-700">그룹 이름</label>
+        <input value={name} onChange={e => setName(e.target.value)} className="w-full mt-1 mb-3 px-3 py-2 border rounded-lg" />
+        <label className="text-sm font-semibold text-gray-700">침대 수</label>
+        <input type="number" value={beds} onChange={e => setBeds(Number(e.target.value) || 0)} className="w-full mt-1 mb-4 px-3 py-2 border rounded-lg" />
+        <div className="flex gap-2">
+          <button onClick={onClose} className="flex-1 px-4 py-2 bg-gray-200 rounded-lg font-bold">취소</button>
+          <button onClick={() => onSave({ ...group, name, beds })} className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-bold">저장</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MoveBedsModal({ groups, onClose, onMove }: { groups: BedGroup[]; onClose: () => void; onMove: (g: BedGroup[]) => void }) {
+  const [from, setFrom] = useState(groups[0]?.id ?? 0);
+  const [to, setTo] = useState(groups[1]?.id ?? 0);
+  const [count, setCount] = useState(1);
+  const [err, setErr] = useState('');
+
+  const apply = () => {
+    if (from === to) return setErr('서로 다른 그룹을 선택하세요.');
+    const src = groups.find(g => g.id === from)!;
+    if (count <= 0 || count > src.beds) return setErr(`이동 수는 1~${src.beds} 사이여야 합니다.`);
+    onMove(groups.map(g => g.id === from ? { ...g, beds: g.beds - count } : g.id === to ? { ...g, beds: g.beds + count } : g));
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
+        <h3 className="text-lg font-bold mb-4">베드 이동</h3>
+        <label className="text-sm font-semibold text-gray-700">출발 그룹</label>
+        <select value={from} onChange={e => { setFrom(Number(e.target.value)); setErr(''); }} className="w-full mt-1 mb-3 px-3 py-2 border rounded-lg">
+          {groups.map(g => <option key={g.id} value={g.id}>{g.name} ({g.beds})</option>)}
+        </select>
+        <label className="text-sm font-semibold text-gray-700">도착 그룹</label>
+        <select value={to} onChange={e => { setTo(Number(e.target.value)); setErr(''); }} className="w-full mt-1 mb-3 px-3 py-2 border rounded-lg">
+          {groups.map(g => <option key={g.id} value={g.id}>{g.name} ({g.beds})</option>)}
+        </select>
+        <label className="text-sm font-semibold text-gray-700">이동 침대 수</label>
+        <input type="number" value={count} onChange={e => { setCount(Number(e.target.value) || 0); setErr(''); }} className="w-full mt-1 mb-2 px-3 py-2 border rounded-lg" />
+        {err && <p className="text-sm text-red-600 mb-2">{err}</p>}
+        <div className="flex gap-2 mt-2">
+          <button onClick={onClose} className="flex-1 px-4 py-2 bg-gray-200 rounded-lg font-bold">취소</button>
+          <button onClick={apply} className="flex-1 px-4 py-2 bg-amber-600 text-white rounded-lg font-bold">이동</button>
+        </div>
       </div>
     </div>
   );
