@@ -131,7 +131,8 @@ export default function PayrollSettlementPage() {
             <li><b>테라피스트</b>: 수수료(정해진 금액)만</li>
             <li><b>매니저(정직원)</b>: {FULL_DAYS}일 만근 시 고정급 전액, 미달 시 일급×출근일</li>
             <li><b>매니저·메인·드라이버·할리스</b>: 개별 일급 × 출근일 (드라이버는 +운행수당 +식비 {peso(200)}/2주)</li>
-            <li><b>야근(퇴근)</b>: {settings.overtimeMinThreshold}분 이상 시 1시간당 {peso(settings.overtimeHourlyRate)} 지급 · 공휴일 국가 ×{settings.nationalHolidayMultiplier}/일반 ×{settings.specialHolidayMultiplier}</li>
+            <li><b>야근(퇴근)</b>: {settings.overtimeMinThreshold}분 이상 시 1시간당 {peso(settings.overtimeHourlyRate)} 지급</li>
+            <li><b>공휴일(전직원)</b>: 국가공휴일 {Math.round(settings.nationalHolidayMultiplier * 100)}% · 특별공휴일 {Math.round(settings.specialHolidayMultiplier * 100)}% (일급×(배율−1) 추가 지급)</li>
             <li><b>지각(출근)</b>: {settings.lateGraceMinutes}분 유예, 초과분 1분당 {peso(settings.latePerMinute)} 차감 · <b>SSS 선지급(인보이스·전액회수)</b> · 가불 · 건강검진 · 13개월 · 결근</li>
           </ul>
         </div>

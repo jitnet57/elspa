@@ -2,7 +2,7 @@
 // 오프라인 지원 및 캐싱 전략
 // 배포할 때마다 버전을 올려서 캐시를 무효화합니다
 
-const CACHE_VERSION = '20260601-v23'; // v23: 급여 규칙 수치(지각10/유예10·야근70/40분·식비200)
+const CACHE_VERSION = '20260601-v24'; // v24: 공휴일 전직원 200%/130% 명시
 const CACHE_NAME = `elspa-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
