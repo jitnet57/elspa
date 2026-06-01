@@ -2,7 +2,7 @@
 // 오프라인 지원 및 캐싱 전략
 // 배포할 때마다 버전을 올려서 캐시를 무효화합니다
 
-const CACHE_VERSION = '20260601-v10'; // v10: 급여정산 직군별 규칙 화면
+const CACHE_VERSION = '20260601-v11'; // v11: 급여 개별 일급 반영
 const CACHE_NAME = `elspa-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',

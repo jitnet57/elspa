@@ -35,7 +35,8 @@ interface EmpInput {
   id: number;
   name: string;
   type: EmpType;
-  base_salary: number;     // 격주 고정급 (정직원/다른직원)
+  base_salary: number;     // 정직원(매니저) 격주 고정급 전액
+  daily_wage: number;      // 개별 일급 (다른직원/드라이버 — 개인마다 다름, 각각 등록)
   days_worked: number;     // 출근일수 (0~13)
   commission: number;      // 테라피스트 수수료(정해진 금액 합계)
   driving_allowance: number; // 드라이버 운행수당
@@ -54,11 +55,11 @@ interface EmpInput {
 function basePayOf(e: EmpInput): number {
   if (e.type === 'therapist') return 0; // 수수료제
   if (e.type === 'manager') {
-    // 정직원: 13일 출근 시 전액, 미달 시 일할
-    return e.days_worked >= FULL_DAYS ? e.base_salary : Math.round((e.base_salary / FULL_DAYS) * e.days_worked);
+    // 정직원: 13일 만근 시 고정급 전액, 미달 시 개별 일급 × 출근일
+    return e.days_worked >= FULL_DAYS ? e.base_salary : e.daily_wage * e.days_worked;
   }
-  // 다른직원(할리스/네일/메인/드라이버): 출근일 비례
-  return Math.round((e.base_salary / FULL_DAYS) * e.days_worked);
+  // 다른직원(할리스/네일/메인/드라이버): 개별 일급 × 출근일 (개인마다 일급 다름)
+  return e.daily_wage * e.days_worked;
 }
 
 function computePay(e: EmpInput) {
@@ -73,15 +74,16 @@ function computePay(e: EmpInput) {
 }
 
 // ── 대표 목데이터 (규칙 시연용) ─────────────────────────────
+// daily_wage = 개인별 일급(각각 등록). 매니저는 base_salary(만근 전액) 기준, 미달 시 daily_wage 일할.
 const MOCK: EmpInput[] = [
-  { id: 1, name: 'Manager Kim', type: 'manager', base_salary: 30000, days_worked: 13, commission: 0, driving_allowance: 0, meal_allowance: 0, sss: 1350, cash_advance: 0, health_check: 0, thirteenth: 1200, late: 0, absence: 0, status: 'approved' },
-  { id: 2, name: 'Manager Lee', type: 'manager', base_salary: 30000, days_worked: 11, commission: 0, driving_allowance: 0, meal_allowance: 0, sss: 1350, cash_advance: 2000, health_check: 0, thirteenth: 1200, late: 300, absence: 0, status: 'draft' },
-  { id: 3, name: 'Therapist Sarah', type: 'therapist', base_salary: 0, days_worked: 12, commission: 18500, driving_allowance: 0, meal_allowance: 0, sss: 900, cash_advance: 3000, health_check: 0, thirteenth: 800, late: 0, absence: 0, status: 'paid' },
-  { id: 4, name: 'Therapist Emma', type: 'therapist', base_salary: 0, days_worked: 13, commission: 21000, driving_allowance: 0, meal_allowance: 0, sss: 1000, cash_advance: 0, health_check: 500, thirteenth: 900, late: 0, absence: 0, status: 'draft' },
-  { id: 5, name: 'Driver Jose', type: 'driver', base_salary: 18000, days_worked: 12, commission: 0, driving_allowance: 3500, meal_allowance: 1500, sss: 900, cash_advance: 1000, health_check: 0, thirteenth: 700, late: 0, absence: 0, status: 'draft' },
-  { id: 6, name: 'Nail Anna', type: 'nail', base_salary: 16000, days_worked: 10, commission: 0, driving_allowance: 0, meal_allowance: 0, sss: 720, cash_advance: 0, health_check: 0, thirteenth: 600, late: 200, absence: 0, status: 'draft' },
-  { id: 7, name: 'Hollys Grace', type: 'hollys', base_salary: 15000, days_worked: 13, commission: 0, driving_allowance: 0, meal_allowance: 0, sss: 700, cash_advance: 0, health_check: 0, thirteenth: 600, late: 0, absence: 0, status: 'approved' },
-  { id: 8, name: 'Maint. Pedro', type: 'maintenance', base_salary: 14000, days_worked: 9, commission: 0, driving_allowance: 0, meal_allowance: 0, sss: 650, cash_advance: 0, health_check: 0, thirteenth: 500, late: 0, absence: 1556, status: 'draft' },
+  { id: 1, name: 'Manager Kim',   type: 'manager',     base_salary: 30000, daily_wage: 2300, days_worked: 13, commission: 0,     driving_allowance: 0,    meal_allowance: 0,    sss: 1350, cash_advance: 0,    health_check: 0,   thirteenth: 1200, late: 0,   absence: 0,    status: 'approved' },
+  { id: 2, name: 'Manager Lee',   type: 'manager',     base_salary: 30000, daily_wage: 2300, days_worked: 11, commission: 0,     driving_allowance: 0,    meal_allowance: 0,    sss: 1350, cash_advance: 2000, health_check: 0,   thirteenth: 1200, late: 300, absence: 0,    status: 'draft' },
+  { id: 3, name: 'Therapist Sarah', type: 'therapist', base_salary: 0,     daily_wage: 0,    days_worked: 12, commission: 18500, driving_allowance: 0,    meal_allowance: 0,    sss: 900,  cash_advance: 3000, health_check: 0,   thirteenth: 800,  late: 0,   absence: 0,    status: 'paid' },
+  { id: 4, name: 'Therapist Emma',  type: 'therapist', base_salary: 0,     daily_wage: 0,    days_worked: 13, commission: 21000, driving_allowance: 0,    meal_allowance: 0,    sss: 1000, cash_advance: 0,    health_check: 500, thirteenth: 900,  late: 0,   absence: 0,    status: 'draft' },
+  { id: 5, name: 'Driver Jose',   type: 'driver',      base_salary: 0,     daily_wage: 1400, days_worked: 12, commission: 0,     driving_allowance: 3500, meal_allowance: 1500, sss: 900,  cash_advance: 1000, health_check: 0,   thirteenth: 700,  late: 0,   absence: 0,    status: 'draft' },
+  { id: 6, name: 'Nail Anna',     type: 'nail',        base_salary: 0,     daily_wage: 1250, days_worked: 10, commission: 0,     driving_allowance: 0,    meal_allowance: 0,    sss: 720,  cash_advance: 0,    health_check: 0,   thirteenth: 600,  late: 200, absence: 0,    status: 'draft' },
+  { id: 7, name: 'Hollys Grace',  type: 'hollys',      base_salary: 0,     daily_wage: 1150, days_worked: 13, commission: 0,     driving_allowance: 0,    meal_allowance: 0,    sss: 700,  cash_advance: 0,    health_check: 0,   thirteenth: 600,  late: 0,   absence: 0,    status: 'approved' },
+  { id: 8, name: 'Maint. Pedro',  type: 'maintenance', base_salary: 0,     daily_wage: 1080, days_worked: 9,  commission: 0,     driving_allowance: 0,    meal_allowance: 0,    sss: 650,  cash_advance: 0,    health_check: 0,   thirteenth: 500,  late: 0,   absence: 0,    status: 'draft' },
 ];
 
 const peso = (n: number) => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 }).format(n);
@@ -137,8 +139,8 @@ export default function PayrollSettlementPage() {
           <ul className="list-disc pl-5 space-y-0.5 text-indigo-800">
             <li><b>테라피스트</b>: 수수료(정해진 금액)만 지급</li>
             <li><b>매니저(정직원)</b>: {FULL_DAYS}일 출근 시 고정급 전액, 미달 시 일할</li>
-            <li><b>할리스·네일·메인·드라이버</b>: 출근일 비례 (고정급 ÷ {FULL_DAYS} × 출근일)</li>
-            <li><b>드라이버</b>: 고정(일할) + 운행수당 + 식비</li>
+            <li><b>할리스·네일·메인·드라이버</b>: <b>개별 일급 × 출근일</b> (일급은 개인마다 다르게 등록)</li>
+            <li><b>드라이버</b>: 일급×출근일 + 운행수당 + 식비</li>
           </ul>
         </div>
 
@@ -193,6 +195,7 @@ export default function PayrollSettlementPage() {
                     <tr className="text-left text-gray-600 border-b border-gray-100">
                       <th className="px-4 py-2">직원</th>
                       <th className="px-4 py-2 text-center">출근일</th>
+                      <th className="px-4 py-2 text-right">일급</th>
                       <th className="px-4 py-2 text-right">기본급</th>
                       <th className="px-4 py-2 text-right">수수료</th>
                       <th className="px-4 py-2 text-right">운행/식비</th>
@@ -214,6 +217,7 @@ export default function PayrollSettlementPage() {
                           <td className="px-4 py-2 text-center">
                             {e.type === 'therapist' ? '—' : `${e.days_worked}/${FULL_DAYS}`}
                           </td>
+                          <td className="px-4 py-2 text-right text-gray-500">{e.daily_wage ? peso(e.daily_wage) : '—'}</td>
                           <td className="px-4 py-2 text-right">{c.base ? peso(c.base) : '—'}</td>
                           <td className="px-4 py-2 text-right">{c.commission ? peso(c.commission) : '—'}</td>
                           <td className="px-4 py-2 text-right">{c.driving + c.meal ? peso(c.driving + c.meal) : '—'}</td>
