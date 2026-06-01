@@ -190,7 +190,10 @@ export default function PayrollSettlementPage() {
             {loading && <span className="text-xs text-gray-400">불러오는 중…</span>}
           </div>
         </div>
-        <a href="/admin/payroll/settings" className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-bold text-gray-700">⚙️ 급여 설정</a>
+        <div className="flex gap-2">
+          <a href="/reports/payroll-test-report.xlsx" download className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold">📊 테스트 보고서</a>
+          <a href="/admin/payroll/settings" className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-bold text-gray-700">⚙️ 급여 설정</a>
+        </div>
       </div>
 
       <main className="px-4 py-6 pb-24 max-w-6xl mx-auto">
