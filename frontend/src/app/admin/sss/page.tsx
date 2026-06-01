@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { getSssMonths, getSssRecords, createSssRecord, updateSssRecord, deleteSssRecord } from '@/lib/api/sss-client';
 
 // ── 타입 ──────────────────────────────────────────────────────────
 interface MonthSummary {
@@ -63,9 +62,7 @@ export default function SssPage() {
   const fetchMonths = useCallback(async () => {
     setLoadingMonths(true);
     try {
-      const res = await fetch(`${API_BASE}/api/sss/months`);
-      if (!res.ok) throw new Error('월 목록 로드 실패');
-      const data: MonthSummary[] = await res.json();
+      const data: MonthSummary[] = await getSssMonths();
       setMonths(data);
       if (data.length > 0 && !selectedMonth) {
         setSelectedMonth(data[0].applicable_month);
@@ -83,9 +80,7 @@ export default function SssPage() {
     setLoadingRecords(true);
     setRecordsError('');
     try {
-      const res = await fetch(`${API_BASE}/api/sss/records?month=${encodeURIComponent(month)}`);
-      if (!res.ok) throw new Error('데이터 로드 실패');
-      const data: SssRecord[] = await res.json();
+      const data: SssRecord[] = await getSssRecords(month);
       setRecords(data.map(r => ({ ...r, dirty: false })));
     } catch (e) {
       setRecordsError(e instanceof Error ? e.message : '오류');
@@ -119,22 +114,17 @@ export default function SssPage() {
   const saveRow = async (row: EditRow) => {
     setSaving(prev => new Set(prev).add(row.id));
     try {
-      const res = await fetch(`${API_BASE}/api/sss/records/${row.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          employee_name: row.employee_name,
-          ss_number:     row.ss_number,
-          ss_amount:     row.ss_amount,
-          ec_amount:     row.ec_amount,
-          total_amount:  row.total_amount,
-          employee_no:   row.employee_no,
-          company:       row.company,
-          employer_ss_no: row.employer_ss_no,
-          invoice_no:    row.invoice_no,
-        }),
+      await updateSssRecord(row.id, {
+        employee_name: row.employee_name,
+        ss_number:     row.ss_number,
+        ss_amount:     row.ss_amount,
+        ec_amount:     row.ec_amount,
+        total_amount:  row.total_amount,
+        employee_no:   row.employee_no,
+        company:       row.company,
+        employer_ss_no: row.employer_ss_no,
+        invoice_no:    row.invoice_no,
       });
-      if (!res.ok) throw new Error('저장 실패');
       setRecords(prev => prev.map(r => r.id === row.id ? { ...r, dirty: false } : r));
     } catch (e) {
       alert(e instanceof Error ? e.message : '저장 오류');
@@ -148,8 +138,7 @@ export default function SssPage() {
     if (!confirm('이 직원 기록을 삭제하시겠습니까?')) return;
     setDeleting(prev => new Set(prev).add(id));
     try {
-      const res = await fetch(`${API_BASE}/api/sss/records/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('삭제 실패');
+      await deleteSssRecord(id);
       setRecords(prev => prev.filter(r => r.id !== id));
     } catch (e) {
       alert(e instanceof Error ? e.message : '삭제 오류');
@@ -166,24 +155,18 @@ export default function SssPage() {
       ? Math.max(...records.map(r => r.employee_no ?? 0)) + 1
       : 1;
     try {
-      const res = await fetch(`${API_BASE}/api/sss/records`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          applicable_month: selectedMonth,
-          company:          meta?.company ?? '',
-          employer_ss_no:   meta?.employer_ss_no ?? '',
-          invoice_no:       meta?.invoice_no ?? '',
-          employee_no:      nextNo,
-          employee_name:    '',
-          ss_number:        '',
-          ss_amount:        0,
-          ec_amount:        0,
-          total_amount:     0,
-        }),
+      const newRow: SssRecord = await createSssRecord({
+        applicable_month: selectedMonth,
+        company:          meta?.company ?? '',
+        employer_ss_no:   meta?.employer_ss_no ?? '',
+        invoice_no:       meta?.invoice_no ?? '',
+        employee_no:      nextNo,
+        employee_name:    '',
+        ss_number:        '',
+        ss_amount:        0,
+        ec_amount:        0,
+        total_amount:     0,
       });
-      if (!res.ok) throw new Error('추가 실패');
-      const newRow: SssRecord = await res.json();
       setRecords(prev => [...prev, { ...newRow, dirty: false }]);
     } catch (e) {
       alert(e instanceof Error ? e.message : '추가 오류');
@@ -195,16 +178,17 @@ export default function SssPage() {
     if (!selectedMonth) return;
     setExporting(true);
     try {
-      const res = await fetch(
-        `${API_BASE}/api/sss/export?month=${encodeURIComponent(selectedMonth)}`
-      );
-      if (!res.ok) throw new Error('내보내기 실패');
-      const blob = await res.blob();
+      // 클라이언트 CSV 생성 (백엔드 불필요)
+      const headers = ['No', 'Employee', 'SS Number', 'SS', 'EC', 'Total'];
+      const lines = records.map(r => [
+        r.employee_no ?? '', r.employee_name, r.ss_number ?? '',
+        r.ss_amount, r.ec_amount, r.total_amount,
+      ].join(','));
+      const csv = '﻿' + [headers.join(','), ...lines].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url  = URL.createObjectURL(blob);
-      const cd   = res.headers.get('Content-Disposition') ?? '';
-      const name = cd.match(/filename="?([^"]+)"?/)?.[1] ?? `SSS_${selectedMonth}.xlsx`;
       const a    = document.createElement('a');
-      a.href = url; a.download = name; a.click();
+      a.href = url; a.download = `SSS_${selectedMonth}.csv`; a.click();
       URL.revokeObjectURL(url);
     } catch (e) {
       alert(e instanceof Error ? e.message : '내보내기 오류');
@@ -247,31 +231,11 @@ export default function SssPage() {
 
   const handleScan = async () => {
     if (!files.length) return;
-    setScanStatus('scanning');
-    setScanError('');
-    try {
-      const form = new FormData();
-      files.forEach(({ file }) => form.append('files', file));
-      const res = await fetch(`${API_BASE}/api/sss/scan`, { method: 'POST', body: form });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ detail: res.statusText }));
-        throw new Error(err.detail || '서버 오류');
-      }
-      // 파일 다운로드
-      const blob = await res.blob();
-      const url  = URL.createObjectURL(blob);
-      const cd   = res.headers.get('Content-Disposition') ?? '';
-      const name = cd.match(/filename="?([^"]+)"?/)?.[1] ?? 'SSS_Contribution.xlsx';
-      const a    = document.createElement('a'); a.href = url; a.download = name; a.click();
-      URL.revokeObjectURL(url);
-      setScanStatus('done');
-      // Records 탭 갱신
-      await fetchMonths();
-      setTab('records');
-    } catch (err: unknown) {
-      setScanError(err instanceof Error ? err.message : '알 수 없는 오류');
-      setScanStatus('error');
-    }
+    // ⚠️ 자동 OCR 스캔은 별도 서버가 필요합니다(현재 백엔드 없음).
+    //    후정산 흐름: 정부 인보이스를 보고 Records 탭에서 직접 입력/수정 → DB 저장.
+    setScanStatus('error');
+    setScanError('자동 스캔(OCR)은 서버가 필요합니다. 정부 인보이스를 보고 Records 탭에서 직접 입력해 주세요. (후정산)');
+    setTab('records');
   };
 
   // ── 렌더 ─────────────────────────────────────────────────────
