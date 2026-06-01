@@ -40,7 +40,7 @@ export default function MonitorPage() {
             <button
               onClick={() => setActiveTab('beds')}
               className={`px-6 py-2 rounded-lg font-bold transition whitespace-nowrap ${
-                activeTab === 'beds' ? 'bg-gray-200 text-gray-800' : 'text-gray-600 hover:text-gray-800'
+                activeTab === 'beds' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
               }`}
             >
               🛏️ {t('Real-time Bed Mode', '실시간 베드 모드')}

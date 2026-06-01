@@ -5,6 +5,7 @@ import { supabaseApiAdapter, type Booking } from '@/lib/api/supabase-adapter';
 import { saveBookingToSheet } from '@/lib/services/booking-sheet';
 import { SERVICES, autoEndTime, type UiTherapist } from './booking-helpers';
 import { getCompanies, getGuides } from '@/lib/api/companies-client';
+import { useT } from '@/lib/i18n';
 
 /**
  * ============================================================
@@ -45,6 +46,7 @@ const padTo30 = (rows: Row[]): Row[] => {
 };
 
 export default function BookingSheetTable() {
+  const tr = useT();
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
   const [date, setDate] = useState(today);
   const [therapists, setTherapists] = useState<UiTherapist[]>([]);
@@ -157,12 +159,12 @@ export default function BookingSheetTable() {
   const saveAll = async () => {
     const targets = rows.map((r, i) => ({ r, i })).filter(({ r }) => isFilled(r) && !r.saved);
     if (targets.length === 0) {
-      setBulkMsg('저장할 행이 없습니다. (테라피스트·마사지·시작·고객 입력 필요)');
+      setBulkMsg(tr('No rows to save. (therapist·treatment·start·guest required)', '저장할 행이 없습니다. (테라피스트·마사지·시작·고객 입력 필요)'));
       return;
     }
-    setBulkMsg(`${targets.length}건 저장 중…`);
+    setBulkMsg(tr(`Saving ${targets.length}…`, `${targets.length}건 저장 중…`));
     for (const { i } of targets) await saveRow(i);
-    setBulkMsg(`✅ ${targets.length}건 저장 완료 (DB + 구글시트)`);
+    setBulkMsg(tr(`✅ ${targets.length} saved (DB + Sheet)`, `✅ ${targets.length}건 저장 완료 (DB + 구글시트)`));
   };
 
   const filledCount = rows.filter(isFilled).length;
@@ -178,21 +180,21 @@ export default function BookingSheetTable() {
       {/* 헤더 */}
       <div className="px-6 py-4 border-b border-white/10 flex flex-wrap items-center gap-3">
         <h2 className="text-xl font-black">📊 BOOKING WITH THERAPIST</h2>
-        <span className="text-xs text-indigo-300">테라피스트 예약 ({ROW_COUNT}행)</span>
+        <span className="text-xs text-indigo-300">{tr(`Therapist booking (${ROW_COUNT} rows)`, `테라피스트 예약 (${ROW_COUNT}행)`)}</span>
         {(() => {
           const filled = rows.filter(isFilled).length;
-          const sheetNo = Math.floor(filled / ROW_COUNT) + 1; // 30개 초과 시 자동으로 다음 시트
+          const sheetNo = Math.floor(filled / ROW_COUNT) + 1;
           const ord = (n: number) => { const s = ['th','st','nd','rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
-          return <span className="text-xs px-2 py-1 rounded-md bg-pink-600/30 text-pink-200" title="30개 초과 시 다음 시트로 자동 반영">📄 시트: {ord(sheetNo)}</span>;
+          return <span className="text-xs px-2 py-1 rounded-md bg-pink-600/30 text-pink-200">{tr('Sheet', '시트')}: {ord(sheetNo)}</span>;
         })()}
         <div className="ml-2 flex items-center gap-2">
           📅
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="px-3 py-2 rounded-lg bg-slate-800 border border-indigo-500/40 text-white text-sm" />
-          {loading && <span className="text-xs text-slate-400">불러오는 중…</span>}
+          {loading && <span className="text-xs text-slate-400">{tr('Loading…', '불러오는 중…')}</span>}
         </div>
         <div className="ml-auto flex items-center gap-3">
-          <span className="text-xs text-slate-300">입력됨: {filledCount}건</span>
-          <button onClick={saveAll} className="px-4 py-2 rounded-lg bg-pink-600 hover:bg-pink-700 font-bold text-sm">전체 저장 (DB + 구글시트)</button>
+          <span className="text-xs text-slate-300">{tr(`Entered: ${filledCount}`, `입력됨: ${filledCount}건`)}</span>
+          <button onClick={saveAll} className="px-4 py-2 rounded-lg bg-pink-600 hover:bg-pink-700 font-bold text-sm">{tr('Save All (DB + Sheet)', '전체 저장 (DB + 구글시트)')}</button>
         </div>
       </div>
       {bulkMsg && <p className="px-6 py-2 text-sm text-indigo-200">{bulkMsg}</p>}
@@ -213,7 +215,7 @@ export default function BookingSheetTable() {
       <datalist id="bk-referral-options">
         {referrals.map((r) => (<option key={r} value={r} />))}
       </datalist>
-      <p className="px-6 pb-2 text-xs text-emerald-300">🟢 빈 룸 {availableRooms.length}개 · 업체/노트 칸: 업체·가이드 검색(레퍼럴) 또는 자유 입력(노트)</p>
+      <p className="px-6 pb-2 text-xs text-emerald-300">{tr(`🟢 ${availableRooms.length} rooms free · Company/Note: search company·guide (referral) or free text (note)`, `🟢 빈 룸 ${availableRooms.length}개 · 업체/노트 칸: 업체·가이드 검색(레퍼럴) 또는 자유 입력(노트)`)}</p>
 
       {/* 30행 예약표 */}
       <div className="px-4 py-4 overflow-x-auto">
@@ -221,16 +223,16 @@ export default function BookingSheetTable() {
           <thead>
             <tr className="text-left text-indigo-200 border-b border-white/10">
               <th className="px-2 py-2 w-10">#</th>
-              <th className="px-2 py-2">테라피스트</th>
-              <th className="px-2 py-2">트리트먼트</th>
-              <th className="px-2 py-2 w-28">시작</th>
-              <th className="px-2 py-2 w-20">종료</th>
-              <th className="px-2 py-2 w-24">방번호</th>
-              <th className="px-2 py-2">고객이름</th>
-              <th className="px-2 py-2">업체명(노트)</th>
-              <th className="px-2 py-2 w-24">지불</th>
-              <th className="px-2 py-2 w-20">팁</th>
-              <th className="px-2 py-2 w-16">저장</th>
+              <th className="px-2 py-2">{tr('Therapist', '테라피스트')}</th>
+              <th className="px-2 py-2">{tr('Treatment', '트리트먼트')}</th>
+              <th className="px-2 py-2 w-28">{tr('Start', '시작')}</th>
+              <th className="px-2 py-2 w-20">{tr('End', '종료')}</th>
+              <th className="px-2 py-2 w-24">{tr('Room', '방번호')}</th>
+              <th className="px-2 py-2">{tr('Guest', '고객이름')}</th>
+              <th className="px-2 py-2">{tr('Company (Note)', '업체명(노트)')}</th>
+              <th className="px-2 py-2 w-24">{tr('Pay', '지불')}</th>
+              <th className="px-2 py-2 w-20">{tr('Tip', '팁')}</th>
+              <th className="px-2 py-2 w-16">{tr('Save', '저장')}</th>
             </tr>
           </thead>
           <tbody>
@@ -240,11 +242,11 @@ export default function BookingSheetTable() {
               <tr key={i} className={`border-b border-white/5 ${r.saved ? 'bg-emerald-900/30' : ''}`}>
                 <td className="px-2 py-1 text-slate-400">{i + 1}</td>
                 <td className="px-2 py-1">
-                  <input list="bk-therapist-options" value={r.therapistName} onChange={(e) => update(i, { therapistName: e.target.value })} placeholder="검색/선택…" className={inp} />
+                  <input list="bk-therapist-options" value={r.therapistName} onChange={(e) => update(i, { therapistName: e.target.value })} placeholder={tr('search/select…','검색/선택…')} className={inp} />
                 </td>
                 <td className="px-2 py-1">
                   <select value={r.service} onChange={(e) => update(i, { service: e.target.value })} className={inp}>
-                    <option value="">선택…</option>
+                    <option value="">{tr('Select…','선택…')}</option>
                     {SERVICES.map((s) => (<option key={s.name} value={s.name}>{s.name} ({s.duration}분)</option>))}
                   </select>
                 </td>
@@ -253,13 +255,13 @@ export default function BookingSheetTable() {
                 </td>
                 <td className="px-2 py-1 font-bold text-cyan-300">{endTimeOf(r) || '—'}</td>
                 <td className="px-2 py-1">
-                  <input list="bk-room-options" value={r.roomNumber} onChange={(e) => update(i, { roomNumber: e.target.value })} placeholder="빈룸" className={inp} />
+                  <input list="bk-room-options" value={r.roomNumber} onChange={(e) => update(i, { roomNumber: e.target.value })} placeholder={tr('free room','빈룸')} className={inp} />
                 </td>
                 <td className="px-2 py-1">
-                  <input value={r.guestName} onChange={(e) => update(i, { guestName: e.target.value })} placeholder="고객명" className={inp} />
+                  <input value={r.guestName} onChange={(e) => update(i, { guestName: e.target.value })} placeholder={tr('guest','고객명')} className={inp} />
                 </td>
                 <td className="px-2 py-1">
-                  <input list="bk-referral-options" value={r.note} onChange={(e) => update(i, { note: e.target.value })} placeholder="업체·가이드 검색 / 노트" className={inp} />
+                  <input list="bk-referral-options" value={r.note} onChange={(e) => update(i, { note: e.target.value })} placeholder={tr('company/guide or note','업체·가이드 검색 / 노트')} className={inp} />
                 </td>
                 <td className="px-2 py-1">
                   <input type="number" value={r.pay || ''} onChange={(e) => update(i, { pay: Number(e.target.value) || 0 })} placeholder="0" className={inp + ' text-right'} />
@@ -269,7 +271,7 @@ export default function BookingSheetTable() {
                 </td>
                 <td className="px-2 py-1">
                   <button onClick={() => saveRow(i)} disabled={!isFilled(r) || r.saving} className={`w-full px-2 py-1.5 rounded font-bold text-xs ${r.saved ? 'bg-emerald-600' : 'bg-blue-600 hover:bg-blue-700 disabled:opacity-30'}`}>
-                    {r.saving ? '…' : r.saved ? '✓' : '저장'}
+                    {r.saving ? '…' : r.saved ? '✓' : tr('Save', '저장')}
                   </button>
                 </td>
               </tr>
