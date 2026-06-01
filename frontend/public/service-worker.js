@@ -2,7 +2,7 @@
 // 오프라인 지원 및 캐싱 전략
 // 배포할 때마다 버전을 올려서 캐시를 무효화합니다
 
-const CACHE_VERSION = '20260601-v19'; // v19: 대시보드 COMPANIES제거/GUIDE FEE통합 + 베드이동 글자색
+const CACHE_VERSION = '20260601-v20'; // v20: SSS 선지급(인보이스·전액회수) 반영
 const CACHE_NAME = `elspa-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',

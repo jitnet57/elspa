@@ -132,7 +132,7 @@ export default function PayrollSettlementPage() {
             <li><b>매니저(정직원)</b>: {FULL_DAYS}일 만근 시 고정급 전액, 미달 시 일급×출근일</li>
             <li><b>할리스·네일·메인·드라이버</b>: 개별 일급 × 출근일 (드라이버는 +운행수당+식비)</li>
             <li><b>가산</b>: 야근({peso(settings.overtimeHourlyRate)}/h) · 국가공휴일 ×{settings.nationalHolidayMultiplier} · 일반공휴일 ×{settings.specialHolidayMultiplier}</li>
-            <li><b>차감</b>: 지각({peso(settings.latePerMinute)}/분) · SSS · 가불 · 건강검진 · 13개월 · 결근</li>
+            <li><b>차감</b>: 지각({peso(settings.latePerMinute)}/분) · <b>SSS 선지급(정부 인보이스 기준·전액회수)</b> · 가불 · 건강검진 · 13개월 · 결근</li>
           </ul>
         </div>
 
@@ -237,7 +237,7 @@ function DetailModal({ e, s, onClose }: { e: EmpInput; s: PayrollSettings; onClo
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 space-y-1.5">
               {row(`지각 (${e.late_minutes}분 × ${peso(s.latePerMinute)})`, c.lateDed, true)}
               {row('결근', e.absence, true)}
-              {row('SSS', e.sss, true)}
+              {row('SSS 선지급 회수 (인보이스 기준)', e.sss, true)}
               {row('가불(CA)', e.cash_advance, true)}
               {row('건강검진', e.health_check, true)}
               {row('13개월 적립', e.thirteenth, true)}
