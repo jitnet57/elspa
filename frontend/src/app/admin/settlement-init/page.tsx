@@ -7,71 +7,24 @@ export default function SettlementInitPage() {
   const [message, setMessage] = useState('');
   const [initData, setInitData] = useState<any>(null);
 
+  // ⚠️ 백엔드 제거 — 정산 데이터는 Supabase에서 관리합니다.
+  // 초기화/시드는 supabase/*.sql (schema/payroll_companies/settlement_mock_data) 실행으로 처리.
   const handleInitialize = async () => {
-    setStatus('loading');
-    setMessage('Initializing settlement data...');
-
-    try {
-      const response = await fetch('http://localhost:8000/api/settlements/initialize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setStatus('success');
-        setMessage('✅ Settlement data initialized successfully!');
-        setInitData(data);
-      } else {
-        setStatus('error');
-        setMessage('❌ Failed to initialize settlement data');
-      }
-    } catch (error) {
-      setStatus('error');
-      setMessage(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+    setStatus('success');
+    setMessage('ℹ️ 정산 데이터는 Supabase에서 관리됩니다. 시드는 supabase/settlement_mock_data.sql 을 SQL Editor에서 실행하세요. (백엔드 불필요)');
+    setInitData(null);
   };
 
   const handleReset = async () => {
-    if (!confirm('⚠️ This will completely reset all settlement data. Are you sure?')) {
-      return;
-    }
-
-    setStatus('loading');
-    setMessage('Resetting settlement data...');
-
-    try {
-      const response = await fetch('http://localhost:8000/api/settlements/reset', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setStatus('success');
-        setMessage('✅ Settlement data reset successfully!');
-        setInitData(null);
-      } else {
-        setStatus('error');
-        setMessage('❌ Failed to reset settlement data');
-      }
-    } catch (error) {
-      setStatus('error');
-      setMessage(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+    if (!confirm('⚠️ 정산 데이터 초기화는 Supabase SQL Editor에서 직접 수행합니다. 안내를 표시할까요?')) return;
+    setStatus('success');
+    setMessage('ℹ️ 초기화: Supabase에서 해당 테이블을 truncate 하거나 시드 SQL을 재실행하세요. (이 화면은 백엔드 없이 동작)');
+    setInitData(null);
   };
 
   const handleCheckStatus = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/api/settlements/status');
-      const data = await response.json();
-      setInitData(data);
-      setMessage('Current settlement status loaded');
-    } catch (error) {
-      setMessage(`Error checking status: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+    setMessage('ℹ️ 현재 정산 현황은 /admin/monthly-settlement · /admin/settlement-report 에서 Supabase 실데이터로 확인하세요.');
+    setInitData(null);
   };
 
   return (

@@ -50,7 +50,7 @@ export function RealtimeMap({
   watchMode = 'self',
   targetEntityType,
   targetEntityId,
-  apiUrl = 'http://localhost:8000',
+  apiUrl = '',
   enableWebSocket = true,
   staticMarkers,
   onMarkerClick,
@@ -116,6 +116,8 @@ export function RealtimeMap({
   // WebSocket 연결
   useEffect(() => {
     if (!map.current || !enableWebSocket) return;
+    // 백엔드 미설정 시 실시간 연결 시도 안 함 (localhost 에러 방지)
+    if (!apiUrl) return;
 
     const wsUrl =
       watchMode === 'all'

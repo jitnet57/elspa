@@ -75,7 +75,7 @@ export default function DriverTrackingPage() {
           watchMode="target"
           targetEntityType="driver"
           targetEntityId={driverId}
-          apiUrl={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}
+          apiUrl={process.env.NEXT_PUBLIC_API_URL || ''}
         />
       </div>
 

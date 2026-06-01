@@ -2,7 +2,7 @@
 // 오프라인 지원 및 캐싱 전략
 // 배포할 때마다 버전을 올려서 캐시를 무효화합니다
 
-const CACHE_VERSION = '20260601-v21'; // v21: SSS Supabase 직결(localhost 제거)
+const CACHE_VERSION = '20260601-v22'; // v22: localhost 백엔드 의존 전체 제거(폴백·WS가드)
 const CACHE_NAME = `elspa-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',

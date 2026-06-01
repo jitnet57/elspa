@@ -4,7 +4,7 @@
 // 📅 작성일: 2026-05-18
 // ============================================================
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export interface Therapist {
   id: number;

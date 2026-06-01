@@ -82,7 +82,7 @@ interface EdgeSearchRequest {
 }
 
 // API 기본 URL (환경변수 또는 기본값)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 const KNOWLEDGE_NETWORK_API = `${API_BASE_URL}/api/knowledge-network`;
 
 /**

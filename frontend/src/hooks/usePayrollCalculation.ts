@@ -54,7 +54,7 @@ export function usePayrollCalculation() {
   );
 
   // API 베이스 URL
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
   /**
    * 단일 직원 급여 계산

@@ -47,7 +47,10 @@ export function useDriverWebSocket(driverId: number | null, enabled: boolean = t
   const connectWebSocket = useCallback(() => {
     if (!driverId || !enabled || ws.current?.readyState === WebSocket.OPEN) return;
 
-    const wsUrl = `${process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000'}/api/driver/ws/${driverId}`;
+    // 백엔드(WS 서버) 미설정 시 연결 시도 안 함 (localhost 에러 방지)
+    const wsBase = process.env.NEXT_PUBLIC_WS_URL || '';
+    if (!wsBase) return;
+    const wsUrl = `${wsBase}/api/driver/ws/${driverId}`;
 
     try {
       ws.current = new WebSocket(wsUrl);
