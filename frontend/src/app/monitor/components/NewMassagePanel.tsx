@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabaseApiAdapter } from '@/lib/api/supabase-adapter';
 import { saveBookingToSheet } from '@/lib/services/booking-sheet';
 import { SERVICES, autoEndTime, initials, type UiTherapist } from './booking-helpers';
+import { getCompanies, getGuides } from '@/lib/api/companies-client';
 import { useT } from '@/lib/i18n';
 
 /**
@@ -45,8 +46,13 @@ export default function NewMassagePanel({
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
 
+  const [referrals, setReferrals] = useState<string[]>([]);
+
   useEffect(() => {
     supabaseApiAdapter.getTherapists().then((r) => setTherapists(r as UiTherapist[])).catch(() => setTherapists([]));
+    Promise.all([getCompanies().catch(() => []), getGuides().catch(() => [])]).then(([cs, gs]) => {
+      setReferrals([...cs.map((c: any) => `${c.name} (업체)`), ...gs.map((g: any) => `${g.name} (가이드)`)]);
+    });
   }, []);
 
   const endTime = autoEndTime(startTime, service);
@@ -152,7 +158,10 @@ export default function NewMassagePanel({
             </div>
             <div>
               <label className="text-sm font-bold text-gray-700">{t('Company / Note', '업체명(노트)')}</label>
-              <input value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('company / memo', '업체명 / 메모')} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900" />
+              <input list="np-referral-options" value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('company/guide or memo', '업체·가이드 검색 / 노트')} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900" />
+              <datalist id="np-referral-options">
+                {referrals.map((r) => (<option key={r} value={r} />))}
+              </datalist>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>

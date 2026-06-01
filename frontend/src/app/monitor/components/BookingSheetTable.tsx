@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabaseApiAdapter, type Booking } from '@/lib/api/supabase-adapter';
 import { saveBookingToSheet } from '@/lib/services/booking-sheet';
 import { SERVICES, autoEndTime, type UiTherapist } from './booking-helpers';
+import { getCompanies, getGuides } from '@/lib/api/companies-client';
 
 /**
  * ============================================================
@@ -52,10 +53,18 @@ export default function BookingSheetTable() {
   const [loading, setLoading] = useState(false);
 
   const [beds, setBeds] = useState<{ bed_number: number; room_zone: string; status: string }[]>([]);
+  const [referrals, setReferrals] = useState<string[]>([]); // "이름 (업체)" / "이름 (가이드)"
 
   useEffect(() => {
     supabaseApiAdapter.getTherapists().then((r) => setTherapists(r as UiTherapist[])).catch(() => setTherapists([]));
     supabaseApiAdapter.getBeds().then((r) => setBeds((r as any[]).map((b) => ({ bed_number: b.bed_number, room_zone: b.room_zone, status: b.status })))).catch(() => setBeds([]));
+    // 업체/가이드 레퍼럴 후보
+    Promise.all([getCompanies().catch(() => []), getGuides().catch(() => [])]).then(([cs, gs]) => {
+      setReferrals([
+        ...cs.map((c: any) => `${c.name} (업체)`),
+        ...gs.map((g: any) => `${g.name} (가이드)`),
+      ]);
+    });
   }, []);
 
   // 날짜의 기존 예약을 행에 프리필 + 30행 패딩
@@ -200,7 +209,11 @@ export default function BookingSheetTable() {
           <option key={r} value={r} />
         ))}
       </datalist>
-      <p className="px-6 pb-2 text-xs text-emerald-300">🟢 빈 룸 {availableRooms.length}개 — 룸 칸에서 검색/선택 가능</p>
+      {/* 업체/가이드 레퍼럴 검색 (선택 시 레퍼럴, 자유입력 시 노트) */}
+      <datalist id="bk-referral-options">
+        {referrals.map((r) => (<option key={r} value={r} />))}
+      </datalist>
+      <p className="px-6 pb-2 text-xs text-emerald-300">🟢 빈 룸 {availableRooms.length}개 · 업체/노트 칸: 업체·가이드 검색(레퍼럴) 또는 자유 입력(노트)</p>
 
       {/* 30행 예약표 */}
       <div className="px-4 py-4 overflow-x-auto">
@@ -246,7 +259,7 @@ export default function BookingSheetTable() {
                   <input value={r.guestName} onChange={(e) => update(i, { guestName: e.target.value })} placeholder="고객명" className={inp} />
                 </td>
                 <td className="px-2 py-1">
-                  <input value={r.note} onChange={(e) => update(i, { note: e.target.value })} placeholder="업체명/노트" className={inp} />
+                  <input list="bk-referral-options" value={r.note} onChange={(e) => update(i, { note: e.target.value })} placeholder="업체·가이드 검색 / 노트" className={inp} />
                 </td>
                 <td className="px-2 py-1">
                   <input type="number" value={r.pay || ''} onChange={(e) => update(i, { pay: Number(e.target.value) || 0 })} placeholder="0" className={inp + ' text-right'} />
