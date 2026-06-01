@@ -53,8 +53,11 @@ export default function BookingSheetTable() {
   const [bulkMsg, setBulkMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const [beds, setBeds] = useState<{ bed_number: number; room_zone: string; status: string }[]>([]);
+
   useEffect(() => {
     supabaseApiAdapter.getTherapists().then((r) => setTherapists(r as UiTherapist[])).catch(() => setTherapists([]));
+    supabaseApiAdapter.getBeds().then((r) => setBeds((r as any[]).map((b) => ({ bed_number: b.bed_number, room_zone: b.room_zone, status: b.status })))).catch(() => setBeds([]));
   }, []);
 
   // 날짜의 기존 예약을 행에 프리필 + 30행 패딩
@@ -150,6 +153,12 @@ export default function BookingSheetTable() {
   };
 
   const filledCount = rows.filter(isFilled).length;
+  // 빈 룸 = available 베드 라벨 − 현재 표에서 이미 쓰인 룸
+  const usedRooms = new Set(rows.filter(isFilled).map((r) => r.roomNumber).filter(Boolean));
+  const availableRooms = beds
+    .filter((b) => b.status === 'available')
+    .map((b) => `${b.room_zone} ${b.bed_number}`)
+    .filter((lbl) => !usedRooms.has(lbl));
 
   return (
     <div className="flex-1 overflow-auto bg-slate-900 text-white">
@@ -181,6 +190,13 @@ export default function BookingSheetTable() {
           <option key={t.id} value={t.name} />
         ))}
       </datalist>
+      {/* 빈 룸 검색 자동완성 (available 베드 − 현재 표에서 사용중인 룸) */}
+      <datalist id="bk-room-options">
+        {availableRooms.map((r) => (
+          <option key={r} value={r} />
+        ))}
+      </datalist>
+      <p className="px-6 pb-2 text-xs text-emerald-300">🟢 빈 룸 {availableRooms.length}개 — 룸 칸에서 검색/선택 가능</p>
 
       {/* 30행 예약표 */}
       <div className="px-4 py-4 overflow-x-auto">
@@ -226,7 +242,7 @@ export default function BookingSheetTable() {
                   <input value={r.guestName} onChange={(e) => update(i, { guestName: e.target.value })} placeholder="고객명" className="w-full bg-slate-800 border border-white/10 rounded px-2 py-1.5" />
                 </td>
                 <td className="px-2 py-1">
-                  <input value={r.roomNumber} onChange={(e) => update(i, { roomNumber: e.target.value })} placeholder="룸" className="w-full bg-slate-800 border border-white/10 rounded px-2 py-1.5" />
+                  <input list="bk-room-options" value={r.roomNumber} onChange={(e) => update(i, { roomNumber: e.target.value })} placeholder="빈룸 검색" className="w-full bg-slate-800 border border-white/10 rounded px-2 py-1.5 text-white placeholder-slate-500" />
                 </td>
                 <td className="px-2 py-1">
                   <button onClick={() => saveRow(i)} disabled={!isFilled(r) || r.saving} className={`w-full px-2 py-1.5 rounded font-bold text-xs ${r.saved ? 'bg-emerald-600' : 'bg-blue-600 hover:bg-blue-700 disabled:opacity-30'}`}>

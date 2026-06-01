@@ -137,6 +137,25 @@ export default function PayrollSettingsPage() {
           onChange={(v) => update({ specialHolidayMultiplier: v })}
         />
 
+        {/* 테라피스트 세션별(마사지 종류별) 수수료 */}
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <p className="font-bold text-gray-800">🧑‍⚕️ 테라피스트 세션 수수료 (종류별, ₱/세션)</p>
+          <p className="text-xs text-gray-500 mb-3">마사지 종류마다 다른 정해진 금액. 테라피스트 수수료 = Σ(종류별 세션수 × 수수료)</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {Object.keys(s.therapistCommission).map((svc) => (
+              <div key={svc} className="flex items-center justify-between gap-2">
+                <span className="text-sm text-gray-700 flex-1 truncate">{svc}</span>
+                <input
+                  type="number"
+                  value={s.therapistCommission[svc] || ''}
+                  onChange={(e) => update({ therapistCommission: { ...s.therapistCommission, [svc]: num(e.target.value) } })}
+                  className="w-28 px-3 py-2 border-2 border-gray-300 rounded-lg text-right font-bold text-gray-900"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div className="flex gap-3 pt-2">
           <button onClick={reset} className="px-5 py-3 bg-gray-200 hover:bg-gray-300 rounded-lg font-bold text-gray-800">
             기본값

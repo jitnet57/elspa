@@ -17,7 +17,20 @@ export interface PayrollSettings {
   latePerMinute: number;             // 지각 차감 (₱/분, 유예 초과분에 대해)
   nationalHolidayMultiplier: number; // 국가 공휴일 (일) 배율 (예: 2.0 → 일급의 2배)
   specialHolidayMultiplier: number;  // 일반(특별) 공휴일 (일) 배율 (예: 1.3)
+  // 테라피스트 세션별(마사지 종류별) 수수료 — 종류마다 다른 정해진 금액(₱/세션)
+  therapistCommission: Record<string, number>;
 }
+
+// 마사지 종류별 테라피스트 세션 수수료 기본값 (₱/세션)
+export const DEFAULT_THERAPIST_COMMISSION: Record<string, number> = {
+  'Thai Massage': 300,
+  'Swedish Massage': 280,
+  'Deep Tissue': 400,
+  'Foot Massage': 200,
+  'Facial Treatment': 350,
+  'Aromatherapy': 250,
+  'Hot Stone Massage': 380,
+};
 
 export const DEFAULT_PAYROLL_SETTINGS: PayrollSettings = {
   overtimeHourlyRate: 70,        // 평일 야근 40분 이상 시 1시간당 70 peso
@@ -28,6 +41,7 @@ export const DEFAULT_PAYROLL_SETTINGS: PayrollSettings = {
   latePerMinute: 10,             // 유예 초과분 1분당 10 peso 차감
   nationalHolidayMultiplier: 2.0,
   specialHolidayMultiplier: 1.3,
+  therapistCommission: DEFAULT_THERAPIST_COMMISSION,
 };
 
 const KEY = 'elspa.payroll.settings';
@@ -36,7 +50,14 @@ export function getPayrollSettings(): PayrollSettings {
   if (typeof window === 'undefined') return DEFAULT_PAYROLL_SETTINGS;
   try {
     const raw = window.localStorage.getItem(KEY);
-    return raw ? { ...DEFAULT_PAYROLL_SETTINGS, ...JSON.parse(raw) } : DEFAULT_PAYROLL_SETTINGS;
+    if (!raw) return DEFAULT_PAYROLL_SETTINGS;
+    const saved = JSON.parse(raw);
+    return {
+      ...DEFAULT_PAYROLL_SETTINGS,
+      ...saved,
+      // 종류별 수수료는 기본값에 저장값을 병합 (누락 종류 보존)
+      therapistCommission: { ...DEFAULT_THERAPIST_COMMISSION, ...(saved.therapistCommission || {}) },
+    };
   } catch {
     return DEFAULT_PAYROLL_SETTINGS;
   }

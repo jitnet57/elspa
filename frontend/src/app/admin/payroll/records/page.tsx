@@ -17,6 +17,7 @@ import {
   getEmployees, ensurePayrollPeriod, getPayrollRecords, upsertPayrollRecord,
   type Employee,
 } from '@/lib/api/payroll-client';
+import { SERVICES } from '@/app/monitor/components/booking-helpers';
 
 const FULL_DAYS = 13;
 type EmpType = 'manager' | 'hollys' | 'nail' | 'maintenance' | 'therapist' | 'driver';
@@ -32,12 +33,13 @@ interface Raw {
   national_ot_min: number; special_ot_min: number; // 공휴일 야근(분) — 공휴일 시급 적용
   national_days: number; special_days: number; late_minutes: number;
   commission: number; driving_allowance: number; meal_allowance: number;
+  sessions: Record<string, number>; // 테라피스트 종류별 세션수 → 수수료 자동계산
   sss: number; cash_advance: number; health_check: number; thirteenth: number; absence: number;
 }
 const emptyRaw = (): Raw => ({
   days_worked: 0, overtime_minutes: 0, national_ot_min: 0, special_ot_min: 0,
   national_days: 0, special_days: 0, late_minutes: 0,
-  commission: 0, driving_allowance: 0, meal_allowance: 0,
+  commission: 0, driving_allowance: 0, meal_allowance: 0, sessions: {},
   sss: 0, cash_advance: 0, health_check: 0, thirteenth: 0, absence: 0,
 });
 
@@ -55,7 +57,10 @@ function basePayOf(type: EmpType, base_salary: number, daily_wage: number, days:
 function computeRow(r: Row, s: PayrollSettings) {
   const daily = r.emp.daily_wage ?? 0;
   const base = basePayOf(r.type, r.emp.base_salary, daily, r.days_worked);
-  const commission = r.type === 'therapist' ? r.commission : 0;
+  // 테라피스트 수수료 = Σ(종류별 세션수 × 종류별 수수료) — 세션마다 다름
+  const commission = r.type === 'therapist'
+    ? Object.entries(r.sessions || {}).reduce((sum, [svc, cnt]) => sum + (cnt || 0) * ((s.therapistCommission && s.therapistCommission[svc]) || 0), 0)
+    : 0;
   const driving = r.type === 'driver' ? r.driving_allowance : 0;
   const meal = r.meal_allowance;
   // 평일 야근 (40분 임계) + 공휴일 야근(공휴일 시급 적용)
@@ -148,6 +153,7 @@ export default function PayrollSettlementPage() {
       national_ot_min: row.national_ot_min, special_ot_min: row.special_ot_min,
       national_days: row.national_days,
       special_days: row.special_days, late_minutes: row.late_minutes, commission: row.commission,
+      sessions: row.sessions || {},
       driving_allowance: row.driving_allowance, meal_allowance: row.meal_allowance, sss: row.sss,
       cash_advance: row.cash_advance, health_check: row.health_check, thirteenth: row.thirteenth, absence: row.absence,
     };
@@ -306,7 +312,18 @@ function DetailModal({ row, s, onClose, onChange, onSave }: {
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <h3 className="font-bold mb-2">💰 수입 입력</h3>
             {row.type !== 'therapist' && field('출근일 (/13)', row.days_worked, (v) => onChange(id, { days_worked: v }))}
-            {row.type === 'therapist' && field('수수료(정해진 금액)', row.commission, (v) => onChange(id, { commission: v }))}
+            {row.type === 'therapist' && (
+              <div className="border-b border-green-200 pb-2 mb-1">
+                <p className="text-sm font-bold text-gray-700 mb-1">세션 수수료 (종류별 세션수)</p>
+                {SERVICES.map((sv) => (
+                  <div key={sv.name} className="flex items-center justify-between py-0.5">
+                    <span className="text-xs text-gray-600">{sv.name} <span className="text-gray-400">({peso((s.therapistCommission && s.therapistCommission[sv.name]) || 0)}/세션)</span></span>
+                    <input type="number" value={(row.sessions && row.sessions[sv.name]) || ''} onChange={(e) => onChange(id, { sessions: { ...(row.sessions || {}), [sv.name]: Number(e.target.value) || 0 } })} className="w-20 px-2 py-1 border rounded text-right text-gray-900" placeholder="0" />
+                  </div>
+                ))}
+                <div className="flex justify-between text-sm font-bold pt-1"><span>수수료 합계</span><span className="text-green-700">{peso(c.commission)}</span></div>
+              </div>
+            )}
             {row.type === 'driver' && field('운행수당', row.driving_allowance, (v) => onChange(id, { driving_allowance: v }))}
             {field('식비', row.meal_allowance, (v) => onChange(id, { meal_allowance: v }))}
             {field('평일 야근(분)', row.overtime_minutes, (v) => onChange(id, { overtime_minutes: v }))}

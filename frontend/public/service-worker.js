@@ -2,7 +2,7 @@
 // 오프라인 지원 및 캐싱 전략
 // 배포할 때마다 버전을 올려서 캐시를 무효화합니다
 
-const CACHE_VERSION = '20260602-v29'; // v29: 테스트 보고서 다운로드 링크
+const CACHE_VERSION = '20260602-v30'; // v30: 테라피스트 세션별 수수료 + 빈룸 검색
 const CACHE_NAME = `elspa-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
