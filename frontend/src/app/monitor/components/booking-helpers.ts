@@ -70,4 +70,16 @@ export interface UiTherapist {
   name: string;
   status: DbTherapistStatus;
   specialty?: string;
+  checked_in_at?: string; // "HH:MM" 출근시각 (출근 순번 정렬용)
+}
+
+// 가용 우선순위: 대기(idle) → 휴식 → 진행중(in_service) → 퇴근. 같으면 출근순(checked_in_at) → id
+const STATUS_RANK: Record<string, number> = { idle: 0, resting: 1, in_service: 2, checked_out: 3 };
+export function sortByAttendance(a: UiTherapist, b: UiTherapist): number {
+  const r = (STATUS_RANK[a.status] ?? 9) - (STATUS_RANK[b.status] ?? 9);
+  if (r !== 0) return r;
+  const ca = a.checked_in_at || '99:99';
+  const cb = b.checked_in_at || '99:99';
+  if (ca !== cb) return ca.localeCompare(cb);
+  return a.id - b.id;
 }

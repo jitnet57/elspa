@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabaseApiAdapter, type Booking } from '@/lib/api/supabase-adapter';
 import { saveBookingToSheet } from '@/lib/services/booking-sheet';
-import { SERVICES, autoEndTime, type UiTherapist } from './booking-helpers';
+import { SERVICES, autoEndTime, sortByAttendance, type UiTherapist } from './booking-helpers';
 import { getCompanies, getGuides } from '@/lib/api/companies-client';
 import { useT } from '@/lib/i18n';
 
@@ -201,7 +201,7 @@ export default function BookingSheetTable() {
 
       {/* 테라피스트 검색 자동완성 옵션 (공유) */}
       <datalist id="bk-therapist-options">
-        {therapists.map((t) => (
+        {therapists.slice().sort(sortByAttendance).map((t) => (
           <option key={t.id} value={t.name} />
         ))}
       </datalist>

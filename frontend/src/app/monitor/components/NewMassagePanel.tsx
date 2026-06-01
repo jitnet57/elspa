@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabaseApiAdapter } from '@/lib/api/supabase-adapter';
 import { saveBookingToSheet } from '@/lib/services/booking-sheet';
-import { SERVICES, autoEndTime, initials, type UiTherapist } from './booking-helpers';
+import { SERVICES, autoEndTime, initials, sortByAttendance, type UiTherapist } from './booking-helpers';
 import { getCompanies, getGuides } from '@/lib/api/companies-client';
 import { useT } from '@/lib/i18n';
 
@@ -56,9 +56,11 @@ export default function NewMassagePanel({
   }, []);
 
   const endTime = autoEndTime(startTime, service);
-  const filtered = therapists.filter(
-    (t) => t.name.toLowerCase().includes(search.toLowerCase()) || (t.specialty ?? '').toLowerCase().includes(search.toLowerCase()),
-  );
+  // 출근 순번 정렬 + 진행중(in_service)은 뒤로 → 다음 가용 테라피스트가 먼저
+  const filtered = therapists
+    .filter((t) => t.name.toLowerCase().includes(search.toLowerCase()) || (t.specialty ?? '').toLowerCase().includes(search.toLowerCase()))
+    .slice()
+    .sort(sortByAttendance);
   const selectedOk = !!therapistName;
 
   const handleSave = async () => {

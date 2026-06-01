@@ -8,6 +8,7 @@ import {
   treatmentMeta,
   therapistStatusMeta,
   initials,
+  sortByAttendance,
   type UiTherapist,
   type DbTherapistStatus,
 } from './booking-helpers';
@@ -113,7 +114,7 @@ export default function DailyTherapistSchedule({ openNewOnMount = false }: { ope
           {therapists.length === 0 ? (
             <div className="px-4 py-8 text-center text-gray-400">테라피스트 데이터 없음</div>
           ) : (
-            therapists.map((t, idx) => {
+            therapists.slice().sort(sortByAttendance).map((t, idx) => {
               const st = therapistStatusMeta[(t.status as DbTherapistStatus) ?? 'idle'] ?? therapistStatusMeta.idle;
               const rows = bookings.filter((b) => b.therapist_name === t.name);
               return (
