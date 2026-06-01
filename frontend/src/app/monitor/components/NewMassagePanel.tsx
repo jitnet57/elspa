@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabaseApiAdapter } from '@/lib/api/supabase-adapter';
 import { saveBookingToSheet } from '@/lib/services/booking-sheet';
 import { SERVICES, autoEndTime, initials, type UiTherapist } from './booking-helpers';
+import { useT } from '@/lib/i18n';
 
 /**
  * ============================================================
@@ -30,6 +31,7 @@ export default function NewMassagePanel({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const t = useT();
   const [therapists, setTherapists] = useState<UiTherapist[]>([]);
   const [search, setSearch] = useState('');
   const [therapistName, setTherapistName] = useState<string>(prefillTherapist ?? '');
@@ -51,8 +53,8 @@ export default function NewMassagePanel({
   const selectedOk = !!therapistName;
 
   const handleSave = async () => {
-    if (!therapistName) return setMsg('테라피스트를 선택(드래그드롭)하세요.');
-    if (!guestName.trim()) return setMsg('고객 이름을 입력하세요.');
+    if (!therapistName) return setMsg(t('Select a therapist (drag & drop).', '테라피스트를 선택(드래그드롭)하세요.'));
+    if (!guestName.trim()) return setMsg(t('Enter guest name.', '고객 이름을 입력하세요.'));
     setSaving(true);
     setMsg('');
 
@@ -71,23 +73,23 @@ export default function NewMassagePanel({
     });
 
     setSaving(false);
-    if (!dbOk && !sheetOk) { setMsg('저장 실패 — DB/시트 연결을 확인하세요.'); return; }
+    if (!dbOk && !sheetOk) { setMsg(t('Save failed — check DB/Sheet connection.', '저장 실패 — DB/시트 연결을 확인하세요.')); return; }
     onSaved();
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[88vh] overflow-y-auto">
+      <div className="bg-white text-gray-900 rounded-2xl shadow-xl w-full max-w-3xl max-h-[88vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b">
-          <h2 className="text-xl font-black">{title}{prefillRoom ? ` · Bed ${prefillRoom}` : ''}</h2>
+          <h2 className="text-xl font-black text-gray-900">{title}{prefillRoom ? ` · Bed ${prefillRoom}` : ''}</h2>
           <button onClick={onClose} className="text-2xl text-gray-400 hover:text-gray-700">✕</button>
         </div>
 
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* 좌: 테라피스트 검색 + 드래그드롭 */}
           <div>
-            <label className="text-sm font-bold text-gray-700">🧑‍⚕️ 테라피스트 (검색 후 드래그)</label>
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="이름 / 전문분야 검색…" className="w-full mt-1 mb-2 px-3 py-2 border rounded-lg text-sm" />
+            <label className="text-sm font-bold text-gray-700">🧑‍⚕️ {t('Therapist (search & drag)', '테라피스트 (검색 후 드래그)')}</label>
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('Search name / specialty…', '이름 / 전문분야 검색…')} className="w-full mt-1 mb-2 px-3 py-2 border rounded-lg text-sm text-gray-900" />
             <div className="h-40 overflow-y-auto border rounded-lg p-2 space-y-1">
               {filtered.map((t) => (
                 <div
@@ -104,7 +106,7 @@ export default function NewMassagePanel({
                   {t.specialty && <span className="ml-auto text-xs text-gray-400">{t.specialty}</span>}
                 </div>
               ))}
-              {filtered.length === 0 && <p className="text-xs text-gray-400 py-4 text-center">검색 결과 없음</p>}
+              {filtered.length === 0 && <p className="text-xs text-gray-400 py-4 text-center">{t('No results', '검색 결과 없음')}</p>}
             </div>
             <div
               onDragOver={(e) => e.preventDefault()}
@@ -113,39 +115,39 @@ export default function NewMassagePanel({
                 selectedOk ? 'border-blue-400 bg-blue-50 text-blue-700 font-bold' : 'border-gray-300 text-gray-400'
               }`}
             >
-              {selectedOk ? `✓ ${therapistName} 선택됨` : '여기로 테라피스트를 끌어다 놓으세요'}
+              {selectedOk ? t(`✓ ${therapistName} selected`, `✓ ${therapistName} 선택됨`) : t('Drag a therapist here', '여기로 테라피스트를 끌어다 놓으세요')}
             </div>
           </div>
 
           {/* 우: 마사지/시간/고객/룸 */}
           <div className="space-y-3">
             <div>
-              <label className="text-sm font-bold text-gray-700">💆 마사지 종류</label>
-              <select value={service} onChange={(e) => setService(e.target.value)} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm">
-                {SERVICES.map((s) => <option key={s.name} value={s.name}>{s.name} ({s.duration}분)</option>)}
+              <label className="text-sm font-bold text-gray-700">💆 {t('Massage Type', '마사지 종류')}</label>
+              <select value={service} onChange={(e) => setService(e.target.value)} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900">
+                {SERVICES.map((s) => <option key={s.name} value={s.name}>{s.name} ({s.duration}{t('min', '분')})</option>)}
               </select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-sm font-bold text-gray-700">시작 시간</label>
-                <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm" />
+                <label className="text-sm font-bold text-gray-700">{t('Start Time', '시작 시간')}</label>
+                <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900" />
               </div>
               <div>
-                <label className="text-sm font-bold text-gray-700">종료 (자동)</label>
+                <label className="text-sm font-bold text-gray-700">{t('End (auto)', '종료 (자동)')}</label>
                 <input value={endTime} readOnly className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-gray-100 font-bold text-blue-700" />
               </div>
             </div>
             <div>
-              <label className="text-sm font-bold text-gray-700">고객 이름</label>
-              <input value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="예: 김철수" className="w-full mt-1 px-3 py-2 border rounded-lg text-sm" />
+              <label className="text-sm font-bold text-gray-700">{t('Guest Name', '고객 이름')}</label>
+              <input value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder={t('e.g. John', '예: 김철수')} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900" />
             </div>
             <div>
-              <label className="text-sm font-bold text-gray-700">룸 번호{prefillRoom ? '' : ' (선택)'}</label>
-              <input value={roomNumber} onChange={(e) => setRoomNumber(e.target.value)} placeholder="예: 05" className="w-full mt-1 px-3 py-2 border rounded-lg text-sm" />
+              <label className="text-sm font-bold text-gray-700">{t('Room No.', '룸 번호')}{prefillRoom ? '' : t(' (optional)', ' (선택)')}</label>
+              <input value={roomNumber} onChange={(e) => setRoomNumber(e.target.value)} placeholder={t('e.g. 05', '예: 05')} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900" />
             </div>
             {msg && <p className="text-sm text-red-600 font-semibold">{msg}</p>}
             <button onClick={handleSave} disabled={saving} className="w-full px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold">
-              {saving ? '저장 중…' : '📋 예약 저장 (DB + 구글시트)'}
+              {saving ? t('Saving…', '저장 중…') : t('📋 Save Booking (DB + Google Sheet)', '📋 예약 저장 (DB + 구글시트)')}
             </button>
           </div>
         </div>
