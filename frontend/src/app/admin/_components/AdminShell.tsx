@@ -45,6 +45,12 @@ export default function AdminShell({ children }: AdminShellProps) {
               <span className="text-sm">Knowledge Network</span>
             </Link>
 
+            {/* 경영지표 */}
+            <Link className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all" href="/admin/management">
+              <span className="text-lg">📈</span>
+              <span className="text-sm">경영지표</span>
+            </Link>
+
             {/* Payroll */}
             <Link className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all" href="/admin/payroll">
               <span className="text-lg">💰</span>
