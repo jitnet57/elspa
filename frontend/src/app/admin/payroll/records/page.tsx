@@ -12,7 +12,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { getPayrollSettings, DEFAULT_PAYROLL_SETTINGS, type PayrollSettings } from '@/lib/payroll-settings';
+import { getPayrollSettings, loadPayrollSettingsRemote, DEFAULT_PAYROLL_SETTINGS, type PayrollSettings } from '@/lib/payroll-settings';
 import {
   getEmployees, ensurePayrollPeriod, getPayrollRecords, upsertPayrollRecord,
   type Employee,
@@ -102,7 +102,10 @@ export default function PayrollSettlementPage() {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Row | null>(null);
 
-  useEffect(() => setSettings(getPayrollSettings()), []);
+  useEffect(() => {
+    setSettings(getPayrollSettings());
+    loadPayrollSettingsRemote().then((r) => { if (r) setSettings(r); });
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true); setErr('');

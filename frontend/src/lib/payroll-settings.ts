@@ -67,3 +67,34 @@ export function savePayrollSettings(s: PayrollSettings): void {
   if (typeof window === 'undefined') return;
   window.localStorage.setItem(KEY, JSON.stringify(s));
 }
+
+// ── Supabase 공유 저장 (app_settings, key='payroll_settings') ──
+const DB_KEY = 'payroll_settings';
+
+/** Supabase 에서 급여 설정 로드 (있으면 localStorage 동기화) — 없으면 null */
+export async function loadPayrollSettingsRemote(): Promise<PayrollSettings | null> {
+  const { getSupabase } = await import('@/lib/supabase/client');
+  const sb = getSupabase();
+  if (!sb) return null;
+  try {
+    const { data, error } = await sb.from('app_settings').select('value').eq('key', DB_KEY).maybeSingle();
+    if (error || !data?.value) return null;
+    const v = data.value as Partial<PayrollSettings>;
+    const merged: PayrollSettings = {
+      ...DEFAULT_PAYROLL_SETTINGS, ...v,
+      therapistCommission: { ...DEFAULT_THERAPIST_COMMISSION, ...(v.therapistCommission || {}) },
+    };
+    if (typeof window !== 'undefined') window.localStorage.setItem(KEY, JSON.stringify(merged));
+    return merged;
+  } catch {
+    return null;
+  }
+}
+
+/** Supabase 에 급여 설정 저장 (단말 공유) */
+export async function savePayrollSettingsRemote(s: PayrollSettings): Promise<void> {
+  const { getSupabase } = await import('@/lib/supabase/client');
+  const sb = getSupabase();
+  if (!sb) return;
+  try { await sb.from('app_settings').upsert({ key: DB_KEY, value: s }, { onConflict: 'key' }); } catch { /* 로컬만 */ }
+}

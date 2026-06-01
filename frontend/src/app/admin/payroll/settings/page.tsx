@@ -13,6 +13,8 @@ import { useEffect, useState } from 'react';
 import {
   getPayrollSettings,
   savePayrollSettings,
+  loadPayrollSettingsRemote,
+  savePayrollSettingsRemote,
   DEFAULT_PAYROLL_SETTINGS,
   type PayrollSettings,
 } from '@/lib/payroll-settings';
@@ -23,6 +25,7 @@ export default function PayrollSettingsPage() {
 
   useEffect(() => {
     setS(getPayrollSettings());
+    loadPayrollSettingsRemote().then((r) => { if (r) setS(r); });
   }, []);
 
   const num = (v: string) => (v === '' ? 0 : Number(v));
@@ -32,6 +35,7 @@ export default function PayrollSettingsPage() {
   };
   const handleSave = () => {
     savePayrollSettings(s);
+    savePayrollSettingsRemote(s); // Supabase 공유 저장
     setSaved(true);
   };
   const reset = () => {
