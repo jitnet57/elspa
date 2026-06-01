@@ -14,7 +14,9 @@
       "Bash(curl -s -H 'Authorization: token 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' https://api.github.com/repos/jitnet57/elspa/actions/runs/26738673736/jobs)",
       "Bash(curl -s -H 'Authorization: token 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' https://api.github.com/repos/jitnet57/elspa/actions/runs/26739077899/jobs)",
       "Bash(curl -s -H 'Authorization: token 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' https://api.github.com/repos/jitnet57/elspa/actions/secrets?per_page=100)",
-      "Bash(npx wrangler *)"
+      "Bash(npx wrangler *)",
+      "Bash(sed -n '1,60p' src/lib/services/google-sheets.ts)",
+      "Bash(sed -n '191,250p' src/app/admin/massage/mockData/bookingData.ts)"
     ]
   }
 }

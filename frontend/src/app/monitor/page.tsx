@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import BedLayoutView from './components/BedLayoutView';
-import TherapistScheduleView from './components/TherapistScheduleView';
-import BookingModal from './components/BookingModal';
+import DailyTherapistSchedule from './components/DailyTherapistSchedule';
+import BookingSheetTable from './components/BookingSheetTable';
 
 /**
  * ============================================================
@@ -21,7 +21,6 @@ import BookingModal from './components/BookingModal';
 
 export default function MonitorPage() {
   const [activeTab, setActiveTab] = useState<'beds' | 'schedule' | 'booking'>('beds');
-  const [showBookingModal, setShowBookingModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -54,10 +53,7 @@ export default function MonitorPage() {
               📅 Therapist Daily Schedule
             </button>
             <button
-              onClick={() => {
-                setActiveTab('booking');
-                setShowBookingModal(true);
-              }}
+              onClick={() => setActiveTab('booking')}
               className={`px-6 py-2 rounded-lg font-bold transition whitespace-nowrap ${
                 activeTab === 'booking'
                   ? 'bg-purple-600 text-white'
@@ -75,14 +71,14 @@ export default function MonitorPage() {
         </div>
       </div>
 
-      {/* Content (각 뷰는 자체 폴링으로 데이터 조회) */}
+      {/* Content */}
       <div className="flex-1 overflow-hidden bg-white">
         {activeTab === 'beds' && <BedLayoutView />}
-        {activeTab === 'schedule' && <TherapistScheduleView />}
+        {/* 테라피스트 일일 스케줄 (타임라인, 이미지2) */}
+        {activeTab === 'schedule' && <DailyTherapistSchedule key="schedule" />}
+        {/* BOOKING WITH THERAPIST → 30행 예약 입력 화면 */}
+        {activeTab === 'booking' && <BookingSheetTable />}
       </div>
-
-      {/* Booking Modal */}
-      {showBookingModal && <BookingModal onClose={() => setShowBookingModal(false)} />}
     </div>
   );
 }
