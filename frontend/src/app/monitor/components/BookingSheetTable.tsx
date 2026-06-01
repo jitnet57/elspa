@@ -175,6 +175,13 @@ export default function BookingSheetTable() {
       </div>
       {bulkMsg && <p className="px-6 py-2 text-sm text-indigo-200">{bulkMsg}</p>}
 
+      {/* 테라피스트 검색 자동완성 옵션 (공유) */}
+      <datalist id="bk-therapist-options">
+        {therapists.map((t) => (
+          <option key={t.id} value={t.name} />
+        ))}
+      </datalist>
+
       {/* 30행 예약표 */}
       <div className="px-4 py-4 overflow-x-auto">
         <table className="w-full min-w-[860px] text-sm border-collapse">
@@ -195,12 +202,13 @@ export default function BookingSheetTable() {
               <tr key={i} className={`border-b border-white/5 ${r.saved ? 'bg-emerald-900/30' : ''}`}>
                 <td className="px-2 py-1 text-slate-400">{i + 1}</td>
                 <td className="px-2 py-1">
-                  <select value={r.therapistName} onChange={(e) => update(i, { therapistName: e.target.value })} className="w-full bg-slate-800 border border-white/10 rounded px-2 py-1.5">
-                    <option value="">선택…</option>
-                    {therapists.map((t) => (
-                      <option key={t.id} value={t.name}>{t.name}</option>
-                    ))}
-                  </select>
+                  <input
+                    list="bk-therapist-options"
+                    value={r.therapistName}
+                    onChange={(e) => update(i, { therapistName: e.target.value })}
+                    placeholder="검색/선택…"
+                    className="w-full bg-slate-800 border border-white/10 rounded px-2 py-1.5 text-white placeholder-slate-500"
+                  />
                 </td>
                 <td className="px-2 py-1">
                   <select value={r.service} onChange={(e) => update(i, { service: e.target.value })} className="w-full bg-slate-800 border border-white/10 rounded px-2 py-1.5">

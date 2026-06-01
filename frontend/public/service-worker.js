@@ -2,7 +2,7 @@
 // 오프라인 지원 및 캐싱 전략
 // 배포할 때마다 버전을 올려서 캐시를 무효화합니다
 
-const CACHE_VERSION = '20260601-v16'; // v16: 베드예약창 공용화(검색)+편집비번1234+언어토글
+const CACHE_VERSION = '20260601-v17'; // v17: BOOKING 표 테라피스트 검색(datalist)
 const CACHE_NAME = `elspa-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
