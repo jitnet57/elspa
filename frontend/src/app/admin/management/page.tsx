@@ -3,52 +3,34 @@
 /**
  * ============================================================
  * 📌 경영지표 (Management Metrics)
- * 📋 월 영업이익 = 총매출 − 지출(급여/부대비용/간접비용/복리후생비/유류비/은행이자/수도세)
- *    순이익 = 영업이익 − 세금 / 연(年) 누적 계산
- * 💾 localStorage('elspa.metrics') 월별 저장 (백엔드 불필요)
- * 📅 작성일: 2026-06-01
+ * 📋 월 영업이익 = 총매출 − 지출 / 순이익 = 영업이익 − 세금 / 연 누적
+ * 🔌 Supabase 저장(management_metrics) + localStorage 폴백
+ * 🔗 정산 매출 자동 연동(monthly_settlements) / 월별 추이 차트(recharts)
+ * 📅 2026-06-01
  * ============================================================
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { getMonthMetrics, saveMonthMetrics, getYearMetrics } from '@/lib/api/management-client';
+import { getMonthlySettlements } from '@/lib/api/companies-client';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface IndirectItem { label: string; amount: number }
 interface MetricsMonth {
-  revenue: number;       // 총매출
-  payroll: number;       // 급여
-  incidental: number;    // 부대비용
-  indirect: IndirectItem[]; // 간접비용 (전기세/임대료/차량할부금 + 추가)
-  welfare: number;       // 복리후생비
-  fuel: number;          // 유류비
-  bankInterest: number;  // 은행이자
-  water: number;         // 수도세
-  tax: number;           // 세금
+  revenue: number; payroll: number; incidental: number;
+  indirect: IndirectItem[]; welfare: number; fuel: number; bankInterest: number; water: number; tax: number;
 }
 
-const STORE_KEY = 'elspa.metrics';
 const peso = (n: number) => '₱' + (n || 0).toLocaleString('en-PH', { maximumFractionDigits: 0 });
-
 const emptyMonth = (): MetricsMonth => ({
   revenue: 0, payroll: 0, incidental: 0,
-  indirect: [
-    { label: '전기세', amount: 0 },
-    { label: '임대료', amount: 0 },
-    { label: '차량할부금', amount: 0 },
-  ],
+  indirect: [{ label: '전기세', amount: 0 }, { label: '임대료', amount: 0 }, { label: '차량할부금', amount: 0 }],
   welfare: 0, fuel: 0, bankInterest: 0, water: 0, tax: 0,
 });
-
-type Store = Record<string, MetricsMonth>; // key: "YYYY-MM"
-
-const loadStore = (): Store => {
-  if (typeof window === 'undefined') return {};
-  try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch { return {}; }
-};
-const saveStore = (s: Store) => { try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch {} };
+const norm = (d: any): MetricsMonth => ({ ...emptyMonth(), ...(d || {}), indirect: d?.indirect ?? emptyMonth().indirect });
 
 const indirectTotal = (m: MetricsMonth) => m.indirect.reduce((s, i) => s + (i.amount || 0), 0);
-const expenseTotal = (m: MetricsMonth) =>
-  m.payroll + m.incidental + indirectTotal(m) + m.welfare + m.fuel + m.bankInterest + m.water;
+const expenseTotal = (m: MetricsMonth) => m.payroll + m.incidental + indirectTotal(m) + m.welfare + m.fuel + m.bankInterest + m.water;
 const operatingProfit = (m: MetricsMonth) => m.revenue - expenseTotal(m);
 const netProfit = (m: MetricsMonth) => operatingProfit(m) - m.tax;
 
@@ -56,44 +38,75 @@ export default function ManagementMetricsPage() {
   const now = useMemo(() => new Date(), []);
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
-  const [store, setStore] = useState<Store>({});
-
-  useEffect(() => { setStore(loadStore()); }, []);
+  const [m, setM] = useState<MetricsMonth>(emptyMonth());
+  const [yearData, setYearData] = useState<Record<string, MetricsMonth>>({});
+  const [loadingRev, setLoadingRev] = useState(false);
 
   const key = `${year}-${String(month).padStart(2, '0')}`;
-  const m = store[key] ?? emptyMonth();
 
-  const update = (patch: Partial<MetricsMonth>) => {
-    const next = { ...store, [key]: { ...m, ...patch } };
-    setStore(next); saveStore(next);
+  // 월 데이터 로드
+  useEffect(() => { getMonthMetrics(key).then((d) => setM(norm(d))); }, [key]);
+  // 연 데이터 로드 (차트/누적)
+  const loadYear = useCallback(() => {
+    getYearMetrics(year).then((all) => {
+      const out: Record<string, MetricsMonth> = {};
+      Object.entries(all).forEach(([k, v]) => { out[k] = norm(v); });
+      setYearData(out);
+    });
+  }, [year]);
+  useEffect(() => { loadYear(); }, [loadYear]);
+
+  const commit = (next: MetricsMonth) => {
+    setM(next);
+    setYearData((prev) => ({ ...prev, [key]: next }));
+    saveMonthMetrics(key, next);
   };
-  const updIndirect = (idx: number, patch: Partial<IndirectItem>) => {
-    const indirect = m.indirect.map((it, i) => (i === idx ? { ...it, ...patch } : it));
-    update({ indirect });
-  };
+  const update = (patch: Partial<MetricsMonth>) => commit({ ...m, ...patch });
+  const updIndirect = (idx: number, patch: Partial<IndirectItem>) =>
+    update({ indirect: m.indirect.map((it, i) => (i === idx ? { ...it, ...patch } : it)) });
   const addIndirect = () => update({ indirect: [...m.indirect, { label: '신규 항목', amount: 0 }] });
   const removeIndirect = (idx: number) => update({ indirect: m.indirect.filter((_, i) => i !== idx) });
 
-  // 연 누적 (해당 연도 모든 월 합산)
+  // 정산 매출 자동 연동
+  const loadRevenue = async () => {
+    setLoadingRev(true);
+    try {
+      const rows = await getMonthlySettlements({ settlement_month: key });
+      const total = (rows || []).reduce((s: number, r: any) => s + (Number(r.total_revenue) || 0), 0);
+      update({ revenue: total });
+    } catch { /* noop */ } finally { setLoadingRev(false); }
+  };
+
+  // 연 누적
   const yearAgg = useMemo(() => {
-    const months = Object.entries(store).filter(([k]) => k.startsWith(`${year}-`)).map(([, v]) => v);
     const acc = { revenue: 0, expense: 0, operating: 0, net: 0, tax: 0 };
-    months.forEach((mm) => {
+    Object.values(yearData).forEach((mm) => {
       acc.revenue += mm.revenue; acc.expense += expenseTotal(mm);
       acc.operating += operatingProfit(mm); acc.net += netProfit(mm); acc.tax += mm.tax;
     });
     return acc;
-  }, [store, year]);
+  }, [yearData]);
+
+  // 월별 추이 차트 데이터
+  const chartData = useMemo(() =>
+    Array.from({ length: 12 }, (_, i) => {
+      const k = `${year}-${String(i + 1).padStart(2, '0')}`;
+      const mm = yearData[k];
+      return {
+        month: `${i + 1}월`,
+        매출: mm ? mm.revenue : 0,
+        영업이익: mm ? operatingProfit(mm) : 0,
+        순이익: mm ? netProfit(mm) : 0,
+      };
+    }), [yearData, year]);
 
   const numInput = (val: number, on: (n: number) => void) => (
     <input type="number" value={val || ''} onChange={(e) => on(Number(e.target.value) || 0)}
       className="w-40 px-3 py-2 border border-gray-300 rounded-lg text-right text-gray-900 focus:border-blue-500 focus:outline-none" placeholder="0" />
   );
-
   const ExpenseRow = ({ label, val, on }: { label: string; val: number; on: (n: number) => void }) => (
     <div className="flex items-center justify-between py-2 border-b border-gray-100">
-      <span className="text-sm text-gray-700">{label}</span>
-      {numInput(val, on)}
+      <span className="text-sm text-gray-700">{label}</span>{numInput(val, on)}
     </div>
   );
 
@@ -101,21 +114,22 @@ export default function ManagementMetricsPage() {
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       <div className="sticky top-0 z-40 bg-white border-b-2 border-gray-200 px-6 py-5">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">📈 경영지표</h1>
-        <p className="text-gray-600 mt-1 text-sm">월 영업이익 · 순이익 · 연 누적</p>
+        <p className="text-gray-600 mt-1 text-sm">월 영업이익 · 순이익 · 연 누적 · 추이</p>
       </div>
 
       <main className="px-6 py-6 max-w-5xl mx-auto">
-        {/* 기간 선택 */}
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-6 flex-wrap">
           <select value={year} onChange={(e) => setYear(Number(e.target.value))} className="px-3 py-2 border-2 border-gray-300 rounded-lg text-gray-900">
             {[now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1].map((y) => <option key={y} value={y}>{y}년</option>)}
           </select>
           <select value={month} onChange={(e) => setMonth(Number(e.target.value))} className="px-3 py-2 border-2 border-gray-300 rounded-lg text-gray-900">
             {Array.from({ length: 12 }, (_, i) => i + 1).map((mm) => <option key={mm} value={mm}>{mm}월</option>)}
           </select>
+          <button onClick={loadRevenue} disabled={loadingRev} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg text-sm font-bold">
+            {loadingRev ? '불러오는 중…' : '🔄 정산 매출 자동 불러오기'}
+          </button>
         </div>
 
-        {/* 월 요약 KPI */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <Kpi label="총매출" value={peso(m.revenue)} cls="from-blue-500 to-blue-600" />
           <Kpi label="총지출" value={peso(expenseTotal(m))} cls="from-red-500 to-red-600" />
@@ -124,7 +138,6 @@ export default function ManagementMetricsPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 매출/세금 */}
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <h3 className="font-bold text-gray-900 mb-3">💰 매출 · 세금</h3>
             <ExpenseRow label="총매출" val={m.revenue} on={(v) => update({ revenue: v })} />
@@ -135,7 +148,6 @@ export default function ManagementMetricsPage() {
             </div>
           </div>
 
-          {/* 지출 */}
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <h3 className="font-bold text-gray-900 mb-3">📉 지출</h3>
             <ExpenseRow label="급여" val={m.payroll} on={(v) => update({ payroll: v })} />
@@ -144,8 +156,6 @@ export default function ManagementMetricsPage() {
             <ExpenseRow label="유류비" val={m.fuel} on={(v) => update({ fuel: v })} />
             <ExpenseRow label="은행이자" val={m.bankInterest} on={(v) => update({ bankInterest: v })} />
             <ExpenseRow label="수도세" val={m.water} on={(v) => update({ water: v })} />
-
-            {/* 간접비용 (항목 추가 가능) */}
             <div className="mt-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-bold text-gray-800">간접비용 (전기세·임대료·차량할부금 등)</span>
@@ -153,16 +163,33 @@ export default function ManagementMetricsPage() {
               </div>
               {m.indirect.map((it, idx) => (
                 <div key={idx} className="flex items-center gap-2 py-1">
-                  <input value={it.label} onChange={(e) => updIndirect(idx, { label: e.target.value })}
-                    className="flex-1 px-2 py-1.5 border border-gray-300 rounded text-sm text-gray-900" />
+                  <input value={it.label} onChange={(e) => updIndirect(idx, { label: e.target.value })} className="flex-1 px-2 py-1.5 border border-gray-300 rounded text-sm text-gray-900" />
                   {numInput(it.amount, (v) => updIndirect(idx, { amount: v }))}
                   <button onClick={() => removeIndirect(idx)} className="text-red-500 hover:text-red-700 px-1">✕</button>
                 </div>
               ))}
               <div className="flex justify-between text-sm mt-2 pt-2 border-t border-gray-100"><span className="text-gray-600">간접비용 합계</span><b>{peso(indirectTotal(m))}</b></div>
             </div>
-
             <div className="flex justify-between mt-4 pt-3 border-t-2 border-gray-200 font-bold"><span>총지출</span><span className="text-red-600">{peso(expenseTotal(m))}</span></div>
+          </div>
+        </div>
+
+        {/* 월별 추이 차트 */}
+        <div className="mt-6 bg-white rounded-xl border border-gray-200 p-5">
+          <h3 className="font-bold text-gray-900 mb-3">📊 {year}년 월별 추이</h3>
+          <div style={{ width: '100%', height: 280 }}>
+            <ResponsiveContainer>
+              <LineChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                <XAxis dataKey="month" fontSize={12} />
+                <YAxis fontSize={11} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
+                <Tooltip formatter={(v: number) => peso(v)} />
+                <Legend />
+                <Line type="monotone" dataKey="매출" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="영업이익" stroke="#10b981" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="순이익" stroke="#a855f7" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
@@ -178,7 +205,7 @@ export default function ManagementMetricsPage() {
           </div>
         </div>
 
-        <p className="text-xs text-gray-400 mt-4">* 입력 즉시 자동 저장(localStorage). 월별로 입력하면 연 누적이 자동 합산됩니다.</p>
+        <p className="text-xs text-gray-400 mt-4">* 입력 즉시 Supabase 저장(미설정 시 localStorage). 정산 매출은 월정산 데이터에서 자동 합산.</p>
       </main>
     </div>
   );
@@ -187,16 +214,14 @@ export default function ManagementMetricsPage() {
 function Kpi({ label, value, cls }: { label: string; value: string; cls: string }) {
   return (
     <div className={`bg-gradient-to-br ${cls} rounded-lg p-4 text-white`}>
-      <p className="text-xs opacity-90">{label}</p>
-      <p className="text-xl font-bold mt-1">{value}</p>
+      <p className="text-xs opacity-90">{label}</p><p className="text-xl font-bold mt-1">{value}</p>
     </div>
   );
 }
 function YearStat({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
     <div className={`rounded-xl p-3 ${highlight ? 'bg-purple-600' : 'bg-white/10'}`}>
-      <p className="text-xs opacity-80">{label}</p>
-      <p className="text-lg font-black mt-1">{value}</p>
+      <p className="text-xs opacity-80">{label}</p><p className="text-lg font-black mt-1">{value}</p>
     </div>
   );
 }
