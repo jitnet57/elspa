@@ -43,7 +43,8 @@ jobs:
 
       - name: Install frontend dependencies
         working-directory: frontend
-        run: npm ci
+        # 락파일이 동기화돼 있으면 빠른 npm ci, 드리프트 시 npm install 로 폴백
+        run: npm ci || npm install
 
       - name: Build frontend
         working-directory: frontend

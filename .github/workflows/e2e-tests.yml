@@ -37,7 +37,7 @@ jobs:
       # 3. 프론트엔드 의존성 설치
       - name: Install frontend dependencies
         working-directory: frontend
-        run: npm ci
+        run: npm ci || npm install
 
       # 4. 프론트엔드 빌드
       - name: Build frontend
