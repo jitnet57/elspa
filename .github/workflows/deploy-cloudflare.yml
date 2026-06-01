@@ -1,8 +1,8 @@
 # ============================================================
 # 📌 .github/workflows/deploy-cloudflare.yml
-# 📋 목적: Cloudflare Pages + Railway 자동 배포
-# 🔧 Trigger: Main 브랜치 푸시
-# 📅 작성일: 2026-05-22
+# 📋 목적: Cloudflare Pages 자동 배포 (프론트 전용, Supabase 직결)
+# 🔧 Trigger: Main 브랜치 푸시 / 수동 실행
+# 📅 작성일: 2026-05-22 (2026-06-01 프론트 전용으로 정리, 백엔드/Railway 제거)
 # ============================================================
 
 name: Deploy to Cloudflare
@@ -15,14 +15,13 @@ on:
 
 env:
   NODE_VERSION: '20'
-  PYTHON_VERSION: '3.11'
 
 jobs:
   # ==========================================
-  # 1️⃣ 빌드 & 테스트
+  # 빌드 & Cloudflare Pages 배포
   # ==========================================
-  build-and-test:
-    name: Build & Test
+  build-and-deploy:
+    name: Build & Deploy Frontend
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -33,7 +32,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Frontend 빌드
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -48,162 +46,19 @@ jobs:
 
       - name: Build frontend
         working-directory: frontend
-        env:
-          NEXT_PUBLIC_API_URL: https://api-backend.railway.app
+        # next.config.ts 의 output:"export" 로 정적 산출물이 frontend/out 에 생성됨
         run: npm run build
 
-      # Backend 테스트
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-
-      - name: Install backend dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt pytest pytest-cov
-
-      - name: Run backend tests
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
-        run: pytest tests/ -v --tb=short -x
-
-  # ==========================================
-  # 2️⃣ Cloudflare Pages 배포 (자동)
-  # ==========================================
-  deploy-frontend:
-    name: Deploy Frontend to Cloudflare Pages
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Cloudflare Pages deployment
+      - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: ${{ secrets.CLOUDFLARE_PROJECT_NAME }}
-          directory: frontend/.next
+          directory: frontend/out
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Deployment success
         run: |
           echo "🎉 Frontend deployed to Cloudflare Pages"
           echo "📍 URL: https://${{ secrets.CLOUDFLARE_PROJECT_NAME }}.pages.dev"
-
-  # ==========================================
-  # 3️⃣ Railway 백엔드 배포
-  # ==========================================
-  deploy-backend:
-    name: Deploy Backend to Railway
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Deploy to Railway
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-          API_BASE_URL: ${{ secrets.API_BASE_URL }}
-          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
-        run: |
-          # Railway CLI 설치
-          npm install -g @railway/cli
-
-          # 로그인
-          railway login --token $RAILWAY_TOKEN
-
-          # 환경변수 설정
-          railway variables set DATABASE_URL="$DATABASE_URL"
-          railway variables set JWT_SECRET_KEY="$JWT_SECRET_KEY"
-          railway variables set SENTRY_DSN="$SENTRY_DSN"
-          railway variables set API_BASE_URL="$API_BASE_URL"
-          railway variables set FRONTEND_URL="$FRONTEND_URL"
-
-          # 배포
-          railway up
-
-      - name: Deployment success
-        run: |
-          echo "🎉 Backend deployed to Railway"
-          echo "📍 API: https://api-backend.railway.app"
-
-  # ==========================================
-  # 4️⃣ 배포 후 헬스 체크
-  # ==========================================
-  health-check:
-    name: Post-Deploy Health Check
-    needs: [deploy-frontend, deploy-backend]
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Wait for deployment
-        run: sleep 30
-
-      - name: Frontend health check
-        run: |
-          echo "🏥 Checking frontend..."
-          curl -f https://${{ secrets.CLOUDFLARE_PROJECT_NAME }}.pages.dev/ \
-            || exit 1
-          echo "✅ Frontend is healthy"
-
-      - name: Backend health check
-        run: |
-          echo "🏥 Checking backend..."
-          curl -f https://api-backend.railway.app/health \
-            || exit 1
-          echo "✅ Backend is healthy"
-
-      - name: API connectivity test
-        run: |
-          echo "🔗 Testing API connectivity..."
-          curl -X GET https://api-backend.railway.app/info \
-            -H "Content-Type: application/json" \
-            || exit 1
-          echo "✅ API is responding"
-
-      - name: All systems operational
-        run: |
-          echo "🎉 Deployment successful!"
-          echo "📍 Frontend: https://${{ secrets.CLOUDFLARE_PROJECT_NAME }}.pages.dev"
-          echo "📍 Backend:  https://api-backend.railway.app"
-
-  # ==========================================
-  # 5️⃣ 배포 완료 알림
-  # ==========================================
-  notify:
-    name: Deployment Notification
-    needs: health-check
-    runs-on: ubuntu-latest
-    if: always()
-
-    steps:
-      - name: Deployment status
-        run: |
-          if [ "${{ needs.health-check.result }}" == "success" ]; then
-            echo "✅ 배포 완료 성공"
-            echo "🚀 Frontend: https://${{ secrets.CLOUDFLARE_PROJECT_NAME }}.pages.dev"
-            echo "🚀 Backend:  https://api-backend.railway.app"
-          else
-            echo "❌ 배포 실패"
-            echo "📋 로그 확인: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          fi
