@@ -18,10 +18,10 @@ export interface PayrollSettings {
 }
 
 export const DEFAULT_PAYROLL_SETTINGS: PayrollSettings = {
-  overtimeHourlyRate: 150,
-  overtimeMinThreshold: 40,
-  lateGraceMinutes: 0,
-  latePerMinute: 50,
+  overtimeHourlyRate: 70,    // 야근 40분 이상 시 1시간당 70 peso
+  overtimeMinThreshold: 40,  // 40분 이상부터 야근 인정
+  lateGraceMinutes: 10,      // 출근 5~10분 유예, 11분부터 차감
+  latePerMinute: 10,         // 유예 초과분 1분당 10 peso 차감
   nationalHolidayMultiplier: 2.0,
   specialHolidayMultiplier: 1.3,
 };

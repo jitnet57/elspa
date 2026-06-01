@@ -81,7 +81,7 @@ const MOCK: EmpInput[] = [
   { id: 2, name: 'Manager Lee', type: 'manager', base_salary: 30000, daily_wage: 2300, days_worked: 11, commission: 0, driving_allowance: 0, meal_allowance: 0, overtime_minutes: 0, national_days: 0, special_days: 0, late_minutes: 25, absence: 0, sss: 1350, cash_advance: 2000, health_check: 0, thirteenth: 1200, status: 'draft' },
   { id: 3, name: 'Therapist Sarah', type: 'therapist', base_salary: 0, daily_wage: 0, days_worked: 12, commission: 18500, driving_allowance: 0, meal_allowance: 0, overtime_minutes: 0, national_days: 0, special_days: 0, late_minutes: 0, absence: 0, sss: 900, cash_advance: 3000, health_check: 0, thirteenth: 800, status: 'paid' },
   { id: 4, name: 'Therapist Emma', type: 'therapist', base_salary: 0, daily_wage: 0, days_worked: 13, commission: 21000, driving_allowance: 0, meal_allowance: 0, overtime_minutes: 0, national_days: 0, special_days: 0, late_minutes: 0, absence: 0, sss: 1000, cash_advance: 0, health_check: 500, thirteenth: 900, status: 'draft' },
-  { id: 5, name: 'Driver Jose', type: 'driver', base_salary: 0, daily_wage: 1400, days_worked: 12, commission: 0, driving_allowance: 3500, meal_allowance: 1500, overtime_minutes: 360, national_days: 1, special_days: 0, late_minutes: 0, absence: 0, sss: 900, cash_advance: 1000, health_check: 0, thirteenth: 700, status: 'draft' },
+  { id: 5, name: 'Driver Jose', type: 'driver', base_salary: 0, daily_wage: 1400, days_worked: 12, commission: 0, driving_allowance: 3500, meal_allowance: 200, overtime_minutes: 360, national_days: 1, special_days: 0, late_minutes: 0, absence: 0, sss: 900, cash_advance: 1000, health_check: 0, thirteenth: 700, status: 'draft' },
   { id: 6, name: 'Nail Anna', type: 'nail', base_salary: 0, daily_wage: 1250, days_worked: 10, commission: 0, driving_allowance: 0, meal_allowance: 0, overtime_minutes: 30, national_days: 0, special_days: 1, late_minutes: 15, absence: 0, sss: 720, cash_advance: 0, health_check: 0, thirteenth: 600, status: 'draft' },
   { id: 7, name: 'Hollys Grace', type: 'hollys', base_salary: 0, daily_wage: 1150, days_worked: 13, commission: 0, driving_allowance: 0, meal_allowance: 0, overtime_minutes: 0, national_days: 0, special_days: 0, late_minutes: 0, absence: 0, sss: 700, cash_advance: 0, health_check: 0, thirteenth: 600, status: 'approved' },
   { id: 8, name: 'Maint. Pedro', type: 'maintenance', base_salary: 0, daily_wage: 1080, days_worked: 9, commission: 0, driving_allowance: 0, meal_allowance: 0, overtime_minutes: 0, national_days: 0, special_days: 0, late_minutes: 0, absence: 1080, sss: 650, cash_advance: 0, health_check: 0, thirteenth: 500, status: 'draft' },
@@ -130,9 +130,9 @@ export default function PayrollSettlementPage() {
           <ul className="list-disc pl-5 space-y-0.5 text-indigo-800">
             <li><b>테라피스트</b>: 수수료(정해진 금액)만</li>
             <li><b>매니저(정직원)</b>: {FULL_DAYS}일 만근 시 고정급 전액, 미달 시 일급×출근일</li>
-            <li><b>할리스·네일·메인·드라이버</b>: 개별 일급 × 출근일 (드라이버는 +운행수당+식비)</li>
-            <li><b>가산</b>: 야근({peso(settings.overtimeHourlyRate)}/h) · 국가공휴일 ×{settings.nationalHolidayMultiplier} · 일반공휴일 ×{settings.specialHolidayMultiplier}</li>
-            <li><b>차감</b>: 지각({peso(settings.latePerMinute)}/분) · <b>SSS 선지급(정부 인보이스 기준·전액회수)</b> · 가불 · 건강검진 · 13개월 · 결근</li>
+            <li><b>매니저·메인·드라이버·할리스</b>: 개별 일급 × 출근일 (드라이버는 +운행수당 +식비 {peso(200)}/2주)</li>
+            <li><b>야근(퇴근)</b>: {settings.overtimeMinThreshold}분 이상 시 1시간당 {peso(settings.overtimeHourlyRate)} 지급 · 공휴일 국가 ×{settings.nationalHolidayMultiplier}/일반 ×{settings.specialHolidayMultiplier}</li>
+            <li><b>지각(출근)</b>: {settings.lateGraceMinutes}분 유예, 초과분 1분당 {peso(settings.latePerMinute)} 차감 · <b>SSS 선지급(인보이스·전액회수)</b> · 가불 · 건강검진 · 13개월 · 결근</li>
           </ul>
         </div>
 
