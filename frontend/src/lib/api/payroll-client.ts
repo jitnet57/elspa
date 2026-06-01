@@ -15,9 +15,10 @@ export interface Employee {
   id: number;
   name: string;
   phone: string;
-  employee_type: 'therapist' | 'driver' | 'manager';
+  employee_type: 'therapist' | 'driver' | 'manager' | 'nail' | 'maintenance' | 'hollys';
   pay_group: 'weekly' | 'biweekly';
   base_salary: number;
+  daily_wage?: number;       // 개별 일급 (payroll_daily_wage.sql)
   commission_rate: number;
   hire_date: string;
   is_active: boolean;
@@ -233,6 +234,32 @@ export async function calculatePayroll(periodId: number): Promise<{ records: Pay
   }
 
   return { records };
+}
+
+/** 기간(period_start~end, pay_group) 을 찾고 없으면 생성하여 id 반환 */
+export async function ensurePayrollPeriod(
+  period_start: string, period_end: string, pay_group: 'weekly' | 'biweekly' = 'biweekly',
+): Promise<PayrollPeriod> {
+  const s = sb();
+  const { data: found } = await s.from('payroll_periods').select('*')
+    .eq('period_start', period_start).eq('period_end', period_end).eq('pay_group', pay_group).maybeSingle();
+  if (found) return found as PayrollPeriod;
+  const { data, error } = await s.from('payroll_periods')
+    .insert({ period_start, period_end, pay_group, status: 'draft' }).select().single();
+  if (error) throw error;
+  return data as PayrollPeriod;
+}
+
+/** (period, employee) 급여 레코드 upsert — 기존 삭제 후 삽입 (중복 방지) */
+export async function upsertPayrollRecord(
+  payroll_period_id: number, employee_id: number, fields: Partial<PayrollRecord>,
+): Promise<PayrollRecord> {
+  const s = sb();
+  await s.from('payroll_records').delete().eq('payroll_period_id', payroll_period_id).eq('employee_id', employee_id);
+  const { data, error } = await s.from('payroll_records')
+    .insert({ payroll_period_id, employee_id, ...fields }).select().single();
+  if (error) throw error;
+  return data as PayrollRecord;
 }
 
 export async function approvePeriod(periodId: number): Promise<PayrollPeriod> {

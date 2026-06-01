@@ -2,7 +2,7 @@
 // 오프라인 지원 및 캐싱 전략
 // 배포할 때마다 버전을 올려서 캐시를 무효화합니다
 
-const CACHE_VERSION = '20260601-v26'; // v26: 경영지표 Supabase저장+정산매출연동+추이차트
+const CACHE_VERSION = '20260602-v27'; // v27: 급여정산 DB 연동(employees/payroll_records)
 const CACHE_NAME = `elspa-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
