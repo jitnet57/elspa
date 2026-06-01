@@ -39,6 +39,9 @@ export default function NewMassagePanel({
   const [startTime, setStartTime] = useState('10:00');
   const [guestName, setGuestName] = useState('');
   const [roomNumber, setRoomNumber] = useState(prefillRoom ?? '');
+  const [note, setNote] = useState('');   // 업체명(노트)
+  const [pay, setPay] = useState(0);       // 지불
+  const [tip, setTip] = useState(0);       // 팁
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
 
@@ -62,14 +65,16 @@ export default function NewMassagePanel({
     try {
       await supabaseApiAdapter.createBooking({
         booking_date: date, treatment: service, start_time: startTime, end_time: endTime,
-        guest_name: guestName, therapist_name: therapistName, room_num: roomNumber, status: 'normal',
+        guest_name: guestName, therapist_name: therapistName, room_num: roomNumber,
+        note, pay, tip, status: 'normal',
       });
       dbOk = true;
     } catch (err) {
       console.warn('DB 저장 실패(Supabase 미설정?):', err);
     }
     const sheetOk = await saveBookingToSheet({
-      therapist: therapistName, service, date, time: startTime, endTime, guestName, roomNumber, notes: '',
+      therapist: therapistName, service, date, time: startTime, endTime, guestName, roomNumber,
+      notes: `${note}${pay ? ` | pay:${pay}` : ''}${tip ? ` | tip:${tip}` : ''}`,
     });
 
     setSaving(false);
@@ -144,6 +149,20 @@ export default function NewMassagePanel({
             <div>
               <label className="text-sm font-bold text-gray-700">{t('Room No.', '룸 번호')}{prefillRoom ? '' : t(' (optional)', ' (선택)')}</label>
               <input value={roomNumber} onChange={(e) => setRoomNumber(e.target.value)} placeholder={t('e.g. 05', '예: 05')} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900" />
+            </div>
+            <div>
+              <label className="text-sm font-bold text-gray-700">{t('Company / Note', '업체명(노트)')}</label>
+              <input value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('company / memo', '업체명 / 메모')} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-bold text-gray-700">{t('Pay', '지불')}</label>
+                <input type="number" value={pay || ''} onChange={(e) => setPay(Number(e.target.value) || 0)} placeholder="0" className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900 text-right" />
+              </div>
+              <div>
+                <label className="text-sm font-bold text-gray-700">{t('Tip', '팁')}</label>
+                <input type="number" value={tip || ''} onChange={(e) => setTip(Number(e.target.value) || 0)} placeholder="0" className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900 text-right" />
+              </div>
             </div>
             {msg && <p className="text-sm text-red-600 font-semibold">{msg}</p>}
             <button onClick={handleSave} disabled={saving} className="w-full px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold">
