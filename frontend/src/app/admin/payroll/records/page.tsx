@@ -38,7 +38,7 @@ interface EmpInput {
   driving_allowance: number; // 드라이버 운행수당
   meal_allowance: number;    // 식비
   // 가산 원천(설정 단가로 환산)
-  overtime_hours: number;    // 야근시간
+  overtime_minutes: number;  // 야근 분 (설정 임계값 이상일 때만 인정)
   national_days: number;     // 국가 공휴일 근무일
   special_days: number;      // 일반(특별) 공휴일 근무일
   // 차감
@@ -59,28 +59,32 @@ function computePay(e: EmpInput, s: PayrollSettings) {
   const commission = e.type === 'therapist' ? e.commission : 0;
   const driving = e.type === 'driver' ? e.driving_allowance : 0;
   const meal = e.meal_allowance;
-  const overtime = Math.round(e.overtime_hours * s.overtimeHourlyRate);
+  // 야근수당: 야근 분이 임계값(기본 40분) 이상일 때만 인정, 시간 환산 × 시급
+  const overtime = e.overtime_minutes >= s.overtimeMinThreshold
+    ? Math.round((e.overtime_minutes / 60) * s.overtimeHourlyRate)
+    : 0;
   const holiday = Math.round(
     e.daily_wage * (s.nationalHolidayMultiplier - 1) * e.national_days +
       e.daily_wage * (s.specialHolidayMultiplier - 1) * e.special_days,
   );
   const gross = base + commission + driving + meal + overtime + holiday;
 
-  const lateDed = e.late_minutes * s.latePerMinute;
+  // 지각 차감: 유예 분 초과분에 대해서만 분당 단가 적용
+  const lateDed = Math.max(0, e.late_minutes - s.lateGraceMinutes) * s.latePerMinute;
   const totalDeductions = e.sss + e.cash_advance + e.health_check + e.thirteenth + lateDed + e.absence;
   const net = Math.max(0, gross - totalDeductions);
   return { base, commission, driving, meal, overtime, holiday, gross, lateDed, totalDeductions, net };
 }
 
 const MOCK: EmpInput[] = [
-  { id: 1, name: 'Manager Kim', type: 'manager', base_salary: 30000, daily_wage: 2300, days_worked: 13, commission: 0, driving_allowance: 0, meal_allowance: 0, overtime_hours: 4, national_days: 0, special_days: 0, late_minutes: 0, absence: 0, sss: 1350, cash_advance: 0, health_check: 0, thirteenth: 1200, status: 'approved' },
-  { id: 2, name: 'Manager Lee', type: 'manager', base_salary: 30000, daily_wage: 2300, days_worked: 11, commission: 0, driving_allowance: 0, meal_allowance: 0, overtime_hours: 0, national_days: 0, special_days: 0, late_minutes: 25, absence: 0, sss: 1350, cash_advance: 2000, health_check: 0, thirteenth: 1200, status: 'draft' },
-  { id: 3, name: 'Therapist Sarah', type: 'therapist', base_salary: 0, daily_wage: 0, days_worked: 12, commission: 18500, driving_allowance: 0, meal_allowance: 0, overtime_hours: 0, national_days: 0, special_days: 0, late_minutes: 0, absence: 0, sss: 900, cash_advance: 3000, health_check: 0, thirteenth: 800, status: 'paid' },
-  { id: 4, name: 'Therapist Emma', type: 'therapist', base_salary: 0, daily_wage: 0, days_worked: 13, commission: 21000, driving_allowance: 0, meal_allowance: 0, overtime_hours: 0, national_days: 0, special_days: 0, late_minutes: 0, absence: 0, sss: 1000, cash_advance: 0, health_check: 500, thirteenth: 900, status: 'draft' },
-  { id: 5, name: 'Driver Jose', type: 'driver', base_salary: 0, daily_wage: 1400, days_worked: 12, commission: 0, driving_allowance: 3500, meal_allowance: 1500, overtime_hours: 6, national_days: 1, special_days: 0, late_minutes: 0, absence: 0, sss: 900, cash_advance: 1000, health_check: 0, thirteenth: 700, status: 'draft' },
-  { id: 6, name: 'Nail Anna', type: 'nail', base_salary: 0, daily_wage: 1250, days_worked: 10, commission: 0, driving_allowance: 0, meal_allowance: 0, overtime_hours: 2, national_days: 0, special_days: 1, late_minutes: 15, absence: 0, sss: 720, cash_advance: 0, health_check: 0, thirteenth: 600, status: 'draft' },
-  { id: 7, name: 'Hollys Grace', type: 'hollys', base_salary: 0, daily_wage: 1150, days_worked: 13, commission: 0, driving_allowance: 0, meal_allowance: 0, overtime_hours: 0, national_days: 0, special_days: 0, late_minutes: 0, absence: 0, sss: 700, cash_advance: 0, health_check: 0, thirteenth: 600, status: 'approved' },
-  { id: 8, name: 'Maint. Pedro', type: 'maintenance', base_salary: 0, daily_wage: 1080, days_worked: 9, commission: 0, driving_allowance: 0, meal_allowance: 0, overtime_hours: 0, national_days: 0, special_days: 0, late_minutes: 0, absence: 1080, sss: 650, cash_advance: 0, health_check: 0, thirteenth: 500, status: 'draft' },
+  { id: 1, name: 'Manager Kim', type: 'manager', base_salary: 30000, daily_wage: 2300, days_worked: 13, commission: 0, driving_allowance: 0, meal_allowance: 0, overtime_minutes: 240, national_days: 0, special_days: 0, late_minutes: 0, absence: 0, sss: 1350, cash_advance: 0, health_check: 0, thirteenth: 1200, status: 'approved' },
+  { id: 2, name: 'Manager Lee', type: 'manager', base_salary: 30000, daily_wage: 2300, days_worked: 11, commission: 0, driving_allowance: 0, meal_allowance: 0, overtime_minutes: 0, national_days: 0, special_days: 0, late_minutes: 25, absence: 0, sss: 1350, cash_advance: 2000, health_check: 0, thirteenth: 1200, status: 'draft' },
+  { id: 3, name: 'Therapist Sarah', type: 'therapist', base_salary: 0, daily_wage: 0, days_worked: 12, commission: 18500, driving_allowance: 0, meal_allowance: 0, overtime_minutes: 0, national_days: 0, special_days: 0, late_minutes: 0, absence: 0, sss: 900, cash_advance: 3000, health_check: 0, thirteenth: 800, status: 'paid' },
+  { id: 4, name: 'Therapist Emma', type: 'therapist', base_salary: 0, daily_wage: 0, days_worked: 13, commission: 21000, driving_allowance: 0, meal_allowance: 0, overtime_minutes: 0, national_days: 0, special_days: 0, late_minutes: 0, absence: 0, sss: 1000, cash_advance: 0, health_check: 500, thirteenth: 900, status: 'draft' },
+  { id: 5, name: 'Driver Jose', type: 'driver', base_salary: 0, daily_wage: 1400, days_worked: 12, commission: 0, driving_allowance: 3500, meal_allowance: 1500, overtime_minutes: 360, national_days: 1, special_days: 0, late_minutes: 0, absence: 0, sss: 900, cash_advance: 1000, health_check: 0, thirteenth: 700, status: 'draft' },
+  { id: 6, name: 'Nail Anna', type: 'nail', base_salary: 0, daily_wage: 1250, days_worked: 10, commission: 0, driving_allowance: 0, meal_allowance: 0, overtime_minutes: 30, national_days: 0, special_days: 1, late_minutes: 15, absence: 0, sss: 720, cash_advance: 0, health_check: 0, thirteenth: 600, status: 'draft' },
+  { id: 7, name: 'Hollys Grace', type: 'hollys', base_salary: 0, daily_wage: 1150, days_worked: 13, commission: 0, driving_allowance: 0, meal_allowance: 0, overtime_minutes: 0, national_days: 0, special_days: 0, late_minutes: 0, absence: 0, sss: 700, cash_advance: 0, health_check: 0, thirteenth: 600, status: 'approved' },
+  { id: 8, name: 'Maint. Pedro', type: 'maintenance', base_salary: 0, daily_wage: 1080, days_worked: 9, commission: 0, driving_allowance: 0, meal_allowance: 0, overtime_minutes: 0, national_days: 0, special_days: 0, late_minutes: 0, absence: 1080, sss: 650, cash_advance: 0, health_check: 0, thirteenth: 500, status: 'draft' },
 ];
 
 const peso = (n: number) => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 }).format(n);
@@ -223,7 +227,7 @@ function DetailModal({ e, s, onClose }: { e: EmpInput; s: PayrollSettings; onClo
               {row('수수료(정해진 금액)', c.commission)}
               {row('운행수당', c.driving)}
               {row('식비', c.meal)}
-              {row(`야근수당 (${e.overtime_hours}h × ${peso(s.overtimeHourlyRate)})`, c.overtime)}
+              {row(`야근수당 (${e.overtime_minutes}분${e.overtime_minutes >= s.overtimeMinThreshold ? '' : ` <${s.overtimeMinThreshold}분 미인정`} × ${peso(s.overtimeHourlyRate)}/h)`, c.overtime)}
               {row(`공휴일 가산 (국가 ${e.national_days}일·일반 ${e.special_days}일)`, c.holiday)}
               <div className="border-t border-green-200 pt-2 flex justify-between font-bold"><span className="text-sm">총 지급(Gross)</span><span className="text-sm text-green-700">{peso(c.gross)}</span></div>
             </div>

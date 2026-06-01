@@ -215,26 +215,8 @@ export default function AdminDashboard() {
 
           {/* Bento-Style Grid Layout */}
           <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            
-            {/* Card 1: Therapist Core */}
-            <div className="bg-white/3 backdrop-blur-md border border-[#8aebff]/10 p-6 rounded-2xl flex flex-col gap-4 transition-all hover:bg-white/7 hover:border-[#8aebff]/40 hover:-translate-y-0.5 hover:shadow-[0_0_30px_rgba(34,211,238,0.1)]">
-              <div className="flex justify-between items-start">
-                <div className="bg-[#8aebff]/10 p-3 rounded-xl text-[#8aebff]">
-                  <span className="material-symbols-outlined">diversity_3</span>
-                </div>
-                <span className="text-[10px] font-mono text-indigo-300/60 uppercase font-bold tracking-wider">60 ACTIVE STAFF</span>
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-white">Therapist Core</h3>
-                <p className="text-indigo-200/50 text-xs mt-1 font-semibold">Directory, Scheduling, & Bio-metrics</p>
-              </div>
-              <div className="flex gap-2 mt-auto text-[10px] font-black tracking-widest">
-                <Link className="flex-1 text-center py-2.5 bg-white/5 hover:bg-[#8aebff]/20 hover:text-[#8aebff] rounded-lg transition-all" href="/admin/therapists">DIRECTORY</Link>
-                <Link className="flex-1 text-center py-2.5 bg-white/5 hover:bg-[#8aebff]/20 hover:text-[#8aebff] rounded-lg transition-all" href="/admin/therapist-schedule">SCHEDULE</Link>
-              </div>
-            </div>
 
-            {/* Card 2: Settlement & Payroll (Col span 2) */}
+            {/* Card: Settlement & Payroll (Col span 2) */}
             <div className="bg-white/3 backdrop-blur-md border border-[#8aebff]/10 md:col-span-2 p-6 rounded-2xl flex flex-col gap-6 relative overflow-hidden transition-all hover:bg-white/7 hover:border-[#8aebff]/40 hover:-translate-y-0.5 hover:shadow-[0_0_30px_rgba(34,211,238,0.1)]">
               <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                 <span className="material-symbols-outlined text-[120px]">account_balance_wallet</span>

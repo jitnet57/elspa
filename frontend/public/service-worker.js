@@ -2,7 +2,7 @@
 // 오프라인 지원 및 캐싱 전략
 // 배포할 때마다 버전을 올려서 캐시를 무효화합니다
 
-const CACHE_VERSION = '20260601-v12'; // v12: 급여설정(야근/지각/공휴일) + 계산루틴
+const CACHE_VERSION = '20260601-v13'; // v13: 야근40분/지각유예 설정 + DB env 복원 + 대시보드 카드 제거
 const CACHE_NAME = `elspa-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',

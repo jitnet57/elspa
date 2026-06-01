@@ -80,14 +80,28 @@ export default function PayrollSettingsPage() {
       <main className="px-4 py-6 max-w-2xl mx-auto space-y-4">
         <Field
           label="🌙 야근수당 시급"
-          desc="야근수당 = 야근시간 × 시급"
+          desc="야근수당 = (야근분 ÷ 60) × 시급"
           value={s.overtimeHourlyRate}
           suffix="₱ / 시간"
           onChange={(v) => update({ overtimeHourlyRate: v })}
         />
         <Field
+          label="🌙 야근 인정 최소 분"
+          desc="야근이 이 분 이상일 때만 야근수당 지급 (예: 40분 미만은 미인정)"
+          value={s.overtimeMinThreshold}
+          suffix="분 이상"
+          onChange={(v) => update({ overtimeMinThreshold: v })}
+        />
+        <Field
+          label="⏰ 지각 유예 (분)"
+          desc="이 분까지는 지각 차감 없음 (유예 초과분부터 차감)"
+          value={s.lateGraceMinutes}
+          suffix="분 유예"
+          onChange={(v) => update({ lateGraceMinutes: v })}
+        />
+        <Field
           label="⏰ 지각 차감 (분당)"
-          desc="지각 차감 = 지각분 × 분당 단가"
+          desc="지각 차감 = (지각분 − 유예분) × 분당 단가"
           value={s.latePerMinute}
           suffix="₱ / 분"
           onChange={(v) => update({ latePerMinute: v })}
