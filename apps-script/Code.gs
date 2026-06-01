@@ -17,10 +17,15 @@
  */
 
 // 동기화할 테이블 → 시트 탭 이름 매핑
+// ⚠️ Supabase → Sheets 단방향 전체 복사 (매 sync 마다 시트를 Supabase 와 100% 일치시킴)
 var TABLES = [
-  { table: 'beds',       sheet: 'beds',       order: 'id' },
-  { table: 'therapists', sheet: 'therapists', order: 'id' },
-  { table: 'bookings',   sheet: 'bookings',   order: 'booking_date' },
+  { table: 'beds',                sheet: 'beds',                order: 'id' },
+  { table: 'therapists',          sheet: 'therapists',          order: 'id' },
+  { table: 'bookings',            sheet: 'bookings',            order: 'booking_date' },
+  // 정산(settlement) 테이블 — 무결성 미러
+  { table: 'companies',           sheet: 'companies',           order: 'id' },
+  { table: 'guides',              sheet: 'guides',              order: 'id' },
+  { table: 'monthly_settlements', sheet: 'monthly_settlements', order: 'settlement_month' },
 ];
 
 /** 매시간 트리거 설치 (1회 실행) */
