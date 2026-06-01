@@ -60,7 +60,10 @@ export async function aggregateReferrals(month: string): Promise<ReferralAgg[]> 
     map.set(key, agg);
   }
   return Array.from(map.values()).map((a) => {
-    const rate = Number(a.company.commission_rate) || 0;
+    // 가이드 레퍼럴 → 가이드 자신의 수수료율, 업체 레퍼럴 → 업체 수수료율
+    const rate = a.kind === 'guide' && a.guide
+      ? (Number(a.guide.commission_rate) || 0)
+      : (Number(a.company.commission_rate) || 0);
     const commission = Math.round((a.revenue * rate) / 100);
     return { ...a, commission_rate: rate, commission_amount: commission, payment_amount: a.revenue - commission };
   });

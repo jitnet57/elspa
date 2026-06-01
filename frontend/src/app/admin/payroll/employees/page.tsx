@@ -13,9 +13,12 @@ import { usePayrollStore } from '@/lib/store/payroll-store';
 import { Employee } from '@/lib/api/payroll-client';
 
 const EMPLOYEE_TYPES = [
-  { value: 'therapist', label: '👨‍⚕️ Therapist', color: 'bg-blue-100 text-blue-700' },
-  { value: 'driver', label: '🚗 Driver', color: 'bg-orange-100 text-orange-700' },
-  { value: 'manager', label: '👔 Manager', color: 'bg-purple-100 text-purple-700' },
+  { value: 'manager', label: '👔 매니저', color: 'bg-purple-100 text-purple-700' },
+  { value: 'hollys', label: '☕ 할리스커피', color: 'bg-amber-100 text-amber-700' },
+  { value: 'nail', label: '💅 네일', color: 'bg-pink-100 text-pink-700' },
+  { value: 'maintenance', label: '🔧 메인테넌스', color: 'bg-slate-100 text-slate-700' },
+  { value: 'driver', label: '🚗 드라이버', color: 'bg-orange-100 text-orange-700' },
+  { value: 'therapist', label: '👨‍⚕️ 테라피스트', color: 'bg-blue-100 text-blue-700' },
 ];
 
 export default function EmployeesPage() {
@@ -66,9 +69,11 @@ export default function EmployeesPage() {
   const handleOpenNewModal = () => {
     setSelectedEmployee(null);
     setFormData({
-      employee_type: 'therapist',
-      pay_group: 'weekly',
-      commission_rate: 30,
+      employee_type: 'manager',
+      pay_group: 'biweekly',
+      commission_rate: 0,
+      base_salary: 0,
+      daily_wage: 0,
     });
     setIsEditing(false);
     setShowModal(true);
@@ -82,8 +87,8 @@ export default function EmployeesPage() {
   };
 
   const handleSaveEmployee = async () => {
-    if (!formData.name || !formData.phone || !formData.base_salary || !formData.hire_date) {
-      alert('Please fill in all required fields');
+    if (!formData.name || !formData.employee_type) {
+      alert('직원명과 직군을 입력하세요');
       return;
     }
 
@@ -95,13 +100,14 @@ export default function EmployeesPage() {
         await createNewEmployee({
           name: formData.name || '',
           phone: formData.phone || '',
-          employee_type: formData.employee_type || 'therapist',
-          pay_group: formData.pay_group || 'weekly',
+          employee_type: formData.employee_type || 'manager',
+          pay_group: formData.pay_group || 'biweekly',
           base_salary: formData.base_salary || 0,
+          daily_wage: formData.daily_wage || 0,
           commission_rate: formData.commission_rate || 0,
-          hire_date: formData.hire_date || '',
+          hire_date: formData.hire_date || new Date().toISOString().split('T')[0],
           is_active: true,
-        });
+        } as any);
         alert('Employee created successfully');
       }
       setShowModal(false);
@@ -458,21 +464,33 @@ export default function EmployeesPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-2 block">Base Salary (PHP) *</label>
+                  <label className="text-sm font-bold text-gray-700 mb-2 block">기본급 (정직원, ₱)</label>
                   <input
                     type="number"
-                    placeholder="15000"
+                    placeholder="30000"
                     value={formData.base_salary || ''}
                     onChange={e => setFormData({ ...formData, base_salary: parseFloat(e.target.value) || 0 })}
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                   />
                 </div>
-
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-2 block">Commission Rate (%) *</label>
+                  <label className="text-sm font-bold text-gray-700 mb-2 block">개별 일급 (다른직원, ₱)</label>
                   <input
                     type="number"
-                    placeholder="30"
+                    placeholder="1400"
+                    value={(formData as any).daily_wage || ''}
+                    onChange={e => setFormData({ ...formData, daily_wage: parseFloat(e.target.value) || 0 } as any)}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1">
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-2 block">커미션율 (%) — 가이드/수수료직 한정</label>
+                  <input
+                    type="number"
+                    placeholder="0"
                     value={formData.commission_rate || ''}
                     onChange={e => setFormData({ ...formData, commission_rate: parseFloat(e.target.value) || 0 })}
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
