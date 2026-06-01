@@ -52,10 +52,52 @@ function syncAll() {
 
   TABLES.forEach(function (cfg) {
     var rows = fetchTable(url, key, cfg.table, cfg.order);
-    writeSheet(ss, cfg.sheet, rows, stamp);
+    // bookings 는 30행 단위로 1st/2nd/3rd 시트 분할 (예약 날짜/시간 컬럼 포함)
+    if (cfg.table === 'bookings') {
+      writePaginatedSheets(ss, cfg.sheet, rows, stamp, PAGE_SIZE);
+    } else {
+      writeSheet(ss, cfg.sheet, rows, stamp);
+    }
   });
 
   Logger.log('✅ ' + stamp + ' Supabase → Sheet 동기화 완료');
+}
+
+// 한 시트당 최대 예약 행 수 (초과 시 다음 시트로)
+var PAGE_SIZE = 30;
+
+/** 1→"1st", 2→"2nd", 3→"3rd", 11→"11th" ... 서수 변환 */
+function ordinal(n) {
+  var s = ['th', 'st', 'nd', 'rd'], v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+/**
+ * bookings 를 pageSize(30) 행씩 분할해 "<base> 1st", "<base> 2nd" ... 시트로 기록.
+ * 이전 동기화의 잔여 페이지 시트는 정리.
+ */
+function writePaginatedSheets(ss, baseName, rows, stamp, pageSize) {
+  rows = rows || [];
+  var pages = Math.max(1, Math.ceil(rows.length / pageSize));
+  for (var p = 0; p < pages; p++) {
+    var chunk = rows.slice(p * pageSize, (p + 1) * pageSize);
+    var name = baseName + ' ' + ordinal(p + 1); // 예: "bookings 1st"
+    writeSheet(ss, name, chunk, stamp + '  (' + ordinal(p + 1) + ' sheet, ' + chunk.length + ' rows)');
+  }
+  // 잔여(과거에 만들어졌던) 페이지 시트 제거
+  var extra = pages + 1;
+  while (true) {
+    var stale = ss.getSheetByName(baseName + ' ' + ordinal(extra));
+    if (!stale) break;
+    ss.deleteSheet(stale);
+    extra++;
+  }
+  // 단일 'bookings' 시트가 있으면 안내만 남기고 정리(중복 방지)
+  var legacy = ss.getSheetByName(baseName);
+  if (legacy) {
+    legacy.clearContents();
+    legacy.getRange(1, 1).setValue('→ "' + baseName + ' 1st/2nd/..." 시트로 분할 저장됨 (' + stamp + ')');
+  }
 }
 
 /** Supabase REST 로 한 테이블 전체 조회 */

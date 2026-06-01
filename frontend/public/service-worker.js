@@ -2,7 +2,7 @@
 // 오프라인 지원 및 캐싱 전략
 // 배포할 때마다 버전을 올려서 캐시를 무효화합니다
 
-const CACHE_VERSION = '20260601-v14'; // v14: 정산리포트 Supabase직결 + 침대그룹 편집/이동
+const CACHE_VERSION = '20260601-v15'; // v15: 베드예약창 테라피스트형태 + 시트번호 + Code.gs 페이지네이션
 const CACHE_NAME = `elspa-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',

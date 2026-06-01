@@ -157,6 +157,12 @@ export default function BookingSheetTable() {
       <div className="px-6 py-4 border-b border-white/10 flex flex-wrap items-center gap-3">
         <h2 className="text-xl font-black">📊 BOOKING WITH THERAPIST</h2>
         <span className="text-xs text-indigo-300">테라피스트 예약 ({ROW_COUNT}행)</span>
+        {(() => {
+          const filled = rows.filter(isFilled).length;
+          const sheetNo = Math.floor(filled / ROW_COUNT) + 1; // 30개 초과 시 자동으로 다음 시트
+          const ord = (n: number) => { const s = ['th','st','nd','rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
+          return <span className="text-xs px-2 py-1 rounded-md bg-pink-600/30 text-pink-200" title="30개 초과 시 다음 시트로 자동 반영">📄 시트: {ord(sheetNo)}</span>;
+        })()}
         <div className="ml-2 flex items-center gap-2">
           📅
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="px-3 py-2 rounded-lg bg-slate-800 border border-indigo-500/40 text-white text-sm" />
