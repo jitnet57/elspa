@@ -126,3 +126,35 @@ select
   'available'
 from generate_series(1, 86) as gs(id)
 on conflict (id) do nothing;
+
+-- ------------------------------------------------------------
+-- 시드: 테라피스트 (Daily Schedule / Booking 화면에 표시)
+-- ⚠️ 비어 있으면 모니터 화면에 테라피스트가 안 보이므로 기본 명단 주입
+-- ------------------------------------------------------------
+insert into public.therapists (id, name, status, specialty) values
+  (1, 'Anna',   'idle',       'Swedish Massage'),
+  (2, 'Bella',  'in_service', 'Aromatherapy'),
+  (3, 'Cathy',  'in_service', 'Thai Massage'),
+  (4, 'Daisy',  'resting',    'Hot Stone Massage'),
+  (5, 'Ella',   'in_service', 'Deep Tissue'),
+  (6, 'Fatima', 'idle',       'Facial Treatment'),
+  (7, 'Gina',   'checked_out','Foot Massage'),
+  (8, 'Hana',   'in_service', 'Swedish Massage'),
+  (9, 'Irene',  'idle',       'Aromatherapy'),
+  (10,'Julia',  'idle',       'Thai Massage')
+on conflict (id) do nothing;
+
+-- ------------------------------------------------------------
+-- 시드: 오늘자 샘플 예약 (타임라인이 비지 않도록 — 운영 시 삭제 가능)
+-- bookings 가 완전히 비어 있을 때만 주입
+-- ------------------------------------------------------------
+insert into public.bookings (booking_date, seq_no, treatment, start_time, end_time, room_num, guest_name, therapist_name, status)
+select * from (values
+  (current_date, 1, 'Swedish Massage',  '10:00', '11:00', '01', 'John Smith',  'Bella',  'normal'),
+  (current_date, 2, 'Aromatherapy',     '12:30', '13:15', '02', 'Mary Lee',    'Bella',  'normal'),
+  (current_date, 3, 'Thai Massage',     '11:00', '12:00', '03', 'Paul Kim',    'Cathy',  'normal'),
+  (current_date, 4, 'Hot Stone Massage','13:00', '14:15', '04', 'Sara Park',   'Daisy',  'normal'),
+  (current_date, 5, 'Deep Tissue',      '11:00', '12:30', '05', 'Tom Cho',     'Ella',   'normal'),
+  (current_date, 6, 'Swedish Massage',  '10:30', '11:30', '06', 'Lucy Han',    'Hana',   'normal')
+) as v(booking_date, seq_no, treatment, start_time, end_time, room_num, guest_name, therapist_name, status)
+where not exists (select 1 from public.bookings);
