@@ -12,10 +12,44 @@
 
 function writeTestSheets() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  writeMatrix_(ss, 'TEST_계산기준서', CRITERIA_());
-  writeMatrix_(ss, 'TEST_급여_예상값', PAYROLL_EXPECTED_());
-  writeMatrix_(ss, 'TEST_정산_예상값', SETTLEMENT_EXPECTED_());
-  SpreadsheetApp.getActiveSpreadsheet().toast('TEST 시트 3개 생성 완료', 'ELSPA', 5);
+  writeMatrix_(ss, 'TEST_00_요약', SUMMARY_());
+  writeMatrix_(ss, 'TEST_01_계산기준서', CRITERIA_());
+  writeMatrix_(ss, 'TEST_02_급여', PAYROLL_EXPECTED_());
+  writeMatrix_(ss, 'TEST_03_OT공휴일', OT_HOLIDAY_());
+  writeMatrix_(ss, 'TEST_04_공휴일야근시급', HOLIDAY_OT_RATE_());
+  writeMatrix_(ss, 'TEST_05_월정산', SETTLEMENT_EXPECTED_());
+  SpreadsheetApp.getActiveSpreadsheet().toast('TEST 시트 6개 생성 완료', 'ELSPA', 5);
+}
+
+function SUMMARY_() {
+  return [
+    ['항목', '내용'],
+    ['보고서', 'ELSPA 정산/급여 계산 테스트 과정 및 결과'],
+    ['작성일', '2026-06-02'],
+    ['검증방식', '계산기준서(정답) ↔ 앱 계산산식 ↔ DB 저장값 3중 대조'],
+    ['급여(8명)', '전부 일치 — 총 실수령 132,965'],
+    ['OT+공휴일(3명)', '전부 일치'],
+    ['공휴일 야근 시급', '국가 140/h · 특별 91/h — 일치'],
+    ['월정산(ABC)', '산식 일치'],
+    ['종합 판정', 'PASS (오차 0)'],
+  ];
+}
+function OT_HOLIDAY_() {
+  return [
+    ['직원', '일급', '기본급', 'OT 3h', '국가공휴(x2)', '특별공휴(x1.3)', '총지급', '판정'],
+    ['Manager Kim', 2300, 30000, 210, 2300, 690, 33200, 'OK'],
+    ['Driver Jose', 1400, 18200, 210, 1400, 420, 23930, 'OK(+운행3500+식비200)'],
+    ['Hollys Grace', 1150, 14950, 210, 1150, 345, 16655, 'OK'],
+  ];
+}
+function HOLIDAY_OT_RATE_() {
+  return [
+    ['케이스', '평일(70/h)', '국가(140/h)', '특별(91/h)', '야근합계', '판정'],
+    ['평일 야근 3h', 210, 0, 0, 210, 'OK'],
+    ['국가공휴 야근 3h', 0, 420, 0, 420, 'OK'],
+    ['특별공휴 야근 3h', 0, 0, 273, 273, 'OK'],
+    ['평일2h+국가1h+특별1h', 140, 140, 91, 371, 'OK'],
+  ];
 }
 
 // 시트에 2D 배열 기록 (1행=헤더). 기존 탭은 초기화 후 재작성.
