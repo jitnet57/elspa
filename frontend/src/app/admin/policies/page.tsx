@@ -227,12 +227,12 @@ function EditGroupModal({ group, onClose, onSave }: { group: BedGroup; onClose: 
   const [beds, setBeds] = useState(group.beds);
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
+      <div className="bg-white text-gray-900 rounded-xl shadow-xl w-full max-w-sm p-6">
         <h3 className="text-lg font-bold mb-4">그룹 편집</h3>
         <label className="text-sm font-semibold text-gray-700">그룹 이름</label>
-        <input value={name} onChange={e => setName(e.target.value)} className="w-full mt-1 mb-3 px-3 py-2 border rounded-lg" />
+        <input value={name} onChange={e => setName(e.target.value)} className="w-full mt-1 mb-3 px-3 py-2 border rounded-lg text-gray-900" />
         <label className="text-sm font-semibold text-gray-700">침대 수</label>
-        <input type="number" value={beds} onChange={e => setBeds(Number(e.target.value) || 0)} className="w-full mt-1 mb-4 px-3 py-2 border rounded-lg" />
+        <input type="number" value={beds} onChange={e => setBeds(Number(e.target.value) || 0)} className="w-full mt-1 mb-4 px-3 py-2 border rounded-lg text-gray-900" />
         <div className="flex gap-2">
           <button onClick={onClose} className="flex-1 px-4 py-2 bg-gray-200 rounded-lg font-bold">취소</button>
           <button onClick={() => onSave({ ...group, name, beds })} className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-bold">저장</button>
@@ -258,18 +258,18 @@ function MoveBedsModal({ groups, onClose, onMove }: { groups: BedGroup[]; onClos
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
+      <div className="bg-white text-gray-900 rounded-xl shadow-xl w-full max-w-sm p-6">
         <h3 className="text-lg font-bold mb-4">베드 이동</h3>
         <label className="text-sm font-semibold text-gray-700">출발 그룹</label>
-        <select value={from} onChange={e => { setFrom(Number(e.target.value)); setErr(''); }} className="w-full mt-1 mb-3 px-3 py-2 border rounded-lg">
+        <select value={from} onChange={e => { setFrom(Number(e.target.value)); setErr(''); }} className="w-full mt-1 mb-3 px-3 py-2 border rounded-lg text-gray-900">
           {groups.map(g => <option key={g.id} value={g.id}>{g.name} ({g.beds})</option>)}
         </select>
         <label className="text-sm font-semibold text-gray-700">도착 그룹</label>
-        <select value={to} onChange={e => { setTo(Number(e.target.value)); setErr(''); }} className="w-full mt-1 mb-3 px-3 py-2 border rounded-lg">
+        <select value={to} onChange={e => { setTo(Number(e.target.value)); setErr(''); }} className="w-full mt-1 mb-3 px-3 py-2 border rounded-lg text-gray-900">
           {groups.map(g => <option key={g.id} value={g.id}>{g.name} ({g.beds})</option>)}
         </select>
         <label className="text-sm font-semibold text-gray-700">이동 침대 수</label>
-        <input type="number" value={count} onChange={e => { setCount(Number(e.target.value) || 0); setErr(''); }} className="w-full mt-1 mb-2 px-3 py-2 border rounded-lg" />
+        <input type="number" value={count} onChange={e => { setCount(Number(e.target.value) || 0); setErr(''); }} className="w-full mt-1 mb-2 px-3 py-2 border rounded-lg text-gray-900" />
         {err && <p className="text-sm text-red-600 mb-2">{err}</p>}
         <div className="flex gap-2 mt-2">
           <button onClick={onClose} className="flex-1 px-4 py-2 bg-gray-200 rounded-lg font-bold">취소</button>
