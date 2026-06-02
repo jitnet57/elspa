@@ -29,7 +29,7 @@ export default function MonitorPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-6">
+      <div className="bg-white border-b border-gray-200 px-6 py-3">
         <div className="flex justify-between items-center">
           <div className="flex gap-2">
             <button

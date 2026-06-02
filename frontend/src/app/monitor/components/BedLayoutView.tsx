@@ -72,7 +72,7 @@ export default function BedLayoutView() {
 
   return (
     <>
-      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <SummaryCard label={t('Available', '비어있음')} value={summary.available} className="bg-green-50 border-green-200 text-green-700" />
           <SummaryCard label={t('In Service', '서비스중')} value={summary.occupied} className="bg-blue-50 border-blue-200 text-blue-700" />
@@ -175,7 +175,7 @@ function BedCard({ bed, onClick }: { bed: TherapyBed; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className={`px-2 py-2 rounded font-bold text-center transition cursor-pointer active:scale-95 leading-snug h-[80px] w-full flex flex-col justify-center gap-1 ${statusColorMap[bed.status]}`}
+      className={`px-2 py-2 rounded font-bold text-center transition cursor-pointer active:scale-95 leading-snug h-[100px] w-full flex flex-col justify-center gap-1 ${statusColorMap[bed.status]}`}
     >
       <div className="text-xs font-bold">{t(`No.${bedNo}`, `${bedNo}번`)}</div>
       {bed.status === 'occupied' ? (
