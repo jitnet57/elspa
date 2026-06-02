@@ -7,7 +7,7 @@ import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
 import { isOnline } from '@/lib/db/syncService';
 import { db } from '@/lib/db/localDb';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+const API_BASE = ''; // Next.js API Routes (로컬)
 
 // ── 카테고리 정의 ───────────────────────────────────────────────
 const CATEGORIES = [

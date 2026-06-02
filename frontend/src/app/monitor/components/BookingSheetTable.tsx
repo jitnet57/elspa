@@ -11,10 +11,10 @@ import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
 
 // ============================================================
 // 📌 상수: API_BASE
-// 📋 목적: 백엔드 API 기본 URL (Drive 저장 API 호출에 사용)
+// 📋 목적: Next.js API Routes (로컬)
 // 📅 작성일: 2026-06-02
 // ============================================================
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+const API_BASE = ''; // Next.js API Routes
 
 /**
  * ============================================================

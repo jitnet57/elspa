@@ -197,8 +197,7 @@ export default function AttendanceView() {
     });
 
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
-      const res = await fetch(`${API_BASE}/api/booking/drive/export`, {
+      const res = await fetch(`/api/booking/drive/export`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
