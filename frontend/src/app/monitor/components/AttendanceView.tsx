@@ -197,7 +197,7 @@ export default function AttendanceView() {
     });
 
     try {
-      // 📁 로컬 파일 저장으로 변경
+      // 🔵 Google Drive 자동 저장
       const attendanceData = employees.map((emp, idx) => {
         const log = logByEmp.get(emp.id);
         return {

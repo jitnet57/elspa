@@ -59,7 +59,6 @@ export default function ExpensePage() {
   const [saving,        setSaving]        = useState<Set<number>>(new Set());
   const [deleting,      setDeleting]      = useState<Set<number>>(new Set());
   const [exporting,     setExporting]     = useState(false);
-  const [sheetExporting, setSheetExporting] = useState(false);
   const [recError,      setRecError]      = useState('');
   // ── 자동 저장 마지막 시각 (HH:MM 형식) ─────────────────────
   const [lastAutoSave,  setLastAutoSave]  = useState<string | null>(null);
@@ -218,7 +217,7 @@ export default function ExpensePage() {
       r.expense_date || r.report_date || selectedDate,
     ]);
     try {
-      // 📁 로컬 파일 저장으로 변경
+      // 🔵 Google Drive 자동 저장
       const expenseData = records.map((r, idx) => ({
         id: idx + 1,
         category: r.category_name,
@@ -253,35 +252,6 @@ export default function ExpensePage() {
     return () => clearInterval(id);
   }, [autoExport, autoSaveEnabled, autoSaveIntervalMs]);
 
-  // ── 파일 저장 (로컬 XLSX) ───────────────────────────────────
-  const handleSheetExport = async () => {
-    if (!records.length) return;
-    setSheetExporting(true);
-    try {
-      const expenseData = records.map((r, idx) => ({
-        id: idx + 1,
-        vendor: r.vendor || '',
-        category: CAT[r.category_name as CatValue]?.label ?? r.category_name,
-        amount: r.amount ?? 0,
-        description: r.description || r.note || '',
-        date: r.expense_date || r.report_date || selectedDate,
-        created_at: new Date().toISOString(),
-      }));
-
-      const res = await fetch('http://localhost:5000/api/save-all', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ expenses: expenseData }),
-      });
-      if (!res.ok) throw new Error(t('File save failed', '파일 저장 실패'));
-      const data = await res.json();
-      alert(`✅ 파일 저장 완료!\n~/elspa/data/expenses.xlsx`);
-    } catch (e) {
-      alert(e instanceof Error ? e.message : t('File save error', '파일 저장 오류'));
-    } finally {
-      setSheetExporting(false);
-    }
-  };
 
   // ── 집계 ────────────────────────────────────────────────────
   const grandTotal  = records.reduce((s, r) => s + (r.amount || 0), 0);
