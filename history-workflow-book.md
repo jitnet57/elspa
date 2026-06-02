@@ -6520,3 +6520,54 @@ GET /api/network/stats
 ### 비고 (학습 포인트)
 - 정적 export + Supabase anon 직결로 백엔드 없이 CRUD. 서비스워커 캐시 버전 올려야 신버전 반영. PAT는 workflow scope 필요. 공개 anon키는 .env.production 커밋 가능(RLS 보호).
 ---
+
+## [2026-06-02 10:38] Order: 065 - Google Drive 연동 + 출결 탭 + i18n + 자동저장 설정
+
+**주제:** Google Drive 폴더 구조 연동, 경영지표 개선, 모니터 출결 탭, admin i18n, 자동저장 설정
+
+### Plan
+✅ 경영지표 일간·주간·월간 탭 + 일간 비용 CRUD
+✅ 모니터 출결 탭 신설 (6직군)
+✅ Google Drive 자동저장 (예약·출결·비용 1시간)
+✅ Settings Google 계정 연결 UI + 자동저장 ON/OFF·간격 설정
+✅ 대시보드 재배치 + admin i18n 10파일
+✅ 선지급 직원 검색+드래그드롭
+✅ NewMassagePanel 3열 레이아웃
+
+### Task 수행 내용
+
+#### 섹션 1: 백엔드 구현
+1. google_sheets_router.py (app/routers/) — Drive 폴더 저장, 토큰 영구 저장, disconnect API
+2. google_oauth_service.py (app/services/) — Drive scope, 폴더 생성, backup 관리, 이메일 조회
+3. expense.py (app/routers/) — 기간 집계 /range API
+4. massage_bookings.py (app/routers/) — 매출 집계 /revenue/range API
+
+#### 섹션 2: 프론트엔드 신규
+1. EmployeePicker.tsx (admin/_components/) — 선지급 직원 검색+드래그드롭
+2. AttendanceView.tsx (monitor/components/) — 출결 탭
+3. GoogleConnect.tsx (components/) — 인증 상태+연결 버튼 미니
+4. GoogleSettings.tsx (components/) — Settings 전용 Google 연결 상세 UI
+5. useAutoSaveSettings.ts (lib/hooks/) — 자동저장 설정 공유 훅
+
+#### 섹션 3: 프론트엔드 수정
+1. AdminShell.tsx — 비용 사이드바 메뉴 추가
+2. management/page.tsx + PeriodReport.tsx — 일/주/월 탭 + 일간 비용 CRUD
+3. monitor/page.tsx — 출결 탭 추가
+4. NewMassagePanel.tsx — 3열 레이아웃 (업체/메모·지불·팁 노출)
+5. BookingSheetTable.tsx — Drive 저장 + 1시간 자동저장
+6. expense/page.tsx — Drive 저장 + 자동저장 설정 훅 연동
+7. deductions/page.tsx — EmployeePicker 연결, i18n
+8. policies/page.tsx — GoogleSettings 연결
+9. 기타 admin 10개 파일 i18n (한/영 전환)
+
+### Result
+✅ **28개 파일 생성/수정 완료 (커밋: e577124b SW v38)**
+- Google Drive elspa/급여·예약·비용·수수료·매출 폴더 자동 생성 ✓
+- 토큰 영구 저장 (서버 재시작 후 복원) ✓
+- 예약·출결·비용 1시간 자동저장 (ON/OFF + 간격 설정) ✓
+- 경영지표 일간 비용 CRUD ✓
+- 모니터 출결 탭 ✓
+- admin i18n 10파일 ✓
+- 선지급 직원 검색+드래그드롭 ✓
+
+---
