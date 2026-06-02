@@ -37,10 +37,10 @@ export default function MonitorPage() {
             <span className="text-sm font-medium text-gray-600">🟢 {t('Live (5s polling)', '실시간 (5초 폴링)')}</span>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-2">
             <button
               onClick={() => setActiveTab('beds')}
-              className={`px-6 py-2 rounded-lg font-bold transition whitespace-nowrap ${
+              className={`px-4 py-1 rounded-lg font-bold text-sm transition whitespace-nowrap ${
                 activeTab === 'beds' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
               }`}
             >
@@ -48,7 +48,7 @@ export default function MonitorPage() {
             </button>
             <button
               onClick={() => setActiveTab('schedule')}
-              className={`px-6 py-2 rounded-lg font-bold transition whitespace-nowrap ${
+              className={`px-4 py-1 rounded-lg font-bold text-sm transition whitespace-nowrap ${
                 activeTab === 'schedule'
                   ? 'bg-purple-600 text-white'
                   : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
@@ -58,7 +58,7 @@ export default function MonitorPage() {
             </button>
             <button
               onClick={() => setActiveTab('booking')}
-              className={`px-6 py-2 rounded-lg font-bold transition whitespace-nowrap ${
+              className={`px-4 py-1 rounded-lg font-bold text-sm transition whitespace-nowrap ${
                 activeTab === 'booking'
                   ? 'bg-purple-600 text-white'
                   : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
@@ -68,7 +68,7 @@ export default function MonitorPage() {
             </button>
             <button
               onClick={() => setActiveTab('attendance')}
-              className={`px-6 py-2 rounded-lg font-bold transition whitespace-nowrap ${
+              className={`px-4 py-1 rounded-lg font-bold text-sm transition whitespace-nowrap ${
                 activeTab === 'attendance'
                   ? 'bg-purple-600 text-white'
                   : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
@@ -77,10 +77,10 @@ export default function MonitorPage() {
               👥 {t('Attendance', '출결')}
             </button>
           </div>
-          <div className="flex gap-2">
-            <button onClick={() => setLang('en')} className={`px-4 py-2 rounded-lg font-bold ${lang === 'en' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}>EN</button>
-            <button onClick={() => setLang('ko')} className={`px-4 py-2 rounded-lg font-bold ${lang === 'ko' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}>KO</button>
-            <button className="p-2 text-gray-600 hover:text-gray-800">⚙️</button>
+          <div className="flex gap-1">
+            <button onClick={() => setLang('en')} className={`px-3 py-1 rounded-lg font-bold text-sm ${lang === 'en' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}>EN</button>
+            <button onClick={() => setLang('ko')} className={`px-3 py-1 rounded-lg font-bold text-sm ${lang === 'ko' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}>KO</button>
+            <button className="p-1 text-gray-600 hover:text-gray-800">⚙️</button>
           </div>
         </div>
       </div>
