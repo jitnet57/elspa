@@ -23435,7 +23435,7 @@ app.get("/api/booking/status", (c) => {
 app.get("/api/booking/auth/google", (c) => {
   try {
     const clientId = c.env.GOOGLE_CLIENT_ID || "";
-    const redirectUri = `${c.req.header("Origin")}/api/auth/google/callback`;
+    const redirectUri = c.env.GOOGLE_OAUTH_REDIRECT_URI || "https://elspa-vercel.app/api/booking/auth/google/callback";
     const params = new URLSearchParams({
       client_id: clientId,
       redirect_uri: redirectUri,
