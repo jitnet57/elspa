@@ -159,6 +159,13 @@ export default function PayrollDashboard() {
             >
               📊 기록 보기
             </a>
+            <a
+              href="/admin/payroll/settings"
+              className="px-5 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-full shadow-md hover:shadow-lg transition-all active:scale-95 font-bold text-sm whitespace-nowrap"
+              title="Payroll Settings"
+            >
+              ⚙️ 급여설정
+            </a>
           </div>
         </div>
       </div>

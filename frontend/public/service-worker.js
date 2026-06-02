@@ -2,7 +2,7 @@
 // 오프라인 지원 및 캐싱 전략
 // 배포할 때마다 버전을 올려서 캐시를 무효화합니다
 
-const CACHE_VERSION = '20260602-v38'; // v38: 경영지표·출결·비용·Drive 연동 + 전체 admin 경로 캐시
+const CACHE_VERSION = '20260602-v39'; // v39: Payroll 급여설정 버튼 추가 + SW 캐시 무효화
 const CACHE_NAME = `elspa-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
