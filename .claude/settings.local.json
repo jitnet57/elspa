@@ -45,7 +45,9 @@
       "Bash(python3 -m py_compile /Users/kwangseobpark/elspa/app/config/table_mappings_usage.py)",
       "Bash(grep -E \"\\\\.\\(ts|tsx|py\\)$\")",
       "Bash(python3 -m pytest tests/test_payment_validation.py -v)",
-      "Bash(pip3 install *)"
+      "Bash(pip3 install *)",
+      "Bash(curl -s -H \"Authorization: token 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\" https://api.github.com/user)",
+      "Bash(curl -s -H \"Authorization: token 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\" https://api.github.com/repos/jitnet57/elspa)"
     ],
     "additionalDirectories": [
       "/private/tmp"
