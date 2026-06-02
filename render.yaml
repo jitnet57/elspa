@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: elspa-backend
+    env: python
+    region: oregon
+    plan: free
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+
+    envVars:
+      - key: SUPABASE_URL
+        value: https://qnqhqrpvqjhqarbufzqd.supabase.co
+
+      - key: SUPABASE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFucWhxcnB2cWpocWFyYnVmenFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NTYyODgsImV4cCI6MjA5NTUzMjI4OH0.xK6AcI7vpWDiuQzEh__5gHFKX3X6eTFH0xrgdZzRB8I
+
+      - key: GOOGLE_CLIENT_ID
+        value: 104694066545-vtgespl9ho6b4gmcolgdrpuloankttgq.apps.googleusercontent.com
+
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+
+      - key: ENVIRONMENT
+        value: production
+
+      - key: PORT
+        value: 8000
