@@ -6,11 +6,11 @@ import { saveBookingToSheet } from '@/lib/services/booking-sheet';
 import { SERVICES, autoEndTime, sortByAttendance, type UiTherapist } from './booking-helpers';
 import { getCompanies, getGuides } from '@/lib/api/companies-client';
 import { useT } from '@/lib/i18n';
-import GoogleConnect from '@/components/GoogleConnect';
 import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
 import { PaymentMethodInput, type PaymentMethodData } from '@/components/PaymentMethodInput';
 import { SSSOptionSelect, type PayrollImpact } from '@/components/SSSOptionSelect';
 import { PaymentFromSelect, type SettlementImpact } from '@/components/PaymentFromSelect';
+// GoogleConnect 제거됨
 
 // ============================================================
 // 📌 상수: API_BASE
