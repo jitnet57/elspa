@@ -19,7 +19,7 @@ import {
 } from '@/lib/api/payroll-client';
 import { SERVICES } from '@/app/monitor/components/booking-helpers';
 import { useT } from '@/lib/i18n';
-import GoogleConnect from '@/components/GoogleConnect';
+import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
 
 // ============================================================
 // 📌 상수: API_BASE
@@ -109,6 +109,7 @@ function defaultPeriod() {
 
 export default function PayrollSettlementPage() {
   const t = useT();
+  const { enabled: autoSaveEnabled, intervalMs: autoSaveIntervalMs } = useAutoSaveSettings();
   const [settings, setSettings] = useState<PayrollSettings>(DEFAULT_PAYROLL_SETTINGS);
   const dp = useMemo(defaultPeriod, []);
   const [periodStart, setPeriodStart] = useState(dp.start);
@@ -121,6 +122,7 @@ export default function PayrollSettlementPage() {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Row | null>(null);
   const [driveLoading, setDriveLoading] = useState(false); // Drive 저장 로딩 상태
+  const [lastAutoSave, setLastAutoSave] = useState(''); // 마지막 자동 저장 시각
 
   useEffect(() => {
     setSettings(getPayrollSettings());
@@ -129,62 +131,49 @@ export default function PayrollSettlementPage() {
 
   // ============================================================
   // 📌 함수명: handleDriveExport
-  // 📋 목적: 현재 급여 rows 데이터를 Google Drive Spreadsheet로 저장
-  //          category = '급여', title_prefix = 기간시작_기간종료
-  // 📅 작성일: 2026-06-02
+  // 📋 목적: 현재 급여 rows 데이터를 Google Drive로 저장 (백엔드 API)
+  // 📅 작성일: 2026-06-02 (Google Drive 자동 저장)
   // ============================================================
-  const handleDriveExport = async () => {
-    // 헤더 행 + 데이터 행으로 2차원 배열 구성
-    const header = ['직원명', '직군', 'Gross Pay', '공제', 'Net Pay', '기간시작', '기간종료', '상태'];
-    const dataRows = rows.map((r) => {
+  const handleDriveExport = async (silent = false) => {
+    if (rows.length === 0) return;
+
+    // 데이터 준비
+    const payrollData = rows.map((r, idx) => {
       const c = computeRow(r, settings);
-      return [
-        r.emp.name,
-        typeLabel(t, r.type),
-        c.gross,
-        c.totalDeductions,
-        c.net,
-        periodStart,
-        periodEnd,
-        r.status,
-      ];
+      return {
+        id: idx + 1,
+        employee_name: r.emp.name,
+        employee_type: typeLabel(t, r.type),
+        gross_pay: c.gross,
+        deductions: c.totalDeductions,
+        net_pay: c.net,
+        period_start: periodStart,
+        period_end: periodEnd,
+        status: r.status,
+        created_at: new Date().toISOString(),
+      };
     });
 
-    setDriveLoading(true);
+    if (!silent) setDriveLoading(true);
     try {
-      // 📁 로컬 파일 저장으로 변경
-      const payrollData = rows.map((r, idx) => {
-        const c = computeRow(r, settings);
-        return {
-          id: idx + 1,
-          employee_name: r.emp.name,
-          employee_type: typeLabel(t, r.type),
-          gross_pay: c.gross,
-          deductions: c.totalDeductions,
-          net_pay: c.net,
-          period_start: periodStart,
-          period_end: periodEnd,
-          status: r.status,
-          created_at: new Date().toISOString(),
-        };
-      });
-
-      const res = await fetch('http://localhost:5000/api/save-all', {
+      // Google Drive 저장 (백엔드 API)
+      const res = await fetch(`${API_BASE}/api/drive/save-payroll`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payroll: payrollData }),
+        body: JSON.stringify(payrollData),
       });
 
-      if (!res.ok) {
-        const errBody = await res.json().catch(() => ({}));
-        alert(`파일 저장 실패: ${errBody?.error || res.statusText}`);
-        return;
+      if (res.ok) {
+        const stamp = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+        setLastAutoSave(stamp);
+        if (!silent) alert(`✅ Google Drive 저장 완료!\nelspa/급여 폴더\n${stamp}`);
+      } else {
+        if (!silent) alert(`❌ 저장 실패: 백엔드 오류`);
       }
-      alert('✅ 파일 저장 완료!\n~/elspa/data/payroll.xlsx');
     } catch (e) {
-      alert(`파일 저장 오류: ${e instanceof Error ? e.message : '알 수 없는 오류'}`);
+      if (!silent) alert(`❌ Google Drive 저장 오류: ${e instanceof Error ? e.message : 'API 연결 확인'}`);
     } finally {
-      setDriveLoading(false);
+      if (!silent) setDriveLoading(false);
     }
   };
 
@@ -224,6 +213,13 @@ export default function PayrollSettlementPage() {
   }, [periodStart, periodEnd]);
 
   useEffect(() => { load(); }, [load]);
+
+  // ── 설정된 간격마다 자동 Google Drive 저장 ───────────
+  useEffect(() => {
+    if (!autoSaveEnabled || rows.length === 0) return;
+    const timer = setInterval(() => { handleDriveExport(true); }, autoSaveIntervalMs);
+    return () => clearInterval(timer);
+  }, [handleDriveExport, autoSaveEnabled, autoSaveIntervalMs, rows.length]);
 
   const update = (empId: number, patch: Partial<Raw> | { status: Row['status'] }) =>
     setRows((prev) => prev.map((r) => (r.emp.id === empId ? { ...r, ...patch, saved: false } : r)));
