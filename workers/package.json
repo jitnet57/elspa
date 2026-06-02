@@ -1,0 +1,21 @@
+{
+  "name": "elspa-api",
+  "version": "1.0.0",
+  "description": "ElSpa Backend - Cloudflare Workers",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "wrangler build"
+  },
+  "dependencies": {
+    "hono": "^4.0.0",
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.40.0",
+    "@cloudflare/workers-types": "^4.20231121.0",
+    "typescript": "^5.0.0"
+  }
+}

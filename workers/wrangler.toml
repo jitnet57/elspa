@@ -1,0 +1,13 @@
+name = "elspa-api"
+type = "service"
+main = "src/index.ts"
+compatibility_date = "2024-12-02"
+
+# 환경 변수
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+# Supabase 환경 변수 (binding)
+[env.production.vars]
+SUPABASE_URL = "https://qnqhqrpvqjhqarbufzqd.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFucWhxcnB2cWpocWFyYnVmenFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NTYyODgsImV4cCI6MjA5NTUzMjI4OH0.xK6AcI7vpWDiuQzEh__5gHFKX3X6eTFH0xrgdZzRB8I"
