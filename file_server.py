@@ -136,6 +136,45 @@ def save_payroll():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 400
 
+@app.route('/api/save-settlement', methods=['POST'])
+def save_settlement():
+    """정산 데이터 저장"""
+    try:
+        data = request.get_json()
+        settlement = data.get('settlement', [])
+
+        result = save_xlsx('settlement', settlement, '정산 기록')
+
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/save-commission', methods=['POST'])
+def save_commission():
+    """수수료 데이터 저장"""
+    try:
+        data = request.get_json()
+        commission = data.get('commission', [])
+
+        result = save_xlsx('commission', commission, '수수료 기록')
+
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/save-employees', methods=['POST'])
+def save_employees():
+    """직원 데이터 저장"""
+    try:
+        data = request.get_json()
+        employees = data.get('employees', [])
+
+        result = save_xlsx('employees', employees, '직원 정보')
+
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
 @app.route('/api/save-all', methods=['POST'])
 def save_all():
     """모든 데이터 한 번에 저장"""

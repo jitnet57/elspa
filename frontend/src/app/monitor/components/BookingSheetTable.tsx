@@ -206,26 +206,39 @@ export default function BookingSheetTable() {
       const dataRows = rows
         .map((r, i) => [i + 1, r.therapistName, r.service, r.startTime, endTimeOf(r), r.roomNumber, r.guestName, r.note, r.pay, r.tip])
         .filter((_, i) => isFilled(rows[i]));
-      const res = await fetch(`${API_BASE}/api/booking/drive/export`, {
+      // 로컬 파일 저장 (Flask 서버)
+      const bookingData = filled.map((r, idx) => ({
+        id: idx + 1,
+        booking_date: date,
+        therapist_name: r.therapistName,
+        treatment: r.service,
+        start_time: r.startTime,
+        end_time: endTimeOf(r),
+        room_number: r.roomNumber,
+        guest_name: r.guestName,
+        note: r.note,
+        pay: r.pay,
+        tip: r.tip,
+        status: 'completed',
+        created_at: new Date().toISOString(),
+      }));
+
+      const res = await fetch('http://localhost:5000/api/save-all', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category: '예약', title_prefix: date, rows: [header, ...dataRows] }),
+        body: JSON.stringify({ bookings: bookingData }),
       });
-      if (res.status === 401) {
-        if (!silent) alert('Google 계정 인증이 필요합니다.');
-        return;
-      }
+
       const json = await res.json();
-      if (res.ok && json.status === 'success') {
-        // 자동 저장 시 마지막 저장 시각만 기록 (alert 없음)
+      if (json.success) {
         const stamp = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
         setLastAutoSave(stamp);
-        if (!silent) alert(`✅ Drive 저장 완료!\n${json.message}\n\n${json.url ?? ''}`);
+        if (!silent) alert(`✅ 파일 저장 완료!\n~/elspa/data/bookings.xlsx\n${stamp}`);
       } else {
-        if (!silent) alert(`❌ Drive 저장 실패: ${json.message ?? '알 수 없는 오류'}`);
+        if (!silent) alert(`❌ 저장 실패: ${json.error ?? '알 수 없는 오류'}`);
       }
     } catch (err) {
-      if (!silent) alert(`❌ Drive 저장 오류: ${err instanceof Error ? err.message : String(err)}`);
+      if (!silent) alert(`❌ 저장 오류: ${err instanceof Error ? err.message : 'Flask 서버 연결 확인'}`);
     } finally {
       if (!silent) setDriveLoading(false);
     }

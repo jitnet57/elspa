@@ -31,7 +31,10 @@ async function loadDataFromIndexedDB() {
       bookings: bookings || [],
       expenses: expenses || [],
       attendance: attendanceLogs || [],
-      payroll: [], // TODO: payroll 테이블 추가 필요
+      payroll: [], // Payroll 데이터 (따로 저장되는 경우)
+      settlement: [], // Settlement 데이터 (따로 저장되는 경우)
+      commission: [], // Commission 데이터 (따로 저장되는 경우)
+      employees: employees || [],
     };
   } catch (error) {
     console.error('❌ IndexedDB 로드 실패:', error);
@@ -40,6 +43,9 @@ async function loadDataFromIndexedDB() {
       expenses: [],
       attendance: [],
       payroll: [],
+      settlement: [],
+      commission: [],
+      employees: [],
     };
   }
 }
