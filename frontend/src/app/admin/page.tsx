@@ -5,6 +5,7 @@ import React from 'react';
 import dynamic from 'next/dynamic';
 import { usePayrollStore } from '@/lib/store/payroll-store';
 import { usePayrollCalculation } from '@/hooks/usePayrollCalculation';
+import { getSupabase } from '@/lib/supabase/client';
 
 // Lazy load 3D 네트워크 대시보드 (SSR 방지)
 const NetworkDashboardAdmin = dynamic(
@@ -25,6 +26,17 @@ export default function AdminDashboard() {
 
   // Payroll Calculation API 훅
   const { calculateSingle, loading: apiLoading, error: apiError, result: apiResult, reset: resetCalc } = usePayrollCalculation();
+
+  // Dashboard KPI state
+  const [dashRefresh, setDashRefresh] = useState(0);
+  const [dashLoading, setDashLoading] = useState(true);
+  const [dashStats, setDashStats] = useState<{
+    present: number; absent: number; earlyLeave: number;
+    todayRevenue: number; todayExpense: number; todayBookings: number;
+    pickupRequests: number; plannedBudget: number;
+    newGuests: number; newCompanies: number; newTherapists: number;
+    newStaff: number; resigned: number;
+  } | null>(null);
 
   // Dashboard tab states
   const [payrollSearch, setPayrollSearch] = useState('');
@@ -119,6 +131,36 @@ export default function AdminDashboard() {
     if (fetchEmployees) fetchEmployees();
   }, [fetchRecords, fetchEmployees]);
 
+  // ============================================================
+  // 📌 대시보드 KPI 데이터 로드
+  // 📋 목적: adminTab이 dashboard일 때 또는 새로고침 시 Supabase에서 KPI 집계
+  // 🔄 의존성: adminTab, dashRefresh
+  // ============================================================
+  useEffect(() => {
+    if (adminTab !== 'dashboard') return;
+    setDashLoading(true);
+    const today = new Date().toISOString().split('T')[0];
+    const d2 = new Date(); d2.setHours(0,0,0,0);
+    const dow = d2.getDay(); const diff2 = dow === 0 ? -6 : 1 - dow;
+    const mon = new Date(d2); mon.setDate(d2.getDate() + diff2);
+    const weekStart = mon.toISOString().split('T')[0];
+    const s = { present:0, absent:0, earlyLeave:0, todayRevenue:0, todayExpense:0, todayBookings:0, pickupRequests:0, plannedBudget:0, newGuests:0, newCompanies:0, newTherapists:0, newStaff:0, resigned:0 };
+    (async () => {
+      const sb = getSupabase();
+      if (sb) {
+        try { const {data:att} = await sb.from('attendance_logs').select('clock_in,clock_out,is_absent').eq('work_date',today); if(att){s.present=att.filter((a:any)=>a.clock_in&&!a.is_absent).length;s.absent=att.filter((a:any)=>a.is_absent).length;s.earlyLeave=att.filter((a:any)=>a.clock_out&&a.clock_out<'17:00').length;} } catch{}
+        try { const {data:bk} = await sb.from('massage_bookings').select('service_price,status').eq('date',today); if(bk){const ac=bk.filter((b:any)=>b.status!=='cancelled');s.todayBookings=ac.length;s.todayRevenue=ac.reduce((t:number,b:any)=>t+(Number(b.service_price)||0),0);} } catch{}
+        try { const {data:ex} = await sb.from('expenses').select('amount').eq('report_date',today); if(ex)s.todayExpense=ex.reduce((t:number,e:any)=>t+(Number(e.amount)||0),0); } catch{}
+        try { const {data:pu} = await sb.from('bookings').select('id').gte('created_at',today+'T00:00:00').eq('status','pending'); if(pu)s.pickupRequests=pu.length; } catch{}
+        try { const {data:em} = await sb.from('employees').select('employee_type,is_active,created_at').gte('created_at',weekStart+'T00:00:00'); if(em){s.newStaff=em.length;s.newTherapists=em.filter((e:any)=>e.employee_type==='therapist').length;} } catch{}
+        try { const {data:re} = await sb.from('employees').select('id').eq('is_active',false).gte('updated_at',weekStart+'T00:00:00'); if(re)s.resigned=re.length; } catch{}
+        try { const {data:co} = await sb.from('companies').select('id').gte('created_at',weekStart+'T00:00:00'); if(co)s.newCompanies=co.length; } catch{}
+        try { const {data:gu} = await sb.from('massage_bookings').select('guest_name').gte('created_at',weekStart+'T00:00:00'); if(gu)s.newGuests=new Set(gu.map((g:any)=>g.guest_name)).size; } catch{}
+      }
+      setDashStats(s); setDashLoading(false);
+    })();
+  }, [adminTab, dashRefresh]);
+
   // API 데이터를 테이블 형식으로 변환
   const payrollData = records.map((record: any) => {
     const employee = employees.find(e => e.id === record.employee_id);
@@ -199,278 +241,51 @@ export default function AdminDashboard() {
         </button>
       </div>
 
+      {/* ============================================================
+          📌 Dashboard 탭: 13개 KPI 카드 대시보드
+          📋 목적: 오늘 출근·매출·예약·픽업 현황 + 이번 주 신규·변동 집계
+          ============================================================ */}
       {adminTab === 'dashboard' && (
-        <>
+        <div className="p-6 space-y-6">
+          <div className="flex justify-between items-center">
+            <p className="text-xs text-indigo-300/50">오늘 기준 · 이번주 신규/변동</p>
+            <button onClick={()=>{ setDashStats(null); setDashRefresh(r=>r+1); }} className="text-xs text-indigo-300 hover:text-white px-3 py-1.5 rounded-lg border border-indigo-500/30">↻ 새로고침</button>
+          </div>
 
-          {/* ============================================================
-              📌 Embedded Payroll Panel (실시간 급여 정산 테이블)
-              ============================================================ */}
-          <section className="bg-white/3 backdrop-blur-md border border-indigo-500/20 rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(99,102,241,0.15)]">
-
-            {/* 에러 베너 */}
-            {error && (
-              <div className="bg-rose-500/10 border-b border-rose-500/30 px-6 py-4">
-                <div className="flex items-center gap-4">
-                  <span className="material-symbols-outlined text-rose-500 text-2xl">warning</span>
-                  <div className="flex-1">
-                    <p className="text-sm font-black text-rose-500 uppercase tracking-widest">API 연결 오류</p>
-                    <p className="text-xs text-rose-300/80 font-semibold mt-1">{error}</p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      // clearError?.();
-                      fetchRecords?.();
-                      fetchEmployees?.();
-                    }}
-                    className="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/30 rounded text-[10px] font-black text-rose-300 transition-all"
-                  >
-                    재시도
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Header Area */}
-            <div className="p-6 border-b border-indigo-500/10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div>
-                <h3 className="text-xl font-black tracking-tight text-white flex items-center gap-2">
-                  💵 Payroll Overview
-                  <span className={`text-[9px] tracking-widest px-2.5 py-0.5 rounded-full font-black uppercase ${
-                    loading
-                      ? 'bg-yellow-500/10 border border-yellow-500/30 text-yellow-400'
-                      : 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-400'
-                  }`}>
-                    {loading ? 'Loading...' : 'Active Ledger'}
-                  </span>
-                </h3>
-                <p className="text-xs text-indigo-200/50 mt-1 font-semibold">
-                  {loading ? (
-                    <span className="text-yellow-400">📊 Loading payroll records...</span>
-                  ) : (
-                    <span>✅ {payrollData.length} records loaded | Batch: May 16 - May 27</span>
-                  )}
-                </p>
-              </div>
-              
-              <div className="flex flex-col sm:flex-row gap-4 text-xs font-black tracking-widest">
-                {/* 검색 필드 */}
-                <div className="relative w-full sm:w-60">
-                  <input
-                    type="text"
-                    value={payrollSearch}
-                    onChange={e => setPayrollSearch(e.target.value)}
-                    placeholder="Search entity..."
-                    className="w-full bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 font-medium text-white placeholder-indigo-300/30"
-                  />
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-indigo-300/40 text-lg">search</span>
-                </div>
-                
-                {/* 직군 탭 */}
-                <div className="flex bg-white/5 p-1 rounded-full border border-white/5 shadow-inner">
-                  <button 
-                    onClick={() => setPayrollTab('all')}
-                    className={`px-5 py-1.5 rounded-full transition-all ${payrollTab === 'all' ? 'bg-[#8aebff] text-slate-950 shadow font-black' : 'text-indigo-300/60 hover:text-indigo-100'}`}
-                  >ALL</button>
-                  <button 
-                    onClick={() => setPayrollTab('therapist')}
-                    className={`px-5 py-1.5 rounded-full transition-all ${payrollTab === 'therapist' ? 'bg-[#8aebff] text-slate-950 shadow font-black' : 'text-indigo-300/60 hover:text-indigo-100'}`}
-                  >THERAPISTS</button>
-                  <button 
-                    onClick={() => setPayrollTab('staff')}
-                    className={`px-5 py-1.5 rounded-full transition-all ${payrollTab === 'staff' ? 'bg-[#8aebff] text-slate-950 shadow font-black' : 'text-indigo-300/60 hover:text-indigo-100'}`}
-                  >STAFF</button>
-                </div>
-              </div>
+          {/* 출근 현황 */}
+          <div>
+            <p className="text-[10px] font-black text-indigo-300/50 uppercase tracking-widest mb-3">👥 출근 현황 (오늘)</p>
+            <div className="grid grid-cols-3 gap-4">
+              <DKpi icon="🟢" label="출근" value={dashStats?.present} loading={dashLoading} color="emerald" />
+              <DKpi icon="🔴" label="결근" value={dashStats?.absent} loading={dashLoading} color="rose" />
+              <DKpi icon="🟡" label="조기퇴근" value={dashStats?.earlyLeave} loading={dashLoading} color="amber" />
             </div>
+          </div>
 
-            {/* Table Area */}
-            <div className="overflow-x-auto">
-              {loading ? (
-                <div className="p-8">
-                  {/* 로딩 상태 헤더 */}
-                  <div className="flex items-center gap-3 mb-8">
-                    <div className="w-4 h-4 rounded-full bg-cyan-400 animate-pulse"></div>
-                    <p className="text-indigo-300 font-semibold">급여 데이터 로딩 중...</p>
-                    <span className="text-[10px] text-indigo-300/50 ml-auto">(최대 5초)</span>
-                  </div>
-
-                  {/* 스켈레톤 테이블 */}
-                  <table className="w-full text-left border-collapse text-xs">
-                    <thead>
-                      <tr className="bg-white/5 text-[10px] font-black tracking-widest text-indigo-300/60 border-b border-indigo-500/10">
-                        <th className="px-6 py-4">ID / NAME</th>
-                        <th className="px-6 py-4">ROLE</th>
-                        <th className="px-6 py-4 text-right">GROSS PAY</th>
-                        <th className="px-6 py-4 text-right">DEDUCTIONS</th>
-                        <th className="px-6 py-4 text-right">NET PAY</th>
-                        <th className="px-6 py-4 text-center">STATUS</th>
-                        <th className="px-6 py-4"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {[...Array(5)].map((_, i) => (
-                        <tr key={i} className="animate-pulse">
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-white/10"></div>
-                              <div className="space-y-2 w-full">
-                                <div className="h-3 bg-white/10 rounded w-24"></div>
-                                <div className="h-2 bg-white/5 rounded w-16"></div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4"><div className="h-3 bg-white/10 rounded w-20"></div></td>
-                          <td className="px-6 py-4"><div className="h-3 bg-white/10 rounded w-24 ml-auto"></div></td>
-                          <td className="px-6 py-4"><div className="h-3 bg-white/10 rounded w-20 ml-auto"></div></td>
-                          <td className="px-6 py-4"><div className="h-3 bg-white/10 rounded w-24 ml-auto"></div></td>
-                          <td className="px-6 py-4 text-center"><div className="h-2 w-2 bg-white/10 rounded-full mx-auto"></div></td>
-                          <td className="px-6 py-4"></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="bg-white/5 text-[10px] font-black tracking-widest text-indigo-300/60 border-b border-indigo-500/10">
-                    <th className="px-6 py-4">ID / NAME</th>
-                    <th className="px-6 py-4">ROLE</th>
-                    <th className="px-6 py-4 text-right">GROSS PAY</th>
-                    <th className="px-6 py-4 text-right">DEDUCTIONS</th>
-                    <th className="px-6 py-4 text-right text-cyan-400 drop-shadow-[0_0_4px_rgba(34,211,238,0.3)] font-black">NET PAY</th>
-                    <th className="px-6 py-4 text-center">STATUS</th>
-                    <th className="px-6 py-4"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5 font-medium">
-                  {filteredPayroll.length > 0 ? (
-                    filteredPayroll.map(item => (
-                      <React.Fragment key={item.id}>
-                        <tr className="hover:bg-white/5 transition-colors duration-200">
-                          {/* ID / Name */}
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center font-bold text-[10px] text-white">
-                                {item.name.substring(0, 2).toUpperCase()}
-                              </div>
-                              <div>
-                                <p className="font-bold text-sm text-white">{item.name}</p>
-                                <p className="text-[9px] font-mono text-indigo-300/50 uppercase tracking-widest mt-0.5">{item.id}</p>
-                              </div>
-                            </div>
-                          </td>
-
-                          {/* Role Tag */}
-                          <td className="px-6 py-4">
-                            <span className={`text-[9px] font-black px-2 py-0.5 rounded tracking-wider ${
-                              item.type === 'therapist' 
-                                ? 'bg-[#8aebff]/10 text-[#8aebff]' 
-                                : 'bg-white/10 text-indigo-300/60'
-                            }`}>
-                              {item.roleLabel}
-                            </span>
-                          </td>
-
-                          {/* Gross, Deductions, Net */}
-                          <td className="px-6 py-4 text-right font-mono font-bold text-indigo-200">₱{item.gross.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                          <td className="px-6 py-4 text-right font-mono font-bold text-rose-400">-₱{item.deductions.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                          <td className={`px-6 py-4 text-right font-mono font-black text-sm drop-shadow-[0_0_8px_rgba(34,211,238,0.4)] ${
-                            item.net === 0 ? 'text-rose-400' : 'text-[#8aebff]'
-                          }`}>
-                            ₱{item.net.toLocaleString(undefined, {minimumFractionDigits: 2})}
-                          </td>
-
-                          {/* Status Dot */}
-                          <td className="px-6 py-4 text-center">
-                            <span className={`inline-block w-2.5 h-2.5 rounded-full ${
-                              item.status === 'emerald' 
-                                ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]' 
-                                : 'bg-rose-500 animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.8)]'
-                            }`}></span>
-                          </td>
-
-                          {/* Accordion Action */}
-                          <td className="px-6 py-4 text-right">
-                            <button 
-                              onClick={() => toggleAccordion(item.id)}
-                              className="text-indigo-300/60 hover:text-cyan-400 transition-all active:scale-95"
-                            >
-                              <span className="material-symbols-outlined">
-                                {expandedRowId === item.id ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}
-                              </span>
-                            </button>
-                          </td>
-                        </tr>
-
-                        {/* Accordion Row Details */}
-                        {expandedRowId === item.id && (
-                          <tr className="bg-white/[0.02] animate-[fadeIn_0.2s_ease-out_forwards]">
-                            <td className={`px-6 py-6 border-l-2 ${item.net === 0 ? 'border-rose-500' : 'border-cyan-400'}`} colSpan={7}>
-                              
-                              {/* Chloe Net 0일 경우 Safety Interlock 경고 배너 출력 */}
-                              {item.id === 'TH-03' ? (
-                                <div className="p-4 bg-rose-500/10 rounded-xl border border-rose-500/20 flex items-center gap-4">
-                                  <span className="material-symbols-outlined text-rose-500 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
-                                  <div>
-                                    <p className="text-xs font-black text-rose-500 uppercase tracking-widest">Safety Interlock: 0 Net Pay</p>
-                                    <p className="text-xs text-indigo-200/60 font-semibold mt-1">Total deductions meet or exceed gross earnings. Manual verification required before disbursement.</p>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                                  {/* Breakdown */}
-                                  <div>
-                                    <p className="text-[10px] font-black text-indigo-300/50 tracking-widest uppercase mb-2">BREAKDOWN</p>
-                                    <div className="space-y-1.5 text-xs text-indigo-200 font-semibold">
-                                      <div className="flex justify-between">
-                                        <span>Base Rate:</span>
-                                        <span className="font-mono">₱{item.breakdown.base.toLocaleString()}</span>
-                                      </div>
-                                      <div className="flex justify-between">
-                                        <span>Tips/Comm:</span>
-                                        <span className="font-mono">₱{item.breakdown.commission.toLocaleString()}</span>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  {/* Deductions */}
-                                  <div>
-                                    <p className="text-[10px] font-black text-indigo-300/50 tracking-widest uppercase mb-2">DEDUCTIONS</p>
-                                    <div className="space-y-1.5 text-xs text-rose-300 font-semibold">
-                                      {Object.entries(item.deductionDetail).map(([key, val]) => (
-                                        <div className="flex justify-between" key={key}>
-                                          <span className="capitalize">{key === 'sss' ? 'SSS Contribution' : key === 'absence' ? 'Absence Fee' : key === 'ca' ? 'Approved CA' : 'Misc Fee'}:</span>
-                                          <span className="font-mono">-₱{val.toLocaleString()}</span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-
-                                  {/* Audit Notes */}
-                                  <div>
-                                    <p className="text-[10px] font-black text-indigo-300/50 tracking-widest uppercase mb-2">AUDIT NOTES</p>
-                                    <p className="text-xs text-indigo-300/80 font-semibold leading-relaxed italic">{item.notes}</p>
-                                  </div>
-                                </div>
-                              )}
-                              
-                            </td>
-                          </tr>
-                        )}
-                      </React.Fragment>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={7} className="px-6 py-12 text-center text-indigo-300/30 font-black uppercase text-xs tracking-widest">No matching entity found in ledger.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-              )}
+          {/* 운영 현황 */}
+          <div>
+            <p className="text-[10px] font-black text-indigo-300/50 uppercase tracking-widest mb-3">📊 운영 현황 (오늘)</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <DKpi icon="₱" label="매출" value={dashStats?.todayRevenue} loading={dashLoading} color="blue" currency />
+              <DKpi icon="💸" label="비용" value={dashStats?.todayExpense} loading={dashLoading} color="orange" currency />
+              <DKpi icon="📅" label="예약" value={dashStats?.todayBookings} loading={dashLoading} color="purple" />
+              <DKpi icon="🚗" label="픽업 요청" value={dashStats?.pickupRequests} loading={dashLoading} color="cyan" />
             </div>
-          </section>
-        </>
+          </div>
+
+          {/* 이번 주 신규·변동 */}
+          <div>
+            <p className="text-[10px] font-black text-indigo-300/50 uppercase tracking-widest mb-3">🆕 이번 주 신규·변동</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <DKpi icon="🙋" label="신규 손님" value={dashStats?.newGuests} loading={dashLoading} color="teal" />
+              <DKpi icon="🏢" label="신규 업체" value={dashStats?.newCompanies} loading={dashLoading} color="indigo" />
+              <DKpi icon="👨‍⚕️" label="신규 테라피스트" value={dashStats?.newTherapists} loading={dashLoading} color="violet" />
+              <DKpi icon="👤" label="신규 직원" value={dashStats?.newStaff} loading={dashLoading} color="sky" />
+              <DKpi icon="📦" label="지출 예정" value={dashStats?.plannedBudget} loading={dashLoading} color="slate" currency />
+              <DKpi icon="🚪" label="퇴사자" value={dashStats?.resigned} loading={dashLoading} color="rose" />
+            </div>
+          </div>
+        </div>
       )}
 
 
@@ -614,4 +429,53 @@ export default function AdminDashboard() {
       )}
         </div>
     );
+}
+
+// ============================================================
+// 📌 컴포넌트명: DKpi
+// 📋 목적: 대시보드 KPI 단일 카드 렌더링
+// 🔧 매개변수: icon, label, value, loading, color, currency
+// 📅 작성일: 2026-06-02
+// ============================================================
+function DKpi({ icon, label, value, loading, color = 'indigo', currency }: {
+  icon: string;
+  label: string;
+  value?: number;
+  loading?: boolean;
+  color?: string;
+  currency?: boolean;
+}) {
+  // 색상별 border + text 클래스 매핑
+  const c: Record<string, string> = {
+    emerald: 'border-emerald-500/20 text-emerald-400',
+    rose:    'border-rose-500/20 text-rose-400',
+    amber:   'border-amber-500/20 text-amber-400',
+    blue:    'border-blue-500/20 text-blue-400',
+    orange:  'border-orange-500/20 text-orange-400',
+    purple:  'border-purple-500/20 text-purple-400',
+    cyan:    'border-cyan-500/20 text-cyan-400',
+    teal:    'border-teal-500/20 text-teal-400',
+    indigo:  'border-indigo-500/20 text-indigo-400',
+    violet:  'border-violet-500/20 text-violet-400',
+    sky:     'border-sky-500/20 text-sky-400',
+    slate:   'border-slate-500/20 text-slate-400',
+  };
+  const cls = c[color] || c.indigo;
+
+  // 표시할 값 결정: 로딩 중이면 '…', 없으면 '-', 통화면 ₱ 포맷, 일반 숫자
+  const val = loading
+    ? '…'
+    : value === undefined
+    ? '-'
+    : currency
+    ? '₱' + (value || 0).toLocaleString('en-PH', { maximumFractionDigits: 0 })
+    : String(value);
+
+  return (
+    <div className={`bg-white/3 backdrop-blur-md border rounded-2xl p-5 flex flex-col gap-2 ${cls}`}>
+      <span className="text-2xl">{icon}</span>
+      <div className={`text-2xl font-black ${cls.split(' ')[1]}`}>{val}</div>
+      <div className="text-[10px] font-bold text-indigo-300/50 uppercase tracking-widest leading-tight">{label}</div>
+    </div>
+  );
 }
