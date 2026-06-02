@@ -24,6 +24,8 @@ import {
 } from '@/lib/api/payroll-client';
 import { useT } from '@/lib/i18n';
 import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
+import { isOnline } from '@/lib/db/syncService';
+import { db } from '@/lib/db/localDb';
 
 // 직군별 이모지 매핑
 const TYPE_EMOJI: Record<Employee['employee_type'], string> = {
@@ -73,9 +75,17 @@ export default function AttendanceView() {
     setLoading(true);
     try {
       const rows = await getAttendance({ work_date: workDate });
+      // 온라인 성공 시 IndexedDB 캐시 업데이트
+      db.attendanceLogs.bulkPut(rows as any).catch(() => {});
       setLogs(rows);
     } catch (e) {
-      console.error('출결 조회 실패', e);
+      // 오프라인이면 IndexedDB 폴백
+      if (!isOnline()) {
+        const local = await db.attendanceLogs.where('work_date').equals(workDate).toArray();
+        setLogs(local as unknown as AttendanceLog[]);
+      } else {
+        console.error('출결 조회 실패', e);
+      }
     } finally {
       setLoading(false);
     }
@@ -259,6 +269,7 @@ export default function AttendanceView() {
             className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none text-sm font-medium"
           />
           {loading && <span className="text-sm text-gray-400">{t('Loading…', '불러오는 중…')}</span>}
+          {!isOnline() && <span className="text-xs font-bold text-orange-500 bg-orange-50 px-2 py-1 rounded-lg">📴 오프라인 — 로컬 데이터</span>}
           {/* 자동 저장 마지막 시각 표시 — 저장된 적 있을 때만 노출 */}
           {lastAutoSave && (
             <span className="text-xs text-gray-400">

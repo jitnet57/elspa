@@ -1,10 +1,18 @@
 'use client';
 
 import { useEffect } from 'react';
+import { startSyncOnReconnect, pullFromSupabase } from '@/lib/db/syncService';
 
 export function PWAInit() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    // 오프라인 복구 시 자동 싱크 리스너 등록
+    startSyncOnReconnect(() => new Date().toISOString().split('T')[0]);
+    // 앱 시작 시 IndexedDB에 최신 데이터 내려받기 (온라인일 때만)
+    if (navigator.onLine) {
+      pullFromSupabase(new Date().toISOString().split('T')[0]).catch(() => {});
+    }
 
     // Register Service Worker
     if ('serviceWorker' in navigator) {

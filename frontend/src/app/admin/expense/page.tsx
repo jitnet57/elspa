@@ -4,6 +4,8 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { useT } from '@/lib/i18n';
 import GoogleConnect from '@/components/GoogleConnect';
 import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
+import { isOnline } from '@/lib/db/syncService';
+import { db } from '@/lib/db/localDb';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -84,7 +86,7 @@ export default function ExpensePage() {
     } finally { setLoadingDates(false); }
   }, [t]);
 
-  // ── 레코드 로드 ─────────────────────────────────────────────
+  // ── 레코드 로드 (온라인: 백엔드 API, 오프라인: IndexedDB 폴백) ─
   const fetchRecords = useCallback(async (date: string) => {
     if (!date) return;
     setLoadingRecs(true); setRecError('');
@@ -92,9 +94,18 @@ export default function ExpensePage() {
       const res = await fetch(`${API_BASE}/api/expense/records?date=${encodeURIComponent(date)}`);
       if (!res.ok) throw new Error(t('Failed to load records', '레코드 로드 실패'));
       const data: ExpenseRecord[] = await res.json();
+      // 온라인 성공 시 IndexedDB에도 캐시
+      db.expenseRecords.bulkPut(data as any).catch(() => {});
       setRecords(data.map(r => ({ ...r, dirty: false })));
     } catch (e) {
-      setRecError(e instanceof Error ? e.message : t('Error', '오류'));
+      // 오프라인이면 IndexedDB 폴백
+      if (!isOnline()) {
+        const local = await db.expenseRecords.where('report_date').equals(date).toArray();
+        setRecords(local.map(r => ({ ...r, dirty: false })) as any);
+        setRecError('');
+      } else {
+        setRecError(e instanceof Error ? e.message : t('Error', '오류'));
+      }
     } finally { setLoadingRecs(false); }
   }, [t]);
 
@@ -332,7 +343,10 @@ export default function ExpensePage() {
         <div className="max-w-6xl mx-auto flex items-center gap-4">
           <a href="/admin" className="text-white/70 hover:text-white text-sm transition-colors">← Admin</a>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold">💰 Daily Expense Report</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold">💰 Daily Expense Report</h1>
+              {!isOnline() && <span className="text-xs font-bold text-orange-200 bg-orange-500/30 px-2 py-1 rounded-lg">📴 오프라인 — 로컬 데이터</span>}
+            </div>
             <p className="text-emerald-100 text-sm mt-0.5">View · Edit · Scan receipts → DB + Excel</p>
           </div>
           {/* 탭 */}
