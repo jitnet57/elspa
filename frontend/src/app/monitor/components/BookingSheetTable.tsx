@@ -10,6 +10,13 @@ import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
 import { PaymentMethodInput, type PaymentMethodData } from '@/components/PaymentMethodInput';
 import { SSSOptionSelect, type PayrollImpact } from '@/components/SSSOptionSelect';
 import { PaymentFromSelect, type SettlementImpact } from '@/components/PaymentFromSelect';
+import PaymentMethodModal from './PaymentMethodModal';
+import {
+  convertLegacyPayToMethods,
+  calculateTotalFromMethods,
+  getPaymentMethodsSummary,
+  getPaymentMethodsCount,
+} from './booking-payment-helpers';
 // GoogleConnect 제거됨
 
 // ============================================================
@@ -46,8 +53,9 @@ interface Row {
   guestName: string;
   roomNumber: string;   // 방번호
   note: string;         // 업체명(노트)
-  pay: number;          // 지불
+  pay: number;          // 지불 (하위 호환성)
   tip: number;          // 팁
+  totalAmount: number;  // 실제 청구액 (PaymentMethodInput의 합계)
   paymentMethods?: PaymentMethodData[];  // 결제 수단 분배 (PaymentMethodInput)
   sssOption?: 'prepaid' | 'hold';        // SSS 정산 방식 (SSSOptionSelect)
   paymentFrom?: 'guest' | 'credit' | 'waived';  // 결제 출처 분류 (PaymentFromSelect)
@@ -57,7 +65,7 @@ interface Row {
 
 const emptyRow = (): Row => ({
   therapistName: '', service: '', startTime: '', guestName: '', roomNumber: '',
-  note: '', pay: 0, tip: 0, paymentMethods: [], sssOption: 'prepaid', paymentFrom: 'guest',
+  note: '', pay: 0, tip: 0, totalAmount: 0, paymentMethods: [], sssOption: 'prepaid', paymentFrom: 'guest',
   saved: false, saving: false,
 });
 
@@ -101,6 +109,12 @@ export default function BookingSheetTable() {
   const [referrals, setReferrals] = useState<string[]>([]); // "이름 (업체)" / "이름 (가이드)"
 
   // ============================================================
+  // 📌 상태: PaymentMethodModal 제어
+  // 📋 목적: 각 행별 결제 수단 입력 모달 관리
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [selectedPaymentRowIndex, setSelectedPaymentRowIndex] = useState<number | null>(null);
+
+  // ============================================================
   // 📌 상태: driveLoading + 마지막 자동저장 시각
   const [driveLoading, setDriveLoading] = useState(false);
   const [lastAutoSave, setLastAutoSave] = useState<string | null>(null);
@@ -129,22 +143,32 @@ export default function BookingSheetTable() {
     setLoading(true);
     try {
       const existing = await supabaseApiAdapter.getBookings(date);
-      const filled: Row[] = existing.map((b: Booking) => ({
-        bookingId: b.id,
-        therapistName: b.therapist_name ?? '',
-        service: b.treatment ?? '',
-        startTime: b.start_time ?? '',
-        guestName: b.guest_name ?? '',
-        roomNumber: b.room_num ?? '',
-        note: b.note ?? '',
-        pay: Number(b.pay) || 0,
-        tip: Number(b.tip) || 0,
-        paymentMethods: (b as any).payment_methods || [],
-        sssOption: ((b as any).sss_option as 'prepaid' | 'hold') || 'prepaid',
-        paymentFrom: ((b as any).payment_from as 'guest' | 'credit' | 'waived') || 'guest',
-        saved: true,
-        saving: false,
-      }));
+      const filled: Row[] = existing.map((b: Booking) => {
+        // 마이그레이션: paymentMethods 없으면 pay에서 변환
+        let paymentMethods = (b as any).payment_methods || [];
+        if (!paymentMethods.length && b.pay) {
+          paymentMethods = convertLegacyPayToMethods(Number(b.pay) || 0);
+        }
+        const totalAmount = calculateTotalFromMethods(paymentMethods) || Number(b.pay) || 0;
+
+        return {
+          bookingId: b.id,
+          therapistName: b.therapist_name ?? '',
+          service: b.treatment ?? '',
+          startTime: b.start_time ?? '',
+          guestName: b.guest_name ?? '',
+          roomNumber: b.room_num ?? '',
+          note: b.note ?? '',
+          pay: Number(b.pay) || 0,
+          tip: Number(b.tip) || 0,
+          totalAmount,
+          paymentMethods,
+          sssOption: ((b as any).sss_option as 'prepaid' | 'hold') || 'prepaid',
+          paymentFrom: ((b as any).payment_from as 'guest' | 'credit' | 'waived') || 'guest',
+          saved: true,
+          saving: false,
+        };
+      });
       setRows(padToRowCount(filled, rowCount));
     } catch {
       setRows(padToRowCount([], rowCount));
@@ -191,10 +215,10 @@ export default function BookingSheetTable() {
       therapist_name: r.therapistName,
       room_num: r.roomNumber,
       note: r.note,
-      pay: r.pay,
+      pay: r.totalAmount || r.pay,  // totalAmount 우선, 없으면 pay 사용
       tip: r.tip,
       status: 'normal',
-      ...(r.paymentMethods && { payment_methods: r.paymentMethods }),
+      ...(r.paymentMethods && r.paymentMethods.length > 0 && { payment_methods: r.paymentMethods }),
       ...(r.sssOption && { sss_option: r.sssOption }),
       ...(r.paymentFrom && { payment_from: r.paymentFrom }),
     } as any;
@@ -254,7 +278,7 @@ export default function BookingSheetTable() {
         'Pay (지불)', 'Tip (팁)',
       ];
       const dataRows = rows
-        .map((r, i) => [i + 1, r.therapistName, r.service, r.startTime, endTimeOf(r), r.roomNumber, r.guestName, r.note, r.pay, r.tip])
+        .map((r, i) => [i + 1, r.therapistName, r.service, r.startTime, endTimeOf(r), r.roomNumber, r.guestName, r.note, r.totalAmount || r.pay, r.tip])
         .filter((_, i) => isFilled(rows[i]));
       // 로컬 파일 저장 (Flask 서버)
       const bookingData = filled.map((r, idx) => ({
@@ -267,7 +291,7 @@ export default function BookingSheetTable() {
         room_number: r.roomNumber,
         guest_name: r.guestName,
         note: r.note,
-        pay: r.pay,
+        pay: r.totalAmount || r.pay,
         tip: r.tip,
         status: 'completed',
         created_at: new Date().toISOString(),
@@ -310,8 +334,38 @@ export default function BookingSheetTable() {
     .map((b) => `${b.room_zone} ${b.bed_number}`)
     .filter((lbl) => !usedRooms.has(lbl));
 
+  // ============================================================
+  // 📌 함수: handlePaymentMethodConfirm
+  // 📋 목적: 모달에서 결제 수단 확인 시 행 데이터 업데이트
+  // 🔧 매개변수: methods (PaymentMethodData[])
+  // 📤 반환값: 없음 (rows 상태 업데이트)
+  // ============================================================
+  const handlePaymentMethodConfirm = (methods: PaymentMethodData[]) => {
+    if (selectedPaymentRowIndex !== null) {
+      const totalAmount = calculateTotalFromMethods(methods);
+      update(selectedPaymentRowIndex, {
+        paymentMethods: methods,
+        totalAmount,
+      });
+    }
+  };
+
   return (
-    <div className="flex-1 overflow-auto bg-slate-900 text-white">
+    <>
+      {/* PaymentMethodModal */}
+      {selectedPaymentRowIndex !== null && (
+        <PaymentMethodModal
+          isOpen={isPaymentModalOpen}
+          rowIndex={selectedPaymentRowIndex}
+          initialMethods={rows[selectedPaymentRowIndex]?.paymentMethods || []}
+          totalAmount={rows[selectedPaymentRowIndex]?.totalAmount || 0}
+          onClose={() => setIsPaymentModalOpen(false)}
+          onConfirm={handlePaymentMethodConfirm}
+          locale="ko"
+        />
+      )}
+
+      <div className="flex-1 overflow-auto bg-slate-900 text-white">
       {/* 헤더 */}
       <div className="px-6 py-4 border-b border-white/10">
         <div className="flex flex-wrap items-center gap-3 mb-3">
@@ -402,7 +456,7 @@ export default function BookingSheetTable() {
               <th className="px-2 py-2 w-32">{tr('Payment Method', '결제 수단')}</th>
               <th className="px-2 py-2 w-24">{tr('SSS Option', 'SSS 방식')}</th>
               <th className="px-2 py-2 w-24">{tr('Payment From', '결제 출처')}</th>
-              <th className="px-2 py-2 w-24">{tr('Pay', '지불')}</th>
+              <th className="px-2 py-2 w-24">{tr('Total', '청구액')}</th>
               <th className="px-2 py-2 w-20">{tr('Tip', '팁')}</th>
               <th className="px-2 py-2 w-16">{tr('Save', '저장')}</th>
             </tr>
@@ -448,13 +502,17 @@ export default function BookingSheetTable() {
                 <td className="px-2 py-1">
                   <input list="bk-referral-options" value={r.note} onChange={(e) => update(i, { note: e.target.value })} placeholder={tr('company/guide or note','업체·가이드 검색 / 노트')} className={inp} />
                 </td>
-                {/* ===== New Payment Method Column ===== */}
+                {/* ===== Payment Method Column (with Modal) ===== */}
                 <td className="px-2 py-1 min-w-max">
-                  <div className="text-xs text-slate-300 bg-slate-700 px-2 py-1 rounded">
-                    {r.paymentMethods && r.paymentMethods.length > 0
-                      ? `${r.paymentMethods.length} ${tr('method(s)', '개')}`
-                      : tr('—', '—')}
-                  </div>
+                  <button
+                    onClick={() => {
+                      setSelectedPaymentRowIndex(i);
+                      setIsPaymentModalOpen(true);
+                    }}
+                    className="px-2 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs rounded font-semibold transition"
+                  >
+                    💳 {getPaymentMethodsCount(r.paymentMethods || [])}
+                  </button>
                 </td>
                 {/* ===== New SSS Option Column ===== */}
                 <td className="px-2 py-1">
@@ -480,7 +538,7 @@ export default function BookingSheetTable() {
                   </select>
                 </td>
                 <td className="px-2 py-1">
-                  <input type="number" value={r.pay || ''} onChange={(e) => update(i, { pay: Number(e.target.value) || 0 })} placeholder="0" className={inp + ' text-right'} />
+                  <input type="number" value={r.totalAmount || ''} onChange={(e) => update(i, { totalAmount: Number(e.target.value) || 0 })} placeholder="0" className={inp + ' text-right'} />
                 </td>
                 <td className="px-2 py-1">
                   <input type="number" value={r.tip || ''} onChange={(e) => update(i, { tip: Number(e.target.value) || 0 })} placeholder="0" className={inp + ' text-right'} />
@@ -496,5 +554,6 @@ export default function BookingSheetTable() {
         </table>
       </div>
     </div>
+    </>
   );
 }

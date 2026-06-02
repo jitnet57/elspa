@@ -6713,3 +6713,108 @@ GET /api/network/stats
 ✅ 모니터링 설정 (Sentry 통합)
 
 ---
+
+## [2026-06-03 07:10] Order: 024 - PaymentMethodInput 모달 통합 → BookingSheetTable 결제 수단 입력
+
+**주제:** BookingSheetTable의 단순 숫자 Pay 필드를 PaymentMethodInput 모달 기반의 다중 결제 수단 입력으로 완전 교체
+
+### Plan
+✅ PaymentMethodModal 신규 컴포넌트 생성
+✅ booking-payment-helpers 유틸리티 함수 개발
+✅ BookingSheetTable 통합 & 상태 관리
+✅ 하위 호환성 마이그레이션 (기존 pay → paymentMethods 변환)
+✅ 모달 열기/닫기 & 결제 수단 선택 기능 테스트
+✅ Git 커밋 & 히스토리 기록
+
+### Task 수행 내용
+
+#### 섹션 1: 신규 컴포넌트 & 유틸리티
+1. **PaymentMethodModal.tsx** (112줄)
+   - Props: isOpen, rowIndex, initialMethods, totalAmount, onClose, onConfirm, locale
+   - UI: 헤더 + 청구액 정보박스 + PaymentMethodInput + 액션 버튼
+   - 모달: fixed position, z-50, black/50 오버레이
+   - 스타일: Tailwind CSS, 반응형 (max-w-2xl)
+
+2. **booking-payment-helpers.ts** (78줄)
+   - convertLegacyPayToMethods(): pay(숫자) → [{method: 'cash', amount: pay}]
+   - calculateTotalFromMethods(): methods 배열의 금액 합계
+   - getPaymentMethodsSummary(): '💳 2,000 + 💵 3,000' 형식 문자열
+   - getPaymentMethodsCount(): '2개' 형식 버튼 레이블
+
+#### 섹션 2: BookingSheetTable 통합
+1. **Row 인터페이스 확장**
+   - totalAmount: number (기존 pay 대체)
+   - paymentMethods: PaymentMethodData[] (다중 결제 수단)
+   - 추가 필드: sssOption, paymentFrom, isPaymentModalOpen, selectedPaymentRowIndex
+
+2. **상태 관리**
+   - useState: isPaymentModalOpen, selectedPaymentRowIndex
+   - handlePaymentMethodConfirm(): 모달 확인 → 행 데이터 업데이트
+
+3. **loadRows() 마이그레이션**
+   - 기존 bookings 조회 시 paymentMethods 확인
+   - 없으면 convertLegacyPayToMethods(b.pay) 로 자동 변환
+   - calculateTotalFromMethods()로 totalAmount 계산
+
+4. **UI 렌더링**
+   - 결제 수단 컬럼: "💳 {count}" 버튼
+   - 버튼 스타일: bg-indigo-600 hover:bg-indigo-700
+   - 클릭 → setSelectedPaymentRowIndex + setIsPaymentModalOpen(true)
+   - Pay 컬럼 → Total 컬럼 (청구액)
+   - SSS Option 컬럼 추가 (prepaid/hold)
+   - Payment From 컬럼 추가 (guest/credit/waived)
+
+5. **PaymentMethodModal 렌더링**
+   - 조건부 렌더: selectedPaymentRowIndex !== null
+   - Props 전달: isOpen, rowIndex, initialMethods, totalAmount, onClose, onConfirm, locale
+
+#### 섹션 3: Backend 타입 확장
+1. **supabase-adapter.ts: Booking 인터페이스**
+   - payment_methods?: Array<{id, method, amount, reference, notes}>
+   - sss_option?: 'prepaid' | 'hold'
+   - payment_from?: 'guest' | 'credit' | 'waived'
+
+### Result
+✅ **4개 파일 생성/수정 완료**
+- PaymentMethodModal.tsx (신규) ✓
+- booking-payment-helpers.ts (신규) ✓
+- BookingSheetTable.tsx (수정) ✓
+- supabase-adapter.ts (타입 확장) ✓
+
+**주요 기능:**
+- 다중 결제 수단 입력 모달 ✓
+- 행별 결제 수단 관리 ✓
+- 금액 자동 합계 계산 ✓
+- 기존 데이터 자동 마이그레이션 ✓
+- 하위 호환성 유지 ✓
+
+**검증:**
+✓ 모달 열기/닫기 정상 작동
+✓ 결제 수단 입력 UI 정상 표시
+✓ 총액 표시 (₱1,000) 정상
+✓ 버튼 텍스트 동적 업데이트 ('💳 1개')
+✓ 빌드 성공 (0 에러)
+✓ 타입스크립트 검사 통과
+
+**커밋:**
+- `✨ Feat: PaymentMethodInput 모달 통합 → BookingSheetTable 결제 수단 입력`
+
+**파일 구조:**
+```
+frontend/src/
+├── app/monitor/components/
+│   ├── PaymentMethodModal.tsx (신규)
+│   ├── booking-payment-helpers.ts (신규)
+│   └── BookingSheetTable.tsx (수정)
+└── lib/api/
+    └── supabase-adapter.ts (타입 확장)
+```
+
+**다음 단계:**
+1. Google Drive 내보내기 수정 (paymentMethods 요약 추가)
+2. 결제 수단 데이터 검증 (totalAmount == sum of methods)
+3. 고급 기능: 부분 결제, 환불 등
+4. 모바일 반응형 테스트
+5. 프로덕션 배포
+
+---

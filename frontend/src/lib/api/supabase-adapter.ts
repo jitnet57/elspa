@@ -48,6 +48,15 @@ export interface Booking {
   note?: string;
   pay?: number;
   tip?: number;
+  payment_methods?: Array<{
+    id: string;
+    method: 'card' | 'cash' | 'gcash' | 'bank_a' | 'bank_b';
+    amount: number;
+    reference?: string;
+    notes?: string;
+  }>;  // 결제 수단 분배
+  sss_option?: 'prepaid' | 'hold';  // SSS 정산 방식
+  payment_from?: 'guest' | 'credit' | 'waived';  // 결제 출처
   status?: 'normal' | 'editing' | 'deleting' | 'deleted' | 'error';
 }
 
