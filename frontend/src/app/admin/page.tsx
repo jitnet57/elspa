@@ -217,7 +217,7 @@ export default function AdminDashboard() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
 
       {/* Tab Navigation */}
-      <div className="flex gap-2 border-b border-white/10 pb-4 overflow-x-auto">
+      <div className="flex gap-2 border-b border-white/10 pb-4 overflow-x-hidden flex-wrap">
         <button
           onClick={() => setAdminTab('dashboard')}
           className={`px-4 py-2 rounded-lg font-bold transition whitespace-nowrap ${

@@ -436,8 +436,8 @@ export default function ExpensePage() {
                   {lastAutoSave && (
                     <span className="text-xs text-emerald-400 font-semibold">
                       ✅ 저장됨 {lastAutoSave}
-                    )}
-                  </div>
+                    </span>
+                  )}
                   <button onClick={handleExport}
                     disabled={!records.length || exporting}
                     className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors disabled:opacity-40 flex items-center gap-1.5">
