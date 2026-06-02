@@ -175,7 +175,7 @@ function BedCard({ bed, onClick }: { bed: TherapyBed; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className={`px-2 py-2 rounded font-bold text-center transition cursor-pointer active:scale-95 leading-snug min-h-[64px] flex flex-col justify-center gap-1 ${statusColorMap[bed.status]}`}
+      className={`px-2 py-2 rounded font-bold text-center transition cursor-pointer active:scale-95 leading-snug h-[80px] w-full flex flex-col justify-center gap-1 ${statusColorMap[bed.status]}`}
     >
       <div className="text-xs font-bold">{t(`No.${bedNo}`, `${bedNo}번`)}</div>
       {bed.status === 'occupied' ? (
