@@ -395,4 +395,64 @@ app.post('/api/drive/save-payroll', async (c) => {
   }
 })
 
+// POST /api/drive/save-revenue - 매출/인보이스 자동 저장
+app.post('/api/drive/save-revenue', async (c) => {
+  try {
+    const body = await c.req.json()
+    const scriptUrl = c.env.GOOGLE_APPS_SCRIPT_URL
+
+    if (!scriptUrl) {
+      return c.json({ error: 'Google Apps Script URL not configured' }, { status: 500 })
+    }
+
+    const response = await fetch(scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'revenue',
+        data: body,
+        timestamp: new Date().toISOString(),
+      }),
+    })
+
+    return c.json({
+      message: 'Revenue data saved to Google Drive',
+      status: response.ok ? 'success' : 'error',
+      timestamp: new Date().toISOString(),
+    })
+  } catch (error: any) {
+    return c.json({ error: error.message }, { status: 500 })
+  }
+})
+
+// POST /api/drive/save-commission - 수수료 자동 저장
+app.post('/api/drive/save-commission', async (c) => {
+  try {
+    const body = await c.req.json()
+    const scriptUrl = c.env.GOOGLE_APPS_SCRIPT_URL
+
+    if (!scriptUrl) {
+      return c.json({ error: 'Google Apps Script URL not configured' }, { status: 500 })
+    }
+
+    const response = await fetch(scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'commission',
+        data: body,
+        timestamp: new Date().toISOString(),
+      }),
+    })
+
+    return c.json({
+      message: 'Commission data saved to Google Drive',
+      status: response.ok ? 'success' : 'error',
+      timestamp: new Date().toISOString(),
+    })
+  } catch (error: any) {
+    return c.json({ error: error.message }, { status: 500 })
+  }
+})
+
 export default app

@@ -1,18 +1,23 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useStore } from '@/lib/store/store';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
+import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
 import { PriceDisplay } from '@/components/PriceDisplay';
 import { PDFGenerator } from '@/lib/services/pdf-generator';
 import { MessagingService } from '@/lib/services/messaging';
 
+const API_BASE = 'https://elspa-api-production.jitnet57.workers.dev';
+
 export default function BillingPage() {
   const { invoices, receipts, messages, rates, addMessage, updateMessageStatus, addNotification } = useStore();
   const exchangeRates = useExchangeRate();
+  const { enabled: autoSaveEnabled, intervalMs: autoSaveIntervalMs } = useAutoSaveSettings();
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterMonth, setFilterMonth] = useState<string>(new Date().toISOString().slice(0, 7));
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
+  const [lastAutoSave, setLastAutoSave] = useState('');
 
   const filteredInvoices = useMemo(() => {
     return invoices.filter(inv => {
@@ -21,6 +26,44 @@ export default function BillingPage() {
       return statusMatch && monthMatch;
     });
   }, [invoices, filterStatus, filterMonth]);
+
+  // ── Google Drive 자동 저장 (매출 + 수수료) ───────────────────────
+  const handleDriveExport = useCallback(async (silent = false) => {
+    if (!invoices.length && !receipts.length) return;
+
+    try {
+      // 매출 저장
+      if (invoices.length > 0) {
+        await fetch(`${API_BASE}/api/drive/save-revenue`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(invoices),
+        });
+      }
+
+      // 수수료 저장
+      if (receipts.length > 0) {
+        await fetch(`${API_BASE}/api/drive/save-commission`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(receipts),
+        });
+      }
+
+      const stamp = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+      setLastAutoSave(stamp);
+      if (!silent) alert(`✅ Google Drive 저장 완료!\nelspa/매출 & 수수료 폴더\n${stamp}`);
+    } catch (err) {
+      if (!silent) alert(`❌ Google Drive 저장 오류: ${err instanceof Error ? err.message : 'API 연결 확인'}`);
+    }
+  }, [invoices, receipts]);
+
+  // ── 자동 저장 인터벌 설정 ───────────────────────────────────────
+  useEffect(() => {
+    if (!autoSaveEnabled) return;
+    const timer = setInterval(() => { handleDriveExport(true); }, autoSaveIntervalMs);
+    return () => clearInterval(timer);
+  }, [handleDriveExport, autoSaveEnabled, autoSaveIntervalMs]);
 
   const handleDownloadInvoice = async (invoiceId: string) => {
     try {
