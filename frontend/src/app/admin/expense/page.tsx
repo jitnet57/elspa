@@ -432,21 +432,10 @@ export default function ExpensePage() {
                     className="text-xs border border-emerald-300 text-emerald-700 hover:bg-emerald-50 px-3 py-2 rounded-lg font-semibold transition-colors">
                     + Add Row
                   </button>
-                  <GoogleConnect />
-                  {/* Drive 저장 버튼 + 자동 저장 마지막 시각 표시 */}
-                  <div className="flex flex-col items-end gap-0.5">
-                    <button onClick={handleSheetExport}
-                      disabled={!records.length || sheetExporting}
-                      className="text-xs bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg font-semibold transition-colors disabled:opacity-40 flex items-center gap-1.5">
-                      {sheetExporting
-                        ? <><span className="animate-spin">⟳</span> {t('Saving…', '저장 중…')}</>
-                        : t('📊 Save to Drive (elspa/비용)', '📊 Drive 저장 (elspa/비용)')}
-                    </button>
-                    {/* 마지막 자동 저장 시각 — autoExport 성공 시 갱신됨 */}
-                    {lastAutoSave && (
-                      <span className="text-[10px] text-gray-400 leading-tight">
-                        {t('Auto-saved', '자동저장')} {lastAutoSave}
-                      </span>
+                  {/* 자동 저장 상태 표시 */}
+                  {lastAutoSave && (
+                    <span className="text-xs text-emerald-400 font-semibold">
+                      ✅ 저장됨 {lastAutoSave}
                     )}
                   </div>
                   <button onClick={handleExport}

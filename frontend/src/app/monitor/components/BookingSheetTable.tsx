@@ -278,18 +278,8 @@ export default function BookingSheetTable() {
         </div>
         <div className="ml-auto flex items-center gap-3">
           <span className="text-xs text-slate-300">{tr(`Entered: ${filledCount}`, `입력됨: ${filledCount}건`)}</span>
-          <button onClick={saveAll} className="px-4 py-2 rounded-lg bg-pink-600 hover:bg-pink-700 font-bold text-sm">{tr('Save All (DB + Sheet)', '전체 저장 (DB + 구글시트)')}</button>
-          {/* ── Drive 저장 영역 ── */}
-          <GoogleConnect />
-          <button
-            onClick={() => handleDriveExport(false)}
-            disabled={driveLoading || filledCount === 0}
-            className="px-4 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-600 disabled:opacity-40 font-bold text-sm text-white whitespace-nowrap"
-          >
-            {driveLoading ? '💾 저장 중…' : '💾 Drive 저장 (예약)'}
-          </button>
           {lastAutoSave && (
-            <span className="text-[10px] text-emerald-400 whitespace-nowrap">🕐 자동저장 {lastAutoSave}</span>
+            <span className="text-xs text-emerald-400 font-semibold">✅ 저장됨 {lastAutoSave}</span>
           )}
         </div>
       </div>
