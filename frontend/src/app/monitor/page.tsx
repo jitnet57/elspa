@@ -31,12 +31,6 @@ export default function MonitorPage() {
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-6">
         <div className="flex justify-between items-center">
-          {/* 폴링 기반 상태 표시 (WebSocket 제거) */}
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-sm font-medium text-gray-600">🟢 {t('Live (5s polling)', '실시간 (5초 폴링)')}</span>
-          </div>
-
           <div className="flex gap-2">
             <button
               onClick={() => setActiveTab('beds')}
