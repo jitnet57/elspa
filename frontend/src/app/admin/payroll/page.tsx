@@ -135,9 +135,32 @@ export default function PayrollDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       {/* Header */}
+      {/* 제목 영역과 빠른 이동 버튼을 가로로 배치 (제목 왼쪽 / 버튼 오른쪽) */}
       <div className="sticky top-0 z-40 bg-white border-b-2 border-gray-200 px-4 py-6">
-        <h1 className="text-3xl font-bold text-gray-900">💰 Payroll System</h1>
-        <p className="text-gray-600 mt-1">Manage payroll periods, calculate salaries, and process settlements</p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          {/* 제목 */}
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">💰 Payroll System</h1>
+            <p className="text-gray-600 mt-1">Manage payroll periods, calculate salaries, and process settlements</p>
+          </div>
+          {/* 빠른 이동 버튼: 직원 관리(파랑) / 기록 보기(보라) — 알약형 버튼 */}
+          <div className="flex gap-2">
+            <a
+              href="/admin/payroll/employees"
+              className="px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full shadow-md hover:shadow-lg transition-all active:scale-95 font-bold text-sm whitespace-nowrap"
+              title="Manage Employees"
+            >
+              👥 직원 관리
+            </a>
+            <a
+              href="/admin/payroll/records"
+              className="px-5 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full shadow-md hover:shadow-lg transition-all active:scale-95 font-bold text-sm whitespace-nowrap"
+              title="View Records"
+            >
+              📊 기록 보기
+            </a>
+          </div>
+        </div>
       </div>
 
       {/* Error Message */}
@@ -320,24 +343,6 @@ export default function PayrollDashboard() {
           )}
         </div>
       </main>
-
-      {/* Quick Links FAB */}
-      <div className="fixed bottom-6 right-6 flex flex-col gap-2 z-40">
-        <a
-          href="/admin/payroll/employees"
-          className="w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full shadow-lg flex items-center justify-center text-xl hover:shadow-xl transition-all active:scale-95 font-bold"
-          title="Manage Employees"
-        >
-          👥
-        </a>
-        <a
-          href="/admin/payroll/records"
-          className="w-14 h-14 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full shadow-lg flex items-center justify-center text-xl hover:shadow-xl transition-all active:scale-95 font-bold"
-          title="View Records"
-        >
-          📊
-        </a>
-      </div>
 
       {/* Detail Modal */}
       {showModal && selectedPeriod && (

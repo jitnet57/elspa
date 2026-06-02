@@ -11,6 +11,7 @@
 // ============================================================
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import {
   getCashAdvances,
   createCashAdvance,
@@ -520,6 +521,19 @@ function SssTab() {
 
   return (
     <div className="space-y-4">
+      {/* SSS Portal 이동 — 대시보드에 있던 스캔/엑셀 기능을 이 탭으로 이전 */}
+      <div className={`${card} flex items-center justify-between gap-4`}>
+        <div>
+          <Link
+            href="/admin/sss"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded transition-colors"
+          >
+            📤 SSS 스캔 · 엑셀 내보내기
+          </Link>
+          <p className="mt-2 text-xs text-slate-500">Legacy data migration &amp; scan to spreadsheet.</p>
+        </div>
+      </div>
+
       <div className={card}>
         <h2 className="text-sm font-semibold text-slate-300 mb-3">SSS 구간 등록</h2>
         <div className="flex flex-wrap gap-2">

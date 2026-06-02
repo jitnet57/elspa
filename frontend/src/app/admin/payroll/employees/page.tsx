@@ -485,18 +485,7 @@ export default function EmployeesPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1">
-                <div>
-                  <label className="text-sm font-bold text-gray-700 mb-2 block">커미션율 (%) — 가이드/수수료직 한정</label>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    value={formData.commission_rate || ''}
-                    onChange={e => setFormData({ ...formData, commission_rate: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                  />
-                </div>
-              </div>
+              <p className="text-xs text-gray-500">💡 테라피스트 커미션은 <b>세션당 정해진 금액</b>입니다 (마사지 종류별). → <a href="/admin/payroll/settings" className="text-blue-600 underline">급여 설정</a>에서 종류별 세션 수수료를 등록하세요.</p>
 
               <div className="grid grid-cols-2 gap-3 mt-8">
                 <button

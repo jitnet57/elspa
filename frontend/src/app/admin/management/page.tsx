@@ -14,6 +14,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getMonthMetrics, saveMonthMetrics, getYearMetrics } from '@/lib/api/management-client';
 import { getMonthlySettlements } from '@/lib/api/companies-client';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import PeriodReport from './PeriodReport';
+
+type Period = 'daily' | 'weekly' | 'monthly';
 
 interface IndirectItem { label: string; amount: number }
 interface MetricsMonth {
@@ -36,6 +39,7 @@ const netProfit = (m: MetricsMonth) => operatingProfit(m) - m.tax;
 
 export default function ManagementMetricsPage() {
   const now = useMemo(() => new Date(), []);
+  const [period, setPeriod] = useState<Period>('monthly');
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [m, setM] = useState<MetricsMonth>(emptyMonth());
@@ -114,9 +118,28 @@ export default function ManagementMetricsPage() {
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       <div className="sticky top-0 z-40 bg-white border-b-2 border-gray-200 px-6 py-5">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">📈 경영지표</h1>
-        <p className="text-gray-600 mt-1 text-sm">월 영업이익 · 순이익 · 연 누적 · 추이</p>
+        <p className="text-gray-600 mt-1 text-sm">일간 · 주간 보고서(자동 집계) · 월간 영업이익/순이익/누적</p>
+        {/* 일간·주간·월간 탭 */}
+        <div className="flex gap-2 mt-4">
+          {([['daily', '📆 일간'], ['weekly', '🗓️ 주간'], ['monthly', '📅 월간']] as [Period, string][]).map(([p, label]) => (
+            <button
+              key={p}
+              onClick={() => setPeriod(p)}
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition ${
+                period === p
+                  ? 'bg-blue-600 text-white shadow'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
+      {period !== 'monthly' && <PeriodReport mode={period} />}
+
+      {period === 'monthly' && (
       <main className="px-6 py-6 max-w-5xl mx-auto">
         <div className="flex items-center gap-3 mb-6 flex-wrap">
           <select value={year} onChange={(e) => setYear(Number(e.target.value))} className="px-3 py-2 border-2 border-gray-300 rounded-lg text-gray-900">
@@ -183,7 +206,7 @@ export default function ManagementMetricsPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
                 <XAxis dataKey="month" fontSize={12} />
                 <YAxis fontSize={11} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
-                <Tooltip formatter={(v: number) => peso(v)} />
+                <Tooltip formatter={(v) => peso(Number(v))} />
                 <Legend />
                 <Line type="monotone" dataKey="매출" stroke="#3b82f6" strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="영업이익" stroke="#10b981" strokeWidth={2} dot={false} />
@@ -207,6 +230,7 @@ export default function ManagementMetricsPage() {
 
         <p className="text-xs text-gray-400 mt-4">* 입력 즉시 Supabase 저장(미설정 시 localStorage). 정산 매출은 월정산 데이터에서 자동 합산.</p>
       </main>
+      )}
     </div>
   );
 }

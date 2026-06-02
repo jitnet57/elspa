@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Plus, Edit2, Trash2, ArrowUp, ArrowDown, ArrowLeftRight } from 'lucide-react';
 
 interface SettingsSection {
@@ -102,6 +103,50 @@ export default function PoliciesPage() {
         {/* Content Area */}
         <div className="bg-white rounded-xl border-2 border-gray-200 shadow-lg p-8">
           {renderContent()}
+        </div>
+
+        {/* ============================================================ */}
+        {/* 📌 섹션: Systems Audit (시스템 감사)                          */}
+        {/* 📋 목적: 대시보드에서 옮겨온 시스템 감사 패널                  */}
+        {/*   - BILLING ACCURACY 진행 바 + 로그/검증 바로가기 버튼        */}
+        {/* ============================================================ */}
+        <div className="mt-8 bg-white rounded-xl border-2 border-gray-200 shadow-lg p-8">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-2xl font-bold text-gray-900">Systems Audit</h2>
+            <span className="text-sm text-gray-500 font-light">시스템 감사</span>
+          </div>
+
+          {/* BILLING ACCURACY 진행 바 (얇은 막대, 99.8% 채움) */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold tracking-wide text-gray-600">
+                BILLING ACCURACY
+              </span>
+              <span className="text-xs font-bold text-emerald-600">99.8%</span>
+            </div>
+            <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-emerald-500 rounded-full"
+                style={{ width: '99.8%' }}
+              />
+            </div>
+          </div>
+
+          {/* 바로가기 버튼 2개 */}
+          <div className="flex gap-3 mt-6">
+            <Link
+              href="/admin/change-logs"
+              className="flex-1 text-center px-4 py-2 text-sm font-semibold border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+            >
+              LOGS
+            </Link>
+            <Link
+              href="/admin/test-data"
+              className="flex-1 text-center px-4 py-2 text-sm font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+            >
+              VALIDATE
+            </Link>
+          </div>
         </div>
       </div>
     </div>
