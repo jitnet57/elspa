@@ -16,7 +16,12 @@
       "Bash(curl -s -H 'Authorization: token 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' https://api.github.com/repos/jitnet57/elspa/actions/secrets?per_page=100)",
       "Bash(npx wrangler *)",
       "Bash(sed -n '1,60p' src/lib/services/google-sheets.ts)",
-      "Bash(sed -n '191,250p' src/app/admin/massage/mockData/bookingData.ts)"
+      "Bash(sed -n '191,250p' src/app/admin/massage/mockData/bookingData.ts)",
+      "Bash(sed -i '' \"/import.*useAutoSaveSettings/d\" frontend/src/app/monitor/components/BookingSheetTable.tsx)",
+      "Bash(sed -i '' \"/const.*autoSaveEnabled.*autoSaveIntervalMs/d\" frontend/src/app/monitor/components/BookingSheetTable.tsx)",
+      "Bash(sed -i '' \"/if \\(!autoSaveEnabled\\) return;/,/}, \\\\[handleDriveExport.*\\\\]\\);/d\" frontend/src/app/monitor/components/BookingSheetTable.tsx)",
+      "Bash(sed -i '' \"/import.*useAutoSaveSettings/d\" frontend/src/app/monitor/components/AttendanceView.tsx)",
+      "Bash(sed -i '' \"/const.*autoSaveEnabled.*autoSaveIntervalMs/d\" frontend/src/app/monitor/components/AttendanceView.tsx)"
     ]
   }
 }

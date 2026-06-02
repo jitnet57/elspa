@@ -7,7 +7,6 @@ import { SERVICES, autoEndTime, sortByAttendance, type UiTherapist } from './boo
 import { getCompanies, getGuides } from '@/lib/api/companies-client';
 import { useT } from '@/lib/i18n';
 import GoogleConnect from '@/components/GoogleConnect';
-import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
 
 // ============================================================
 // 📌 상수: API_BASE
@@ -70,7 +69,6 @@ export default function BookingSheetTable() {
   // 📌 상태: driveLoading + 마지막 자동저장 시각
   const [driveLoading, setDriveLoading] = useState(false);
   const [lastAutoSave, setLastAutoSave] = useState<string | null>(null);
-  const { enabled: autoSaveEnabled, intervalMs: autoSaveIntervalMs } = useAutoSaveSettings();
 
   useEffect(() => {
     supabaseApiAdapter.getTherapists().then((r) => setTherapists(r as UiTherapist[])).catch(() => setTherapists([]));
@@ -233,10 +231,6 @@ export default function BookingSheetTable() {
 
   // ── 1시간마다 자동 Drive 저장 (채워진 행이 있을 때만) ───────────
   useEffect(() => {
-    if (!autoSaveEnabled) return;
-    const timer = setInterval(() => { handleDriveExport(true); }, autoSaveIntervalMs);
-    return () => clearInterval(timer);
-  }, [handleDriveExport, autoSaveEnabled, autoSaveIntervalMs]);
 
   const filledCount = rows.filter(isFilled).length;
   // 빈 룸 = available 베드 라벨 − 현재 표에서 이미 쓰인 룸

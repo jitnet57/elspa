@@ -23,7 +23,6 @@ import {
   type AttendanceLog,
 } from '@/lib/api/payroll-client';
 import { useT } from '@/lib/i18n';
-import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
 import { isOnline } from '@/lib/db/syncService';
 import { db } from '@/lib/db/localDb';
 
@@ -52,7 +51,6 @@ const nowHHMM = (): string => {
 
 export default function AttendanceView() {
   const t = useT();
-  const { enabled: autoSaveEnabled, intervalMs: autoSaveIntervalMs } = useAutoSaveSettings();
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
   const [workDate, setWorkDate] = useState(today);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -224,10 +222,6 @@ export default function AttendanceView() {
 
   // 설정에 따라 자동 저장 인터벌 설정 (꺼져 있으면 등록 안 함)
   useEffect(() => {
-    if (!autoSaveEnabled) return;
-    const id = setInterval(autoExport, autoSaveIntervalMs);
-    return () => clearInterval(id);
-  }, [autoExport, autoSaveEnabled, autoSaveIntervalMs]);
 
   // 직군 필터 버튼 라벨
   const typeLabel = (ty: Employee['employee_type']): string => {

@@ -3,7 +3,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useT } from '@/lib/i18n';
 import GoogleConnect from '@/components/GoogleConnect';
-import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
 import { isOnline } from '@/lib/db/syncService';
 import { db } from '@/lib/db/localDb';
 
@@ -46,7 +45,6 @@ type ScanStatus = 'idle' | 'scanning' | 'done' | 'error';
 // ════════════════════════════════════════════════════════════════
 export default function ExpensePage() {
   const t = useT();
-  const { enabled: autoSaveEnabled, intervalMs: autoSaveIntervalMs } = useAutoSaveSettings();
   const today = new Date().toISOString().split('T')[0];
 
   const [tab, setTab] = useState<'records' | 'scan'>('records');
@@ -243,10 +241,6 @@ export default function ExpensePage() {
 
   // 설정에 따라 자동 저장 인터벌 (꺼져 있으면 등록 안 함)
   useEffect(() => {
-    if (!autoSaveEnabled) return;
-    const id = setInterval(autoExport, autoSaveIntervalMs);
-    return () => clearInterval(id);
-  }, [autoExport, autoSaveEnabled, autoSaveIntervalMs]);
 
   // ── Google Sheet 내보내기 ───────────────────────────────────
   const handleSheetExport = async () => {

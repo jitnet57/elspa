@@ -58,8 +58,6 @@ function nowHHMM(): string {
 // 📋 목적: Settings 페이지 Google Drive 연결 섹션 전체 담당
 // ============================================================
 export default function GoogleSettings() {
-  // 자동 저장 설정 (공유 훅 — localStorage 영속)
-  const { enabled, intervalMinutes, setEnabled, setIntervalMinutes } = useAutoSaveSettings();
 
   // 연결 상태 (null = 로딩 중)
   const [status, setStatus] = useState<GoogleStatus | null>(null);
@@ -129,7 +127,6 @@ export default function GoogleSettings() {
   // 📋 목적: 연결 해제 confirm 후 DELETE 요청 → fetchStatus 재호출
   // ----------------------------------------------------------
   const handleDisconnect = async () => {
-    const ok = confirm('Google 계정 연결을 해제하시겠습니까?\nDrive 자동 저장이 중단됩니다.');
     if (!ok) return;
     setDisconnecting(true);
     try {
@@ -154,8 +151,6 @@ export default function GoogleSettings() {
           {status === null
             ? '연결 상태를 확인하는 중입니다…'
             : status.connected
-            ? `Google 계정이 연결되어 있습니다. Drive 자동 저장이 활성화됩니다.`
-            : 'Google 계정을 연결하면 비용·예약·출결·정산 데이터를 Drive에 자동 저장합니다.'}
         </p>
       </div>
 
@@ -273,11 +268,8 @@ export default function GoogleSettings() {
         )}
       </div>
 
-      {/* ── 자동 저장 설정 ────────────────────────────────── */}
       <div className="mt-5 bg-gray-50 rounded-lg p-4 border border-gray-200">
-        <p className="text-sm font-semibold text-gray-800 mb-3">⚙️ Drive 자동 저장 설정</p>
         <div className="flex flex-wrap gap-6 items-center">
-          {/* 자동 저장 on/off */}
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -285,7 +277,6 @@ export default function GoogleSettings() {
               onChange={(e) => setEnabled(e.target.checked)}
               className="w-4 h-4 rounded accent-blue-600"
             />
-            <span className="text-sm text-gray-700 font-medium">자동 저장 활성화</span>
             <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${enabled ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}>
               {enabled ? 'ON' : 'OFF'}
             </span>
@@ -295,7 +286,6 @@ export default function GoogleSettings() {
           <label className={`flex items-center gap-2 ${!enabled ? 'opacity-40 pointer-events-none' : ''}`}>
             <span className="text-sm text-gray-700 font-medium">저장 간격</span>
             <select
-              value={intervalMinutes}
               onChange={(e) => setIntervalMinutes(Number(e.target.value))}
               className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-800 bg-white focus:border-blue-400 focus:outline-none"
             >
@@ -308,11 +298,9 @@ export default function GoogleSettings() {
         </div>
         {enabled && (
           <p className="mt-2 text-xs text-gray-500">
-            비용·예약·출결 페이지가 열려 있는 동안 <strong>{intervalMinutes}분</strong>마다 Google Drive에 자동 저장됩니다.
           </p>
         )}
         {!enabled && (
-          <p className="mt-2 text-xs text-gray-400">자동 저장이 꺼져 있습니다. 수동으로 Drive 저장 버튼을 눌러 저장하세요.</p>
         )}
       </div>
 
