@@ -12,6 +12,8 @@ interface Env {
   SUPABASE_URL: string
   SUPABASE_KEY: string
   ENVIRONMENT: string
+  GOOGLE_CLIENT_ID?: string
+  GOOGLE_CLIENT_SECRET?: string
 }
 
 const app = new Hono<{ Bindings: Env }>()
@@ -153,6 +155,84 @@ app.get('/api/dashboard/kpi', async (c) => {
     })
   } catch (error: any) {
     return c.json({ error: error.message || 'Failed to fetch KPI' }, { status: 500 })
+  }
+})
+
+// ============================================================
+// Google OAuth API
+// ============================================================
+
+// GET /api/booking/status - Google 연결 상태 확인
+app.get('/api/booking/status', (c) => {
+  try {
+    // 클라이언트에서 Authorization 헤더로 토큰 전달
+    const authHeader = c.req.header('Authorization')
+    const hasToken = !!authHeader && authHeader.startsWith('Bearer ')
+
+    return c.json({
+      connected: hasToken,
+      status: hasToken ? 'connected' : 'disconnected',
+      message: hasToken ? 'Google 연결됨' : 'Google 미연결',
+    })
+  } catch (error: any) {
+    return c.json({ error: error.message }, { status: 500 })
+  }
+})
+
+// GET /api/booking/auth/google - Google OAuth 인증 URL
+app.get('/api/booking/auth/google', (c) => {
+  try {
+    const clientId = c.env.GOOGLE_CLIENT_ID || ''
+    const redirectUri = `${c.req.header('Origin')}/api/auth/google/callback`
+
+    const params = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: redirectUri,
+      response_type: 'code',
+      scope: 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/spreadsheets',
+      access_type: 'offline',
+      prompt: 'consent',
+    })
+
+    return c.json({
+      authUrl: `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`,
+      status: 'ok',
+    })
+  } catch (error: any) {
+    return c.json({ error: error.message }, { status: 500 })
+  }
+})
+
+// DELETE /api/booking/auth/google - Google 연결 해제
+app.delete('/api/booking/auth/google', (c) => {
+  try {
+    return c.json({
+      message: 'Google 연결 해제됨',
+      status: 'disconnected',
+    })
+  } catch (error: any) {
+    return c.json({ error: error.message }, { status: 500 })
+  }
+})
+
+// POST /api/booking/auth/google/callback - OAuth 콜백
+app.post('/api/booking/auth/google/callback', async (c) => {
+  try {
+    const { code } = await c.req.json()
+
+    if (!code) {
+      return c.json({ error: '인증 코드 필요' }, { status: 400 })
+    }
+
+    // 실제 구현: code를 access_token으로 교환
+    // 지금은 임시로 성공 응답
+    return c.json({
+      message: '인증 성공',
+      token: `temp_token_${Date.now()}`,
+      status: 'connected',
+    })
+  } catch (error: any) {
+    return c.json({ error: error.message }, { status: 500 })
   }
 })
 
