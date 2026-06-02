@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Edit2, Trash2, ArrowUp, ArrowDown, ArrowLeftRight } from 'lucide-react';
 import { useT } from '@/lib/i18n';
-import GoogleSettings from '@/components/GoogleSettings';
+
 
 interface SettingsSection {
   id: string;
@@ -169,7 +169,6 @@ export default function PoliciesPage() {
         {/* 📋 GoogleSettings 컴포넌트가 연결 상태·버튼·안내 전체를 담당   */}
         {/* ============================================================ */}
         <div className="mt-8">
-          <GoogleSettings />
         </div>
       </div>
     </div>

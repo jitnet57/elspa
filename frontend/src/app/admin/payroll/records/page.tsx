@@ -19,7 +19,7 @@ import {
 } from '@/lib/api/payroll-client';
 import { SERVICES } from '@/app/monitor/components/booking-helpers';
 import { useT } from '@/lib/i18n';
-import GoogleConnect from '@/components/GoogleConnect';
+
 
 // ============================================================
 // 📌 상수: API_BASE
@@ -273,7 +273,6 @@ export default function PayrollSettlementPage() {
         </div>
         <div className="flex gap-2 flex-wrap items-center">
           {/* Google 인증 상태 표시 + 인증 버튼 */}
-          <GoogleConnect />
           {/* Drive 저장 버튼 — 현재 필터된 rows 전체를 Google Spreadsheet로 내보냄 */}
           <button
             onClick={handleDriveExport}

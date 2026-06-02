@@ -2,7 +2,6 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useT } from '@/lib/i18n';
-import GoogleConnect from '@/components/GoogleConnect';
 import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
 import { isOnline } from '@/lib/db/syncService';
 import { db } from '@/lib/db/localDb';
@@ -426,7 +425,6 @@ export default function ExpensePage() {
                     className="text-xs border border-emerald-300 text-emerald-700 hover:bg-emerald-50 px-3 py-2 rounded-lg font-semibold transition-colors">
                     + Add Row
                   </button>
-                  <GoogleConnect />
                   {/* Drive 저장 버튼 + 자동 저장 마지막 시각 표시 */}
                   <div className="flex flex-col items-end gap-0.5">
                     <button onClick={handleSheetExport}
