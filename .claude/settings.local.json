@@ -21,7 +21,9 @@
       "Bash(python3 main.py)",
       "Bash(/Users/kwangseobpark/elspa/venv/bin/python /Users/kwangseobpark/elspa/main.py > /tmp/fastapi.log 2>&1 & *)",
       "Bash(PORT=8001 /Users/kwangseobpark/elspa/venv/bin/python /Users/kwangseobpark/elspa/main.py)",
-      "Bash(vercel --prod --yes)"
+      "Bash(vercel --prod --yes)",
+      "Bash(wrangler pages *)",
+      "Bash(curl -s https://elspa-api-production.jitnet57.workers.dev/health)"
     ],
     "additionalDirectories": [
       "/private/tmp"
