@@ -266,19 +266,9 @@ export default function BookingSheetTable() {
   // silent=true 이면 alert 없이 조용히 저장 (자동 저장용)
   const handleDriveExport = useCallback(async (silent = false) => {
     const filled = rows.filter((r, i) => isFilled(rows[i]));
-    if (filled.length === 0) return; // 빈 데이터면 저장 안 함
+    if (filled.length === 0) return;
     if (!silent) setDriveLoading(true);
     try {
-      const header = [
-        '#', 'Therapist (테라피스트)', 'Treatment (트리트먼트)',
-        'Start (시작)', 'End (종료)', 'Room (방번호)',
-        'Guest (고객이름)', 'Company/Note (업체명/노트)',
-        'Pay (지불)', 'Tip (팁)',
-      ];
-      const dataRows = rows
-        .map((r, i) => [i + 1, r.therapistName, r.service, r.startTime, endTimeOf(r), r.roomNumber, r.guestName, r.note, r.totalAmount || r.pay, r.tip])
-        .filter((_, i) => isFilled(rows[i]));
-      // 로컬 파일 저장 (Flask 서버)
       const bookingData = filled.map((r, idx) => ({
         id: idx + 1,
         booking_date: date,
@@ -295,23 +285,43 @@ export default function BookingSheetTable() {
         created_at: new Date().toISOString(),
       }));
 
-      // Google Drive 저장 (백엔드 API)
-      const res = await fetch(`${API_BASE}/api/drive/save-booking`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bookingData),
-      });
+      // ✅ 로컬 폴더 + Google Drive 동시 저장
+      const [localRes, driveRes] = await Promise.all([
+        // 1️⃣ 로컬 파일 저장 (Flask: ~/elspa/data/)
+        fetch('http://localhost:5001/api/save-bookings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bookings: bookingData }),
+        }),
+        // 2️⃣ Google Drive 저장 (Cloudflare Workers API)
+        fetch(`${API_BASE}/api/drive/save-booking`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bookingData),
+        }),
+      ]);
 
-      const json = await res.json();
-      if (res.ok && json.status === 'success') {
-        const stamp = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-        setLastAutoSave(stamp);
-        if (!silent) alert(`✅ Google Drive 저장 완료!\nelspa/예약 폴더\n${stamp}`);
+      const localJson = await localRes.json();
+      const driveJson = await driveRes.json();
+
+      const stamp = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+      setLastAutoSave(stamp);
+
+      // 결과 판정
+      const localSuccess = localRes.ok && localJson.success;
+      const driveSuccess = driveRes.ok && driveJson.status === 'success';
+
+      if (localSuccess && driveSuccess) {
+        if (!silent) alert(`✅ 저장 완료!\n📁 로컬: ~/elspa/data/\n☁️ Google Drive: elspa/예약\n${stamp}`);
+      } else if (localSuccess || driveSuccess) {
+        const msg = localSuccess ? '📁 로컬 ✓' : '❌ 로컬 실패';
+        const gMsg = driveSuccess ? '☁️ Google Drive ✓' : '❌ Google Drive 실패';
+        if (!silent) alert(`⚠️ 부분 저장\n${msg}\n${gMsg}`);
       } else {
-        if (!silent) alert(`❌ 저장 실패: ${json.error ?? '알 수 없는 오류'}`);
+        if (!silent) alert(`❌ 저장 실패\n로컬: ${localJson.error}\nGoogle Drive: ${driveJson.error}`);
       }
     } catch (err) {
-      if (!silent) alert(`❌ Google Drive 저장 오류: ${err instanceof Error ? err.message : 'API 연결 확인'}`);
+      if (!silent) alert(`❌ 저장 오류: ${err instanceof Error ? err.message : '서버 연결 확인'}`);
     } finally {
       if (!silent) setDriveLoading(false);
     }
@@ -385,6 +395,19 @@ export default function BookingSheetTable() {
             {lastAutoSave && (
               <span className="text-[10px] md:text-xs text-emerald-400 font-semibold">✅ 저장됨 {lastAutoSave}</span>
             )}
+            <button
+              onClick={() => handleDriveExport(false)}
+              disabled={driveLoading || filledCount === 0}
+              className={`px-3 py-1.5 rounded text-[10px] md:text-xs font-semibold transition ${
+                driveLoading
+                  ? 'bg-slate-700 text-slate-400 cursor-wait'
+                  : filledCount === 0
+                    ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                    : 'bg-green-600 hover:bg-green-700 text-white'
+              }`}
+            >
+              {driveLoading ? '💾 저장 중...' : '💾 Drive 저장'}
+            </button>
           </div>
         </div>
 
