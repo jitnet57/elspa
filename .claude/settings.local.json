@@ -20,7 +20,8 @@
       "Bash(wrangler deploy *)",
       "Bash(python3 main.py)",
       "Bash(/Users/kwangseobpark/elspa/venv/bin/python /Users/kwangseobpark/elspa/main.py > /tmp/fastapi.log 2>&1 & *)",
-      "Bash(PORT=8001 /Users/kwangseobpark/elspa/venv/bin/python /Users/kwangseobpark/elspa/main.py)"
+      "Bash(PORT=8001 /Users/kwangseobpark/elspa/venv/bin/python /Users/kwangseobpark/elspa/main.py)",
+      "Bash(vercel --prod --yes)"
     ],
     "additionalDirectories": [
       "/private/tmp"
