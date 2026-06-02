@@ -270,4 +270,129 @@ app.post('/api/booking/drive/export', async (c) => {
   }
 })
 
+// ============================================================
+// Google Drive 자동 저장 엔드포인트 (7개 탭)
+// ============================================================
+
+// POST /api/drive/save-booking - 예약 자동 저장
+app.post('/api/drive/save-booking', async (c) => {
+  try {
+    const body = await c.req.json()
+    const scriptUrl = c.env.GOOGLE_APPS_SCRIPT_URL
+
+    if (!scriptUrl) {
+      return c.json({ error: 'Google Apps Script URL not configured' }, { status: 500 })
+    }
+
+    // Google Apps Script로 예약 데이터 전송
+    const response = await fetch(scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'booking',
+        data: body,
+        timestamp: new Date().toISOString(),
+      }),
+    })
+
+    return c.json({
+      message: 'Booking data saved to Google Drive',
+      status: response.ok ? 'success' : 'error',
+      timestamp: new Date().toISOString(),
+    })
+  } catch (error: any) {
+    return c.json({ error: error.message }, { status: 500 })
+  }
+})
+
+// POST /api/drive/save-attendance - 출결 자동 저장
+app.post('/api/drive/save-attendance', async (c) => {
+  try {
+    const body = await c.req.json()
+    const scriptUrl = c.env.GOOGLE_APPS_SCRIPT_URL
+
+    if (!scriptUrl) {
+      return c.json({ error: 'Google Apps Script URL not configured' }, { status: 500 })
+    }
+
+    const response = await fetch(scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'attendance',
+        data: body,
+        timestamp: new Date().toISOString(),
+      }),
+    })
+
+    return c.json({
+      message: 'Attendance data saved to Google Drive',
+      status: response.ok ? 'success' : 'error',
+      timestamp: new Date().toISOString(),
+    })
+  } catch (error: any) {
+    return c.json({ error: error.message }, { status: 500 })
+  }
+})
+
+// POST /api/drive/save-expense - 비용 자동 저장
+app.post('/api/drive/save-expense', async (c) => {
+  try {
+    const body = await c.req.json()
+    const scriptUrl = c.env.GOOGLE_APPS_SCRIPT_URL
+
+    if (!scriptUrl) {
+      return c.json({ error: 'Google Apps Script URL not configured' }, { status: 500 })
+    }
+
+    const response = await fetch(scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'expense',
+        data: body,
+        timestamp: new Date().toISOString(),
+      }),
+    })
+
+    return c.json({
+      message: 'Expense data saved to Google Drive',
+      status: response.ok ? 'success' : 'error',
+      timestamp: new Date().toISOString(),
+    })
+  } catch (error: any) {
+    return c.json({ error: error.message }, { status: 500 })
+  }
+})
+
+// POST /api/drive/save-payroll - 급여 자동 저장
+app.post('/api/drive/save-payroll', async (c) => {
+  try {
+    const body = await c.req.json()
+    const scriptUrl = c.env.GOOGLE_APPS_SCRIPT_URL
+
+    if (!scriptUrl) {
+      return c.json({ error: 'Google Apps Script URL not configured' }, { status: 500 })
+    }
+
+    const response = await fetch(scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'payroll',
+        data: body,
+        timestamp: new Date().toISOString(),
+      }),
+    })
+
+    return c.json({
+      message: 'Payroll data saved to Google Drive',
+      status: response.ok ? 'success' : 'error',
+      timestamp: new Date().toISOString(),
+    })
+  } catch (error: any) {
+    return c.json({ error: error.message }, { status: 500 })
+  }
+})
+
 export default app

@@ -212,10 +212,12 @@ export default function AttendanceView() {
         };
       });
 
-      const res = await fetch('http://localhost:5000/api/save-all', {
+      // Google Drive 저장 (백엔드 API)
+      const API_BASE = 'https://elspa-api-production.jitnet57.workers.dev';
+      const res = await fetch(`${API_BASE}/api/drive/save-attendance`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ attendance: attendanceData }),
+        body: JSON.stringify(attendanceData),
       });
 
       // 네트워크 오류는 조용히 무시 (자동 저장이므로)

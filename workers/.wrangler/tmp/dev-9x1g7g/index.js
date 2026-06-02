@@ -23500,6 +23500,106 @@ app.post("/api/booking/drive/export", async (c) => {
     return c.json({ error: error.message }, { status: 500 });
   }
 });
+app.post("/api/drive/save-booking", async (c) => {
+  try {
+    const body = await c.req.json();
+    const scriptUrl = c.env.GOOGLE_APPS_SCRIPT_URL;
+    if (!scriptUrl) {
+      return c.json({ error: "Google Apps Script URL not configured" }, { status: 500 });
+    }
+    const response = await fetch(scriptUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "booking",
+        data: body,
+        timestamp: (/* @__PURE__ */ new Date()).toISOString()
+      })
+    });
+    return c.json({
+      message: "Booking data saved to Google Drive",
+      status: response.ok ? "success" : "error",
+      timestamp: (/* @__PURE__ */ new Date()).toISOString()
+    });
+  } catch (error) {
+    return c.json({ error: error.message }, { status: 500 });
+  }
+});
+app.post("/api/drive/save-attendance", async (c) => {
+  try {
+    const body = await c.req.json();
+    const scriptUrl = c.env.GOOGLE_APPS_SCRIPT_URL;
+    if (!scriptUrl) {
+      return c.json({ error: "Google Apps Script URL not configured" }, { status: 500 });
+    }
+    const response = await fetch(scriptUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "attendance",
+        data: body,
+        timestamp: (/* @__PURE__ */ new Date()).toISOString()
+      })
+    });
+    return c.json({
+      message: "Attendance data saved to Google Drive",
+      status: response.ok ? "success" : "error",
+      timestamp: (/* @__PURE__ */ new Date()).toISOString()
+    });
+  } catch (error) {
+    return c.json({ error: error.message }, { status: 500 });
+  }
+});
+app.post("/api/drive/save-expense", async (c) => {
+  try {
+    const body = await c.req.json();
+    const scriptUrl = c.env.GOOGLE_APPS_SCRIPT_URL;
+    if (!scriptUrl) {
+      return c.json({ error: "Google Apps Script URL not configured" }, { status: 500 });
+    }
+    const response = await fetch(scriptUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "expense",
+        data: body,
+        timestamp: (/* @__PURE__ */ new Date()).toISOString()
+      })
+    });
+    return c.json({
+      message: "Expense data saved to Google Drive",
+      status: response.ok ? "success" : "error",
+      timestamp: (/* @__PURE__ */ new Date()).toISOString()
+    });
+  } catch (error) {
+    return c.json({ error: error.message }, { status: 500 });
+  }
+});
+app.post("/api/drive/save-payroll", async (c) => {
+  try {
+    const body = await c.req.json();
+    const scriptUrl = c.env.GOOGLE_APPS_SCRIPT_URL;
+    if (!scriptUrl) {
+      return c.json({ error: "Google Apps Script URL not configured" }, { status: 500 });
+    }
+    const response = await fetch(scriptUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "payroll",
+        data: body,
+        timestamp: (/* @__PURE__ */ new Date()).toISOString()
+      })
+    });
+    return c.json({
+      message: "Payroll data saved to Google Drive",
+      status: response.ok ? "success" : "error",
+      timestamp: (/* @__PURE__ */ new Date()).toISOString()
+    });
+  } catch (error) {
+    return c.json({ error: error.message }, { status: 500 });
+  }
+});
 var src_default = app;
 
 // node_modules/wrangler/templates/middleware/middleware-ensure-req-body-drained.ts

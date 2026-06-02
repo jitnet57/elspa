@@ -230,10 +230,11 @@ export default function ExpensePage() {
         created_at: new Date().toISOString(),
       }));
 
-      const res = await fetch('http://localhost:5000/api/save-all', {
+      // Google Drive 저장 (백엔드 API)
+      const res = await fetch(`${API_BASE}/api/drive/save-expense`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ expenses: expenseData }),
+        body: JSON.stringify(expenseData),
       });
 
       if (res.ok) {

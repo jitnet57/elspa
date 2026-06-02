@@ -273,28 +273,29 @@ export default function BookingSheetTable() {
         created_at: new Date().toISOString(),
       }));
 
-      const res = await fetch('http://localhost:5000/api/save-all', {
+      // Google Drive 저장 (백엔드 API)
+      const res = await fetch(`${API_BASE}/api/drive/save-booking`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bookings: bookingData }),
+        body: JSON.stringify(bookingData),
       });
 
       const json = await res.json();
-      if (json.success) {
+      if (res.ok && json.status === 'success') {
         const stamp = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
         setLastAutoSave(stamp);
-        if (!silent) alert(`✅ 파일 저장 완료!\n~/elspa/data/bookings.xlsx\n${stamp}`);
+        if (!silent) alert(`✅ Google Drive 저장 완료!\nelspa/예약 폴더\n${stamp}`);
       } else {
         if (!silent) alert(`❌ 저장 실패: ${json.error ?? '알 수 없는 오류'}`);
       }
     } catch (err) {
-      if (!silent) alert(`❌ 저장 오류: ${err instanceof Error ? err.message : 'Flask 서버 연결 확인'}`);
+      if (!silent) alert(`❌ Google Drive 저장 오류: ${err instanceof Error ? err.message : 'API 연결 확인'}`);
     } finally {
       if (!silent) setDriveLoading(false);
     }
   }, [rows, date]);
 
-  // ── 1시간마다 자동 Drive 저장 (채워진 행이 있을 때만) ───────────
+  // ── 설정된 간격마다 자동 Drive 저장 (Google Apps Script) ───────────
   useEffect(() => {
     if (!autoSaveEnabled) return;
     const timer = setInterval(() => { handleDriveExport(true); }, autoSaveIntervalMs);
