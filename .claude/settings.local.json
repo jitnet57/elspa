@@ -43,7 +43,9 @@
       "Bash(python3 -m py_compile /Users/kwangseobpark/elspa/app/config/table_mappings.py)",
       "Bash(awk '{print $9, \"\\(\" $5 \"\\)\"}')",
       "Bash(python3 -m py_compile /Users/kwangseobpark/elspa/app/config/table_mappings_usage.py)",
-      "Bash(grep -E \"\\\\.\\(ts|tsx|py\\)$\")"
+      "Bash(grep -E \"\\\\.\\(ts|tsx|py\\)$\")",
+      "Bash(python3 -m pytest tests/test_payment_validation.py -v)",
+      "Bash(pip3 install *)"
     ],
     "additionalDirectories": [
       "/private/tmp"

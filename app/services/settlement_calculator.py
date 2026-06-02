@@ -327,7 +327,7 @@ def bulk_settle_monthly(
         next_month_first = date(year, month + 1, 1)
 
     # 전월 마지막 날
-    payment_date = (next_month_first - __import__('datetime').timedelta(days=1)).date()
+    payment_date = next_month_first - __import__('datetime').timedelta(days=1)
 
     # 단계 3-5: 각 정산 처리
     processed = []

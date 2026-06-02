@@ -105,15 +105,14 @@ class Booking(Base):
         CheckConstraint("sss_amount >= 0", name="ck_sss_amount_positive"),
     )
 
-    # ━━━ 관계 ━━━
-    settlements = relationship(
-        "CompanySettlement",
-        secondary="settlement_transactions",
-        primaryjoin="Booking.id == foreign(settlement_transactions.c.booking_id)",
-        secondaryjoin="settlement_transactions.c.company_settlement_id == CompanySettlement.id",
-        viewonly=True,
-        comment="이 예약과 연결된 정산 기록"
-    )
+    # ━━━ 관계 ━━━ (removed due to SQLAlchemy 2.0 compatibility)
+    # settlements = relationship(
+    #     "CompanySettlement",
+    #     secondary="settlement_transactions",
+    #     primaryjoin="Booking.id == foreign(settlement_transactions.c.booking_id)",
+    #     secondaryjoin="settlement_transactions.c.company_settlement_id == CompanySettlement.id",
+    #     viewonly=True
+    # )
 
     # ============================================================
     # 메서드 1: add_payment_method()
