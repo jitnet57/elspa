@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
 import React from 'react';
 import dynamic from 'next/dynamic';
 import { usePayrollStore } from '@/lib/store/payroll-store';
@@ -22,16 +21,20 @@ const NetworkDashboardAdmin = dynamic(
 // 🔄 업데이트: 2026-05-29 - 3D 네트워크 대시보드 통합
 // ============================================================
 export default function AdminDashboard() {
-  const searchParams = useSearchParams();
-  const tabParam = searchParams.get('tab') as 'dashboard' | 'payroll' | 'payroll-calc' | 'knowledge-network' | null;
-
   // Main tab: Dashboard vs Payroll Periods vs Payroll Calculation vs Knowledge Network
-  const [adminTab, setAdminTab] = useState<'dashboard' | 'payroll' | 'payroll-calc' | 'knowledge-network'>(
-    tabParam || 'dashboard'
-  );
+  const [adminTab, setAdminTab] = useState<'dashboard' | 'payroll' | 'payroll-calc' | 'knowledge-network'>('dashboard');
 
   // Payroll Calculation API 훅
   const { calculateSingle, loading: apiLoading, error: apiError, result: apiResult, reset: resetCalc } = usePayrollCalculation();
+
+  // URL 쿼리 파라미터에서 탭 읽기 (클라이언트 사이드만)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab') as 'dashboard' | 'payroll' | 'payroll-calc' | 'knowledge-network' | null;
+      if (tab) setAdminTab(tab);
+    }
+  }, []);
 
   // Dashboard KPI state
   const [dashRefresh, setDashRefresh] = useState(0);
