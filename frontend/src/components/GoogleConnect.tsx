@@ -11,8 +11,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+import { API_ENDPOINTS } from '@/lib/config/api-config';
 
 export default function GoogleConnect() {
   const [connected, setConnected] = useState<boolean | null>(null);
@@ -21,7 +20,7 @@ export default function GoogleConnect() {
   // 연결 상태 확인
   const check = useCallback(async () => {
     try {
-      const r = await fetch(`${API_BASE}/api/booking/status`);
+      const r = await fetch(API_ENDPOINTS.bookingStatus);
       const d = await r.json();
       setConnected(!!d.connected);
     } catch {
@@ -35,7 +34,7 @@ export default function GoogleConnect() {
   const connect = async () => {
     setOpening(true);
     try {
-      const r = await fetch(`${API_BASE}/api/booking/auth/google`);
+      const r = await fetch(API_ENDPOINTS.bookingAuthGoogle);
       const d = await r.json();
       if (d.authorization_url) {
         window.open(d.authorization_url, '_blank', 'noopener,noreferrer');
