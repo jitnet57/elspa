@@ -60,6 +60,9 @@ export default function GoogleSettings() {
   // 자동 저장 설정 (공유 훅 — localStorage 영속)
   const { enabled, intervalMinutes, setEnabled, setIntervalMinutes } = useAutoSaveSettings();
 
+  // ⚠️ Google OAuth는 설정 문제로 비활성화
+  // Google Apps Script로만 저장합니다
+
   // 연결 상태 (null = 로딩 중)
   const [status, setStatus] = useState<GoogleStatus | null>(null);
   // 인증 URL 요청 로딩
@@ -148,128 +151,20 @@ export default function GoogleSettings() {
     <div className="bg-white rounded-xl border-2 border-blue-100 shadow-sm p-6">
       {/* ── 헤더 ────────────────────────────────────────── */}
       <div className="mb-5">
-        <h2 className="text-xl font-bold text-gray-900">🔗 Google Drive / Sheets 연결</h2>
+        <h2 className="text-xl font-bold text-gray-900">📊 Google Sheets 자동 저장</h2>
         <p className="text-sm text-gray-500 mt-1">
-          {status === null
-            ? '연결 상태를 확인하는 중입니다…'
-            : status.connected
-            ? `Google 계정이 연결되어 있습니다. Drive 자동 저장이 활성화됩니다.`
-            : 'Google 계정을 연결하면 비용·예약·출결·정산 데이터를 Drive에 자동 저장합니다.'}
+          Google Apps Script를 통해 비용·예약·출결 데이터를 Google Sheets에 자동 저장합니다.
         </p>
       </div>
 
-      {/* ── 상태 배지 ────────────────────────────────────── */}
-      <div className="mb-5">
-        {status === null ? (
-          // 로딩 중 스피너
-          <span className="inline-flex items-center gap-2 text-sm text-gray-400">
-            <svg className="animate-spin h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-            </svg>
-            확인 중…
+      {/* ── Google OAuth 비활성화 안내 ────────────────────── */}
+      <div className="mb-5 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <p className="text-sm text-blue-800">
+          ✅ <strong>Google Apps Script 연동 완료</strong><br/>
+          <span className="text-xs text-blue-700 mt-1 block">
+            Google OAuth 인증 대신 Google Apps Script를 통해 자동으로 저장됩니다.
           </span>
-        ) : status.connected ? (
-          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-700 bg-green-100 px-3 py-1.5 rounded-full">
-            🟢 연결됨
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full">
-            ⚪ 미연결
-          </span>
-        )}
-      </div>
-
-      {/* ── 연결됐을 때: 계정 정보 + 해제 버튼 ──────────── */}
-      {status?.connected && (
-        <div className="mb-5 space-y-3">
-          {/* 계정 이메일 */}
-          {status.email && (
-            <div className="flex items-center gap-2 text-sm text-gray-700">
-              <span className="font-semibold w-24 shrink-0">계정</span>
-              <span className="text-blue-700 font-medium">{status.email}</span>
-            </div>
-          )}
-          {/* 토큰 만료일 */}
-          {status.token_expiry && (
-            <div className="flex items-center gap-2 text-sm text-gray-700">
-              <span className="font-semibold w-24 shrink-0">토큰 만료</span>
-              <span className="text-gray-600">{formatExpiry(status.token_expiry)}</span>
-            </div>
-          )}
-          {/* 스코프 목록 */}
-          {status.scopes && status.scopes.length > 0 && (
-            <div className="flex items-start gap-2 text-sm text-gray-700">
-              <span className="font-semibold w-24 shrink-0 pt-0.5">허용 범위</span>
-              <ul className="space-y-0.5">
-                {status.scopes.map((s, i) => (
-                  <li key={i} className="text-xs text-gray-500 font-mono break-all">{s}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {/* 연결 해제 버튼 */}
-          <div className="pt-2">
-            <button
-              onClick={handleDisconnect}
-              disabled={disconnecting}
-              className="px-4 py-2 text-sm font-semibold border-2 border-red-400 text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-50 transition"
-            >
-              {disconnecting ? '해제 중…' : '🔌 연결 해제'}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── 미연결일 때: 연결 버튼 + Redirect URI 안내 ──── */}
-      {status !== null && !status.connected && (
-        <div className="mb-5 space-y-4">
-          {/* Google 계정 연결 버튼 */}
-          <button
-            onClick={handleConnect}
-            disabled={loading}
-            className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-lg transition"
-          >
-            {loading ? (
-              <>
-                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                </svg>
-                인증 창 여는 중…
-              </>
-            ) : (
-              '🔗 Google 계정 연결'
-            )}
-          </button>
-
-          {/* Redirect URI 설정 안내 박스 */}
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2">
-            <p className="text-xs font-semibold text-gray-600">📋 Redirect URI 설정 안내</p>
-            <p className="text-xs text-gray-600">
-              <code className="font-mono bg-gray-100 px-1 rounded">GOOGLE_OAUTH_REDIRECT_URI</code> 를 배포 URL +{' '}
-              <code className="font-mono bg-gray-100 px-1 rounded">/api/booking/auth/google/callback</code> 으로 설정하세요.
-            </p>
-            {/* 예시 코드블록 */}
-            <pre className="mt-2 bg-gray-800 text-green-400 text-xs rounded-lg p-3 overflow-x-auto font-mono">
-              {`GOOGLE_OAUTH_REDIRECT_URI=https://your-backend.railway.app/api/booking/auth/google/callback`}
-            </pre>
-          </div>
-        </div>
-      )}
-
-      {/* ── 공통 하단: 새로고침 + 마지막 확인 시각 ──────── */}
-      <div className="flex items-center gap-3 pt-3 border-t border-gray-100">
-        <button
-          onClick={fetchStatus}
-          title="연결 상태 새로고침"
-          className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 px-2 py-1.5 rounded hover:bg-gray-100 transition"
-        >
-          ↻ 새로고침
-        </button>
-        {lastChecked && (
-          <span className="text-xs text-gray-400">마지막 확인: {lastChecked}</span>
-        )}
+        </p>
       </div>
 
       {/* ── 자동 저장 설정 ────────────────────────────────── */}
