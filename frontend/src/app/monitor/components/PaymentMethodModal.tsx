@@ -51,7 +51,7 @@ export default function PaymentMethodModal({
       <div className="bg-white rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-gray-900">
+          <h2 className="text-sm md:text-lg font-bold text-gray-900">
             {locale === 'ko' ? '결제 수단 입력' : 'Payment Methods'}
           </h2>
           <button
@@ -65,7 +65,7 @@ export default function PaymentMethodModal({
 
         {/* 청구액 정보 */}
         <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-sm text-gray-600">
+          <p className="text-xs md:text-sm text-gray-600">
             {locale === 'ko' ? '청구액' : 'Total Amount'}
           </p>
           <p className="text-2xl font-bold text-gray-900">

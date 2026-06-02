@@ -367,29 +367,29 @@ export default function BookingSheetTable() {
       {/* 헤더 */}
       <div className="px-6 py-4 border-b border-white/10">
         <div className="flex flex-wrap items-center gap-3 mb-3">
-          <h2 className="text-xl font-black">📊 BOOKING WITH THERAPIST</h2>
-          <span className="text-xs text-indigo-300">{tr(`Therapist booking`, `테라피스트 예약`)}</span>
+          <h2 className="text-lg md:text-xl font-black">📊 BOOKING WITH THERAPIST</h2>
+          <span className="text-[10px] md:text-xs text-indigo-300">{tr(`Therapist booking`, `테라피스트 예약`)}</span>
           {(() => {
             const filled = rows.filter(isFilled).length;
             const sheetNo = Math.floor(filled / rowCount) + 1;
             const ord = (n: number) => { const s = ['th','st','nd','rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
-            return <span className="text-xs px-2 py-1 rounded-md bg-pink-600/30 text-pink-200">{tr('Sheet', '시트')}: {ord(sheetNo)}</span>;
+            return <span className="text-[10px] md:text-xs px-2 py-1 rounded-md bg-pink-600/30 text-pink-200">{tr('Sheet', '시트')}: {ord(sheetNo)}</span>;
           })()}
           <div className="ml-2 flex items-center gap-2">
             📅
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="px-3 py-2 rounded-lg bg-slate-800 border border-indigo-500/40 text-white text-sm" />
-            {loading && <span className="text-xs text-slate-400">{tr('Loading…', '불러오는 중…')}</span>}
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="px-3 py-2 rounded-lg bg-slate-800 border border-indigo-500/40 text-white text-xs md:text-sm" />
+            {loading && <span className="text-[10px] md:text-xs text-slate-400">{tr('Loading…', '불러오는 중…')}</span>}
           </div>
           <div className="ml-auto flex items-center gap-3">
-            <span className="text-xs text-slate-300">{tr(`Entered: ${filledCount}`, `입력됨: ${filledCount}건`)}</span>
+            <span className="text-[10px] md:text-xs text-slate-300">{tr(`Entered: ${filledCount}`, `입력됨: ${filledCount}건`)}</span>
             {lastAutoSave && (
-              <span className="text-xs text-emerald-400 font-semibold">✅ 저장됨 {lastAutoSave}</span>
+              <span className="text-[10px] md:text-xs text-emerald-400 font-semibold">✅ 저장됨 {lastAutoSave}</span>
             )}
           </div>
         </div>
 
         {/* 행 수 조정 UI */}
-        <div className="flex items-center gap-3 text-xs text-slate-300 bg-slate-800/50 p-2 rounded-lg">
+        <div className="flex items-center gap-3 text-[10px] md:text-xs text-slate-300 bg-slate-800/50 p-2 rounded-lg">
           <label className="text-slate-400 font-medium">
             {tr('Rows', '행 수')}:
           </label>
@@ -409,11 +409,11 @@ export default function BookingSheetTable() {
             max="100"
             value={rowCount}
             onChange={(e) => updateRowCount(parseInt(e.target.value, 10))}
-            className="w-12 px-2 py-1 rounded bg-slate-700 border border-indigo-500/30 text-white text-xs"
+            className="w-12 px-2 py-1 rounded bg-slate-700 border border-indigo-500/30 text-white text-[10px] md:text-xs"
           />
           <button
             onClick={() => updateRowCount(DEFAULT_ROW_COUNT)}
-            className="ml-2 px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs transition"
+            className="ml-2 px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 text-[10px] md:text-xs transition"
           >
             {tr('Reset', '초기화')} (60)
           </button>
@@ -436,11 +436,11 @@ export default function BookingSheetTable() {
       <datalist id="bk-referral-options">
         {referrals.map((r) => (<option key={r} value={r} />))}
       </datalist>
-      <p className="px-6 pb-2 text-xs text-emerald-300">{tr(`🟢 ${availableRooms.length} rooms free · Company/Note: search company·guide (referral) or free text (note)`, `🟢 빈 룸 ${availableRooms.length}개 · 업체/노트 칸: 업체·가이드 검색(레퍼럴) 또는 자유 입력(노트)`)}</p>
+      <p className="px-6 pb-2 text-[10px] md:text-xs text-emerald-300">{tr(`🟢 ${availableRooms.length} rooms free · Company/Note: search company·guide (referral) or free text (note)`, `🟢 빈 룸 ${availableRooms.length}개 · 업체/노트 칸: 업체·가이드 검색(레퍼럴) 또는 자유 입력(노트)`)}</p>
 
       {/* 30행 예약표 */}
       <div className="px-4 py-4 overflow-x-auto">
-        <table className="w-full min-w-[1100px] text-sm border-collapse">
+        <table className="w-full min-w-[1100px] text-xs md:text-sm border-collapse">
           <thead>
             <tr className="text-left text-indigo-200 border-b border-white/10">
               <th className="px-2 py-2 w-10">#</th>
@@ -459,7 +459,7 @@ export default function BookingSheetTable() {
           </thead>
           <tbody>
             {rows.map((r, i) => {
-              const inp = 'w-full bg-slate-800 border border-white/10 rounded px-2 py-1.5 text-white placeholder-slate-500 text-xs';
+              const inp = 'w-full bg-slate-800 border border-white/10 rounded px-2 py-1.5 text-white placeholder-slate-500 text-[11px] md:text-xs';
               // ============================================================
               // 📌 Mock SSS Payroll Impact (실제로는 백엔드에서 조회)
               // 📋 목적: SSSOptionSelect 컴포넌트 데모용
@@ -505,7 +505,7 @@ export default function BookingSheetTable() {
                       setSelectedPaymentRowIndex(i);
                       setIsPaymentModalOpen(true);
                     }}
-                    className="px-2 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs rounded font-semibold transition"
+                    className="px-2 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] md:text-xs rounded font-semibold transition"
                   >
                     💳 {getPaymentMethodsCount(r.paymentMethods || [])}
                   </button>
@@ -517,7 +517,7 @@ export default function BookingSheetTable() {
                   <input type="number" value={r.tip || ''} onChange={(e) => update(i, { tip: Number(e.target.value) || 0 })} placeholder="0" className={inp + ' text-right'} />
                 </td>
                 <td className="px-2 py-1">
-                  <button onClick={() => saveRow(i)} disabled={!isFilled(r) || r.saving} className={`w-full px-2 py-1.5 rounded font-bold text-xs ${r.saved ? 'bg-emerald-600' : 'bg-blue-600 hover:bg-blue-700 disabled:opacity-30'}`}>
+                  <button onClick={() => saveRow(i)} disabled={!isFilled(r) || r.saving} className={`w-full px-2 py-1.5 rounded font-bold text-[11px] md:text-xs ${r.saved ? 'bg-emerald-600' : 'bg-blue-600 hover:bg-blue-700 disabled:opacity-30'}`}>
                     {r.saving ? '…' : r.saved ? '✓' : tr('Save', '저장')}
                   </button>
                 </td>
