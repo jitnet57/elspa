@@ -1,0 +1,261 @@
+================================================================================
+결제 시스템 데이터베이스 마이그레이션 — 완성
+작성일: 2026-06-02
+================================================================================
+
+📋 생성된 파일
+================================================================================
+
+1. Python 마이그레이션 (권장)
+   경로: /Users/kwangseobpark/elspa/app/migrations/20260602_payment_system_migration.py
+   용도: SQLAlchemy 기반, 단계별 실행, 자동 검증
+   실행: python app/migrations/20260602_payment_system_migration.py
+
+2. SQL 마이그레이션
+   경로: /Users/kwangseobpark/elspa/app/migrations/20260602_payment_system_migration.sql
+   용도: 순수 SQL, DBeaver/psql/Supabase 호환
+   실행: psql < 파일경로 또는 SQL 에디터에서 실행
+
+3. 상세 가이드 (필독)
+   경로: /Users/kwangseobpark/elspa/app/migrations/PAYMENT_MIGRATION_README.md
+   용도: 전체 마이그레이션 설명, 구조, 검증 쿼리
+
+4. 체크리스트
+   경로: /Users/kwangseobpark/elspa/PAYMENT_SYSTEM_MIGRATION_CHECKLIST.md
+   용도: 빠른 시작, 검증, 다음 단계
+
+
+✅ 마이그레이션 내용
+================================================================================
+
+ENUM 타입 (3개)
+  - sss_status_enum: pending, approved, confirmed, cancelled
+  - payment_from_enum: customer, company_credit, referral
+  - settlement_status_enum: pending, approved, settled, rejected, confirmed
+
+bookings 테이블 ALTER (4개 필드)
+  - payment_methods (JSON): 다중 결제수단 저장
+  - sss_status (ENUM): SSS 상태
+  - payment_from (ENUM): 결제 주체
+  - settlement_status (ENUM): 정산 상태
+
+새 테이블 (3개)
+  - company_settlements: 월간 정산 기록 (기존 모델: app/models/company_settlement.py)
+  - settlement_transactions: 거래별 상세 기록
+  - settlement_rules: 정산 규칙 관리
+
+인덱스 (10개+)
+  - bookings: 4개 (payment_settlement, sss_status, settlement_status, status_settlement)
+  - company_settlements: 4개 (company_id, status, payment_date, period)
+  - settlement_transactions: 3개 (company_id, booking_id, type)
+  - settlement_rules: 2개 (conditions, active)
+
+외래 키
+  - company_settlements.company_id → companies.id
+  - settlement_transactions.company_settlement_id → company_settlements.id
+  - settlement_transactions.booking_id → bookings.id
+
+
+🚀 실행 방법 (3가지)
+================================================================================
+
+방법 1: Python (권장) ⭐
+  $ cd /Users/kwangseobpark/elspa
+  $ python app/migrations/20260602_payment_system_migration.py
+  
+  특징:
+  - 자동 오류 처리
+  - 단계별 진행 상황 표시
+  - 최종 검증 포함
+
+방법 2: SQL (DBeaver)
+  1. DBeaver 열기
+  2. SQL 에디터에서 파일 열기:
+     /Users/kwangseobpark/elspa/app/migrations/20260602_payment_system_migration.sql
+  3. Ctrl+Enter 또는 ▶️ 버튼 클릭
+
+방법 3: psql 명령줄
+  $ psql -U postgres -d elspa < \
+    /Users/kwangseobpark/elspa/app/migrations/20260602_payment_system_migration.sql
+
+
+✔️ 검증 (마이그레이션 후)
+================================================================================
+
+1. ENUM 타입 확인
+   SELECT typname FROM pg_type WHERE typtype = 'e' AND typname LIKE '%enum';
+   예상: 3개 타입
+
+2. bookings 컬럼 확인
+   SELECT column_name, data_type FROM information_schema.columns
+   WHERE table_name = 'bookings'
+   AND column_name IN ('payment_methods', 'sss_status', 'payment_from', 'settlement_status');
+   예상: 4개 컬럼
+
+3. 테이블 존재 확인
+   SELECT table_name FROM information_schema.tables
+   WHERE table_name IN ('company_settlements', 'settlement_transactions', 'settlement_rules');
+   예상: 3개 테이블
+
+4. 인덱스 확인
+   SELECT COUNT(*) FROM pg_indexes
+   WHERE tablename IN ('bookings', 'company_settlements', 'settlement_transactions');
+   예상: 10개 이상
+
+
+📊 테이블 설계
+================================================================================
+
+bookings (기존 + 신규)
+├─ 기본: id, customer_id, therapist_id, service_id
+├─ 일정: booking_date, booking_time, duration_minutes
+├─ 정보: location, special_request, notes
+├─ 상태: status (pending, confirmed, completed, cancelled)
+├─ 기존 결제: total_price, payment_method
+└─ 신규 필드:
+   ├─ payment_methods (JSON[]) — 다중 결제수단
+   ├─ sss_status (ENUM) — SSS 추적
+   ├─ payment_from (ENUM) — 결제 주체
+   └─ settlement_status (ENUM) — 정산 상태
+
+company_settlements (신규 월간 정산)
+├─ 기본: id, company_id, settlement_period_year, settlement_period_month
+├─ 매출: total_revenue, guest_revenue, credit_revenue, waived_revenue
+├─ 회수: recovery_rate, recovered_amount
+├─ 수수료: platform_fee_rate, platform_fee
+├─ 차감: refund_amount, dispute_deduction, other_deduction, total_deductions
+├─ 정산액: net_settlement
+├─ 상태: status, settlement_date, payment_date, payment_method
+├─ 감시: created_by, approved_by, paid_by
+└─ 시간: created_at, updated_at
+
+settlement_transactions (신규 거래 기록)
+├─ 기본: id, company_settlement_id, booking_id, customer_id
+├─ 분류: transaction_type (booking, refund, dispute, adjustment)
+│         settlement_category (guest, credit, waived)
+├─ 금액: amount, recovery_rate, recovered_amount
+├─ 날짜: transaction_date
+├─ 메모: notes
+└─ 시간: created_at
+
+settlement_rules (신규 규칙)
+├─ 기본: id, rule_name, description, is_active
+├─ 조건: customer_type, payment_method
+├─ 설정: settlement_status, recovery_rate, platform_fee_rate
+└─ 시간: created_at, updated_at
+
+
+💡 핵심 설계 원칙
+================================================================================
+
+1. 정규화: 거래 상세는 settlement_transactions로 분리
+2. 감시: 정산 상태 변경 기록 (created_by, approved_by, paid_by)
+3. 유연성: JSON payment_methods로 다중 결제 수단 지원
+4. 성능: 자주 쿼리되는 필드에 복합 인덱스 추가
+5. 무결성: CHECK 제약 + FOREIGN KEY + ENUM으로 데이터 보호
+
+
+🔄 상태 전이 (State Transitions)
+================================================================================
+
+sss_status:
+  pending → approved → confirmed
+  pending → cancelled
+
+settlement_status:
+  pending → approved (관리자 승인)
+  approved → settled (지급 완료)
+  settled → confirmed (은행 확인)
+  pending/approved → rejected (거부)
+
+
+📈 금액 계산식
+================================================================================
+
+net_settlement = (guest_revenue + recovered_amount) - platform_fee - total_deductions
+
+where:
+  guest_revenue = 비회원 매출 (회수율 100%)
+  recovered_amount = credit_revenue × recovery_rate / 100
+  platform_fee = (total_revenue - waived_revenue) × platform_fee_rate / 100
+  total_deductions = refund_amount + dispute_deduction + other_deduction
+
+
+⚠️ 주의사항
+================================================================================
+
+안전성:
+  ✓ IF NOT EXISTS로 중복 생성 방지
+  ✓ 기존 데이터 보존 (ALTER TABLE ADD COLUMN)
+  ✓ DEFAULT 값 설정 (마이그레이션 후 기존 행도 안전)
+  ✓ CHECK 제약으로 데이터 무결성 보장
+
+성능:
+  ✓ 복합 인덱스로 WHERE 조건 최적화
+  ✓ ENUM 타입으로 저장 공간 절약
+  ✓ 비파괴적 마이그레이션 (기존 데이터 손상 없음)
+
+주의:
+  ! 프로덕션 DB에는 백업 후 실행
+  ! 롤백이 필요하면 ENUM 타입 삭제 필요 (외래키 때문에 복잡)
+
+
+📝 다음 단계 (Next Steps)
+================================================================================
+
+1. API 라우터 구현 (app/routers/settlements.py)
+   - GET /settlements — 월간 정산 조회
+   - POST /settlements — 정산 생성
+   - PATCH /settlements/{id} — 상태 변경
+   - GET /settlements/{id}/transactions — 거래 상세
+
+2. 서비스 로직 (app/services/settlement_service.py)
+   - SettlementService.calculate_monthly()
+   - SettlementService.approve()
+   - SettlementService.settle()
+
+3. Pydantic 스키마 (app/schemas/settlement.py)
+   - CompanySettlementCreate
+   - CompanySettlementUpdate
+   - SettlementTransactionRead
+
+4. 테스트 (tests/test_settlements.py)
+   - 정산액 계산 검증
+   - 상태 전이 검증
+
+5. 프론트엔드 (frontend/src/app/admin/settlements/)
+   - 월간 정산 대시보드
+   - 정산 상태 추적
+
+
+📚 참고 문서
+================================================================================
+
+상세 가이드:
+  /Users/kwangseobpark/elspa/app/migrations/PAYMENT_MIGRATION_README.md
+
+체크리스트:
+  /Users/kwangseobpark/elspa/PAYMENT_SYSTEM_MIGRATION_CHECKLIST.md
+
+기존 모델 (이미 작성됨):
+  /Users/kwangseobpark/elspa/app/models/company_settlement.py
+
+
+✅ 마이그레이션 상태
+================================================================================
+
+상태: 준비 완료 ✓
+파일 개수: 3개 (Python + SQL + 가이드)
+검증: 포함됨
+실행 시간: ~2-5초
+롤백: 외래키 때문에 복잡 (백업 권장)
+
+
+================================================================================
+모든 준비가 완료되었습니다!
+다음 명령으로 마이그레이션을 실행하세요:
+
+$ cd /Users/kwangseobpark/elspa
+$ python app/migrations/20260602_payment_system_migration.py
+
+================================================================================

@@ -84,10 +84,26 @@ export default function AdminShell({ children }: AdminShellProps) {
             </Link>
 
             {/* Settings */}
-            <Link className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all" href="/admin/policies">
+            <Link className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all" href="/admin/settings">
               <span className="text-lg">⚙️</span>
               <span className="text-sm">Settings</span>
             </Link>
+
+            {/* Settings Submenu */}
+            <div className="ml-3 space-y-1 border-l border-indigo-500/20 pl-3">
+              <Link className="flex items-center gap-3 px-4 py-2 rounded-lg text-indigo-300/60 hover:text-indigo-300 hover:bg-white/3 transition-all text-sm" href="/admin/settings/import">
+                <span className="text-lg">📥</span>
+                <span className="text-xs">Import Data</span>
+              </Link>
+              <Link className="flex items-center gap-3 px-4 py-2 rounded-lg text-indigo-300/60 hover:text-indigo-300 hover:bg-white/3 transition-all text-sm" href="/admin/policies">
+                <span className="text-lg">📋</span>
+                <span className="text-xs">Policies</span>
+              </Link>
+              <Link className="flex items-center gap-3 px-4 py-2 rounded-lg text-indigo-300/60 hover:text-indigo-300 hover:bg-white/3 transition-all text-sm" href="/admin/audit-logs">
+                <span className="text-lg">📊</span>
+                <span className="text-xs">Audit Logs</span>
+              </Link>
+            </div>
           </nav>
         </div>
 
@@ -138,7 +154,7 @@ export default function AdminShell({ children }: AdminShellProps) {
               <span className="text-xl">💰</span>
               <span className="mt-1">Payroll</span>
             </Link>
-            <Link href="/admin/policies" className="flex flex-col items-center justify-center flex-1 py-3 text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all text-[10px] font-bold">
+            <Link href="/admin/settings" className="flex flex-col items-center justify-center flex-1 py-3 text-indigo-300/60 hover:text-white hover:bg-white/5 transition-all text-[10px] font-bold">
               <span className="text-xl">⚙️</span>
               <span className="mt-1">Settings</span>
             </Link>

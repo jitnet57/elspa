@@ -1,0 +1,460 @@
+================================================================================
+                    CompanySettlement 시스템 설계 완료
+================================================================================
+
+작성일: 2026-06-02
+상태: 설계 & 초기 구현 완료
+담당자: jitnet-gif (kang jichul)
+
+================================================================================
+📋 생성 파일 요약
+================================================================================
+
+1. 설계 문서
+   📄 CompanySettlement_Design.md (5,800+ 줄)
+   - ER 다이어그램
+   - 정산 규칙 & 공식 (5가지)
+   - 워크플로우 (5단계)
+   - 정산 시나리오 (5가지 use case)
+   - SQL 쿼리 예시
+   - 구현 로드맵
+
+2. 구현 가이드
+   📄 CompanySettlement_Implementation_Guide.md (800+ 줄)
+   - API 엔드포인트 (7가지)
+   - 데이터 모델 상세
+   - 계산 엔진 알고리즘
+   - 사용 예시 (3가지)
+   - 마이그레이션 가이드
+   - 테스트 계획
+
+3. 데이터 모델 (SQLAlchemy)
+   📄 app/models/company_settlement.py (380+ 줄)
+   - CompanySettlement (월간 정산)
+   - SettlementTransaction (거래 추적)
+   - SettlementRule (정산 규칙)
+
+4. 비즈니스 로직 (Python)
+   📄 app/services/settlement_engine.py (480+ 줄)
+   - SettlementCalculator (계산 엔진)
+   - SettlementRuleEngine (규칙 판정)
+   - SettlementRepository (저장소 패턴)
+
+5. API 라우터 (FastAPI)
+   📄 app/routers/company_settlement.py (430+ 줄)
+   - 7개 엔드포인트
+   - Pydantic 스키마
+   - 오류 처리
+   - 문서화
+
+================================================================================
+🎯 핵심 규칙 (3가지)
+================================================================================
+
+정산 유형별 처리 방식:
+
+┌─────────────────┬──────────────┬──────────────┬──────────┐
+│ 고객 유형       │ 정산 상태    │ 설명         │ 회수율   │
+├─────────────────┼──────────────┼──────────────┼──────────┤
+│ Guest (비회원)  │ SETTLED      │ 즉시 정산    │ 100%     │
+│ Credit (외상)   │ PENDING      │ 대기 정산    │ 0~100%*  │
+│ Waived (제외)   │ WAIVED       │ 정산 제외    │ 0%       │
+└─────────────────┴──────────────┴──────────────┴──────────┘
+
+* 회수율은 관리자가 월별로 수기 갱신
+
+================================================================================
+📊 계산 공식 (5가지)
+================================================================================
+
+1. 매출 분류
+   total_revenue = guest_revenue + credit_revenue + waived_revenue
+
+2. 외상 회수액
+   recovered_amount = credit_revenue × (recovery_rate / 100)
+   예) 100,000 × 80% = 80,000
+
+3. 플랫폼 수수료
+   base_amount = total_revenue - waived_revenue
+   platform_fee = base_amount × (platform_fee_rate / 100)
+   예) 250,000 × 25% = 62,500
+
+4. 차감액 합계
+   total_deductions = refund + dispute + other
+   예) 5,000 + 2,000 + 1,000 = 8,000
+
+5. 최종 정산액 (핵심)
+   net_settlement = (guest_revenue + recovered_amount)
+                  - platform_fee
+                  - total_deductions
+
+   예) (150,000 + 80,000) - 62,500 - 8,000 = 149,500 PHP
+
+================================================================================
+🔄 정산 워크플로우 (5단계)
+================================================================================
+
+[월초]
+   ↓
+   Step 1: 데이터 수집 (지난달 예약)
+   → booking + customer + transaction 통합
+   → settlement_type별 분류 (guest/credit/waived)
+
+   ↓
+   Step 2: 자동 계산 (상태: DRAFT)
+   → SettlementCalculator 실행
+   → 매출, 회수, 수수료, 차감 계산
+
+   ↓
+   Step 3: 관리자 검증 및 승인 (상태: APPROVED)
+   → 외상 회수율 수기 갱신
+   → 분쟁/환불 항목 확인
+   → 최종 승인
+
+   ↓
+   Step 4: 자동 지급 (상태: SETTLED)
+   → 은행 송금 / GCash 송금
+   → payment_date 기록
+
+   ↓
+[월말]
+   Step 5: 확인 (상태: CONFIRMED)
+   → 은행 거래내역 대조
+   → settlement_date 최종 기록
+
+================================================================================
+🏗️ 데이터 모델 구조
+================================================================================
+
+CompanySettlement
+├─ 기본 정보
+│  ├─ company_id (업체)
+│  ├─ settlement_period_year (연도)
+│  └─ settlement_period_month (월)
+│
+├─ 매출 분류
+│  ├─ total_revenue
+│  ├─ guest_revenue (비회원)
+│  ├─ credit_revenue (외상)
+│  └─ waived_revenue (제외)
+│
+├─ 외상 회수
+│  ├─ recovery_rate (%)
+│  └─ recovered_amount
+│
+├─ 수수료
+│  ├─ platform_fee_rate (기본 25%)
+│  └─ platform_fee
+│
+├─ 차감액
+│  ├─ refund_amount
+│  ├─ dispute_deduction
+│  ├─ other_deduction
+│  └─ total_deductions
+│
+├─ 최종
+│  └─ net_settlement
+│
+├─ 상태 관리
+│  ├─ status (draft/approved/settled/rejected/confirmed)
+│  ├─ payment_method
+│  └─ payment_date
+│
+└─ 감사 정보
+   ├─ created_by
+   ├─ approved_by
+   ├─ paid_by
+   └─ timestamps
+
+SettlementTransaction (1:N)
+├─ company_settlement_id (FK)
+├─ booking_id (FK)
+├─ transaction_type (booking/refund/dispute/adjustment)
+├─ settlement_category (guest/credit/waived)
+└─ amount & recovery_rate
+
+SettlementRule
+├─ rule_name
+├─ customer_type & payment_method (조건)
+├─ settlement_status (결과)
+└─ recovery_rate & platform_fee_rate (설정)
+
+================================================================================
+🔌 API 엔드포인트 (7가지)
+================================================================================
+
+1. POST /api/settlements/company/calculate
+   → 월간 정산 자동 계산 및 생성
+   입력: company_id, year, month
+   출력: CompanySettlement (status: draft)
+
+2. GET /api/settlements/company/{company_id}/{year}/{month}
+   → 특정 월 정산 조회
+   출력: CompanySettlement
+
+3. GET /api/settlements/company/{company_id}
+   → 업체의 모든 정산 목록
+   필터: status, year
+   출력: CompanySettlement[]
+
+4. PATCH /api/settlements/company/{settlement_id}/approve
+   → 정산 승인 (draft → approved)
+   입력: approved_by, notes
+
+5. PATCH /api/settlements/company/{settlement_id}/settle
+   → 정산 지급 (approved → settled)
+   입력: payment_method, payment_date, paid_by
+
+6. PATCH /api/settlements/company/{settlement_id}/recovery-rate
+   → 외상 회수율 수기 갱신
+   입력: recovery_rate (0~100)
+   부작용: recovered_amount, net_settlement 자동 재계산
+
+7. GET /api/settlements/company/{settlement_id}/transactions
+   → 정산의 구성 거래 조회
+   출력: SettlementTransaction[]
+
+================================================================================
+🧮 계산 엔진 클래스
+================================================================================
+
+SettlementCalculator
+├─ _fetch_bookings() - 대상 기간 예약 수집
+├─ _classify_revenue() - 매출 분류 (guest/credit/waived)
+├─ _calculate_recovery() - 외상 회수액 계산
+├─ _calculate_platform_fee() - 플랫폼 수수료 계산
+├─ _fetch_deductions() - 차감액 조회
+├─ _calculate_net_settlement() - 최종 정산액 계산
+└─ _prepare_transactions() - 거래 기록 준비
+
+SettlementRuleEngine
+├─ determine_settlement_type() - settlement_type 자동 판정
+│  (규칙 우선순위: 수기 입력 > 규칙 매칭 > 기본값)
+├─ _match_rule() - 규칙 테이블에서 매칭
+├─ get_default_recovery_rate() - 기본 회수율 (guest:100%, credit:80%, waived:0%)
+└─ get_default_platform_fee_rate() - 기본 수수료율 (25%)
+
+SettlementRepository
+├─ create_settlement() - 정산 및 거래 기록 저장
+├─ get_settlement() - 정산 조회
+├─ update_recovery_rate() - 회수율 수기 갱신
+├─ approve_settlement() - 정산 승인
+├─ settle_payment() - 정산 지급
+└─ _recalculate_net_settlement() - 정산액 재계산
+
+================================================================================
+💾 데이터베이스 마이그레이션
+================================================================================
+
+필수 생성 테이블:
+1. company_settlements (월간 정산)
+   - 1 company × 12 months = 최대 12개/company/year
+   - 인덱스: (company_id, year, month), status, payment_date
+
+2. settlement_transactions (거래 추적)
+   - 1 settlement × N bookings
+   - 인덱스: company_settlement_id, booking_id, transaction_type
+
+3. settlement_rules (정산 규칙)
+   - 규칙 추가/수정으로 유동적 처리
+   - 예: 새로운 결제 수단 추가 시 rule 추가
+
+선택 마이그레이션 (bookings):
+   - settlement_type VARCHAR(50) - 정산 유형
+   - settlement_id INTEGER - 해당 정산 기록 FK
+   - recovery_rate DECIMAL(5,2) - 회수율
+
+================================================================================
+📋 정산 시나리오 (5가지)
+================================================================================
+
+Scenario 1: 비회원 고객 (Guest)
+   입력: 드롭인 고객, 현장 현금 결제 2,000 PHP
+   → settlement_type = 'settled'
+   → recovered_amount = 2,000 (100%)
+   결과: 즉시 정산액에 반영
+
+Scenario 2: 업체 크레딧 (Company Credit)
+   입력: ABC Corp 직원 이용권 5건 × 2,000 = 10,000 PHP
+   → settlement_type = 'pending'
+   → recovery_rate = 80% (수기 입력)
+   → recovered_amount = 8,000
+   결과: 외상액 10,000 중 8,000만 정산액에 반영
+
+Scenario 3: 제외 정산 (Waived)
+   입력: 신규 고객 프로모션 1,500 PHP
+   → settlement_type = 'waived'
+   → recovery_rate = 0%
+   → platform_fee도 부과하지 않음
+   결과: 정산액에 제외, 내부 회계에만 기록
+
+Scenario 4: 분쟁 및 환불
+   입력: 고객 불만 환불 500 + 서비스 분쟁 200
+   → total_deductions = 700
+   결과: net_settlement에서 700 차감
+
+Scenario 5: 월간 종합 정산
+   입력: Makati Spa Center, 5월
+   - 비회원 150,000 (회수 100%)
+   - 외상 100,000 (회수 80%)
+   - 제외 50,000 (회수 0%)
+   계산:
+   - guest_revenue = 150,000
+   - recovered = 80,000
+   - platform_fee = (300,000 - 50,000) × 25% = 62,500
+   - deductions = 8,000
+   결과:
+   - net_settlement = (150,000 + 80,000) - 62,500 - 8,000 = 149,500 PHP
+
+================================================================================
+🚀 구현 로드맵
+================================================================================
+
+Phase 1: 데이터베이스 & 백엔드 (완료)
+   ✅ 데이터 모델 설계
+   ✅ 계산 엔진 구현
+   ✅ API 라우터 개발
+   ⏳ 테스트 작성
+
+Phase 2: 프론트엔드 (예정)
+   □ 관리자 정산 대시보드
+   □ 정산 상세 조회 페이지
+   □ 승인/지급 UI
+   □ 분쟁/환불 관리
+
+Phase 3: 자동화 (예정)
+   □ 월초 정산 계산 Cron Job
+   □ 월말 승인 알림
+   □ 은행 API 연동
+   □ 메시지 발송 (WhatsApp, Kakao)
+
+Phase 4: 분석 & 보고 (예정)
+   □ 정산 현황 대시보드
+   □ 월별 비교 분석
+   □ 업체별 성과 분석
+   □ 회수율 추이
+
+================================================================================
+✅ 검증 체크리스트
+================================================================================
+
+데이터베이스
+  [ ] company_settlements 테이블 생성
+  [ ] settlement_transactions 테이블 생성
+  [ ] settlement_rules 테이블 생성
+  [ ] 외래키 & 인덱스 검증
+  [ ] CHECK 제약 조건 검증
+
+백엔드 코드
+  [ ] models/company_settlement.py 임포트
+  [ ] services/settlement_engine.py 임포트
+  [ ] routers/company_settlement.py FastAPI 등록
+  [ ] 초기 규칙 데이터 설정
+
+API 테스트
+  [ ] POST /calculate 테스트
+  [ ] GET /{company_id}/{year}/{month} 테스트
+  [ ] GET /{company_id} 테스트
+  [ ] PATCH /{id}/approve 테스트
+  [ ] PATCH /{id}/settle 테스트
+  [ ] PATCH /{id}/recovery-rate 테스트
+  [ ] GET /{id}/transactions 테스트
+
+비즈니스 로직
+  [ ] 계산 공식 정확성 검증
+  [ ] 규칙 엔진 테스트
+  [ ] 금액 정밀도 검증 (Decimal)
+  [ ] 상태 전이 검증
+
+================================================================================
+📚 문서 파일
+================================================================================
+
+1. CompanySettlement_Design.md (5,800+ 줄)
+   - 완전한 설계 문서
+   - ER 다이어그램
+   - SQL 예시
+   - 시나리오 분석
+
+2. CompanySettlement_Implementation_Guide.md (800+ 줄)
+   - 구현 가이드
+   - API 사용법
+   - 마이그레이션 절차
+   - 테스트 계획
+
+3. app/models/company_settlement.py (380+ 줄)
+   - SQLAlchemy 모델
+   - 제약 조건 & 인덱스
+   - 상세 주석
+
+4. app/services/settlement_engine.py (480+ 줄)
+   - 계산 엔진
+   - 규칙 엔진
+   - 저장소 패턴
+
+5. app/routers/company_settlement.py (430+ 줄)
+   - FastAPI 엔드포인트
+   - Pydantic 스키마
+   - 문서화
+
+================================================================================
+🔑 주요 특징
+================================================================================
+
+✨ 자동 계산
+   - settlement_type 자동 판정
+   - 매출 분류 자동화
+   - 정산액 자동 계산
+   - 거래 기록 자동 추적
+
+🔒 정확성
+   - Numeric(12, 2) 금융 정밀도
+   - CHECK 제약 조건으로 데이터 무결성
+   - 감사 추적 (created_by, approved_by, paid_by)
+
+📊 유연성
+   - settlement_rules로 규칙 관리
+   - recovery_rate 수기 갱신 가능
+   - 차감액 항목별 추적
+   - platform_fee_rate 동적 조정
+
+🔄 워크플로우
+   - 5단계 정산 프로세스
+   - 상태 전이 제어 (draft → approved → settled)
+   - 승인 및 지급 추적
+
+📈 확장성
+   - settlement_type 확장 가능
+   - payment_method 추가 용이
+   - 새로운 규칙 추가 간단
+
+================================================================================
+📞 담당자 정보
+================================================================================
+
+이름: kang jichul (jitnet-gif)
+이메일: kangjichul@hanmail.net
+작성일: 2026-06-02
+프로젝트: ElSpa (플랫폼 운영비 정산 시스템)
+
+================================================================================
+🎉 완료!
+================================================================================
+
+CompanySettlement 설계 및 초기 구현이 완료되었습니다.
+
+생성된 파일:
+  ✅ CompanySettlement_Design.md
+  ✅ CompanySettlement_Implementation_Guide.md
+  ✅ app/models/company_settlement.py
+  ✅ app/services/settlement_engine.py
+  ✅ app/routers/company_settlement.py
+
+다음 단계:
+  1. 데이터베이스 마이그레이션 실행
+  2. FastAPI 라우터 등록
+  3. 초기 규칙 데이터 설정
+  4. API 엔드포인트 테스트
+  5. 프론트엔드 구현 시작
+
+================================================================================

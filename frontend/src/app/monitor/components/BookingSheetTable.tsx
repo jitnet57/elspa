@@ -8,6 +8,9 @@ import { getCompanies, getGuides } from '@/lib/api/companies-client';
 import { useT } from '@/lib/i18n';
 import GoogleConnect from '@/components/GoogleConnect';
 import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
+import { PaymentMethodInput, type PaymentMethodData } from '@/components/PaymentMethodInput';
+import { SSSOptionSelect, type PayrollImpact } from '@/components/SSSOptionSelect';
+import { PaymentFromSelect, type SettlementImpact } from '@/components/PaymentFromSelect';
 
 // ============================================================
 // 📌 상수: API_BASE
@@ -39,13 +42,17 @@ interface Row {
   note: string;         // 업체명(노트)
   pay: number;          // 지불
   tip: number;          // 팁
+  paymentMethods?: PaymentMethodData[];  // 결제 수단 분배 (PaymentMethodInput)
+  sssOption?: 'prepaid' | 'hold';        // SSS 정산 방식 (SSSOptionSelect)
+  paymentFrom?: 'guest' | 'credit' | 'waived';  // 결제 출처 분류 (PaymentFromSelect)
   saved: boolean;
   saving: boolean;
 }
 
 const emptyRow = (): Row => ({
   therapistName: '', service: '', startTime: '', guestName: '', roomNumber: '',
-  note: '', pay: 0, tip: 0, saved: false, saving: false,
+  note: '', pay: 0, tip: 0, paymentMethods: [], sssOption: 'prepaid', paymentFrom: 'guest',
+  saved: false, saving: false,
 });
 
 const padTo30 = (rows: Row[]): Row[] => {
@@ -99,6 +106,9 @@ export default function BookingSheetTable() {
         note: b.note ?? '',
         pay: Number(b.pay) || 0,
         tip: Number(b.tip) || 0,
+        paymentMethods: (b as any).payment_methods || [],
+        sssOption: ((b as any).sss_option as 'prepaid' | 'hold') || 'prepaid',
+        paymentFrom: ((b as any).payment_from as 'guest' | 'credit' | 'waived') || 'guest',
         saved: true,
         saving: false,
       }));
@@ -137,7 +147,10 @@ export default function BookingSheetTable() {
       pay: r.pay,
       tip: r.tip,
       status: 'normal',
-    };
+      ...(r.paymentMethods && { payment_methods: r.paymentMethods }),
+      ...(r.sssOption && { sss_option: r.sssOption }),
+      ...(r.paymentFrom && { payment_from: r.paymentFrom }),
+    } as any;
 
     // 1) DB 저장 (신규=create / 기존=update)
     let dbOk = false;
@@ -316,6 +329,9 @@ export default function BookingSheetTable() {
               <th className="px-2 py-2 w-24">{tr('Room', '방번호')}</th>
               <th className="px-2 py-2">{tr('Guest', '고객이름')}</th>
               <th className="px-2 py-2">{tr('Company (Note)', '업체명(노트)')}</th>
+              <th className="px-2 py-2 w-32">{tr('Payment Method', '결제 수단')}</th>
+              <th className="px-2 py-2 w-24">{tr('SSS Option', 'SSS 방식')}</th>
+              <th className="px-2 py-2 w-24">{tr('Payment From', '결제 출처')}</th>
               <th className="px-2 py-2 w-24">{tr('Pay', '지불')}</th>
               <th className="px-2 py-2 w-20">{tr('Tip', '팁')}</th>
               <th className="px-2 py-2 w-16">{tr('Save', '저장')}</th>
@@ -323,7 +339,20 @@ export default function BookingSheetTable() {
           </thead>
           <tbody>
             {rows.map((r, i) => {
-              const inp = 'w-full bg-slate-800 border border-white/10 rounded px-2 py-1.5 text-white placeholder-slate-500';
+              const inp = 'w-full bg-slate-800 border border-white/10 rounded px-2 py-1.5 text-white placeholder-slate-500 text-xs';
+              // ============================================================
+              // 📌 Mock SSS Payroll Impact (실제로는 백엔드에서 조회)
+              // 📋 목적: SSSOptionSelect 컴포넌트 데모용
+              // ============================================================
+              const mockPayrollImpact: PayrollImpact = {
+                grossSalary: 25000,
+                sssContribution: 1125,
+                prepaidAmount: 1125,
+                holdAmount: r.pay || 0,
+                taxImplications: tr('Tax implications calculated based on SSS option', 'SSS 옵션에 따른 세금 영향도 계산됨'),
+                settlementDate: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0],
+              };
+
               return (
               <tr key={i} className={`border-b border-white/5 ${r.saved ? 'bg-emerald-900/30' : ''}`}>
                 <td className="px-2 py-1 text-slate-400">{i + 1}</td>
@@ -348,6 +377,37 @@ export default function BookingSheetTable() {
                 </td>
                 <td className="px-2 py-1">
                   <input list="bk-referral-options" value={r.note} onChange={(e) => update(i, { note: e.target.value })} placeholder={tr('company/guide or note','업체·가이드 검색 / 노트')} className={inp} />
+                </td>
+                {/* ===== New Payment Method Column ===== */}
+                <td className="px-2 py-1 min-w-max">
+                  <div className="text-xs text-slate-300 bg-slate-700 px-2 py-1 rounded">
+                    {r.paymentMethods && r.paymentMethods.length > 0
+                      ? `${r.paymentMethods.length} ${tr('method(s)', '개')}`
+                      : tr('—', '—')}
+                  </div>
+                </td>
+                {/* ===== New SSS Option Column ===== */}
+                <td className="px-2 py-1">
+                  <select
+                    value={r.sssOption || 'prepaid'}
+                    onChange={(e) => update(i, { sssOption: e.target.value as 'prepaid' | 'hold' })}
+                    className={inp}
+                  >
+                    <option value="prepaid">{tr('Prepaid', '선지급')}</option>
+                    <option value="hold">{tr('Hold', '보류')}</option>
+                  </select>
+                </td>
+                {/* ===== New Payment From Column ===== */}
+                <td className="px-2 py-1">
+                  <select
+                    value={r.paymentFrom || 'guest'}
+                    onChange={(e) => update(i, { paymentFrom: e.target.value as 'guest' | 'credit' | 'waived' })}
+                    className={inp}
+                  >
+                    <option value="guest">{tr('Guest (Paid)', '비회원(즉시)')}</option>
+                    <option value="credit">{tr('Credit (Hold)', '외상(유보)')}</option>
+                    <option value="waived">{tr('Waived', '제외')}</option>
+                  </select>
                 </td>
                 <td className="px-2 py-1">
                   <input type="number" value={r.pay || ''} onChange={(e) => update(i, { pay: Number(e.target.value) || 0 })} placeholder="0" className={inp + ' text-right'} />

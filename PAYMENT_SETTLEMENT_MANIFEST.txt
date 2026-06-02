@@ -1,0 +1,373 @@
+================================================================================
+결제/정산 API 엔드포인트 — 완료 항목 목록
+================================================================================
+
+작성일: 2026-06-02
+담당자: jitnet-gif (kangjichul@hanmail.net)
+상태: ✅ 완료
+
+================================================================================
+📦 생성된 파일
+================================================================================
+
+[1] 백엔드 구현 (2개)
+────────────────────────────────────────────────────────────────────────────
+
+  ✅ app/schemas/payment_settlement.py (14 KB)
+     - 8개 Pydantic 스키마
+     - 4개 열거형 (Enum)
+     - 모든 요청/응답 타입 정의
+     - 입력 검증 규칙 포함
+
+  ✅ app/routers/payment_settlement.py (24 KB)
+     - 7개 API 엔드포인트
+     - 2개 라우터 (payment_router, settlement_router)
+     - FastAPI 구현 완료
+     - 에러 처리 & 검증 로직 포함
+
+
+[2] 문서 (5개)
+────────────────────────────────────────────────────────────────────────────
+
+  ✅ API_PAYMENT_SETTLEMENT_SPEC.md (15 KB)
+     - 전체 API 명세서
+     - 각 엔드포인트 상세 설명
+     - 요청/응답 예제
+     - 정산 금액 계산식
+     - 정산 프로세스 흐름도
+
+  ✅ INTEGRATION_GUIDE.md (13 KB)
+     - 백엔드 개발자용 통합 가이드
+     - 단계별 구현 방법
+     - 데이터베이스 마이그레이션
+     - 테스트 코드 예제
+     - 일반적인 오류 해결
+
+  ✅ FRONTEND_API_CLIENT.md (22 KB)
+     - 프론트엔드 개발자용 가이드
+     - Zod 타입 정의 (TypeScript)
+     - Axios API 클라이언트
+     - Zustand 상태 관리 스토어
+     - React 컴포넌트 예제
+     - 테스트 코드 예제
+
+  ✅ PAYMENT_SETTLEMENT_SUMMARY.md (12 KB)
+     - 종합 요약 문서
+     - 핵심 개요
+     - 엔드포인트 매핑
+     - 정산 흐름도
+     - 빠른 통합 가이드
+
+  ✅ QUICK_REFERENCE.md (6 KB)
+     - 빠른 참고 카드
+     - curl 예제
+     - Python/TypeScript 코드 스니펫
+     - 에러 코드 설명
+     - 문제 해결 팁
+
+
+================================================================================
+🔌 API 엔드포인트 (7개)
+================================================================================
+
+그룹 1: 결제 방법 관리 (4개)
+────────────────────────────────────────────────────────────────────────────
+  1. POST   /api/bookings/{id}/payment-methods
+     - 예약에 결제 방법 추가
+     - 지원: 은행송금, GCash, 현금, 수표, 카드, 수기 기록
+
+  2. PATCH  /api/bookings/{id}/sss-option
+     - SSS (Social Security System) 정산 옵션 업데이트
+     - 필리핀 사회보장시스템 지원
+
+  3. PATCH  /api/bookings/{id}/payment-from
+     - 결제 출처 업데이트
+     - 고객 직접, 기업 외상, 바우처, 멤버십, 프로모션
+
+  4. GET    /api/bookings/{id}/payment-info
+     - 예약의 모든 결제 정보 조회
+     - 통합 응답
+
+그룹 2: 정산 관리 (3개)
+────────────────────────────────────────────────────────────────────────────
+  5. GET    /api/settlements/pending
+     - 정산 대기 목록 조회
+     - 페이지네이션 지원
+     - 필터링 지원 (company_id, status)
+
+  6. GET    /api/settlements/{id}
+     - 정산 상세 조회
+     - 거래 내역 포함
+
+  7. PATCH  /api/settlements/{id}/mark-settled
+     - 정산 완료 처리
+     - 관리자 전용
+     - 지급 정보 기록
+
+
+================================================================================
+📊 데이터 구조
+================================================================================
+
+결제 방법 종류 (6가지)
+  - bank_transfer: 은행 송금
+  - gcash: GCash (필리핀 전자지갑)
+  - cash: 현금
+  - check: 수표
+  - card: 카드
+  - manual: 수기 기록
+
+SSS 상태 (4가지)
+  - not_applicable: 해당 없음
+  - prepaid: 선지급 (회사 사전 지급)
+  - gov_invoice: 정부 인보이스 기반
+  - full_recovery: 전액 회수
+
+결제 출처 (5가지)
+  - customer: 고객 직접 (회수율 100%)
+  - company_credit: 기업 외상 (회수율 변동)
+  - voucher: 바우처 (회수율 0%)
+  - membership: 멤버십 (회수율 100%)
+  - promo: 프로모션 (회수율 0%)
+
+정산 상태 (6가지)
+  - draft: 초안
+  - pending: 대기 중
+  - approved: 승인됨
+  - settled: 정산 완료
+  - confirmed: 확정됨
+  - rejected: 거부됨
+
+
+================================================================================
+🎯 사용 예시
+================================================================================
+
+시나리오 1: 고객 직접 결제
+─────────────────────────────────────────────────────────────────────────────
+  1. POST /api/bookings/12345/payment-methods
+     → 은행송금 정보 추가
+  
+  2. PATCH /api/bookings/12345/payment-from
+     → payment_from: "customer" 설정
+  
+  3. GET /api/settlements/pending
+     → 정산 대기 목록 조회
+  
+  4. PATCH /api/settlements/1/mark-settled
+     → 정산 완료 처리
+
+시나리오 2: 기업 외상
+─────────────────────────────────────────────────────────────────────────────
+  1. PATCH /api/bookings/12345/payment-from
+     → payment_from: "company_credit"
+     → company_credit_id: 567
+  
+  2. PATCH /api/bookings/12345/sss-option
+     → sss_status: "prepaid"
+     → sss_contribution_percent: 12.5
+
+
+================================================================================
+🔧 기술 사양
+================================================================================
+
+백엔드
+  - Framework: FastAPI (Python)
+  - ORM: SQLAlchemy
+  - 검증: Pydantic
+  - 데이터베이스: PostgreSQL
+  - 모델: CompanySettlement, SettlementTransaction
+
+프론트엔드
+  - Framework: Next.js 16.2.4
+  - HTTP: Axios
+  - 검증: Zod
+  - 상태 관리: Zustand
+  - 스타일: Tailwind CSS
+
+
+================================================================================
+📋 구현 체크리스트
+================================================================================
+
+필수 작업
+  □ 1. 파일 복사
+       - app/schemas/payment_settlement.py
+       - app/routers/payment_settlement.py
+
+  □ 2. main.py 업데이트
+       - 라우터 등록
+
+  □ 3. Booking 모델 확장
+       - payment_method, payment_from, sss_status, sss_contribution_percent 필드
+
+  □ 4. 마이그레이션
+       - alembic revision --autogenerate
+       - alembic upgrade head
+
+  □ 5. 테스트
+       - Swagger 확인 (/docs)
+       - API 엔드포인트 테스트
+
+선택 작업
+  □ 6. PaymentMethod 모델 생성
+  □ 7. 서비스 레이어 구현
+  □ 8. 프론트엔드 클라이언트
+  □ 9. UI 컴포넌트
+
+
+================================================================================
+📚 문서 구조
+================================================================================
+
+대상별 문서 사용 가이드:
+
+  모든 개발자
+  └─ API_PAYMENT_SETTLEMENT_SPEC.md (전체 명세)
+  └─ QUICK_REFERENCE.md (빠른 참고)
+
+  백엔드 개발자
+  └─ INTEGRATION_GUIDE.md (통합 가이드)
+  └─ payment_settlement.py (주석 포함)
+
+  프론트엔드 개발자
+  └─ FRONTEND_API_CLIENT.md (클라이언트 구현)
+  └─ TypeScript 예제
+
+  팀 리더/매니저
+  └─ PAYMENT_SETTLEMENT_SUMMARY.md (개요)
+
+
+================================================================================
+🚀 빠른 시작 (5분)
+================================================================================
+
+1. 파일 확인
+   $ ls -la app/schemas/payment_settlement.py
+   $ ls -la app/routers/payment_settlement.py
+
+2. 라우터 등록 (main.py)
+   from app.routers.payment_settlement import payment_router, settlement_router
+   app.include_router(payment_router)
+   app.include_router(settlement_router)
+
+3. 스키마 테스트
+   $ python -c "from app.schemas.payment_settlement import *; print('OK')"
+
+4. Swagger 확인
+   $ python main.py
+   → http://localhost:8000/docs
+
+5. API 테스트
+   $ curl http://localhost:8000/api/settlements/pending
+
+
+================================================================================
+💡 주요 특징
+================================================================================
+
+✅ 완전한 타입 검증
+   - 모든 입출력 Pydantic/Zod 검증
+   - IDE 자동완성
+
+✅ 명확한 에러 처리
+   - HTTP 상태 코드 (201, 200, 404, 400)
+   - 구조화된 에러 응답
+
+✅ 확장성
+   - 새 결제 방법 추가 용이
+   - 정산 규칙 커스터마이징 가능
+
+✅ 충분한 문서화
+   - OpenAPI/Swagger 호환
+   - 스키마별 예제
+   - 사용 시나리오
+
+✅ 프로덕션 준비
+   - 감시 로그 지원
+   - 페이지네이션
+   - 성능 최적화 고려
+
+
+================================================================================
+📞 지원
+================================================================================
+
+담당자: jitnet-gif
+이메일: kangjichul@hanmail.net
+
+문제 발생 시:
+  1. QUICK_REFERENCE.md → 문제 해결 섹션 확인
+  2. INTEGRATION_GUIDE.md → 일반적인 오류 확인
+  3. API_PAYMENT_SETTLEMENT_SPEC.md → 전체 명세 확인
+  4. 담당자에게 문의
+
+
+================================================================================
+📅 일정
+================================================================================
+
+Phase 1: 구현 (완료)
+  ✅ 스키마 정의
+  ✅ 라우터 구현
+  ✅ 문서 작성
+
+Phase 2: 통합 (예정)
+  □ 모델 확장
+  □ 마이그레이션
+  □ 테스트
+
+Phase 3: 배포 (예정)
+  □ 프로덕션 마이그레이션
+  □ 모니터링
+  □ 배포
+
+
+================================================================================
+✅ 완료 사항
+================================================================================
+
+생성된 파일:
+  ✅ app/schemas/payment_settlement.py (14 KB)
+  ✅ app/routers/payment_settlement.py (24 KB)
+  ✅ API_PAYMENT_SETTLEMENT_SPEC.md (15 KB)
+  ✅ INTEGRATION_GUIDE.md (13 KB)
+  ✅ FRONTEND_API_CLIENT.md (22 KB)
+  ✅ PAYMENT_SETTLEMENT_SUMMARY.md (12 KB)
+  ✅ QUICK_REFERENCE.md (6 KB)
+
+총 크기: ~106 KB
+총 라인: ~2,500+ 라인
+
+
+================================================================================
+다음 단계
+================================================================================
+
+1. 이 매니페스트 검토
+2. 백엔드 개발자에게 INTEGRATION_GUIDE.md 전달
+3. 프론트엔드 개발자에게 FRONTEND_API_CLIENT.md 전달
+4. 팀 회의에서 API_PAYMENT_SETTLEMENT_SPEC.md 검토
+5. 통합 시작 (Phase 2)
+
+
+================================================================================
+최종 확인
+================================================================================
+
+파일 존재 확인:
+  $ ls app/schemas/payment_settlement.py
+  $ ls app/routers/payment_settlement.py
+
+스키마 임포트 테스트:
+  $ python -c "from app.schemas.payment_settlement import *; print('✅ OK')"
+
+라우터 구조 확인:
+  $ grep -c "def " app/routers/payment_settlement.py
+  (7개 엔드포인트 함수)
+
+
+================================================================================
+마지막 업데이트: 2026-06-02
+상태: 완료 ✅

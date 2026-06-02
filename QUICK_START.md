@@ -1,244 +1,266 @@
-# 🚀 ElSpa Manager - 빠른 시작 가이드
+# 월간 정산 자동화 - 빠른 시작 가이드
 
-## ✅ 현재 상태
-
-| 항목 | 상태 |
-|------|------|
-| Supabase 연결 정보 | ✅ 완료 |
-| FastAPI 프로젝트 | ✅ 초기화됨 |
-| 환경 변수 설정 | ✅ 거의 완료 |
-| Docker 개발환경 | ✅ 준비됨 |
+**5분 안에 시작하기**
 
 ---
 
-## ⚠️ 남은 작업 (필수 1가지)
-
-### 🔐 DATABASE_URL 비밀번호 추가
-
-`.env` 파일의 다음 줄을 수정:
+## 1️⃣ 설정 (1분)
 
 ```bash
-# 현재 상태 (수정 필요):
-DATABASE_URL=postgresql://postgres:password@<YOUR_PROJECT_ID>.supabase.co:5432/postgres
-
-# 수정 후:
-DATABASE_URL=postgresql://postgres:{YOUR_PASSWORD}@<YOUR_PROJECT_ID>.supabase.co:5432/postgres
+cd /path/to/elspa
+bash scripts/setup_settlement_automation.sh
 ```
 
-**비밀번호 찾는 방법:**
-1. https://app.supabase.com/project/<YOUR_PROJECT_ID>/settings/database 접속
-2. **Connection string** 섹션에서 `[YOUR_PASSWORD]` 확인
-3. 위의 `{YOUR_PASSWORD}` 자리에 복사 붙여넣기
+**체크:**
+- ✅ `logs/` 디렉토리 생성됨
+- ✅ `reports/settlements/` 디렉토리 생성됨
+- ✅ Python 패키지 설치됨
+- ✅ 데이터베이스 연결 성공
 
 ---
 
-## 🚀 실행 명령어
-
-### 1️⃣ 패키지 설치
-```bash
-pip install -r requirements.txt
-```
-
-### 2️⃣ Redis 시작 (선택사항)
-```bash
-docker-compose up -d
-```
-
-### 3️⃣ API 서버 시작
-```bash
-# 방법 1: 직접 실행
-python main.py
-
-# 방법 2: Uvicorn (hot reload 포함)
-uvicorn main:app --reload --port 8000
-```
-
-### 4️⃣ 헬스 체크
-```bash
-curl http://localhost:8000/health
-```
-
-응답 예시:
-```json
-{
-  "status": "🟢 Healthy",
-  "api_version": "0.1.0",
-  "database": "✅ Connected",
-  "supabase": "https://<YOUR_PROJECT_ID>.supabase.co"
-}
-```
-
----
-
-## 🧪 연결 테스트
+## 2️⃣ 테스트 실행 (2분)
 
 ```bash
-python test_supabase.py
+python scripts/monthly_settlement_automation.py --test --year 2026 --month 6
 ```
 
-출력 예시:
-```
-============================================================
-🧪 Supabase 연결 통합 테스트
-============================================================
-
-🔍 Supabase 연결 테스트 시작...
-
-📋 환경 변수 상태:
-  DATABASE_URL: ✅ 설정됨
-  SUPABASE_URL: ✅ 설정됨
-  SUPABASE_KEY: ✅ 설정됨
-  SUPABASE_SECRET_KEY: ✅ 설정됨
-
-🎉 모든 테스트 통과!
-```
+**확인 사항:**
+- ✅ 정산 데이터 조회됨
+- ✅ 요약이 생성됨
+- ✅ 에러 없음
 
 ---
 
-## 📚 Supabase 토큰 정보
-
-| 토큰 | 역할 | 사용처 |
-|------|------|--------|
-| **Publishable Key** | 프론트엔드 클라이언트 | React/Next.js 앱 |
-| **Secret Key** | 백엔드 관리 | API 서버 (보안) |
-| **JWT (anon)** | 익명 사용자 | 공개 API 호출 |
-| **JWT (service_role)** | 서버 권한 | 관리 작업 |
-
----
-
-## 📁 프로젝트 구조
-
-```
-elspa/
-├── main.py                    # ⭐ FastAPI 앱 시작점
-├── requirements.txt           # 패키지 의존성
-├── .env                       # 🔐 환경 변수 (비공개)
-├── .env.example               # 📋 템플릿
-├── test_supabase.py          # 🧪 연결 테스트
-├── docker-compose.yml         # 🐳 Redis 개발환경
-│
-├── app/
-│   ├── config.py             # 설정 관리
-│   ├── database.py           # ✅ Supabase 연결
-│   ├── models/               # SQLAlchemy ORM 모델
-│   │   ├── customer.py       # (예정)
-│   │   ├── booking.py        # (예정)
-│   │   └── ...
-│   ├── routers/              # API 엔드포인트
-│   │   ├── chats.py         # (예정)
-│   │   ├── bookings.py      # (예정)
-│   │   └── ...
-│   ├── services/             # 비즈니스 로직
-│   ├── agents/               # LangGraph 에이전트
-│   └── utils/                # 유틸리티 함수
-│
-└── SUPABASE_SETUP.md         # 📖 상세 가이드
-```
-
----
-
-## 🔄 API 엔드포인트 (예정)
+## 3️⃣ 실제 실행 (1분)
 
 ```bash
-# 헬스 체크
-GET /health
+python scripts/monthly_settlement_automation.py --manual --year 2026 --month 6
+```
 
-# 채팅
-POST /api/chats
-GET /api/chats/{id}
+**출력:**
+```
+✓ 정산 완료
+  비회원: 8건 처리
+  외상: 3건 처리
+  Excel: reports/settlements/settlement_202606.xlsx
+  PDF: reports/settlements/settlement_202606.pdf
+```
 
-# 예약
-GET /api/bookings
-POST /api/bookings
-PUT /api/bookings/{id}
-DELETE /api/bookings/{id}
-
-# 스케줄
-GET /api/schedule
-WS /ws/schedule
-
-# 정산
-GET /api/finance
+**파일 확인:**
+```bash
+ls -la reports/settlements/
+ls -la logs/settlement_automation.log
 ```
 
 ---
 
-## 📋 다음 단계 (체크리스트)
+## 4️⃣ 자동화 설정 (선택)
 
-### Week 1: Setup
-- [ ] DATABASE_URL 비밀번호 추가
-- [ ] 연결 테스트 (`python test_supabase.py`)
-- [ ] SQLAlchemy 모델 정의 (Customer, Service, Booking, Staff, Transaction)
-- [ ] Alembic 마이그레이션 스크립트
-
-### Week 2: Core Features
-- [ ] Chat API (메신저/카톡 통합)
-- [ ] LangGraph Consultation Agent
-- [ ] Booking API (CRUD)
-- [ ] Retry + Circuit Breaker 구현
-
-### Week 3: Advanced
-- [ ] WebSocket Schedule API
-- [ ] Finance API (정산 자동화)
-- [ ] Bull 배치 처리
-- [ ] Prompt Caching 최적화
-
-### Week 4: Resilience
-- [ ] 오프라인 모드 (Frontend)
-- [ ] 경량 모델 자동 선택
-- [ ] 모니터링 & 로깅
-- [ ] 성능 테스트
-
----
-
-## 🐛 문제 해결
-
-### "Database connection refused"
-```
-원인: DATABASE_URL의 비밀번호가 틀림
-해결: Supabase 대시보드에서 올바른 비밀번호 확인
-```
-
-### "Module not found: sqlalchemy"
-```
-원인: requirements.txt 설치 안 됨
-해결: pip install -r requirements.txt
-```
-
-### "ANTHROPIC_API_KEY not set"
-```
-원인: Claude API 키 미설정
-해결: .env 파일에 ANTHROPIC_API_KEY 추가
-```
-
----
-
-## 🔗 유용한 링크
-
-- 🔐 Supabase 대시보드: https://app.supabase.com/project/<YOUR_PROJECT_ID>
-- 📖 FastAPI 공식 문서: https://fastapi.tiangolo.com
-- 🔗 LangChain 공식 문서: https://python.langchain.com
-- 📚 Supabase Python 문서: https://supabase.com/docs/reference/python/introduction
-
----
-
-## ✨ 완료!
-
-모든 준비가 완료되었습니다. 이제:
+### 방법 A: APScheduler (권장)
 
 ```bash
-# 1. 비밀번호 추가
-# (.env 파일 수정)
-
-# 2. 테스트 실행
-python test_supabase.py
-
-# 3. API 시작
-python main.py
-
-# 4. 브라우저에서 확인
-# http://localhost:8000/health
+# 백그라운드 실행 (Ctrl+C로 중지)
+python scripts/monthly_settlement_automation.py --schedule
 ```
 
-**날짜**: 2026-05-06  
-**상태**: 🟢 Ready for Development
+### 방법 B: Linux Cron
+
+```bash
+crontab -e
+
+# 다음 추가 (매월 5일 오전 9시)
+0 9 5 * * cd /path/to/elspa && python scripts/monthly_settlement_automation.py --manual >> logs/cron.log 2>&1
+```
+
+### 방법 C: Windows Task Scheduler
+
+1. `taskschd.msc` 열기
+2. "기본 작업 만들기"
+3. 이름: `ElSpa Settlement`
+4. 트리거: 월간, 5일, 09:00
+5. 동작: `python.exe` + `scripts/monthly_settlement_automation.py --manual`
+
+---
+
+## 📋 명령어 치트시트
+
+| 목표 | 명령어 |
+|------|--------|
+| 현재 월 처리 | `python scripts/monthly_settlement_automation.py --manual` |
+| 특정 월 처리 | `python scripts/monthly_settlement_automation.py --manual --year 2026 --month 5` |
+| 테스트만 | `python scripts/monthly_settlement_automation.py --test` |
+| 스케줄러 시작 | `python scripts/monthly_settlement_automation.py --schedule` |
+| 도움말 | `python scripts/monthly_settlement_automation.py --help` |
+| 예제 보기 | `python scripts/settlement_automation_example.py` |
+| 설정 | `bash scripts/setup_settlement_automation.sh` |
+
+---
+
+## 📊 생성되는 파일
+
+### Excel 보고서
+```
+📄 reports/settlements/settlement_202606.xlsx
+   ├─ 요약 정보
+   └─ 업체별 상세 (13개 칼럼)
+```
+
+### PDF 보고서
+```
+📄 reports/settlements/settlement_202606.pdf
+   ├─ 요약 테이블
+   └─ 업체별 상세
+```
+
+### 로그
+```
+📄 logs/settlement_automation.log (상세 로그)
+📄 logs/settlement_automation_results.json (결과)
+```
+
+---
+
+## 🔍 결과 확인
+
+```bash
+# 로그 확인
+tail logs/settlement_automation.log
+
+# 보고서 확인
+ls reports/settlements/
+
+# JSON 결과 확인
+cat logs/settlement_automation_results.json | jq '.'
+```
+
+---
+
+## 📊 정산 금액 계산 공식
+
+```
+순정산액 = (비회원 + 회수액) - 수수료 - 차감액
+
+여기서:
+  회수액 = 외상 × 회수율(%) / 100
+  수수료 = (총매출 - 제외) × 수수료율(%) / 100
+  차감액 = 환불 + 분쟁 + 기타
+```
+
+---
+
+## 🎯 정산 상태 변화
+
+```
+처리 전:
+  status = 'draft' 또는 'pending'
+  payment_date = NULL
+
+처리 후:
+  status = 'settled'
+  payment_date = 오늘
+  payment_method = 'bank_transfer'
+```
+
+---
+
+## 🆘 문제 해결
+
+### Q: "Database connection failed"
+**A:** `.env` 확인
+```bash
+grep DATABASE_URL .env
+```
+
+### Q: "No module named 'openpyxl'"
+**A:** 설치
+```bash
+pip install openpyxl reportlab
+```
+
+### Q: "No settlements found"
+**A:** 데이터 확인
+```sql
+SELECT COUNT(*) FROM company_settlements 
+WHERE status IN ('draft', 'pending');
+```
+
+---
+
+## 📚 자세한 정보
+
+- **상세 가이드:** `scripts/SETTLEMENT_AUTOMATION_GUIDE.md`
+- **전체 요약:** `SETTLEMENT_AUTOMATION_SUMMARY.md`
+- **스크립트 README:** `scripts/README.md`
+- **예제 코드:** `scripts/settlement_automation_example.py`
+
+---
+
+## ✅ 체크리스트
+
+월간 정산 자동화 준비 완료 확인:
+
+- [ ] `setup_settlement_automation.sh` 실행 완료
+- [ ] 데이터베이스 연결 성공
+- [ ] 테스트 실행 완료 (`--test`)
+- [ ] 실제 실행 완료 (`--manual`)
+- [ ] 보고서 파일 확인됨
+- [ ] 로그 파일 확인됨
+- [ ] 자동화 설정 완료 (선택)
+
+---
+
+## 🚀 다음 단계
+
+### 월간 루틴
+
+1. **매월 5일**
+   - 자동으로 정산 처리됨 (스케줄러 설정 시)
+   - 또는 수동 실행: `python scripts/monthly_settlement_automation.py --manual`
+
+2. **보고서 확인**
+   - `reports/settlements/settlement_YYYYMM.xlsx`
+   - `reports/settlements/settlement_YYYYMM.pdf`
+
+3. **결과 검증**
+   - 업체별 정산액 확인
+   - 이상 거래 확인
+
+4. **지급 처리**
+   - 정산액 은행 송금
+   - 결과 아카이빙
+
+### 커스터마이제이션
+
+- **지급 방법 변경:** `payment_method` 수정
+- **스케줄 시간 변경:** Cron 표현식 수정
+- **필터 추가:** 쿼리 커스터마이제이션
+- **보고서 포맷:** Excel/PDF 템플릿 수정
+
+---
+
+## 💡 팁
+
+```bash
+# 최근 로그 실시간 보기
+tail -f logs/settlement_automation.log
+
+# JSON 결과 이쁘게 보기
+cat logs/settlement_automation_results.json | jq '.'
+
+# 특정 월 재실행
+python scripts/monthly_settlement_automation.py --manual --year 2026 --month 3
+
+# 테스트 후 본실행
+python scripts/monthly_settlement_automation.py --test --year 2026 --month 6 && \
+python scripts/monthly_settlement_automation.py --manual --year 2026 --month 6
+```
+
+---
+
+**🎉 완료! 이제 월간 정산이 자동화되었습니다.**
+
+---
+
+**작성일:** 2026-06-02  
+**버전:** 1.0

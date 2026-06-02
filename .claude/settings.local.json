@@ -27,7 +27,23 @@
       "Bash(curl -s https://elspa-api-production.jitnet57.workers.dev/api/bookings)",
       "Bash(python3 -m pip install supabase pandas openpyxl -q)",
       "Bash(chmod +x /Users/kwangseobpark/elspa/sync_to_supabase.py)",
-      "Bash(python3 -m pip install flask openpyxl pandas -q)"
+      "Bash(python3 -m pip install flask openpyxl pandas -q)",
+      "Bash(grep -E \"\\\\.\\(tsx|ts|py\\)$\")",
+      "Bash(npx prettier *)",
+      "Bash(grep -E \"\\\\.\\(py|tsx\\)$\")",
+      "Bash(grep -E \"\\\\.py$\")",
+      "Bash(python -c \"from app.models.booking import Booking; print\\('✓ Booking model loaded successfully'\\)\")",
+      "Bash(python3 -c \"from app.models.booking import Booking; print\\('✓ Booking model loaded successfully'\\)\")",
+      "Bash(python3 -m py_compile app/models/booking.py)",
+      "Bash(python3 -m py_compile app/models/excel_import_models.py)",
+      "Bash(python -m py_compile app/services/excel_import_service.py)",
+      "Bash(python3 -m py_compile app/services/excel_import_service.py)",
+      "Bash(python -m app.config.table_mappings)",
+      "Bash(python3 -m app.config.table_mappings)",
+      "Bash(python3 -m py_compile /Users/kwangseobpark/elspa/app/config/table_mappings.py)",
+      "Bash(awk '{print $9, \"\\(\" $5 \"\\)\"}')",
+      "Bash(python3 -m py_compile /Users/kwangseobpark/elspa/app/config/table_mappings_usage.py)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx|py\\)$\")"
     ],
     "additionalDirectories": [
       "/private/tmp"
