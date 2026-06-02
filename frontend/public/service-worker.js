@@ -2,19 +2,47 @@
 // 오프라인 지원 및 캐싱 전략
 // 배포할 때마다 버전을 올려서 캐시를 무효화합니다
 
-const CACHE_VERSION = '20260602-v31'; // v31: BOOKING 컬럼 재구성(방번호/업체명노트/지불/팁)
+const CACHE_VERSION = '20260602-v38'; // v38: 경영지표·출결·비용·Drive 연동 + 전체 admin 경로 캐시
 const CACHE_NAME = `elspa-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
+  // ── 고객 ───────────────────────────────────────────
   '/customer',
   '/customer/services',
   '/customer/reviews',
   '/customer/mypage',
   '/customer/booking',
   '/customer/about-matching',
+  // ── 관리자 (admin) ──────────────────────────────────
   '/admin',
+  '/admin/management',
+  '/admin/expense',
+  '/admin/payroll',
+  '/admin/payroll/employees',
+  '/admin/payroll/records',
+  '/admin/payroll/attendance',
+  '/admin/deductions',
+  '/admin/monthly-settlement',
+  '/admin/settlement-report',
+  '/admin/guide-referral-fee',
+  '/admin/companies',
+  '/admin/policies',
+  '/admin/sss',
+  '/admin/data-management',
+  '/admin/audit-logs',
+  '/admin/change-logs',
+  '/admin/therapists',
+  '/admin/massage',
+  '/admin/matching',
+  '/admin/fairness-dashboard',
+  '/admin/simulation',
+  // ── 모니터 ─────────────────────────────────────────
+  '/monitor',
+  // ── 드라이버 / 테라피스트 ───────────────────────────
+  '/driver',
+  '/therapist',
 ];
 
 // 설치 이벤트: 정적 자산 캐싱
@@ -119,11 +147,20 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => {
-          // 네트워크 실패 시 오프라인 페이지 제공
-          return caches.match('/') || new Response('오프라인 상태입니다.');
+          // 네트워크 실패 시 캐시된 페이지 또는 루트 반환
+          return caches.match(request)
+            .then(cached => cached || caches.match('/'))
+            .then(page => page || new Response('오프라인 상태입니다. 인터넷 연결 후 새로고침하세요.', { status: 503 }));
         });
     })
   );
+});
+
+// ── SKIP_WAITING 메시지 처리 (즉시 업데이트) ─────────────────────
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // 백그라운드 동기 이벤트 (향후 사용)

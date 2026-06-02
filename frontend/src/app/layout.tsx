@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "../app/providers";
 import { PWAInit } from "./pwa-init";
+import { OfflineBanner } from "@/components/OfflineBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,12 +51,15 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        {/* Material Symbols Icon Font - Preload for faster initial render */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        {/* Material Symbols — crossOrigin preconnect + display=swap (오프라인 시 브라우저 캐시 폴백) */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
           rel="stylesheet"
+          media="print"
+          // @ts-expect-error onLoad hack: 로드되면 media=all 로 전환 (비블로킹)
+          onLoad="this.media='all'"
         />
 
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -69,6 +73,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <PWAInit />
+        <OfflineBanner />
         <Providers>{children}</Providers>
       </body>
     </html>
