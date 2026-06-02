@@ -30,7 +30,13 @@ const API_BASE = 'https://elspa-api-production.jitnet57.workers.dev';
  * ============================================================
  */
 
-const ROW_COUNT = 30;
+// ============================================================
+// 📌 상수: DEFAULT_ROW_COUNT
+// 📋 목적: BOOKING WITH THERAPIST 기본 행 수
+// 🔧 범위: 10~100, LocalStorage에서 덮어쓸 수 있음
+// 📅 작성일: 2026-06-02
+// ============================================================
+const DEFAULT_ROW_COUNT = 60;
 
 interface Row {
   bookingId?: number;   // 있으면 기존 예약(수정), 없으면 신규(등록)
@@ -55,9 +61,16 @@ const emptyRow = (): Row => ({
   saved: false, saving: false,
 });
 
-const padTo30 = (rows: Row[]): Row[] => {
-  const out = rows.slice(0, ROW_COUNT);
-  while (out.length < ROW_COUNT) out.push(emptyRow());
+// ============================================================
+// 📌 함수: padToRowCount
+// 📋 목적: 지정된 행 수만큼 빈 행으로 패딩
+// 🔧 매개변수: rows (Row[]), rowCount (number)
+// 📤 반환값: 패딩된 행 배열
+// 📅 작성일: 2026-06-02
+// ============================================================
+const padToRowCount = (rows: Row[], rowCount: number): Row[] => {
+  const out = rows.slice(0, rowCount);
+  while (out.length < rowCount) out.push(emptyRow());
   return out;
 };
 
@@ -66,7 +79,22 @@ export default function BookingSheetTable() {
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
   const [date, setDate] = useState(today);
   const [therapists, setTherapists] = useState<UiTherapist[]>([]);
-  const [rows, setRows] = useState<Row[]>(() => padTo30([]));
+
+  // ============================================================
+  // 📌 상태: rowCount (LocalStorage 기반, 기본값: 60)
+  // 📋 목적: 사용자 설정에 따라 동적 행 수 조정
+  // 🔧 범위: 10~100
+  // 📅 작성일: 2026-06-02
+  // ============================================================
+  const [rowCount, setRowCount] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('bookingRowCount');
+      return saved ? Math.max(10, Math.min(100, parseInt(saved, 10))) : DEFAULT_ROW_COUNT;
+    }
+    return DEFAULT_ROW_COUNT;
+  });
+
+  const [rows, setRows] = useState<Row[]>(() => padToRowCount([], rowCount));
   const [bulkMsg, setBulkMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -91,7 +119,13 @@ export default function BookingSheetTable() {
     });
   }, []);
 
-  // 날짜의 기존 예약을 행에 프리필 + 30행 패딩
+  // ============================================================
+  // 📌 함수: loadRows
+  // 📋 목적: 날짜의 기존 예약을 행에 프리필 + rowCount만큼 패딩
+  // 🔧 매개변수: date (상태), rowCount (상태)
+  // 📤 반환값: 없음 (rows 상태 업데이트)
+  // 📅 작성일: 2026-06-02
+  // ============================================================
   const loadRows = useCallback(async () => {
     setLoading(true);
     try {
@@ -112,17 +146,31 @@ export default function BookingSheetTable() {
         saved: true,
         saving: false,
       }));
-      setRows(padTo30(filled));
+      setRows(padToRowCount(filled, rowCount));
     } catch {
-      setRows(padTo30([]));
+      setRows(padToRowCount([], rowCount));
     } finally {
       setLoading(false);
     }
-  }, [date]);
+  }, [date, rowCount]);
 
   useEffect(() => {
     loadRows();
   }, [loadRows]);
+
+  // ============================================================
+  // 📌 함수: updateRowCount
+  // 📋 목적: 표시 행 수 변경 + LocalStorage 저장
+  // 🔧 매개변수: newCount (number, 10~100 범위)
+  // 📤 반환값: 없음
+  // 📅 작성일: 2026-06-02
+  // ============================================================
+  const updateRowCount = (newCount: number) => {
+    const clamped = Math.max(10, Math.min(100, newCount));
+    setRowCount(clamped);
+    localStorage.setItem('bookingRowCount', clamped.toString());
+    setRows((prev) => padToRowCount(prev, clamped));
+  };
 
   const update = (i: number, patch: Partial<Row>) =>
     setRows((prev) => prev.map((r, idx) => (idx === i ? { ...r, ...patch, saved: false } : r)));
@@ -275,25 +323,58 @@ export default function BookingSheetTable() {
   return (
     <div className="flex-1 overflow-auto bg-slate-900 text-white">
       {/* 헤더 */}
-      <div className="px-6 py-4 border-b border-white/10 flex flex-wrap items-center gap-3">
-        <h2 className="text-xl font-black">📊 BOOKING WITH THERAPIST</h2>
-        <span className="text-xs text-indigo-300">{tr(`Therapist booking (${ROW_COUNT} rows)`, `테라피스트 예약 (${ROW_COUNT}행)`)}</span>
-        {(() => {
-          const filled = rows.filter(isFilled).length;
-          const sheetNo = Math.floor(filled / ROW_COUNT) + 1;
-          const ord = (n: number) => { const s = ['th','st','nd','rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
-          return <span className="text-xs px-2 py-1 rounded-md bg-pink-600/30 text-pink-200">{tr('Sheet', '시트')}: {ord(sheetNo)}</span>;
-        })()}
-        <div className="ml-2 flex items-center gap-2">
-          📅
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="px-3 py-2 rounded-lg bg-slate-800 border border-indigo-500/40 text-white text-sm" />
-          {loading && <span className="text-xs text-slate-400">{tr('Loading…', '불러오는 중…')}</span>}
+      <div className="px-6 py-4 border-b border-white/10">
+        <div className="flex flex-wrap items-center gap-3 mb-3">
+          <h2 className="text-xl font-black">📊 BOOKING WITH THERAPIST</h2>
+          <span className="text-xs text-indigo-300">{tr(`Therapist booking`, `테라피스트 예약`)}</span>
+          {(() => {
+            const filled = rows.filter(isFilled).length;
+            const sheetNo = Math.floor(filled / rowCount) + 1;
+            const ord = (n: number) => { const s = ['th','st','nd','rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
+            return <span className="text-xs px-2 py-1 rounded-md bg-pink-600/30 text-pink-200">{tr('Sheet', '시트')}: {ord(sheetNo)}</span>;
+          })()}
+          <div className="ml-2 flex items-center gap-2">
+            📅
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="px-3 py-2 rounded-lg bg-slate-800 border border-indigo-500/40 text-white text-sm" />
+            {loading && <span className="text-xs text-slate-400">{tr('Loading…', '불러오는 중…')}</span>}
+          </div>
+          <div className="ml-auto flex items-center gap-3">
+            <span className="text-xs text-slate-300">{tr(`Entered: ${filledCount}`, `입력됨: ${filledCount}건`)}</span>
+            {lastAutoSave && (
+              <span className="text-xs text-emerald-400 font-semibold">✅ 저장됨 {lastAutoSave}</span>
+            )}
+          </div>
         </div>
-        <div className="ml-auto flex items-center gap-3">
-          <span className="text-xs text-slate-300">{tr(`Entered: ${filledCount}`, `입력됨: ${filledCount}건`)}</span>
-          {lastAutoSave && (
-            <span className="text-xs text-emerald-400 font-semibold">✅ 저장됨 {lastAutoSave}</span>
-          )}
+
+        {/* 행 수 조정 UI */}
+        <div className="flex items-center gap-3 text-xs text-slate-300 bg-slate-800/50 p-2 rounded-lg">
+          <label className="text-slate-400 font-medium">
+            {tr('Rows', '행 수')}:
+          </label>
+          <input
+            type="range"
+            min="10"
+            max="100"
+            step="10"
+            value={rowCount}
+            onChange={(e) => updateRowCount(parseInt(e.target.value, 10))}
+            className="w-24 cursor-pointer"
+          />
+          <span className="min-w-[2rem] font-semibold text-indigo-300">{rowCount}</span>
+          <input
+            type="number"
+            min="10"
+            max="100"
+            value={rowCount}
+            onChange={(e) => updateRowCount(parseInt(e.target.value, 10))}
+            className="w-12 px-2 py-1 rounded bg-slate-700 border border-indigo-500/30 text-white text-xs"
+          />
+          <button
+            onClick={() => updateRowCount(DEFAULT_ROW_COUNT)}
+            className="ml-2 px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs transition"
+          >
+            {tr('Reset', '초기화')} (60)
+          </button>
         </div>
       </div>
       {bulkMsg && <p className="px-6 py-2 text-sm text-indigo-200">{bulkMsg}</p>}
