@@ -57,9 +57,6 @@ export default function RootLayout({
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
           rel="stylesheet"
-          media="print"
-          // @ts-expect-error onLoad hack: 로드되면 media=all 로 전환 (비블로킹)
-          onLoad="this.media='all'"
         />
 
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
