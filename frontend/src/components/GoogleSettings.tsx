@@ -13,9 +13,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
-
-// 백엔드 API 기본 URL (환경변수 없으면 빈 문자열 → 상대 경로)
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+import { API_ENDPOINTS } from '@/lib/config/api-config';
 
 // ============================================================
 // 📌 타입: GoogleStatus
@@ -76,7 +74,7 @@ export default function GoogleSettings() {
   // ----------------------------------------------------------
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/booking/status`);
+      const res = await fetch(API_ENDPOINTS.bookingStatus);
       const data = await res.json();
       setStatus({
         connected: !!data.connected,
@@ -105,7 +103,7 @@ export default function GoogleSettings() {
   const handleConnect = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/booking/auth/google`);
+      const res = await fetch(API_ENDPOINTS.bookingAuthGoogle);
       const data = await res.json();
       if (data.authorization_url) {
         // 새 창으로 Google OAuth 열기
@@ -133,7 +131,7 @@ export default function GoogleSettings() {
     if (!ok) return;
     setDisconnecting(true);
     try {
-      await fetch(`${API_BASE}/api/booking/auth/google`, { method: 'DELETE' });
+      await fetch(API_ENDPOINTS.bookingAuthGoogle, { method: 'DELETE' });
       await fetchStatus();
     } catch {
       alert('연결 해제 중 오류가 발생했습니다. 다시 시도해 주세요.');
