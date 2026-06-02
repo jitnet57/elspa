@@ -202,28 +202,51 @@ export default function SettlementReportPage() {
         rows = [header, ...dataRows];
       }
 
-      const res = await fetch(`${API_BASE}/api/booking/drive/export`, {
+      // 📁 로컬 파일 저장으로 변경
+      let data: any = { settlement: [] };
+
+      if (category === '매출') {
+        data.settlement = filteredSettlements.map((s, idx) => ({
+          id: idx + 1,
+          company: getCompanyName(s.company_id),
+          guide: getGuideName(s.guide_id),
+          revenue: s.total_revenue,
+          sessions: s.total_sessions,
+          month: s.settlement_month,
+          status: s.status,
+          created_at: new Date().toISOString(),
+        }));
+      } else {
+        data.commission = filteredSettlements.map((s, idx) => ({
+          id: idx + 1,
+          company: getCompanyName(s.company_id),
+          guide: getGuideName(s.guide_id),
+          revenue: s.total_revenue,
+          commission_rate: s.commission_rate,
+          commission_amount: s.commission_amount,
+          payment_amount: s.payment_amount,
+          month: s.settlement_month,
+          status: s.status,
+          created_at: new Date().toISOString(),
+        }));
+      }
+
+      const res = await fetch('http://localhost:5000/api/save-all', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          category,
-          title_prefix: selectedMonth,
-          rows,
-        }),
+        body: JSON.stringify(data),
       });
 
-      if (res.status === 401) {
-        alert('Google 계정 인증이 필요합니다. 우측 Google 연결 버튼을 통해 인증해 주세요.');
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(`파일 저장 실패: ${err.error || res.statusText}`);
         return;
       }
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || 'Drive 저장 실패');
-      }
-      alert(`✅ ${data.message}`);
+      const filename = category === '매출' ? 'settlement.xlsx' : 'commission.xlsx';
+      alert(`✅ 파일 저장 완료!\n~/elspa/data/${filename}`);
     } catch (e) {
-      alert(`⚠️ Drive 저장 실패: ${e instanceof Error ? e.message : String(e)}`);
+      alert(`⚠️ 파일 저장 실패: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       if (category === '매출') {
         setDriveRevenueLoading(false);

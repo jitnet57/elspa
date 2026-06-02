@@ -197,18 +197,29 @@ export default function AttendanceView() {
     });
 
     try {
-      const res = await fetch(`https://elspa-api-production.jitnet57.workers.dev/api/booking/drive/export`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          category: '출결',
-          title_prefix: workDate,
-          rows: [header, ...dataRows],
-        }),
+      // 📁 로컬 파일 저장으로 변경
+      const attendanceData = employees.map((emp, idx) => {
+        const log = logByEmp.get(emp.id);
+        return {
+          id: idx + 1,
+          employee_name: emp.name,
+          employee_type: emp.employee_type,
+          clock_in: log?.clock_in ?? '',
+          clock_out: log?.clock_out ?? '',
+          is_absent: log?.is_absent ?? false,
+          work_date: workDate,
+          created_at: new Date().toISOString(),
+        };
       });
 
-      // 401 인증 오류는 조용히 무시
-      if (res.status === 401) return;
+      const res = await fetch('http://localhost:5000/api/save-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ attendance: attendanceData }),
+      });
+
+      // 네트워크 오류는 조용히 무시 (자동 저장이므로)
+      if (!res.ok) return;
 
       if (res.ok) {
         // 성공 시 현재 시각 HH:MM 저장

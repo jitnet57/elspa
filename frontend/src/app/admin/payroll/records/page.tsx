@@ -152,28 +152,37 @@ export default function PayrollSettlementPage() {
 
     setDriveLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/booking/drive/export`, {
+      // 📁 로컬 파일 저장으로 변경
+      const payrollData = rows.map((r, idx) => {
+        const c = computeRow(r, settings);
+        return {
+          id: idx + 1,
+          employee_name: r.emp.name,
+          employee_type: typeLabel(t, r.type),
+          gross_pay: c.gross,
+          deductions: c.totalDeductions,
+          net_pay: c.net,
+          period_start: periodStart,
+          period_end: periodEnd,
+          status: r.status,
+          created_at: new Date().toISOString(),
+        };
+      });
+
+      const res = await fetch('http://localhost:5000/api/save-all', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          category: '급여',
-          title_prefix: `${periodStart}_${periodEnd}`,
-          rows: [header, ...dataRows],
-        }),
+        body: JSON.stringify({ payroll: payrollData }),
       });
-      if (res.status === 401) {
-        alert('Google 인증이 필요합니다. 우측의 Google 연결 버튼을 통해 인증해 주세요.');
-        return;
-      }
+
       if (!res.ok) {
         const errBody = await res.json().catch(() => ({}));
-        alert(`Drive 저장 실패: ${errBody?.message || res.statusText}`);
+        alert(`파일 저장 실패: ${errBody?.error || res.statusText}`);
         return;
       }
-      const data = await res.json();
-      alert(data.message || 'Google Drive에 저장되었습니다.');
+      alert('✅ 파일 저장 완료!\n~/elspa/data/payroll.xlsx');
     } catch (e) {
-      alert(`Drive 저장 오류: ${e instanceof Error ? e.message : '알 수 없는 오류'}`);
+      alert(`파일 저장 오류: ${e instanceof Error ? e.message : '알 수 없는 오류'}`);
     } finally {
       setDriveLoading(false);
     }

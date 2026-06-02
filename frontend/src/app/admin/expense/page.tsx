@@ -219,19 +219,24 @@ export default function ExpensePage() {
       r.expense_date || r.report_date || selectedDate,
     ]);
     try {
-      const res = await fetch(`${API_BASE}/api/booking/drive/export`, {
+      // 📁 로컬 파일 저장으로 변경
+      const expenseData = records.map((r, idx) => ({
+        id: idx + 1,
+        category: r.category_name,
+        amount: r.amount,
+        description: r.note || '',
+        date: selectedDate,
+        vendor: r.vendor || '',
+        created_at: new Date().toISOString(),
+      }));
+
+      const res = await fetch('http://localhost:5000/api/save-all', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          category: '비용',
-          title_prefix: selectedDate,
-          rows: [header, ...dataRows],
-        }),
+        body: JSON.stringify({ expenses: expenseData }),
       });
-      // 401 인증 오류는 조용히 무시 (Google 미연결 상태일 수 있음)
-      if (res.status === 401) return;
+
       if (res.ok) {
-        // 현재 시각을 HH:MM 형식으로 저장
         const d = window.Date ? window.Date : Date;
         const timeStr = new d().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
         setLastAutoSave(timeStr);
@@ -248,30 +253,31 @@ export default function ExpensePage() {
     return () => clearInterval(id);
   }, [autoExport, autoSaveEnabled, autoSaveIntervalMs]);
 
-  // ── Google Sheet 내보내기 ───────────────────────────────────
+  // ── 파일 저장 (로컬 XLSX) ───────────────────────────────────
   const handleSheetExport = async () => {
     if (!records.length) return;
     setSheetExporting(true);
     try {
-      const header = ['Vendor', 'Category', 'Amount', 'Description', 'Date'];
-      const rows = records.map(r => [
-        r.vendor || '',
-        CAT[r.category_name as CatValue]?.label ?? r.category_name,
-        r.amount ?? 0,
-        r.description || '',
-        r.expense_date || r.report_date || selectedDate,
-      ]);
-      const res = await fetch(`${API_BASE}/api/booking/drive/export`, {
+      const expenseData = records.map((r, idx) => ({
+        id: idx + 1,
+        vendor: r.vendor || '',
+        category: CAT[r.category_name as CatValue]?.label ?? r.category_name,
+        amount: r.amount ?? 0,
+        description: r.description || r.note || '',
+        date: r.expense_date || r.report_date || selectedDate,
+        created_at: new Date().toISOString(),
+      }));
+
+      const res = await fetch('http://localhost:5000/api/save-all', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category: '비용', title_prefix: selectedDate, rows: [header, ...rows] }),
+        body: JSON.stringify({ expenses: expenseData }),
       });
-      if (res.status === 401) throw new Error(t('Google sign-in required. Connect your Google account first.', '구글 인증이 필요합니다. 먼저 Google 계정을 연결하세요.'));
-      if (!res.ok) throw new Error(t('Google Sheet export failed', 'Google Sheet 내보내기 실패'));
+      if (!res.ok) throw new Error(t('File save failed', '파일 저장 실패'));
       const data = await res.json();
-      alert(`✅ ${data.message}`);
+      alert(`✅ 파일 저장 완료!\n~/elspa/data/expenses.xlsx`);
     } catch (e) {
-      alert(e instanceof Error ? e.message : t('Google Sheet export error', 'Google Sheet 내보내기 오류'));
+      alert(e instanceof Error ? e.message : t('File save error', '파일 저장 오류'));
     } finally {
       setSheetExporting(false);
     }
