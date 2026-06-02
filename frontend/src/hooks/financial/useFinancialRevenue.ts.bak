@@ -14,7 +14,7 @@ async function fetchRevenue(year: number, month?: number): Promise<MonthlyRevenu
   const params = new URLSearchParams({ year: year.toString() });
   if (month) params.append('month', month.toString());
 
-  const response = await fetch(`https://elspa-api-production.jitnet57.workers.dev/api/admin/financial/revenue?${params}`);
+  const response = await fetch(`/api/admin/financial/revenue?${params}`);
   if (!response.ok) throw new Error('Failed to fetch revenue');
   return response.json();
 }

@@ -103,11 +103,11 @@ export default function PayrollAnalyticsPage() {
 
       // 병렬로 모든 API 호출
       const [trendRes, distRes, dedRes, summaryRes, detailRes] = await Promise.all([
-        fetch(`https://elspa-api-production.jitnet57.workers.dev/api/payroll/analytics/monthly-trend?year=${selectedYear}`, { headers }),
-        fetch(`https://elspa-api-production.jitnet57.workers.dev/api/payroll/analytics/employee-distribution?period_id=${selectedPeriod}`, { headers }),
-        fetch(`https://elspa-api-production.jitnet57.workers.dev/api/payroll/analytics/deduction-breakdown?period_id=${selectedPeriod}`, { headers }),
-        fetch(`https://elspa-api-production.jitnet57.workers.dev/api/payroll/analytics/summary?period_id=${selectedPeriod}`, { headers }),
-        fetch(`https://elspa-api-production.jitnet57.workers.dev/api/payroll/analytics/employee-details?period_id=${selectedPeriod}&skip=0&limit=50`, { headers })
+        fetch(`/api/payroll/analytics/monthly-trend?year=${selectedYear}`, { headers }),
+        fetch(`/api/payroll/analytics/employee-distribution?period_id=${selectedPeriod}`, { headers }),
+        fetch(`/api/payroll/analytics/deduction-breakdown?period_id=${selectedPeriod}`, { headers }),
+        fetch(`/api/payroll/analytics/summary?period_id=${selectedPeriod}`, { headers }),
+        fetch(`/api/payroll/analytics/employee-details?period_id=${selectedPeriod}&skip=0&limit=50`, { headers })
       ]);
 
       const trend = await trendRes.json();

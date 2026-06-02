@@ -19,7 +19,7 @@ async function fetchExpenses(
   if (month) params.append('month', month.toString());
   if (categoryId) params.append('category_id', categoryId.toString());
 
-  const response = await fetch(`https://elspa-api-production.jitnet57.workers.dev/api/admin/financial/expenses?${params}`);
+  const response = await fetch(`/api/admin/financial/expenses?${params}`);
   if (!response.ok) throw new Error('Failed to fetch expenses');
   return response.json();
 }

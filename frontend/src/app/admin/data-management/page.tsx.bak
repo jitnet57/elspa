@@ -65,17 +65,17 @@ export default function AdminDataManagement() {
     setLoading(true);
     try {
       // 테라피스트 데이터 로드
-      const therapistRes = await fetch('https://elspa-api-production.jitnet57.workers.dev/api/admin/data/therapists');
+      const therapistRes = await fetch('/api/admin/data/therapists');
       const therapistData = await therapistRes.json();
       setTherapists(therapistData.data);
 
       // 예약 데이터 로드
-      const bookingRes = await fetch('https://elspa-api-production.jitnet57.workers.dev/api/admin/data/bookings');
+      const bookingRes = await fetch('/api/admin/data/bookings');
       const bookingData = await bookingRes.json();
       setBookings(bookingData.data);
 
       // 드라이버 데이터 로드
-      const driverRes = await fetch('https://elspa-api-production.jitnet57.workers.dev/api/admin/data/drivers');
+      const driverRes = await fetch('/api/admin/data/drivers');
       const driverData = await driverRes.json();
       setDrivers(driverData.data);
     } catch (error) {

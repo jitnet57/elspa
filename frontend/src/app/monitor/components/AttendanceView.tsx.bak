@@ -197,7 +197,7 @@ export default function AttendanceView() {
     });
 
     try {
-      const res = await fetch(`https://elspa-api-production.jitnet57.workers.dev/api/booking/drive/export`, {
+      const res = await fetch(`/api/booking/drive/export`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
