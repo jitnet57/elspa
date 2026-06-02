@@ -2,7 +2,6 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useT } from '@/lib/i18n';
-import GoogleConnect from '@/components/GoogleConnect';
 import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
 import { isOnline } from '@/lib/db/syncService';
 import { db } from '@/lib/db/localDb';
