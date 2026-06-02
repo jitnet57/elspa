@@ -11,7 +11,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { API_ENDPOINTS } from '@/lib/config/api-config';
+
+const BACKEND_URL = 'https://elspa-api-production.jitnet57.workers.dev'
 
 export default function GoogleConnect() {
   const [connected, setConnected] = useState<boolean | null>(null);
@@ -20,7 +21,7 @@ export default function GoogleConnect() {
   // 연결 상태 확인
   const check = useCallback(async () => {
     try {
-      const r = await fetch(API_ENDPOINTS.bookingStatus);
+      const r = await fetch(`${BACKEND_URL}/api/booking/status`);
       const d = await r.json();
       setConnected(!!d.connected);
     } catch {
@@ -34,7 +35,7 @@ export default function GoogleConnect() {
   const connect = async () => {
     setOpening(true);
     try {
-      const r = await fetch(API_ENDPOINTS.bookingAuthGoogle);
+      const r = await fetch(`${BACKEND_URL}/api/booking/auth/google`);
       const d = await r.json();
       if (d.authorization_url) {
         window.open(d.authorization_url, '_blank', 'noopener,noreferrer');
