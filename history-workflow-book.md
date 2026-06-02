@@ -6488,3 +6488,35 @@ GET /api/network/stats
 ✅ 배포: https://elspa.pages.dev (dccbdbde)
 
 ---
+
+---
+## [2026-06-02] Order: 064 - 세션 진행 로그 (배포·정산·급여·경영지표·i18n) — 학습용 프롬프트 기록
+
+**주제:** 백엔드 없는 Supabase 직결 구조에서 모니터/예약·정산·급여·경영지표를 구축·배포하며 받은 프롬프트와 대응 정리
+
+### 진행 흐름 (프롬프트 → 대응 → 결과)
+
+1. **"build and deploy"** → npm run build(67/67) 후 배포 시도. Cloudflare 배포 실패 추적:
+   - npm ci 락파일 드리프트(@emnapi) → node_modules+lock 재설치 / 워크플로우 `npm ci || npm install`
+   - deploy-cloudflare.yml 프론트 전용 정리(백엔드/Railway 제거), 배포 디렉터리 .next→out
+   - 실제 배포는 **Cloudflare Pages Git 연동(elspa 프로젝트)** 이 담당함을 확인. PAT 토큰 push(workflow scope) 이슈 해결.
+2. **WebSocket 에러 제거** → /ws/monitor 고아 훅(useRealtimeSync) 삭제 + 서비스워커 캐시 v 무효화. 모니터는 폴링/정적.
+3. **"베드별·테라피스트별 예약현황"** → BedLayoutView(베드에 진행/예약 표시), DailyTherapistSchedule(타임라인), BookingSheetTable(30행). "훅 필요없다/단순 표시" 피드백 반영(정적).
+4. **DB 연동(Supabase)** → schema.sql/payroll_companies/deductions/sss_records/management_metrics/app_settings 스키마. companies-client/payroll-client/sss-client/management-client/settlement-client 직결. .env.production(NEXT_PUBLIC anon)로 DB-on.
+5. **정산 목데이터 + 무결성** → companies6/guides12/monthly_settlements18 시드, anon↔service 검증. 계산기준서+예상값 구글시트(TestSheets.gs) + 보고서 reports/*.xlsx (앱=DB=기준 3중 대조 PASS).
+6. **급여 규칙(직군별)** → 테라피스트=세션당 수수료(종류별 정해진 금액), 매니저=13일 만근 전액, 다른직원=개별 일급×출근일, 드라이버=일급+운행수당+식비200/2주, 야근 40분↑ 시급(평일70·공휴일 별도시급), 지각 10분유예 후 분당10, 공휴일 전직원 국가200%/특별130%, SSS=선지급(정부 인보이스·전액회수). 급여 설정(localStorage+Supabase app_settings 공유) + 급여정산 records DB(employees/payroll_records) 연동.
+7. **레퍼럴 → 월정산 파이프라인** → 예약 note의 "(업체)/(가이드)" 파싱→월별 집계→monthly_settlements upsert(가이드는 가이드 수수료율). 업체명(노트) = 업체/가이드 검색(레퍼럴) + 자유 노트 겸용.
+8. **경영지표** → 월 영업이익=총매출−지출(급여/부대/간접(항목추가)/복리/유류/은행이자/수도세), 순이익=−세금, 연누적, 정산매출 자동연동, 추이차트. 일간/주간/월간 탭 + PeriodReport.
+9. **i18n** → 기본 영어 + ko 토글(localStorage). 모니터 탭/BOOKING표/예약창 매핑. 베드 모드 탭 바이올렛 활성색.
+10. **직원 관리** → 6직군(매니저/할리스/네일/메인/드라이버/테라피스트) 탭 + 개별 일급 입력. 커미션율 제거(세션당 금액). 대시보드 급여계산기 제거(급여정산 일원화).
+11. **테라피스트 정렬** → 출근순(checked_in_at), 진행중(in_service) 뒤로.
+
+### Result
+✅ Cloudflare Pages 배포 자동화(SW 캐시 버전 관리), Supabase 전 테이블 연동, 급여·정산 규칙 검증(보고서), 경영지표·레퍼럴 파이프라인, i18n, 직원관리까지 반영. SW v39.
+
+### Next
+- i18n 100% 확대(DailyTherapistSchedule/BedLayoutView 잔여 한글), 레퍼럴→월정산 자동화 UI 정련, 경영지표 daily 비용 등록 CRUD 보강.
+
+### 비고 (학습 포인트)
+- 정적 export + Supabase anon 직결로 백엔드 없이 CRUD. 서비스워커 캐시 버전 올려야 신버전 반영. PAT는 workflow scope 필요. 공개 anon키는 .env.production 커밋 가능(RLS 보호).
+---
