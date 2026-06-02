@@ -95,7 +95,6 @@ export default function BookingSheetTable() {
   });
 
   const [rows, setRows] = useState<Row[]>(() => padToRowCount([], rowCount));
-  const [bulkMsg, setBulkMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
   const [beds, setBeds] = useState<{ bed_number: number; room_zone: string; status: string }[]>([]);
@@ -232,16 +231,6 @@ export default function BookingSheetTable() {
     );
   };
 
-  const saveAll = async () => {
-    const targets = rows.map((r, i) => ({ r, i })).filter(({ r }) => isFilled(r) && !r.saved);
-    if (targets.length === 0) {
-      setBulkMsg(tr('No rows to save. (therapist·treatment·start·guest required)', '저장할 행이 없습니다. (테라피스트·마사지·시작·고객 입력 필요)'));
-      return;
-    }
-    setBulkMsg(tr(`Saving ${targets.length}…`, `${targets.length}건 저장 중…`));
-    for (const { i } of targets) await saveRow(i);
-    setBulkMsg(tr(`✅ ${targets.length} saved (DB + Sheet)`, `✅ ${targets.length}건 저장 완료 (DB + 구글시트)`));
-  };
 
   // ============================================================
   // 📌 함수: handleDriveExport
@@ -377,7 +366,6 @@ export default function BookingSheetTable() {
           </button>
         </div>
       </div>
-      {bulkMsg && <p className="px-6 py-2 text-sm text-indigo-200">{bulkMsg}</p>}
 
       {/* 테라피스트 검색 자동완성 옵션 (공유) */}
       <datalist id="bk-therapist-options">
