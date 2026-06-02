@@ -26,7 +26,8 @@
       "Bash(curl -s https://elspa-api-production.jitnet57.workers.dev/health)",
       "Bash(curl -s https://elspa-api-production.jitnet57.workers.dev/api/bookings)",
       "Bash(python3 -m pip install supabase pandas openpyxl -q)",
-      "Bash(chmod +x /Users/kwangseobpark/elspa/sync_to_supabase.py)"
+      "Bash(chmod +x /Users/kwangseobpark/elspa/sync_to_supabase.py)",
+      "Bash(python3 -m pip install flask openpyxl pandas -q)"
     ],
     "additionalDirectories": [
       "/private/tmp"

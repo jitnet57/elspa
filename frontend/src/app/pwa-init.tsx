@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { startSyncOnReconnect, pullFromSupabase } from '@/lib/db/syncService';
+import { startAutoSave, checkFileServer } from '@/lib/api/file-save-client';
 
 export function PWAInit() {
   useEffect(() => {
@@ -13,6 +14,17 @@ export function PWAInit() {
     if (navigator.onLine) {
       pullFromSupabase(new Date().toISOString().split('T')[0]).catch(() => {});
     }
+
+    // ✨ 파일 자동 저장 시작 (15분마다)
+    checkFileServer().then((isConnected) => {
+      if (isConnected) {
+        console.log('🚀 파일 자동 저장 시작');
+        startAutoSave(15 * 60 * 1000); // 15분마다
+      } else {
+        console.log('⚠️  로컬 파일 서버에 연결할 수 없습니다');
+        console.log('💡 팁: python3 ~/elspa/file_server.py를 실행하세요');
+      }
+    });
 
     // Register Service Worker
     if ('serviceWorker' in navigator) {
