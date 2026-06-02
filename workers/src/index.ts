@@ -14,6 +14,8 @@ interface Env {
   ENVIRONMENT: string
   GOOGLE_CLIENT_ID?: string
   GOOGLE_CLIENT_SECRET?: string
+  GOOGLE_OAUTH_REDIRECT_URI?: string
+  GOOGLE_APPS_SCRIPT_URL?: string
 }
 
 const app = new Hono<{ Bindings: Env }>()
@@ -230,6 +232,38 @@ app.post('/api/booking/auth/google/callback', async (c) => {
       message: '인증 성공',
       token: `temp_token_${Date.now()}`,
       status: 'connected',
+    })
+  } catch (error: any) {
+    return c.json({ error: error.message }, { status: 500 })
+  }
+})
+
+// ============================================================
+// Google Sheets 자동 저장 (Google Apps Script)
+// ============================================================
+app.post('/api/booking/drive/export', async (c) => {
+  try {
+    const body = await c.req.json()
+    const scriptUrl = c.env.GOOGLE_APPS_SCRIPT_URL
+
+    if (!scriptUrl) {
+      return c.json({ error: 'Google Apps Script URL not configured' }, { status: 500 })
+    }
+
+    // Google Apps Script로 데이터 전송
+    const response = await fetch(scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+
+    if (!response.ok) {
+      return c.json({ error: 'Failed to save to Google Sheets' }, { status: 500 })
+    }
+
+    return c.json({
+      message: 'Data saved to Google Sheets',
+      status: 'success',
     })
   } catch (error: any) {
     return c.json({ error: error.message }, { status: 500 })

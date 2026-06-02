@@ -15,3 +15,4 @@ SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 GOOGLE_CLIENT_ID = "104694066545-vtgespl9ho6b4gmcolgdrpuloankttgq.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET = ""
 GOOGLE_OAUTH_REDIRECT_URI = "https://elspa-vercel.app/api/booking/auth/google/callback"
+GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzq5gZi2ADc0ylhmLo_7E4mPmqfqv84836P7Tgj7Qg/usercontent"

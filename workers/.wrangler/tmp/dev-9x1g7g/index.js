@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// .wrangler/tmp/bundle-U9QKfg/strip-cf-connecting-ip-header.js
+// .wrangler/tmp/bundle-wuoiSj/strip-cf-connecting-ip-header.js
 function stripCfConnectingIPHeader(input, init) {
   const request = new Request(input, init);
   request.headers.delete("CF-Connecting-IP");
@@ -23477,6 +23477,29 @@ app.post("/api/booking/auth/google/callback", async (c) => {
     return c.json({ error: error.message }, { status: 500 });
   }
 });
+app.post("/api/booking/drive/export", async (c) => {
+  try {
+    const body = await c.req.json();
+    const scriptUrl = c.env.GOOGLE_APPS_SCRIPT_URL;
+    if (!scriptUrl) {
+      return c.json({ error: "Google Apps Script URL not configured" }, { status: 500 });
+    }
+    const response = await fetch(scriptUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    if (!response.ok) {
+      return c.json({ error: "Failed to save to Google Sheets" }, { status: 500 });
+    }
+    return c.json({
+      message: "Data saved to Google Sheets",
+      status: "success"
+    });
+  } catch (error) {
+    return c.json({ error: error.message }, { status: 500 });
+  }
+});
 var src_default = app;
 
 // node_modules/wrangler/templates/middleware/middleware-ensure-req-body-drained.ts
@@ -23520,7 +23543,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-U9QKfg/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-wuoiSj/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -23552,7 +23575,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-U9QKfg/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-wuoiSj/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
