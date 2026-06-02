@@ -195,7 +195,7 @@ app.get('/api/booking/auth/google', (c) => {
     })
 
     return c.json({
-      authUrl: `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`,
+      authorization_url: `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`,
       status: 'ok',
     })
   } catch (error: any) {

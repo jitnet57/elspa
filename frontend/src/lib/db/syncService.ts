@@ -34,7 +34,7 @@ export async function pullFromSupabase(today: string): Promise<void> {
 
   // 오늘 이후 예약
   try {
-    const { data } = await sb.from('bookings').select('*').gte('date', today).limit(200);
+    const { data } = await sb.from('bookings').select('*').gte('booking_date', today).limit(200);
     if (data?.length) await db.bookings.bulkPut(data as any);
   } catch { /* 오프라인 무시 */ }
 }
