@@ -6,6 +6,15 @@ import { saveBookingToSheet } from '@/lib/services/booking-sheet';
 import { SERVICES, autoEndTime, sortByAttendance, type UiTherapist } from './booking-helpers';
 import { getCompanies, getGuides } from '@/lib/api/companies-client';
 import { useT } from '@/lib/i18n';
+import GoogleConnect from '@/components/GoogleConnect';
+import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
+
+// ============================================================
+// 📌 상수: API_BASE
+// 📋 목적: 백엔드 API 기본 URL (Drive 저장 API 호출에 사용)
+// 📅 작성일: 2026-06-02
+// ============================================================
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 /**
  * ============================================================
@@ -56,6 +65,12 @@ export default function BookingSheetTable() {
 
   const [beds, setBeds] = useState<{ bed_number: number; room_zone: string; status: string }[]>([]);
   const [referrals, setReferrals] = useState<string[]>([]); // "이름 (업체)" / "이름 (가이드)"
+
+  // ============================================================
+  // 📌 상태: driveLoading + 마지막 자동저장 시각
+  const [driveLoading, setDriveLoading] = useState(false);
+  const [lastAutoSave, setLastAutoSave] = useState<string | null>(null);
+  const { enabled: autoSaveEnabled, intervalMs: autoSaveIntervalMs } = useAutoSaveSettings();
 
   useEffect(() => {
     supabaseApiAdapter.getTherapists().then((r) => setTherapists(r as UiTherapist[])).catch(() => setTherapists([]));
@@ -167,6 +182,62 @@ export default function BookingSheetTable() {
     setBulkMsg(tr(`✅ ${targets.length} saved (DB + Sheet)`, `✅ ${targets.length}건 저장 완료 (DB + 구글시트)`));
   };
 
+  // ============================================================
+  // 📌 함수: handleDriveExport
+  // 📋 목적: 현재 예약 데이터를 Google Drive 스프레드시트로 저장
+  //         - 채워진 행만 포함 (빈 행 제외)
+  //         - category = '예약', title_prefix = 선택된 날짜
+  // 🔧 매개변수: 없음 (rows, date 상태 참조)
+  // 📤 반환값: 없음 (성공/실패 alert 표시)
+  // 📅 작성일: 2026-06-02
+  // ============================================================
+  // silent=true 이면 alert 없이 조용히 저장 (자동 저장용)
+  const handleDriveExport = useCallback(async (silent = false) => {
+    const filled = rows.filter((r, i) => isFilled(rows[i]));
+    if (filled.length === 0) return; // 빈 데이터면 저장 안 함
+    if (!silent) setDriveLoading(true);
+    try {
+      const header = [
+        '#', 'Therapist (테라피스트)', 'Treatment (트리트먼트)',
+        'Start (시작)', 'End (종료)', 'Room (방번호)',
+        'Guest (고객이름)', 'Company/Note (업체명/노트)',
+        'Pay (지불)', 'Tip (팁)',
+      ];
+      const dataRows = rows
+        .map((r, i) => [i + 1, r.therapistName, r.service, r.startTime, endTimeOf(r), r.roomNumber, r.guestName, r.note, r.pay, r.tip])
+        .filter((_, i) => isFilled(rows[i]));
+      const res = await fetch(`${API_BASE}/api/booking/drive/export`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: '예약', title_prefix: date, rows: [header, ...dataRows] }),
+      });
+      if (res.status === 401) {
+        if (!silent) alert('Google 계정 인증이 필요합니다.');
+        return;
+      }
+      const json = await res.json();
+      if (res.ok && json.status === 'success') {
+        // 자동 저장 시 마지막 저장 시각만 기록 (alert 없음)
+        const stamp = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+        setLastAutoSave(stamp);
+        if (!silent) alert(`✅ Drive 저장 완료!\n${json.message}\n\n${json.url ?? ''}`);
+      } else {
+        if (!silent) alert(`❌ Drive 저장 실패: ${json.message ?? '알 수 없는 오류'}`);
+      }
+    } catch (err) {
+      if (!silent) alert(`❌ Drive 저장 오류: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      if (!silent) setDriveLoading(false);
+    }
+  }, [rows, date]);
+
+  // ── 1시간마다 자동 Drive 저장 (채워진 행이 있을 때만) ───────────
+  useEffect(() => {
+    if (!autoSaveEnabled) return;
+    const timer = setInterval(() => { handleDriveExport(true); }, autoSaveIntervalMs);
+    return () => clearInterval(timer);
+  }, [handleDriveExport, autoSaveEnabled, autoSaveIntervalMs]);
+
   const filledCount = rows.filter(isFilled).length;
   // 빈 룸 = available 베드 라벨 − 현재 표에서 이미 쓰인 룸
   const usedRooms = new Set(rows.filter(isFilled).map((r) => r.roomNumber).filter(Boolean));
@@ -195,6 +266,18 @@ export default function BookingSheetTable() {
         <div className="ml-auto flex items-center gap-3">
           <span className="text-xs text-slate-300">{tr(`Entered: ${filledCount}`, `입력됨: ${filledCount}건`)}</span>
           <button onClick={saveAll} className="px-4 py-2 rounded-lg bg-pink-600 hover:bg-pink-700 font-bold text-sm">{tr('Save All (DB + Sheet)', '전체 저장 (DB + 구글시트)')}</button>
+          {/* ── Drive 저장 영역 ── */}
+          <GoogleConnect />
+          <button
+            onClick={() => handleDriveExport(false)}
+            disabled={driveLoading || filledCount === 0}
+            className="px-4 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-600 disabled:opacity-40 font-bold text-sm text-white whitespace-nowrap"
+          >
+            {driveLoading ? '💾 저장 중…' : '💾 Drive 저장 (예약)'}
+          </button>
+          {lastAutoSave && (
+            <span className="text-[10px] text-emerald-400 whitespace-nowrap">🕐 자동저장 {lastAutoSave}</span>
+          )}
         </div>
       </div>
       {bulkMsg && <p className="px-6 py-2 text-sm text-indigo-200">{bulkMsg}</p>}

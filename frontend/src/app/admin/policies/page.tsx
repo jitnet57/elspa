@@ -3,11 +3,15 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Edit2, Trash2, ArrowUp, ArrowDown, ArrowLeftRight } from 'lucide-react';
+import { useT } from '@/lib/i18n';
+import GoogleSettings from '@/components/GoogleSettings';
 
 interface SettingsSection {
   id: string;
   name: string;
+  nameEn: string;
   description: string;
+  descriptionEn: string;
   color: string;
 }
 
@@ -15,36 +19,47 @@ const SETTINGS_SECTIONS: SettingsSection[] = [
   {
     id: 'bed-groups',
     name: '🛏️ 베드 그룹 관리',
+    nameEn: '🛏️ Bed Group Management',
     description: '마사지실별 침대 그룹 설정',
+    descriptionEn: 'Configure bed groups per massage room',
     color: 'bg-blue-50 border-blue-200',
   },
   {
     id: 'company',
     name: '🏢 업체 등록',
+    nameEn: '🏢 Company Registration',
     description: '회사/업체 정보 관리',
+    descriptionEn: 'Manage company information',
     color: 'bg-emerald-50 border-emerald-200',
   },
   {
     id: 'guide',
     name: '📖 가이드 등록',
+    nameEn: '📖 Guide Registration',
     description: '운영 규칙 및 정책 설정',
+    descriptionEn: 'Set operation rules and policies',
     color: 'bg-amber-50 border-amber-200',
   },
   {
     id: 'therapist',
     name: '테라피스트 등록',
+    nameEn: 'Therapist Registration',
     description: '테라피스트 정보 관리',
+    descriptionEn: 'Manage therapist information',
     color: 'bg-pink-50 border-pink-200',
   },
   {
     id: 'staff',
     name: '👥 직원 등록',
+    nameEn: '👥 Staff Registration',
     description: '일반 직원 정보 관리',
+    descriptionEn: 'Manage general staff information',
     color: 'bg-purple-50 border-purple-200',
   },
 ];
 
 export default function PoliciesPage() {
+  const t = useT();
   const [selectedSection, setSelectedSection] = useState<string>('bed-groups');
   const selectedData = SETTINGS_SECTIONS.find(s => s.id === selectedSection);
 
@@ -74,7 +89,7 @@ export default function PoliciesPage() {
             ⚙️ Settings
           </h1>
           <p className="text-lg text-gray-600 font-light">
-            관리 설정 및 정책 관리
+            {t('Administration settings and policy management', '관리 설정 및 정책 관리')}
           </p>
         </div>
 
@@ -91,10 +106,10 @@ export default function PoliciesPage() {
               }`}
             >
               <div className="font-bold text-base text-gray-900 mb-2">
-                {section.name}
+                {t(section.nameEn, section.name)}
               </div>
               <div className="text-xs text-gray-600">
-                {section.description}
+                {t(section.descriptionEn, section.description)}
               </div>
             </button>
           ))}
@@ -113,7 +128,7 @@ export default function PoliciesPage() {
         <div className="mt-8 bg-white rounded-xl border-2 border-gray-200 shadow-lg p-8">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-2xl font-bold text-gray-900">Systems Audit</h2>
-            <span className="text-sm text-gray-500 font-light">시스템 감사</span>
+            <span className="text-sm text-gray-500 font-light">{t('Systems Audit', '시스템 감사')}</span>
           </div>
 
           {/* BILLING ACCURACY 진행 바 (얇은 막대, 99.8% 채움) */}
@@ -148,6 +163,14 @@ export default function PoliciesPage() {
             </Link>
           </div>
         </div>
+
+        {/* ============================================================ */}
+        {/* 📌 섹션: Google Drive / Sheets 연결 인증                      */}
+        {/* 📋 GoogleSettings 컴포넌트가 연결 상태·버튼·안내 전체를 담당   */}
+        {/* ============================================================ */}
+        <div className="mt-8">
+          <GoogleSettings />
+        </div>
       </div>
     </div>
   );
@@ -172,6 +195,7 @@ const DEFAULT_BED_GROUPS: BedGroup[] = [
 const BED_GROUPS_KEY = 'elspa.bedGroups';
 
 function BedGroupsContent() {
+  const t = useT();
   const [groups, setGroups] = useState<BedGroup[]>(DEFAULT_BED_GROUPS);
   const [editing, setEditing] = useState<BedGroup | null>(null);
   const [moveOpen, setMoveOpen] = useState(false);
@@ -197,7 +221,7 @@ function BedGroupsContent() {
     setEditing(g);
   };
   const removeGroup = (id: number) => {
-    if (confirm('이 그룹을 삭제할까요?')) persist(groups.filter(g => g.id !== id));
+    if (confirm(t('Delete this group?', '이 그룹을 삭제할까요?'))) persist(groups.filter(g => g.id !== id));
   };
   const moveGroup = (idx: number, dir: -1 | 1) => {
     const j = idx + dir;
@@ -215,15 +239,15 @@ function BedGroupsContent() {
     <div>
       <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">마사지실 침대 구성</h2>
-          <p className="text-sm text-gray-500 mt-1">총 {totalBeds}개 침대 · {groups.length}개 그룹</p>
+          <h2 className="text-2xl font-bold text-gray-900">{t('Massage Room Bed Configuration', '마사지실 침대 구성')}</h2>
+          <p className="text-sm text-gray-500 mt-1">{t(`Total ${totalBeds} beds · ${groups.length} groups`, `총 ${totalBeds}개 침대 · ${groups.length}개 그룹`)}</p>
         </div>
         <div className="flex gap-2">
           <button onClick={() => setMoveOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">
-            <ArrowLeftRight size={18} /> 베드 이동
+            <ArrowLeftRight size={18} /> {t('Move Beds', '베드 이동')}
           </button>
           <button onClick={addGroup} className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-            <Plus size={18} /> 새 그룹 추가
+            <Plus size={18} /> {t('Add New Group', '새 그룹 추가')}
           </button>
         </div>
       </div>
@@ -234,21 +258,21 @@ function BedGroupsContent() {
             <div className="flex justify-between items-start mb-3">
               <div>
                 <div className="font-bold text-lg text-gray-900">{group.name}</div>
-                <div className="text-sm text-gray-500">총 {group.beds}개 침대</div>
+                <div className="text-sm text-gray-500">{t(`Total ${group.beds} beds`, `총 ${group.beds}개 침대`)}</div>
               </div>
               <div className="flex items-center gap-1">
                 {/* 순서 이동 */}
-                <button onClick={() => moveGroup(idx, -1)} disabled={idx === 0} className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30" title="위로"><ArrowUp size={16} /></button>
-                <button onClick={() => moveGroup(idx, 1)} disabled={idx === groups.length - 1} className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30" title="아래로"><ArrowDown size={16} /></button>
-                <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold ml-1">{group.status}</span>
+                <button onClick={() => moveGroup(idx, -1)} disabled={idx === 0} className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30" title={t('Up', '위로')}><ArrowUp size={16} /></button>
+                <button onClick={() => moveGroup(idx, 1)} disabled={idx === groups.length - 1} className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30" title={t('Down', '아래로')}><ArrowDown size={16} /></button>
+                <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold ml-1">{group.status === '정상' ? t('Normal', '정상') : group.status}</span>
               </div>
             </div>
             <div className="flex gap-2">
               <button onClick={() => setEditing(group)} className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50 transition">
-                <Edit2 size={14} /> 편집
+                <Edit2 size={14} /> {t('Edit', '편집')}
               </button>
               <button onClick={() => removeGroup(group.id)} className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm border border-red-300 text-red-600 rounded hover:bg-red-50 transition">
-                <Trash2 size={14} /> 삭제
+                <Trash2 size={14} /> {t('Delete', '삭제')}
               </button>
             </div>
           </div>
@@ -268,19 +292,20 @@ function BedGroupsContent() {
 }
 
 function EditGroupModal({ group, onClose, onSave }: { group: BedGroup; onClose: () => void; onSave: (g: BedGroup) => void }) {
+  const t = useT();
   const [name, setName] = useState(group.name);
   const [beds, setBeds] = useState(group.beds);
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white text-gray-900 rounded-xl shadow-xl w-full max-w-sm p-6">
-        <h3 className="text-lg font-bold mb-4">그룹 편집</h3>
-        <label className="text-sm font-semibold text-gray-700">그룹 이름</label>
+        <h3 className="text-lg font-bold mb-4">{t('Edit Group', '그룹 편집')}</h3>
+        <label className="text-sm font-semibold text-gray-700">{t('Group Name', '그룹 이름')}</label>
         <input value={name} onChange={e => setName(e.target.value)} className="w-full mt-1 mb-3 px-3 py-2 border rounded-lg text-gray-900" />
-        <label className="text-sm font-semibold text-gray-700">침대 수</label>
+        <label className="text-sm font-semibold text-gray-700">{t('Bed Count', '침대 수')}</label>
         <input type="number" value={beds} onChange={e => setBeds(Number(e.target.value) || 0)} className="w-full mt-1 mb-4 px-3 py-2 border rounded-lg text-gray-900" />
         <div className="flex gap-2">
-          <button onClick={onClose} className="flex-1 px-4 py-2 bg-gray-200 rounded-lg font-bold">취소</button>
-          <button onClick={() => onSave({ ...group, name, beds })} className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-bold">저장</button>
+          <button onClick={onClose} className="flex-1 px-4 py-2 bg-gray-200 rounded-lg font-bold">{t('Cancel', '취소')}</button>
+          <button onClick={() => onSave({ ...group, name, beds })} className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-bold">{t('Save', '저장')}</button>
         </div>
       </div>
     </div>
@@ -288,15 +313,16 @@ function EditGroupModal({ group, onClose, onSave }: { group: BedGroup; onClose: 
 }
 
 function MoveBedsModal({ groups, onClose, onMove }: { groups: BedGroup[]; onClose: () => void; onMove: (g: BedGroup[]) => void }) {
+  const t = useT();
   const [from, setFrom] = useState(groups[0]?.id ?? 0);
   const [to, setTo] = useState(groups[1]?.id ?? 0);
   const [count, setCount] = useState(1);
   const [err, setErr] = useState('');
 
   const apply = () => {
-    if (from === to) return setErr('서로 다른 그룹을 선택하세요.');
+    if (from === to) return setErr(t('Please select two different groups.', '서로 다른 그룹을 선택하세요.'));
     const src = groups.find(g => g.id === from)!;
-    if (count <= 0 || count > src.beds) return setErr(`이동 수는 1~${src.beds} 사이여야 합니다.`);
+    if (count <= 0 || count > src.beds) return setErr(t(`Move count must be between 1 and ${src.beds}.`, `이동 수는 1~${src.beds} 사이여야 합니다.`));
     onMove(groups.map(g => g.id === from ? { ...g, beds: g.beds - count } : g.id === to ? { ...g, beds: g.beds + count } : g));
     onClose();
   };
@@ -304,21 +330,21 @@ function MoveBedsModal({ groups, onClose, onMove }: { groups: BedGroup[]; onClos
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white text-gray-900 rounded-xl shadow-xl w-full max-w-sm p-6">
-        <h3 className="text-lg font-bold mb-4">베드 이동</h3>
-        <label className="text-sm font-semibold text-gray-700">출발 그룹</label>
+        <h3 className="text-lg font-bold mb-4">{t('Move Beds', '베드 이동')}</h3>
+        <label className="text-sm font-semibold text-gray-700">{t('Source Group', '출발 그룹')}</label>
         <select value={from} onChange={e => { setFrom(Number(e.target.value)); setErr(''); }} className="w-full mt-1 mb-3 px-3 py-2 border rounded-lg text-gray-900">
           {groups.map(g => <option key={g.id} value={g.id}>{g.name} ({g.beds})</option>)}
         </select>
-        <label className="text-sm font-semibold text-gray-700">도착 그룹</label>
+        <label className="text-sm font-semibold text-gray-700">{t('Destination Group', '도착 그룹')}</label>
         <select value={to} onChange={e => { setTo(Number(e.target.value)); setErr(''); }} className="w-full mt-1 mb-3 px-3 py-2 border rounded-lg text-gray-900">
           {groups.map(g => <option key={g.id} value={g.id}>{g.name} ({g.beds})</option>)}
         </select>
-        <label className="text-sm font-semibold text-gray-700">이동 침대 수</label>
+        <label className="text-sm font-semibold text-gray-700">{t('Beds to Move', '이동 침대 수')}</label>
         <input type="number" value={count} onChange={e => { setCount(Number(e.target.value) || 0); setErr(''); }} className="w-full mt-1 mb-2 px-3 py-2 border rounded-lg text-gray-900" />
         {err && <p className="text-sm text-red-600 mb-2">{err}</p>}
         <div className="flex gap-2 mt-2">
-          <button onClick={onClose} className="flex-1 px-4 py-2 bg-gray-200 rounded-lg font-bold">취소</button>
-          <button onClick={apply} className="flex-1 px-4 py-2 bg-amber-600 text-white rounded-lg font-bold">이동</button>
+          <button onClick={onClose} className="flex-1 px-4 py-2 bg-gray-200 rounded-lg font-bold">{t('Cancel', '취소')}</button>
+          <button onClick={apply} className="flex-1 px-4 py-2 bg-amber-600 text-white rounded-lg font-bold">{t('Move', '이동')}</button>
         </div>
       </div>
     </div>
@@ -329,6 +355,7 @@ function MoveBedsModal({ groups, onClose, onMove }: { groups: BedGroup[]; onClos
 // 업체 등록 컴포넌트
 // ============================================================
 function CompanyContent() {
+  const t = useT();
   const [companies] = useState([
     { id: 1, name: 'ElSpa Plaza', address: 'Seoul, Korea', phone: '02-1234-5678', status: '활성' },
     { id: 2, name: 'Wellness Center', address: 'Busan, Korea', phone: '051-2345-6789', status: '활성' },
@@ -337,10 +364,10 @@ function CompanyContent() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">등록된 업체</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('Registered Companies', '등록된 업체')}</h2>
         <button className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition">
           <Plus size={18} />
-          업체 추가
+          {t('Add Company', '업체 추가')}
         </button>
       </div>
 
@@ -348,11 +375,11 @@ function CompanyContent() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-200">
-              <th className="px-4 py-3 text-left font-semibold text-gray-900">업체명</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-900">주소</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-900">연락처</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-900">상태</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-900">작업</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">{t('Company Name', '업체명')}</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">{t('Address', '주소')}</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">{t('Contact', '연락처')}</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">{t('Status', '상태')}</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">{t('Actions', '작업')}</th>
             </tr>
           </thead>
           <tbody>
@@ -363,7 +390,7 @@ function CompanyContent() {
                 <td className="px-4 py-3 text-gray-600">{company.phone}</td>
                 <td className="px-4 py-3">
                   <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
-                    {company.status}
+                    {company.status === '활성' ? t('Active', '활성') : company.status}
                   </span>
                 </td>
                 <td className="px-4 py-3 flex gap-2">
@@ -387,19 +414,20 @@ function CompanyContent() {
 // 가이드 등록 컴포넌트
 // ============================================================
 function GuideContent() {
+  const t = useT();
   const [guides] = useState([
-    { id: 1, title: '서비스 운영 규칙', category: '운영 정책', status: '활성' },
-    { id: 2, title: '고객 응대 가이드', category: '교육', status: '활성' },
-    { id: 3, title: '안전 수칙', category: '안전', status: '활성' },
+    { id: 1, title: '서비스 운영 규칙', titleEn: 'Service Operation Rules', category: '운영 정책', categoryEn: 'Operation Policy', status: '활성' },
+    { id: 2, title: '고객 응대 가이드', titleEn: 'Customer Service Guide', category: '교육', categoryEn: 'Training', status: '활성' },
+    { id: 3, title: '안전 수칙', titleEn: 'Safety Guidelines', category: '안전', categoryEn: 'Safety', status: '활성' },
   ]);
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">운영 가이드</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('Operation Guides', '운영 가이드')}</h2>
         <button className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">
           <Plus size={18} />
-          가이드 추가
+          {t('Add Guide', '가이드 추가')}
         </button>
       </div>
 
@@ -408,11 +436,11 @@ function GuideContent() {
           <div key={guide.id} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition">
             <div className="flex justify-between items-start mb-2">
               <div>
-                <div className="font-bold text-gray-900">{guide.title}</div>
-                <div className="text-sm text-gray-500">분류: {guide.category}</div>
+                <div className="font-bold text-gray-900">{t(guide.titleEn, guide.title)}</div>
+                <div className="text-sm text-gray-500">{t('Category', '분류')}: {t(guide.categoryEn, guide.category)}</div>
               </div>
               <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
-                {guide.status}
+                {guide.status === '활성' ? t('Active', '활성') : guide.status}
               </span>
             </div>
             <div className="flex gap-2 justify-end">
@@ -434,19 +462,20 @@ function GuideContent() {
 // 테라피스트 등록 컴포넌트
 // ============================================================
 function TherapistContent() {
+  const t = useT();
   const [therapists] = useState([
-    { id: 1, name: 'Maria Santos', specialty: 'Swedish Massage', experience: '5년', status: '활동 중' },
-    { id: 2, name: 'Ana Mercado', specialty: 'Thai Massage', experience: '3년', status: '활동 중' },
-    { id: 3, name: 'Rosa Chavez', specialty: 'Hot Stone', experience: '4년', status: '휴직' },
+    { id: 1, name: 'Maria Santos', specialty: 'Swedish Massage', experience: '5년', experienceEn: '5 years', status: '활동 중' },
+    { id: 2, name: 'Ana Mercado', specialty: 'Thai Massage', experience: '3년', experienceEn: '3 years', status: '활동 중' },
+    { id: 3, name: 'Rosa Chavez', specialty: 'Hot Stone', experience: '4년', experienceEn: '4 years', status: '휴직' },
   ]);
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">테라피스트 관리</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('Therapist Management', '테라피스트 관리')}</h2>
         <button className="flex items-center gap-2 px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition">
           <Plus size={18} />
-          테라피스트 추가
+          {t('Add Therapist', '테라피스트 추가')}
         </button>
       </div>
 
@@ -454,11 +483,11 @@ function TherapistContent() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-200">
-              <th className="px-4 py-3 text-left font-semibold text-gray-900">이름</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-900">전문</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-900">경력</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-900">상태</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-900">작업</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">{t('Name', '이름')}</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">{t('Specialty', '전문')}</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">{t('Experience', '경력')}</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">{t('Status', '상태')}</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">{t('Actions', '작업')}</th>
             </tr>
           </thead>
           <tbody>
@@ -466,14 +495,14 @@ function TherapistContent() {
               <tr key={therapist.id} className="border-b border-gray-100 hover:bg-gray-50">
                 <td className="px-4 py-3 font-medium text-gray-900">{therapist.name}</td>
                 <td className="px-4 py-3 text-gray-600">{therapist.specialty}</td>
-                <td className="px-4 py-3 text-gray-600">{therapist.experience}</td>
+                <td className="px-4 py-3 text-gray-600">{t(therapist.experienceEn, therapist.experience)}</td>
                 <td className="px-4 py-3">
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                     therapist.status === '활동 중'
                       ? 'bg-green-100 text-green-800'
                       : 'bg-gray-100 text-gray-800'
                   }`}>
-                    {therapist.status}
+                    {therapist.status === '활동 중' ? t('Active', '활동 중') : therapist.status === '휴직' ? t('On Leave', '휴직') : therapist.status}
                   </span>
                 </td>
                 <td className="px-4 py-3 flex gap-2">
@@ -497,19 +526,20 @@ function TherapistContent() {
 // 직원 등록 컴포넌트
 // ============================================================
 function StaffContent() {
+  const t = useT();
   const [staff] = useState([
-    { id: 1, name: 'John Doe', position: '매니저', department: '운영', status: '근무 중' },
-    { id: 2, name: 'Jane Smith', position: '어시스턴트', department: '고객서비스', status: '근무 중' },
-    { id: 3, name: 'Mike Johnson', position: '청소원', department: '시설', status: '휴무' },
+    { id: 1, name: 'John Doe', position: '매니저', positionEn: 'Manager', department: '운영', departmentEn: 'Operations', status: '근무 중' },
+    { id: 2, name: 'Jane Smith', position: '어시스턴트', positionEn: 'Assistant', department: '고객서비스', departmentEn: 'Customer Service', status: '근무 중' },
+    { id: 3, name: 'Mike Johnson', position: '청소원', positionEn: 'Cleaner', department: '시설', departmentEn: 'Facilities', status: '휴무' },
   ]);
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">직원 관리</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('Staff Management', '직원 관리')}</h2>
         <button className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition">
           <Plus size={18} />
-          직원 추가
+          {t('Add Staff', '직원 추가')}
         </button>
       </div>
 
@@ -517,26 +547,26 @@ function StaffContent() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-200">
-              <th className="px-4 py-3 text-left font-semibold text-gray-900">이름</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-900">직책</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-900">부서</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-900">상태</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-900">작업</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">{t('Name', '이름')}</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">{t('Position', '직책')}</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">{t('Department', '부서')}</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">{t('Status', '상태')}</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-900">{t('Actions', '작업')}</th>
             </tr>
           </thead>
           <tbody>
             {staff.map(employee => (
               <tr key={employee.id} className="border-b border-gray-100 hover:bg-gray-50">
                 <td className="px-4 py-3 font-medium text-gray-900">{employee.name}</td>
-                <td className="px-4 py-3 text-gray-600">{employee.position}</td>
-                <td className="px-4 py-3 text-gray-600">{employee.department}</td>
+                <td className="px-4 py-3 text-gray-600">{t(employee.positionEn, employee.position)}</td>
+                <td className="px-4 py-3 text-gray-600">{t(employee.departmentEn, employee.department)}</td>
                 <td className="px-4 py-3">
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                     employee.status === '근무 중'
                       ? 'bg-green-100 text-green-800'
                       : 'bg-yellow-100 text-yellow-800'
                   }`}>
-                    {employee.status}
+                    {employee.status === '근무 중' ? t('On Duty', '근무 중') : employee.status === '휴무' ? t('Off Duty', '휴무') : employee.status}
                   </span>
                 </td>
                 <td className="px-4 py-3 flex gap-2">

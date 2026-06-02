@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import React from 'react';
 import { useAdminGate } from '@/lib/store/admin-gate-store';
+import { useT } from '@/lib/i18n';
 
 // ============================================================
 // 📌 컴포넌트명: AdminShell
@@ -17,6 +18,7 @@ interface AdminShellProps {
 
 export default function AdminShell({ children }: AdminShellProps) {
   const { logout } = useAdminGate();
+  const t = useT();
 
   return (
     <div className="min-h-screen bg-[#0c1324] bg-[radial-gradient(circle_at_top_right,_#1e1b4b,_#0c1324_60%)] text-[#dce1fb] font-sans antialiased relative pb-16">
@@ -48,7 +50,13 @@ export default function AdminShell({ children }: AdminShellProps) {
             {/* 경영지표 */}
             <Link className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all" href="/admin/management">
               <span className="text-lg">📈</span>
-              <span className="text-sm">경영지표</span>
+              <span className="text-sm">{t('Business Metrics', '경영지표')}</span>
+            </Link>
+
+            {/* 비용 (Daily Reporting · 지출 원장) */}
+            <Link className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all" href="/admin/expense">
+              <span className="text-lg">💸</span>
+              <span className="text-sm">{t('Expenses', '비용')}</span>
             </Link>
 
             {/* Payroll */}
@@ -60,19 +68,19 @@ export default function AdminShell({ children }: AdminShellProps) {
             {/* 공제/선지급 관리 */}
             <Link className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all" href="/admin/deductions">
               <span className="text-lg">💸</span>
-              <span className="text-sm">공제/선지급 관리</span>
+              <span className="text-sm">{t('Deductions / Advances', '공제/선지급 관리')}</span>
             </Link>
 
             {/* 월정산 */}
             <Link className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all" href="/admin/monthly-settlement">
               <span className="text-lg">📅</span>
-              <span className="text-sm">월정산</span>
+              <span className="text-sm">{t('Monthly Settlement', '월정산')}</span>
             </Link>
 
             {/* 정산 리포트 */}
             <Link className="flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-300/70 hover:text-white hover:bg-white/5 transition-all" href="/admin/settlement-report">
               <span className="text-lg">📊</span>
-              <span className="text-sm">정산 리포트</span>
+              <span className="text-sm">{t('Settlement Report', '정산 리포트')}</span>
             </Link>
 
             {/* Settings */}
@@ -85,7 +93,7 @@ export default function AdminShell({ children }: AdminShellProps) {
 
         <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
           <div className="flex items-center gap-3">
-            <img alt="Admin" className="w-10 h-10 rounded-full border border-cyan-500/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-Zy8obKMQ4KCOYGq9VIYlInzuOjEWliz7MAm1b9M5EEj61q1lo_2sCRiGkqfcKFDnZjkwYMvbTZHOg2smiDIkZDWTwUpaCQk-oX6O0iXV1zHd1WgoZFvVOp48yI6TmwNqLqIIqVWp_S_QBwxAPp62YS_LzVshm44scATwlDBlPFAtUD82Uo44NHlxPnEPZFBXmYfzAZJcRzB7KKQ9mII2ooy_6pSlDZHBruhDIHh_RkDrzvLV2QPWnD4iw7G2YybILo_B44PhxT-d"/>
+            <img alt={t('Admin', '관리자')} className="w-10 h-10 rounded-full border border-cyan-500/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-Zy8obKMQ4KCOYGq9VIYlInzuOjEWliz7MAm1b9M5EEj61q1lo_2sCRiGkqfcKFDnZjkwYMvbTZHOg2smiDIkZDWTwUpaCQk-oX6O0iXV1zHd1WgoZFvVOp48yI6TmwNqLqIIqVWp_S_QBwxAPp62YS_LzVshm44scATwlDBlPFAtUD82Uo44NHlxPnEPZFBXmYfzAZJcRzB7KKQ9mII2ooy_6pSlDZHBruhDIHh_RkDrzvLV2QPWnD4iw7G2YybILo_B44PhxT-d"/>
             <div className="overflow-hidden">
               <p className="font-bold text-sm truncate text-white">Admin User</p>
               <p className="text-[9px] font-mono text-cyan-400">v2.0.5 • 2026-05-28 13:23</p>

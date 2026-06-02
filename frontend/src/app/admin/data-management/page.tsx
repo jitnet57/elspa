@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useT } from '@/lib/i18n';
 
 /**
  * ============================================================
@@ -44,6 +45,7 @@ interface Driver {
 }
 
 export default function AdminDataManagement() {
+  const t = useT();
   const [activeTab, setActiveTab] = useState<TabType>('therapists');
   const [therapists, setTherapists] = useState<Therapist[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -112,7 +114,7 @@ export default function AdminDataManagement() {
   // 삭제
   // ============================================================
   const handleDelete = async (type: TabType, id: number) => {
-    if (!confirm('정말 삭제하시겠습니까?')) return;
+    if (!confirm(t('Are you sure you want to delete this?', '정말 삭제하시겠습니까?'))) return;
     try {
       await fetch(`/api/admin/data/${type}/${id}`, {
         method: 'DELETE',
@@ -147,8 +149,8 @@ export default function AdminDataManagement() {
       <div className="max-w-7xl mx-auto">
         {/* 헤더 */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">📊 데이터 관리 센터</h1>
-          <p className="text-slate-600">테라피스트, 예약, 드라이버 정보를 한곳에서 관리하세요</p>
+          <h1 className="text-4xl font-bold text-slate-900 mb-2">{t('📊 Data Management Center', '📊 데이터 관리 센터')}</h1>
+          <p className="text-slate-600">{t('Manage therapist, booking, and driver information in one place', '테라피스트, 예약, 드라이버 정보를 한곳에서 관리하세요')}</p>
         </div>
 
         {/* 탭 네비게이션 */}
@@ -161,7 +163,7 @@ export default function AdminDataManagement() {
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            👤 테라피스트 ({therapists.length})
+            {t('👤 Therapists', '👤 테라피스트')} ({therapists.length})
           </button>
           <button
             onClick={() => setActiveTab('bookings')}
@@ -171,7 +173,7 @@ export default function AdminDataManagement() {
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            📅 예약 현황 ({bookings.length})
+            {t('📅 Bookings', '📅 예약 현황')} ({bookings.length})
           </button>
           <button
             onClick={() => setActiveTab('drivers')}
@@ -181,11 +183,11 @@ export default function AdminDataManagement() {
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            🚗 드라이버 ({drivers.length})
+            {t('🚗 Drivers', '🚗 드라이버')} ({drivers.length})
           </button>
         </div>
 
-        {loading && <div className="text-center py-12 text-slate-600">로딩 중...</div>}
+        {loading && <div className="text-center py-12 text-slate-600">{t('Loading...', '로딩 중...')}</div>}
 
         {!loading && (
           <>
@@ -259,17 +261,18 @@ function TherapistTable({
   onDelete: (id: number) => void;
   onExport: () => void;
 }) {
+  const t = useT();
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       {/* 액션 바 */}
       <div className="bg-blue-50 p-4 border-b border-blue-200 flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-blue-900">테라피스트 관리</h2>
+        <h2 className="text-lg font-semibold text-blue-900">{t('Therapist Management', '테라피스트 관리')}</h2>
         <div className="flex gap-3">
           <button
             onClick={onExport}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-sm font-medium"
           >
-            📥 엑셀 다운로드
+            {t('📥 Excel Download', '📥 엑셀 다운로드')}
           </button>
         </div>
       </div>
@@ -279,13 +282,13 @@ function TherapistTable({
         <table className="w-full text-sm">
           <thead className="bg-slate-100 border-b border-slate-200">
             <tr>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">ID</th>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">이름</th>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">전문분야</th>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">경력(년)</th>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">평점</th>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">상태</th>
-              <th className="px-6 py-3 text-center font-semibold text-slate-700">작업</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t('ID', 'ID')}</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t('Name', '이름')}</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t('Speciality', '전문분야')}</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t('Experience (yrs)', '경력(년)')}</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t('Rating', '평점')}</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t('Status', '상태')}</th>
+              <th className="px-6 py-3 text-center font-semibold text-slate-700">{t('Actions', '작업')}</th>
             </tr>
           </thead>
           <tbody>
@@ -350,7 +353,7 @@ function TherapistTable({
                         onClick={onSave}
                         className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700"
                       >
-                        ✓ 저장
+                        {t('✓ Save', '✓ 저장')}
                       </button>
                     </td>
                   </>
@@ -377,13 +380,13 @@ function TherapistTable({
                         onClick={() => onEdit(therapist.id, therapist)}
                         className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
                       >
-                        수정
+                        {t('Edit', '수정')}
                       </button>
                       <button
                         onClick={() => onDelete(therapist.id)}
                         className="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700"
                       >
-                        삭제
+                        {t('Delete', '삭제')}
                       </button>
                     </td>
                   </>
@@ -419,17 +422,18 @@ function BookingTable({
   onDelete: (id: number) => void;
   onExport: () => void;
 }) {
+  const t = useT();
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       {/* 액션 바 */}
       <div className="bg-green-50 p-4 border-b border-green-200 flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-green-900">예약 현황 관리</h2>
+        <h2 className="text-lg font-semibold text-green-900">{t('Booking Management', '예약 현황 관리')}</h2>
         <div className="flex gap-3">
           <button
             onClick={onExport}
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all text-sm font-medium"
           >
-            📥 엑셀 다운로드
+            {t('📥 Excel Download', '📥 엑셀 다운로드')}
           </button>
         </div>
       </div>
@@ -439,14 +443,14 @@ function BookingTable({
         <table className="w-full text-sm">
           <thead className="bg-slate-100 border-b border-slate-200">
             <tr>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">ID</th>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">고객</th>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">테라피스트</th>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">서비스</th>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">날짜</th>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">시간</th>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">상태</th>
-              <th className="px-6 py-3 text-center font-semibold text-slate-700">작업</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t('ID', 'ID')}</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t('Customer', '고객')}</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t('Therapist', '테라피스트')}</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t('Service', '서비스')}</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t('Date', '날짜')}</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t('Time', '시간')}</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t('Status', '상태')}</th>
+              <th className="px-6 py-3 text-center font-semibold text-slate-700">{t('Actions', '작업')}</th>
             </tr>
           </thead>
           <tbody>
@@ -506,9 +510,9 @@ function BookingTable({
                         onChange={(e) => setEditData({ ...editData, status: e.target.value })}
                         className="w-full px-2 py-1 border border-slate-300 rounded"
                       >
-                        <option>예약</option>
-                        <option>진행중</option>
-                        <option>완료</option>
+                        <option value="예약">{t('Booked', '예약')}</option>
+                        <option value="진행중">{t('In Progress', '진행중')}</option>
+                        <option value="완료">{t('Completed', '완료')}</option>
                       </select>
                     </td>
                     <td className="px-6 py-4 text-center">
@@ -516,7 +520,7 @@ function BookingTable({
                         onClick={onSave}
                         className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700"
                       >
-                        ✓ 저장
+                        {t('✓ Save', '✓ 저장')}
                       </button>
                     </td>
                   </>
@@ -538,7 +542,13 @@ function BookingTable({
                               : 'bg-green-100 text-green-700'
                         }`}
                       >
-                        {booking.status}
+                        {booking.status === '예약'
+                          ? t('Booked', '예약')
+                          : booking.status === '진행중'
+                            ? t('In Progress', '진행중')
+                            : booking.status === '완료'
+                              ? t('Completed', '완료')
+                              : booking.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-center flex gap-2 justify-center">
@@ -546,13 +556,13 @@ function BookingTable({
                         onClick={() => onEdit(booking.id, booking)}
                         className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700"
                       >
-                        수정
+                        {t('Edit', '수정')}
                       </button>
                       <button
                         onClick={() => onDelete(booking.id)}
                         className="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700"
                       >
-                        삭제
+                        {t('Delete', '삭제')}
                       </button>
                     </td>
                   </>
@@ -588,17 +598,18 @@ function DriverTable({
   onDelete: (id: number) => void;
   onExport: () => void;
 }) {
+  const t = useT();
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       {/* 액션 바 */}
       <div className="bg-amber-50 p-4 border-b border-amber-200 flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-amber-900">드라이버 관리</h2>
+        <h2 className="text-lg font-semibold text-amber-900">{t('Driver Management', '드라이버 관리')}</h2>
         <div className="flex gap-3">
           <button
             onClick={onExport}
             className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-all text-sm font-medium"
           >
-            📥 엑셀 다운로드
+            {t('📥 Excel Download', '📥 엑셀 다운로드')}
           </button>
         </div>
       </div>
@@ -608,14 +619,14 @@ function DriverTable({
         <table className="w-full text-sm">
           <thead className="bg-slate-100 border-b border-slate-200">
             <tr>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">ID</th>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">이름</th>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">차량</th>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">면허번호</th>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">휴대폰</th>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">상태</th>
-              <th className="px-6 py-3 text-left font-semibold text-slate-700">오늘 수익</th>
-              <th className="px-6 py-3 text-center font-semibold text-slate-700">작업</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t('ID', 'ID')}</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t('Name', '이름')}</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t('Vehicle', '차량')}</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t('License No.', '면허번호')}</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t('Phone', '휴대폰')}</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t('Status', '상태')}</th>
+              <th className="px-6 py-3 text-left font-semibold text-slate-700">{t("Today's Earnings", '오늘 수익')}</th>
+              <th className="px-6 py-3 text-center font-semibold text-slate-700">{t('Actions', '작업')}</th>
             </tr>
           </thead>
           <tbody>
@@ -665,9 +676,9 @@ function DriverTable({
                         onChange={(e) => setEditData({ ...editData, status: e.target.value })}
                         className="w-full px-2 py-1 border border-slate-300 rounded"
                       >
-                        <option>운행중</option>
-                        <option>대기중</option>
-                        <option>휴무</option>
+                        <option value="운행중">{t('Driving', '운행중')}</option>
+                        <option value="대기중">{t('Waiting', '대기중')}</option>
+                        <option value="휴무">{t('Off Duty', '휴무')}</option>
                       </select>
                     </td>
                     <td className="px-6 py-4">
@@ -685,7 +696,7 @@ function DriverTable({
                         onClick={onSave}
                         className="px-3 py-1 bg-amber-600 text-white rounded text-xs hover:bg-amber-700"
                       >
-                        ✓ 저장
+                        {t('✓ Save', '✓ 저장')}
                       </button>
                     </td>
                   </>
@@ -706,7 +717,13 @@ function DriverTable({
                               : 'bg-gray-100 text-gray-700'
                         }`}
                       >
-                        {driver.status}
+                        {driver.status === '운행중'
+                          ? t('Driving', '운행중')
+                          : driver.status === '대기중'
+                            ? t('Waiting', '대기중')
+                            : driver.status === '휴무'
+                              ? t('Off Duty', '휴무')
+                              : driver.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 font-semibold text-amber-600">
@@ -717,13 +734,13 @@ function DriverTable({
                         onClick={() => onEdit(driver.id, driver)}
                         className="px-3 py-1 bg-amber-600 text-white rounded text-xs hover:bg-amber-700"
                       >
-                        수정
+                        {t('Edit', '수정')}
                       </button>
                       <button
                         onClick={() => onDelete(driver.id)}
                         className="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700"
                       >
-                        삭제
+                        {t('Delete', '삭제')}
                       </button>
                     </td>
                   </>

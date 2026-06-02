@@ -92,14 +92,14 @@ export default function NewMassagePanel({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white text-gray-900 rounded-2xl shadow-xl w-full max-w-3xl max-h-[88vh] overflow-y-auto">
+      <div className="bg-white text-gray-900 rounded-2xl shadow-xl w-full max-w-4xl max-h-[92vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b">
           <h2 className="text-xl font-black text-gray-900">{title}{prefillRoom ? ` · Bed ${prefillRoom}` : ''}</h2>
           <button onClick={onClose} className="text-2xl text-gray-400 hover:text-gray-700">✕</button>
         </div>
 
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* 좌: 테라피스트 검색 + 드래그드롭 */}
+        <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* 1열: 테라피스트 검색 + 드래그드롭 */}
           <div>
             <label className="text-sm font-bold text-gray-700">🧑‍⚕️ {t('Therapist (search & drag)', '테라피스트 (검색 후 드래그)')}</label>
             <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('Search name / specialty…', '이름 / 전문분야 검색…')} className="w-full mt-1 mb-2 px-3 py-2 border rounded-lg text-sm text-gray-900" />
@@ -132,7 +132,7 @@ export default function NewMassagePanel({
             </div>
           </div>
 
-          {/* 우: 마사지/시간/고객/룸 */}
+          {/* 2열: 마사지 종류 · 시간 · 고객명 · 룸 */}
           <div className="space-y-3">
             <div>
               <label className="text-sm font-bold text-gray-700">💆 {t('Massage Type', '마사지 종류')}</label>
@@ -158,6 +158,10 @@ export default function NewMassagePanel({
               <label className="text-sm font-bold text-gray-700">{t('Room No.', '룸 번호')}{prefillRoom ? '' : t(' (optional)', ' (선택)')}</label>
               <input value={roomNumber} onChange={(e) => setRoomNumber(e.target.value)} placeholder={t('e.g. 05', '예: 05')} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900" />
             </div>
+          </div>
+
+          {/* 3열: 업체/메모 · 지불 · 팁 · 저장 */}
+          <div className="space-y-3">
             <div>
               <label className="text-sm font-bold text-gray-700">{t('Company / Note', '업체명(노트)')}</label>
               <input list="np-referral-options" value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('company/guide or memo', '업체·가이드 검색 / 노트')} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900" />
@@ -165,18 +169,16 @@ export default function NewMassagePanel({
                 {referrals.map((r) => (<option key={r} value={r} />))}
               </datalist>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-bold text-gray-700">{t('Pay', '지불')}</label>
-                <input type="number" value={pay || ''} onChange={(e) => setPay(Number(e.target.value) || 0)} placeholder="0" className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900 text-right" />
-              </div>
-              <div>
-                <label className="text-sm font-bold text-gray-700">{t('Tip', '팁')}</label>
-                <input type="number" value={tip || ''} onChange={(e) => setTip(Number(e.target.value) || 0)} placeholder="0" className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900 text-right" />
-              </div>
+            <div>
+              <label className="text-sm font-bold text-gray-700">{t('Pay', '지불')}</label>
+              <input type="number" value={pay || ''} onChange={(e) => setPay(Number(e.target.value) || 0)} placeholder="0" className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900 text-right" />
+            </div>
+            <div>
+              <label className="text-sm font-bold text-gray-700">{t('Tip', '팁')}</label>
+              <input type="number" value={tip || ''} onChange={(e) => setTip(Number(e.target.value) || 0)} placeholder="0" className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900 text-right" />
             </div>
             {msg && <p className="text-sm text-red-600 font-semibold">{msg}</p>}
-            <button onClick={handleSave} disabled={saving} className="w-full px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold">
+            <button onClick={handleSave} disabled={saving} className="w-full px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold mt-auto">
               {saving ? t('Saving…', '저장 중…') : t('📋 Save Booking (DB + Google Sheet)', '📋 예약 저장 (DB + 구글시트)')}
             </button>
           </div>

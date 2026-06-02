@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import React from 'react';
-import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { usePayrollStore } from '@/lib/store/payroll-store';
 import { usePayrollCalculation } from '@/hooks/usePayrollCalculation';
@@ -22,7 +21,7 @@ const NetworkDashboardAdmin = dynamic(
 // ============================================================
 export default function AdminDashboard() {
   // Main tab: Dashboard vs Payroll Periods vs Payroll Calculation vs Knowledge Network
-  const [adminTab, setAdminTab] = useState<'dashboard' | 'payroll' | 'payroll-calc' | 'knowledge-network' | 'expense'>('dashboard');
+  const [adminTab, setAdminTab] = useState<'dashboard' | 'payroll' | 'payroll-calc' | 'knowledge-network'>('dashboard');
 
   // Payroll Calculation API 훅
   const { calculateSingle, loading: apiLoading, error: apiError, result: apiResult, reset: resetCalc } = usePayrollCalculation();
@@ -198,47 +197,10 @@ export default function AdminDashboard() {
         >
           🧠 Knowledge Network
         </button>
-        <button
-          onClick={() => setAdminTab('expense')}
-          className={`px-4 py-2 rounded-lg font-bold transition whitespace-nowrap ${
-            adminTab === 'expense'
-              ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-              : 'text-gray-400 hover:text-white'
-          }`}
-        >
-          💸 비용
-        </button>
       </div>
 
       {adminTab === 'dashboard' && (
         <>
-
-          {/* Bento-Style Grid Layout */}
-          <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-
-            {/* Card: Settlement & Payroll (Col span 2) */}
-            <div className="bg-white/3 backdrop-blur-md border border-[#8aebff]/10 md:col-span-2 p-6 rounded-2xl flex flex-col gap-6 relative overflow-hidden transition-all hover:bg-white/7 hover:border-[#8aebff]/40 hover:-translate-y-0.5 hover:shadow-[0_0_30px_rgba(34,211,238,0.1)]">
-              <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                <span className="material-symbols-outlined text-[120px]">account_balance_wallet</span>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="bg-orange-400/10 p-3 rounded-xl text-orange-400">
-                  <span className="material-symbols-outlined">account_balance</span>
-                </div>
-                <div>
-                  <h3 className="text-lg font-black text-white">Settlement & Payroll</h3>
-                  <p className="text-indigo-200/50 text-xs mt-0.5 font-semibold">Financial distribution & auditing systems</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-[10px] font-black tracking-widest">
-                <Link className="px-4 py-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-[#8aebff]/40 transition-all text-center" href="/admin/payroll">PAYROLL</Link>
-                <Link className="px-4 py-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-[#8aebff]/40 transition-all text-center" href="/admin/deductions">💸 공제/선지급</Link>
-                <Link className="px-4 py-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-[#8aebff]/40 transition-all text-center" href="/admin/monthly-settlement">📅 월정산 · GUIDE FEE</Link>
-                <Link className="px-4 py-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-[#8aebff]/40 transition-all text-center" href="/admin/settlement-report">REPORTS</Link>
-              </div>
-            </div>
-
-          </section>
 
           {/* ============================================================
               📌 Embedded Payroll Panel (실시간 급여 정산 테이블)
@@ -509,29 +471,6 @@ export default function AdminDashboard() {
             </div>
           </section>
         </>
-      )}
-
-
-      {/* ============================================================
-          💸 비용 탭 — 대시보드에서 이동한 Daily Reporting 카드
-          ============================================================ */}
-      {adminTab === 'expense' && (
-        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {/* Card: Daily Reporting (대시보드에서 이동) */}
-          <div className="bg-white/3 backdrop-blur-md border border-[#8aebff]/10 p-6 rounded-2xl transition-all hover:bg-white/7 hover:border-[#8aebff]/40 hover:-translate-y-0.5 hover:shadow-[0_0_30px_rgba(34,211,238,0.1)]">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="material-symbols-outlined text-[#8aebff]">receipt_long</span>
-              <h4 className="font-bold text-sm text-white">Daily Reporting</h4>
-            </div>
-            <p className="text-xs text-indigo-200/50 mb-6 font-semibold leading-relaxed">Consolidated expense tracking for all regional sectors.</p>
-            <Link
-              href="/admin/expense"
-              className="block w-full py-3.5 bg-[#8aebff]/15 border border-[#8aebff]/30 text-[#8aebff] font-black text-center rounded-xl hover:bg-[#8aebff]/35 transition-all text-xs tracking-widest"
-            >
-              OPEN EXPENSE LEDGER
-            </Link>
-          </div>
-        </section>
       )}
 
 

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { therapyBeds, getBedsByRoom, therapists, type TherapyBed } from '@/app/admin/massage/mockData/bookingData';
+import { useT } from '@/lib/i18n';
 import NewMassagePanel from './NewMassagePanel';
 
 // 📌 테라피스트 id → 정보 매핑 (진행중 표시용)
@@ -19,6 +20,7 @@ const EDIT_PASSWORD = '1234'; // 임시 편집 비밀번호
 const today = () => new Date().toISOString().split('T')[0];
 
 export default function BedLayoutView() {
+  const t = useT();
   const [selectedBed, setSelectedBed] = useState<TherapyBed | null>(null);
   const [showPanel, setShowPanel] = useState(false);   // 예약창
   const [pwOpen, setPwOpen] = useState(false);          // 비밀번호 모달
@@ -26,10 +28,10 @@ export default function BedLayoutView() {
   const [pwErr, setPwErr] = useState('');
 
   const rooms = [
-    { id: 'room1', name: '마사지룸1', beds: getBedsByRoom('room1') },
-    { id: 'room2', name: '마사지룸2', beds: getBedsByRoom('room2') },
-    { id: 'room3', name: 'VIP실', beds: getBedsByRoom('room3') },
-    { id: 'room4', name: '기타실', beds: getBedsByRoom('room4') },
+    { id: 'room1', name: t('Massage Room 1', '마사지룸1'), beds: getBedsByRoom('room1') },
+    { id: 'room2', name: t('Massage Room 2', '마사지룸2'), beds: getBedsByRoom('room2') },
+    { id: 'room3', name: t('VIP Room', 'VIP실'), beds: getBedsByRoom('room3') },
+    { id: 'room4', name: t('Other Room', '기타실'), beds: getBedsByRoom('room4') },
   ];
   const summary = {
     available: therapyBeds.filter((b) => b.status === 'available').length,
@@ -56,7 +58,7 @@ export default function BedLayoutView() {
       setPwOpen(false);
       setShowPanel(true); // 예약창(편집) 오픈
     } else {
-      setPwErr('비밀번호가 올바르지 않습니다.');
+      setPwErr(t('Incorrect password.', '비밀번호가 올바르지 않습니다.'));
     }
   };
 
@@ -72,10 +74,10 @@ export default function BedLayoutView() {
     <>
       <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <SummaryCard label="비어있음" value={summary.available} className="bg-green-50 border-green-200 text-green-700" />
-          <SummaryCard label="서비스중" value={summary.occupied} className="bg-blue-50 border-blue-200 text-blue-700" />
-          <SummaryCard label="정리중" value={summary.cleaning} className="bg-amber-50 border-amber-200 text-amber-700" />
-          <SummaryCard label="점검중" value={summary.maintenance} className="bg-gray-100 border-gray-300 text-gray-700" />
+          <SummaryCard label={t('Available', '비어있음')} value={summary.available} className="bg-green-50 border-green-200 text-green-700" />
+          <SummaryCard label={t('In Service', '서비스중')} value={summary.occupied} className="bg-blue-50 border-blue-200 text-blue-700" />
+          <SummaryCard label={t('Cleaning', '정리중')} value={summary.cleaning} className="bg-amber-50 border-amber-200 text-amber-700" />
+          <SummaryCard label={t('Maintenance', '점검중')} value={summary.maintenance} className="bg-gray-100 border-gray-300 text-gray-700" />
         </div>
 
         {rooms.map((room) => (
@@ -103,14 +105,14 @@ export default function BedLayoutView() {
             </div>
             <div className="p-6 space-y-4">
               <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 space-y-1">
-                <p className="text-xs text-gray-600 font-semibold">현재 진행중</p>
-                <p className="text-sm font-bold text-gray-800">테라피스트: {currentTherapist ?? '-'}</p>
-                <p className="text-sm font-bold text-gray-800">시술: {selectedBed.serviceName ?? '-'}</p>
-                <p className="text-sm font-bold text-green-600">종료: {selectedBed.endTime ?? '-'}</p>
+                <p className="text-xs text-gray-600 font-semibold">{t('In Progress', '현재 진행중')}</p>
+                <p className="text-sm font-bold text-gray-800">{t('Therapist', '테라피스트')}: {currentTherapist ?? '-'}</p>
+                <p className="text-sm font-bold text-gray-800">{t('Service', '시술')}: {selectedBed.serviceName ?? '-'}</p>
+                <p className="text-sm font-bold text-green-600">{t('End', '종료')}: {selectedBed.endTime ?? '-'}</p>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => { setPwOpen(true); setPw(''); setPwErr(''); }} className="flex-1 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-bold">✏️ 편집</button>
-                <button onClick={closeAll} className="flex-1 px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-bold">닫기</button>
+                <button onClick={() => { setPwOpen(true); setPw(''); setPwErr(''); }} className="flex-1 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-bold">✏️ {t('Edit', '편집')}</button>
+                <button onClick={closeAll} className="flex-1 px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-bold">{t('Close', '닫기')}</button>
               </div>
             </div>
           </div>
@@ -121,22 +123,22 @@ export default function BedLayoutView() {
       {pwOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-sm w-full">
-            <div className="bg-red-500 text-white p-5 rounded-t-xl"><h2 className="text-xl font-black">🔐 편집 비밀번호</h2></div>
+            <div className="bg-red-500 text-white p-5 rounded-t-xl"><h2 className="text-xl font-black">🔐 {t('Edit Password', '편집 비밀번호')}</h2></div>
             <div className="p-6 space-y-3">
-              <p className="text-sm text-gray-700 font-semibold">예약을 편집하려면 비밀번호를 입력하세요. (임시: 1234)</p>
+              <p className="text-sm text-gray-700 font-semibold">{t('Enter the password to edit this booking. (temp: 1234)', '예약을 편집하려면 비밀번호를 입력하세요. (임시: 1234)')}</p>
               <input
                 type="password"
                 value={pw}
                 onChange={(e) => { setPw(e.target.value); setPwErr(''); }}
                 onKeyDown={(e) => e.key === 'Enter' && verifyPw()}
-                placeholder="비밀번호"
+                placeholder={t('Password', '비밀번호')}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-red-500"
                 autoFocus
               />
               {pwErr && <p className="text-sm text-red-600 font-semibold">{pwErr}</p>}
               <div className="flex gap-2">
-                <button onClick={() => { setPwOpen(false); setPw(''); setPwErr(''); }} className="flex-1 px-4 py-2 bg-gray-200 rounded-lg font-bold">취소</button>
-                <button onClick={verifyPw} className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-bold">확인</button>
+                <button onClick={() => { setPwOpen(false); setPw(''); setPwErr(''); }} className="flex-1 px-4 py-2 bg-gray-200 rounded-lg font-bold">{t('Cancel', '취소')}</button>
+                <button onClick={verifyPw} className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-bold">{t('Confirm', '확인')}</button>
               </div>
             </div>
           </div>
@@ -149,7 +151,7 @@ export default function BedLayoutView() {
           date={today()}
           prefillRoom={bedNo(selectedBed)}
           prefillTherapist={currentTherapist}
-          title={selectedBed.status === 'occupied' ? '✏️ 예약 편집' : '+ Start New Massage'}
+          title={selectedBed.status === 'occupied' ? t('✏️ Edit Booking', '✏️ 예약 편집') : '+ Start New Massage'}
           onClose={closeAll}
           onSaved={closeAll}
         />
@@ -159,6 +161,7 @@ export default function BedLayoutView() {
 }
 
 function BedCard({ bed, onClick }: { bed: TherapyBed; onClick: () => void }) {
+  const t = useT();
   const statusColorMap: Record<string, string> = {
     available: 'bg-green-500 text-white hover:bg-green-600',
     occupied: 'bg-blue-500 text-white hover:bg-blue-600',
@@ -171,7 +174,7 @@ function BedCard({ bed, onClick }: { bed: TherapyBed; onClick: () => void }) {
 
   return (
     <button onClick={onClick} className={`px-1 py-2 rounded font-bold text-center transition cursor-pointer active:scale-95 leading-tight min-h-[56px] flex flex-col justify-center gap-0.5 ${statusColorMap[bed.status]}`}>
-      <div className="text-xs font-bold">{bedNo}번</div>
+      <div className="text-xs font-bold">{t(`No.${bedNo}`, `${bedNo}번`)}</div>
       {bed.status === 'occupied' ? (
         <>
           {therapistName && <div className="text-[11px] font-semibold truncate">{therapistName}</div>}
@@ -179,11 +182,11 @@ function BedCard({ bed, onClick }: { bed: TherapyBed; onClick: () => void }) {
           {bed.endTime && <div className="text-[9px] opacity-90">~{bed.endTime}</div>}
         </>
       ) : bed.status === 'cleaning' ? (
-        <div className="text-[10px]">🧹 정리중</div>
+        <div className="text-[10px]">🧹 {t('Cleaning', '정리중')}</div>
       ) : bed.status === 'maintenance' ? (
-        <div className="text-[10px]">🔧 점검</div>
+        <div className="text-[10px]">🔧 {t('Maintenance', '점검')}</div>
       ) : (
-        <div className="text-[10px] opacity-90">비어있음</div>
+        <div className="text-[10px] opacity-90">{t('Available', '비어있음')}</div>
       )}
     </button>
   );

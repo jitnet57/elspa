@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useStore } from '@/lib/store/store';
 import { exportSettlementReportCSV, downloadCSV } from '@/lib/utils/csv-export';
 import { getCompanySettlements, getGuideSettlements } from '@/lib/api/settlement-client';
+import { exportSettlementToSheet } from '@/lib/api/settlement-sheet-client';
+import GoogleConnect from '@/components/GoogleConnect';
 
 interface MonthlySettlement {
   id: number;
@@ -46,6 +48,10 @@ export default function SettlementReportPage() {
   } = useStore();
   const [selectedMonth, setSelectedMonth] = useState('2026-05');
   const [reportType, setReportType] = useState<'monthly' | 'company' | 'guide'>('monthly');
+  const [sheetLoading, setSheetLoading] = useState(false);
+  // Drive 저장 로딩 상태 (매출 / 수수료 각각 관리)
+  const [driveRevenueLoading, setDriveRevenueLoading] = useState(false);
+  const [driveCommissionLoading, setDriveCommissionLoading] = useState(false);
 
   // API에서 정산 데이터 로드
   useEffect(() => {
@@ -150,6 +156,83 @@ export default function SettlementReportPage() {
     })
     .filter(s => s !== null);
 
+  // ============================================================
+  // 📌 함수명: handleDriveExport
+  // 📋 목적: 정산 데이터를 Google Drive 스프레드시트로 저장
+  // 🔧 매개변수: category ('매출' | '수수료') — 저장할 데이터 종류
+  // 📅 작성일: 2026-06-02
+  // ============================================================
+  const handleDriveExport = async (category: '매출' | '수수료') => {
+    // 매출/수수료에 따라 로딩 상태 및 rows 구성 분기
+    if (category === '매출') {
+      setDriveRevenueLoading(true);
+    } else {
+      setDriveCommissionLoading(true);
+    }
+
+    try {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+
+      let rows: Array<Array<any>>;
+      if (category === '매출') {
+        // 매출 헤더 + 데이터 행
+        const header = ['업체', '가이드', '매출', '세션수', '월', '상태'];
+        const dataRows = filteredSettlements.map(s => [
+          getCompanyName(s.company_id),
+          getGuideName(s.guide_id),
+          s.total_revenue,
+          s.total_sessions,
+          s.settlement_month,
+          s.status,
+        ]);
+        rows = [header, ...dataRows];
+      } else {
+        // 수수료 헤더 + 데이터 행
+        const header = ['업체', '가이드', '매출', '커미션율', '커미션액', '지급액', '월', '상태'];
+        const dataRows = filteredSettlements.map(s => [
+          getCompanyName(s.company_id),
+          getGuideName(s.guide_id),
+          s.total_revenue,
+          s.commission_rate,
+          s.commission_amount,
+          s.payment_amount,
+          s.settlement_month,
+          s.status,
+        ]);
+        rows = [header, ...dataRows];
+      }
+
+      const res = await fetch(`${API_BASE}/api/booking/drive/export`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category,
+          title_prefix: selectedMonth,
+          rows,
+        }),
+      });
+
+      if (res.status === 401) {
+        alert('Google 계정 인증이 필요합니다. 우측 Google 연결 버튼을 통해 인증해 주세요.');
+        return;
+      }
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || 'Drive 저장 실패');
+      }
+      alert(`✅ ${data.message}`);
+    } catch (e) {
+      alert(`⚠️ Drive 저장 실패: ${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      if (category === '매출') {
+        setDriveRevenueLoading(false);
+      } else {
+        setDriveCommissionLoading(false);
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-8">
       <div className="max-w-7xl mx-auto">
@@ -244,6 +327,47 @@ export default function SettlementReportPage() {
           >
             📥 Export CSV
           </button>
+          <button
+            onClick={async () => {
+              setSheetLoading(true);
+              try {
+                const r = await exportSettlementToSheet({
+                  month: selectedMonth,
+                  reportType,
+                  settlements: filteredSettlements as any,
+                  companies: companies as any,
+                  guides: guides as any,
+                });
+                alert(`✅ ${r.message}`);
+              } catch (e) {
+                alert(`⚠️ ${e instanceof Error ? e.message : 'Google Sheet 내보내기 실패'}`);
+              } finally {
+                setSheetLoading(false);
+              }
+            }}
+            className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold rounded-lg transition-colors disabled:opacity-50"
+            disabled={isLoading || sheetLoading}
+          >
+            {sheetLoading ? '내보내는 중…' : '📊 Google Sheet로 내보내기'}
+          </button>
+          {/* Drive 저장 버튼: 매출 */}
+          <button
+            onClick={() => handleDriveExport('매출')}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50"
+            disabled={isLoading || driveRevenueLoading}
+          >
+            {driveRevenueLoading ? '저장 중…' : '💾 Drive 저장 (매출)'}
+          </button>
+          {/* Drive 저장 버튼: 수수료 */}
+          <button
+            onClick={() => handleDriveExport('수수료')}
+            className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50"
+            disabled={isLoading || driveCommissionLoading}
+          >
+            {driveCommissionLoading ? '저장 중…' : '💾 Drive 저장 (수수료)'}
+          </button>
+          {/* Google 인증 상태 표시 */}
+          <GoogleConnect />
         </div>
 
         {/* Monthly Report */}

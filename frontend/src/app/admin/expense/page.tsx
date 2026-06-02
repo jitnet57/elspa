@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { useT } from '@/lib/i18n';
+import GoogleConnect from '@/components/GoogleConnect';
+import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -40,6 +43,8 @@ type ScanStatus = 'idle' | 'scanning' | 'done' | 'error';
 
 // ════════════════════════════════════════════════════════════════
 export default function ExpensePage() {
+  const t = useT();
+  const { enabled: autoSaveEnabled, intervalMs: autoSaveIntervalMs } = useAutoSaveSettings();
   const today = new Date().toISOString().split('T')[0];
 
   const [tab, setTab] = useState<'records' | 'scan'>('records');
@@ -53,7 +58,10 @@ export default function ExpensePage() {
   const [saving,        setSaving]        = useState<Set<number>>(new Set());
   const [deleting,      setDeleting]      = useState<Set<number>>(new Set());
   const [exporting,     setExporting]     = useState(false);
+  const [sheetExporting, setSheetExporting] = useState(false);
   const [recError,      setRecError]      = useState('');
+  // ── 자동 저장 마지막 시각 (HH:MM 형식) ─────────────────────
+  const [lastAutoSave,  setLastAutoSave]  = useState<string | null>(null);
 
   // ── Scan 상태 ───────────────────────────────────────────────
   const [files,       setFiles]       = useState<FileItem[]>([]);
@@ -68,13 +76,13 @@ export default function ExpensePage() {
     setLoadingDates(true);
     try {
       const res = await fetch(`${API_BASE}/api/expense/dates`);
-      if (!res.ok) throw new Error('날짜 목록 오류');
+      if (!res.ok) throw new Error(t('Date list error', '날짜 목록 오류'));
       const data: DateSummary[] = await res.json();
       setDates(data);
     } catch (e) {
-      setRecError(e instanceof Error ? e.message : '오류');
+      setRecError(e instanceof Error ? e.message : t('Error', '오류'));
     } finally { setLoadingDates(false); }
-  }, []);
+  }, [t]);
 
   // ── 레코드 로드 ─────────────────────────────────────────────
   const fetchRecords = useCallback(async (date: string) => {
@@ -82,13 +90,13 @@ export default function ExpensePage() {
     setLoadingRecs(true); setRecError('');
     try {
       const res = await fetch(`${API_BASE}/api/expense/records?date=${encodeURIComponent(date)}`);
-      if (!res.ok) throw new Error('레코드 로드 실패');
+      if (!res.ok) throw new Error(t('Failed to load records', '레코드 로드 실패'));
       const data: ExpenseRecord[] = await res.json();
       setRecords(data.map(r => ({ ...r, dirty: false })));
     } catch (e) {
-      setRecError(e instanceof Error ? e.message : '오류');
+      setRecError(e instanceof Error ? e.message : t('Error', '오류'));
     } finally { setLoadingRecs(false); }
-  }, []);
+  }, [t]);
 
   useEffect(() => { fetchDates(); }, []);
   useEffect(() => { fetchRecords(selectedDate); }, [selectedDate, fetchRecords]);
@@ -117,9 +125,9 @@ export default function ExpensePage() {
           description:   row.description,
         }),
       });
-      if (!res.ok) throw new Error('저장 실패');
+      if (!res.ok) throw new Error(t('Save failed', '저장 실패'));
       setRecords(prev => prev.map(r => r.id === row.id ? { ...r, dirty: false } : r));
-    } catch (e) { alert(e instanceof Error ? e.message : '저장 오류'); }
+    } catch (e) { alert(e instanceof Error ? e.message : t('Save error', '저장 오류')); }
     finally { setSaving(prev => { const s = new Set(prev); s.delete(row.id); return s; }); }
   };
 
@@ -131,14 +139,14 @@ export default function ExpensePage() {
 
   // ── 행 삭제 ─────────────────────────────────────────────────
   const deleteRow = async (id: number) => {
-    if (!confirm('이 지출 기록을 삭제하시겠습니까?')) return;
+    if (!confirm(t('Delete this expense record?', '이 지출 기록을 삭제하시겠습니까?'))) return;
     setDeleting(prev => new Set(prev).add(id));
     try {
       const res = await fetch(`${API_BASE}/api/expense/records/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('삭제 실패');
+      if (!res.ok) throw new Error(t('Delete failed', '삭제 실패'));
       setRecords(prev => prev.filter(r => r.id !== id));
       fetchDates();
-    } catch (e) { alert(e instanceof Error ? e.message : '삭제 오류'); }
+    } catch (e) { alert(e instanceof Error ? e.message : t('Delete error', '삭제 오류')); }
     finally { setDeleting(prev => { const s = new Set(prev); s.delete(id); return s; }); }
   };
 
@@ -159,11 +167,11 @@ export default function ExpensePage() {
           description:   '',
         }),
       });
-      if (!res.ok) throw new Error('추가 실패');
+      if (!res.ok) throw new Error(t('Add failed', '추가 실패'));
       const newRow: ExpenseRecord = await res.json();
       setRecords(prev => [...prev, { ...newRow, dirty: false }]);
       fetchDates();
-    } catch (e) { alert(e instanceof Error ? e.message : '추가 오류'); }
+    } catch (e) { alert(e instanceof Error ? e.message : t('Add error', '추가 오류')); }
   };
 
   // ── Excel 내보내기 ──────────────────────────────────────────
@@ -175,15 +183,87 @@ export default function ExpensePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ report_date: selectedDate }),
       });
-      if (!res.ok) throw new Error('내보내기 실패');
+      if (!res.ok) throw new Error(t('Export failed', '내보내기 실패'));
       const blob = await res.blob();
       const url  = URL.createObjectURL(blob);
       const cd   = res.headers.get('Content-Disposition') ?? '';
       const name = cd.match(/filename="?([^"]+)"?/)?.[1] ?? `Expense_${selectedDate}.xlsx`;
       const a = document.createElement('a'); a.href = url; a.download = name; a.click();
       URL.revokeObjectURL(url);
-    } catch (e) { alert(e instanceof Error ? e.message : '내보내기 오류'); }
+    } catch (e) { alert(e instanceof Error ? e.message : t('Export error', '내보내기 오류')); }
     finally { setExporting(false); }
+  };
+
+  // ── Drive 자동 저장 (1시간마다 백그라운드 실행) ─────────────
+  // records 와 selectedDate 를 Drive elspa/비용 폴더에 자동 저장합니다.
+  // 401(인증 없음) 오류는 조용히 무시하고, 성공 시 lastAutoSave에 HH:MM 저장.
+  const autoExport = useCallback(async () => {
+    if (!records.length) return;
+    const header = ['Vendor', 'Category', 'Amount', 'Description', 'Date'];
+    const dataRows = records.map(r => [
+      r.vendor || '',
+      CAT[r.category_name as CatValue]?.label ?? r.category_name,
+      r.amount ?? 0,
+      r.description || '',
+      r.expense_date || r.report_date || selectedDate,
+    ]);
+    try {
+      const res = await fetch(`${API_BASE}/api/booking/drive/export`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category: '비용',
+          title_prefix: selectedDate,
+          rows: [header, ...dataRows],
+        }),
+      });
+      // 401 인증 오류는 조용히 무시 (Google 미연결 상태일 수 있음)
+      if (res.status === 401) return;
+      if (res.ok) {
+        // 현재 시각을 HH:MM 형식으로 저장
+        const d = window.Date ? window.Date : Date;
+        const timeStr = new d().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+        setLastAutoSave(timeStr);
+      }
+    } catch {
+      // 네트워크 오류 등은 무시 (자동 저장이므로 사용자에게 표시 안 함)
+    }
+  }, [records, selectedDate]);
+
+  // 설정에 따라 자동 저장 인터벌 (꺼져 있으면 등록 안 함)
+  useEffect(() => {
+    if (!autoSaveEnabled) return;
+    const id = setInterval(autoExport, autoSaveIntervalMs);
+    return () => clearInterval(id);
+  }, [autoExport, autoSaveEnabled, autoSaveIntervalMs]);
+
+  // ── Google Sheet 내보내기 ───────────────────────────────────
+  const handleSheetExport = async () => {
+    if (!records.length) return;
+    setSheetExporting(true);
+    try {
+      const header = ['Vendor', 'Category', 'Amount', 'Description', 'Date'];
+      const rows = records.map(r => [
+        r.vendor || '',
+        CAT[r.category_name as CatValue]?.label ?? r.category_name,
+        r.amount ?? 0,
+        r.description || '',
+        r.expense_date || r.report_date || selectedDate,
+      ]);
+      const res = await fetch(`${API_BASE}/api/booking/drive/export`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: '비용', title_prefix: selectedDate, rows: [header, ...rows] }),
+      });
+      if (res.status === 401) throw new Error(t('Google sign-in required. Connect your Google account first.', '구글 인증이 필요합니다. 먼저 Google 계정을 연결하세요.'));
+      if (!res.ok) throw new Error(t('Google Sheet export failed', 'Google Sheet 내보내기 실패'));
+      const data = await res.json();
+      alert(`✅ ${data.message}`);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : t('Google Sheet export error', 'Google Sheet 내보내기 오류'));
+    } finally {
+      setSheetExporting(false);
+    }
   };
 
   // ── 집계 ────────────────────────────────────────────────────
@@ -226,7 +306,7 @@ export default function ExpensePage() {
       );
       if (!res.ok) {
         const err = await res.json().catch(() => ({ detail: res.statusText }));
-        throw new Error(err.detail || '서버 오류');
+        throw new Error(err.detail || t('Server error', '서버 오류'));
       }
       const data = await res.json();
       setScanCount(data.count || 0);
@@ -238,7 +318,7 @@ export default function ExpensePage() {
       await fetchRecords(selectedDate);
       setTimeout(() => setTab('records'), 800);
     } catch (err: unknown) {
-      setScanError(err instanceof Error ? err.message : '알 수 없는 오류');
+      setScanError(err instanceof Error ? err.message : t('Unknown error', '알 수 없는 오류'));
       setScanStatus('error');
     }
   };
@@ -299,7 +379,7 @@ export default function ExpensePage() {
                         <option value="">-- Saved dates --</option>
                         {dates.map(d => (
                           <option key={d.date} value={d.date}>
-                            {d.date} ({d.count}건 · ₱{d.total.toFixed(0)})
+                            {d.date} ({d.count}{t(' items', '건')} · ₱{d.total.toFixed(0)})
                           </option>
                         ))}
                       </select>
@@ -332,6 +412,23 @@ export default function ExpensePage() {
                     className="text-xs border border-emerald-300 text-emerald-700 hover:bg-emerald-50 px-3 py-2 rounded-lg font-semibold transition-colors">
                     + Add Row
                   </button>
+                  <GoogleConnect />
+                  {/* Drive 저장 버튼 + 자동 저장 마지막 시각 표시 */}
+                  <div className="flex flex-col items-end gap-0.5">
+                    <button onClick={handleSheetExport}
+                      disabled={!records.length || sheetExporting}
+                      className="text-xs bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg font-semibold transition-colors disabled:opacity-40 flex items-center gap-1.5">
+                      {sheetExporting
+                        ? <><span className="animate-spin">⟳</span> {t('Saving…', '저장 중…')}</>
+                        : t('📊 Save to Drive (elspa/비용)', '📊 Drive 저장 (elspa/비용)')}
+                    </button>
+                    {/* 마지막 자동 저장 시각 — autoExport 성공 시 갱신됨 */}
+                    {lastAutoSave && (
+                      <span className="text-[10px] text-gray-400 leading-tight">
+                        {t('Auto-saved', '자동저장')} {lastAutoSave}
+                      </span>
+                    )}
+                  </div>
                   <button onClick={handleExport}
                     disabled={!records.length || exporting}
                     className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors disabled:opacity-40 flex items-center gap-1.5">
@@ -494,7 +591,7 @@ export default function ExpensePage() {
                               className={`rounded-xl p-3 border ${cat.border} ${cat.bg.split(' ')[0]}`}>
                               <div className="flex items-center justify-between mb-1">
                                 <p className="text-xs font-bold text-gray-700 truncate">{cat.label}</p>
-                                <span className="text-xs text-gray-400 ml-1 flex-shrink-0">{cat.count}건</span>
+                                <span className="text-xs text-gray-400 ml-1 flex-shrink-0">{cat.count}{t(' items', '건')}</span>
                               </div>
                               <p className="text-base font-bold text-gray-800">₱{peso(cat.total)}</p>
                               <div className="bg-white/60 rounded-full h-1 mt-2">

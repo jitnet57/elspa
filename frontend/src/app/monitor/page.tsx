@@ -5,6 +5,7 @@ import { useT, useLang, setLang } from '@/lib/i18n';
 import BedLayoutView from './components/BedLayoutView';
 import DailyTherapistSchedule from './components/DailyTherapistSchedule';
 import BookingSheetTable from './components/BookingSheetTable';
+import AttendanceView from './components/AttendanceView';
 
 /**
  * ============================================================
@@ -21,7 +22,7 @@ import BookingSheetTable from './components/BookingSheetTable';
  */
 
 export default function MonitorPage() {
-  const [activeTab, setActiveTab] = useState<'beds' | 'schedule' | 'booking'>('beds');
+  const [activeTab, setActiveTab] = useState<'beds' | 'schedule' | 'booking' | 'attendance'>('beds');
   const t = useT();
   const lang = useLang();
 
@@ -65,6 +66,16 @@ export default function MonitorPage() {
             >
               📊 {t('BOOKING WITH THERAPIST', '테라피스트 예약')}
             </button>
+            <button
+              onClick={() => setActiveTab('attendance')}
+              className={`px-6 py-2 rounded-lg font-bold transition whitespace-nowrap ${
+                activeTab === 'attendance'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+              }`}
+            >
+              👥 {t('Attendance', '출결')}
+            </button>
           </div>
           <div className="flex gap-2">
             <button onClick={() => setLang('en')} className={`px-4 py-2 rounded-lg font-bold ${lang === 'en' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}>EN</button>
@@ -81,6 +92,8 @@ export default function MonitorPage() {
         {activeTab === 'schedule' && <DailyTherapistSchedule key="schedule" />}
         {/* BOOKING WITH THERAPIST → 30행 예약 입력 화면 */}
         {activeTab === 'booking' && <BookingSheetTable />}
+        {/* 출결 — 전 직원(6직군) 출근/퇴근/결근 체크 */}
+        {activeTab === 'attendance' && <AttendanceView />}
       </div>
     </div>
   );

@@ -253,11 +253,25 @@ export default function GuideReferralFeePage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">🎯 Guide Referral Fee Management</h1>
               <p className="text-gray-600 mt-2">Track and manage guide referral earnings and incentives</p>
             </div>
+            {/* 월정산 페이지로 이동 (레퍼럴 → 월정산 흐름 안내) */}
+            <a
+              href="/admin/monthly-settlement"
+              className="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-bold whitespace-nowrap transition"
+            >
+              📊 월정산으로 →
+            </a>
+          </div>
+
+          {/* 레퍼럴율 → 월정산 자동 반영 흐름 안내 */}
+          <div className="mt-4 rounded-lg bg-indigo-50 border border-indigo-100 px-4 py-3 text-sm text-indigo-800">
+            💡 여기서 설정한 가이드/업체 <strong>레퍼럴 수수료율</strong>은 예약창 <strong>업체명(노트)</strong>에 지정된 레퍼럴을
+            기준으로 집계됩니다. <strong>월정산</strong> 페이지의 <strong>예약→월정산 반영</strong> 버튼을 누르면 해당 월 매출이
+            자동으로 정산에 반영됩니다.
           </div>
         </div>
 
@@ -467,6 +481,13 @@ export default function GuideReferralFeePage() {
                 <li>✓ Each customer referral: ₱{referralFeeSettings.feePerCustomer.toLocaleString()}</li>
                 <li>✓ Paid monthly with settlement</li>
                 <li>✓ Referrals must be confirmed/active to earn fee</li>
+                <li>
+                  ✓ <strong>월정산 자동 반영:</strong>{' '}
+                  <a href="/admin/monthly-settlement" className="underline font-semibold hover:text-indigo-900">
+                    월정산 페이지
+                  </a>
+                  의 <strong>예약→월정산 반영</strong> 버튼으로 해당 월 레퍼럴 매출이 정산에 집계됩니다
+                </li>
               </ul>
             </div>
 

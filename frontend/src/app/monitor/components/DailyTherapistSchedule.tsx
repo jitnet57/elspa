@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabaseApiAdapter, type Booking } from '@/lib/api/supabase-adapter';
+import { useT } from '@/lib/i18n';
 import NewMassagePanel from './NewMassagePanel';
 import {
   toDecimal,
@@ -28,6 +29,7 @@ const HOURS = Array.from({ length: 13 }, (_, i) => 9 + i); // 09:00 ~ 21:00
 const HOUR_W = 84;
 
 export default function DailyTherapistSchedule({ openNewOnMount = false }: { openNewOnMount?: boolean }) {
+  const t = useT();
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
   const [selectedDate, setSelectedDate] = useState(today);
   const [therapists, setTherapists] = useState<UiTherapist[]>([]);
@@ -71,9 +73,9 @@ export default function DailyTherapistSchedule({ openNewOnMount = false }: { ope
     <div className="flex-1 overflow-auto bg-white text-gray-800">
       {/* 3단계 헤더 */}
       <div className="px-6 py-4 border-b border-gray-200 flex flex-wrap items-start gap-6">
-        <Step n={1} title="Select Date" desc="날짜별 스케줄 조회" />
-        <Step n={2} title="Daily Therapist Schedule" desc="누가·언제·어떤 마사지인지 한눈에" />
-        <Step n={3} title="Start New Massage" desc="테라피스트·고객·마사지 선택해 예약" />
+        <Step n={1} title="Select Date" desc={t('Browse schedule by date', '날짜별 스케줄 조회')} />
+        <Step n={2} title="Daily Therapist Schedule" desc={t('See who, when, and which massage at a glance', '누가·언제·어떤 마사지인지 한눈에')} />
+        <Step n={3} title="Start New Massage" desc={t('Pick therapist, guest, and massage to book', '테라피스트·고객·마사지 선택해 예약')} />
         <button
           onClick={() => setShowNew(true)}
           className="ml-auto self-center px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold whitespace-nowrap shadow"
@@ -90,7 +92,7 @@ export default function DailyTherapistSchedule({ openNewOnMount = false }: { ope
           <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="outline-none" />
         </div>
         <button onClick={() => shiftDate(1)} className="px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50">›</button>
-        {loading && <span className="text-xs text-gray-400 ml-2">불러오는 중…</span>}
+        {loading && <span className="text-xs text-gray-400 ml-2">{t('Loading…', '불러오는 중…')}</span>}
       </div>
 
       {/* 타임라인 */}
@@ -112,7 +114,7 @@ export default function DailyTherapistSchedule({ openNewOnMount = false }: { ope
 
           {/* 테라피스트 행 */}
           {therapists.length === 0 ? (
-            <div className="px-4 py-8 text-center text-gray-400">테라피스트 데이터 없음</div>
+            <div className="px-4 py-8 text-center text-gray-400">{t('No therapist data', '테라피스트 데이터 없음')}</div>
           ) : (
             therapists.slice().sort(sortByAttendance).map((t, idx) => {
               const st = therapistStatusMeta[(t.status as DbTherapistStatus) ?? 'idle'] ?? therapistStatusMeta.idle;

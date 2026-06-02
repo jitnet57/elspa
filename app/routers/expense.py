@@ -272,6 +272,46 @@ async def list_dates(db: AsyncSession = Depends(get_db)):
     ]
 
 
+@router.get("/range")
+async def get_range(
+    start: str = Query(..., description="YYYY-MM-DD"),
+    end:   str = Query(..., description="YYYY-MM-DD"),
+    db: AsyncSession = Depends(get_db),
+):
+    """기간별 비용 자동 집계 (경영지표 일간·주간 보고서용)
+
+    report_date 는 'YYYY-MM-DD' 문자열이라 사전식 비교 = 날짜 비교가 성립한다.
+    반환: 총합 / 카테고리별 합계 / 일자별 합계
+    """
+    cond = (Expense.report_date.is_not(None)) & \
+           (Expense.report_date >= start) & (Expense.report_date <= end)
+
+    # 일자별 합계
+    date_rows = (await db.execute(
+        select(Expense.report_date, sqlfunc.sum(Expense.amount).label("total"))
+        .where(cond)
+        .group_by(Expense.report_date)
+        .order_by(Expense.report_date)
+    )).all()
+    by_date = [{"date": r.report_date, "total": float(r.total or 0)} for r in date_rows]
+
+    # 카테고리별 합계
+    cat_rows = (await db.execute(
+        select(Expense.category_name, sqlfunc.sum(Expense.amount).label("total"))
+        .where(cond)
+        .group_by(Expense.category_name)
+    )).all()
+    by_category = {(r.category_name or "other"): float(r.total or 0) for r in cat_rows}
+
+    return {
+        "start": start,
+        "end": end,
+        "total": sum(by_category.values()),
+        "by_category": by_category,
+        "by_date": by_date,
+    }
+
+
 @router.get("/records")
 async def get_records(
     date: str = Query(..., description="YYYY-MM-DD"),
