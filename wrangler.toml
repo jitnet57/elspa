@@ -3,7 +3,7 @@
 # 빌드: npm run build → ./frontend/out 폴더 생성 → Cloudflare Pages 자동 배포
 
 name = "elspa"
-pages_build_output_dir = "./frontend/out"
+pages_build_output_dir = "frontend"
 
 # 프로덕션 환경 변수
 [env.production.vars]
