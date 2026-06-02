@@ -356,20 +356,44 @@ function MoveBedsModal({ groups, onClose, onMove }: { groups: BedGroup[]; onClos
 // ============================================================
 function CompanyContent() {
   const t = useT();
-  const [companies] = useState([
+  const [companies, setCompanies] = useState([
     { id: 1, name: 'ElSpa Plaza', address: 'Seoul, Korea', phone: '02-1234-5678', status: '활성' },
     { id: 2, name: 'Wellness Center', address: 'Busan, Korea', phone: '051-2345-6789', status: '활성' },
   ]);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newCompany, setNewCompany] = useState({ name: '', address: '', phone: '' });
+
+  const handleAddCompany = () => {
+    if (newCompany.name && newCompany.address && newCompany.phone) {
+      setCompanies([...companies, { id: Date.now(), ...newCompany, status: '활성' }]);
+      setNewCompany({ name: '', address: '', phone: '' });
+      setShowAddForm(false);
+    }
+  };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900">{t('Registered Companies', '등록된 업체')}</h2>
-        <button className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition">
+        <button onClick={() => setShowAddForm(!showAddForm)} className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition">
           <Plus size={18} />
           {t('Add Company', '업체 추가')}
         </button>
       </div>
+
+      {showAddForm && (
+        <div className="mb-6 p-4 bg-emerald-50 border-2 border-emerald-200 rounded-lg">
+          <div className="grid grid-cols-3 gap-4">
+            <input type="text" placeholder={t('Company Name', '업체명')} value={newCompany.name} onChange={(e) => setNewCompany({...newCompany, name: e.target.value})} className="px-3 py-2 border border-gray-300 rounded-lg" />
+            <input type="text" placeholder={t('Address', '주소')} value={newCompany.address} onChange={(e) => setNewCompany({...newCompany, address: e.target.value})} className="px-3 py-2 border border-gray-300 rounded-lg" />
+            <input type="text" placeholder={t('Contact', '연락처')} value={newCompany.phone} onChange={(e) => setNewCompany({...newCompany, phone: e.target.value})} className="px-3 py-2 border border-gray-300 rounded-lg" />
+          </div>
+          <div className="flex gap-2 mt-3">
+            <button onClick={handleAddCompany} className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600">저장</button>
+            <button onClick={() => setShowAddForm(false)} className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">취소</button>
+          </div>
+        </div>
+      )}
 
       <div className="overflow-x-auto">
         <table className="w-full">
