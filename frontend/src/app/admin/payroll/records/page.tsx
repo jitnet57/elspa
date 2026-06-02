@@ -26,7 +26,7 @@ import GoogleConnect from '@/components/GoogleConnect';
 // 📋 목적: 백엔드 API 기본 URL (환경변수 미설정 시 상대경로)
 // 📅 작성일: 2026-06-02
 // ============================================================
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+const API_BASE = 'https://elspa-api-production.jitnet57.workers.dev';
 
 const FULL_DAYS = 13;
 type EmpType = 'manager' | 'hollys' | 'nail' | 'maintenance' | 'therapist' | 'driver';

@@ -11,10 +11,10 @@ import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
 
 // ============================================================
 // 📌 상수: API_BASE
-// 📋 목적: Next.js API Routes (로컬)
+// 📋 목적: Cloudflare Workers 백엔드
 // 📅 작성일: 2026-06-02
 // ============================================================
-const API_BASE = ''; // Next.js API Routes
+const API_BASE = 'https://elspa-api-production.jitnet57.workers.dev';
 
 /**
  * ============================================================

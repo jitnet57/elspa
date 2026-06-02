@@ -171,7 +171,7 @@ export default function SettlementReportPage() {
     }
 
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+      const API_BASE = 'https://elspa-api-production.jitnet57.workers.dev';
 
       let rows: Array<Array<any>>;
       if (category === '매출') {

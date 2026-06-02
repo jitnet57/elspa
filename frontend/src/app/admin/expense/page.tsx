@@ -7,7 +7,7 @@ import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
 import { isOnline } from '@/lib/db/syncService';
 import { db } from '@/lib/db/localDb';
 
-const API_BASE = ''; // Next.js API Routes (로컬)
+const API_BASE = 'https://elspa-api-production.jitnet57.workers.dev';
 
 // ── 카테고리 정의 ───────────────────────────────────────────────
 const CATEGORIES = [
