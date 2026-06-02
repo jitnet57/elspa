@@ -5,7 +5,7 @@ import { useStore } from '@/lib/store/store';
 import { exportSettlementReportCSV, downloadCSV } from '@/lib/utils/csv-export';
 import { getCompanySettlements, getGuideSettlements } from '@/lib/api/settlement-client';
 import { exportSettlementToSheet } from '@/lib/api/settlement-sheet-client';
-
+import GoogleConnect from '@/components/GoogleConnect';
 
 interface MonthlySettlement {
   id: number;
@@ -367,6 +367,7 @@ export default function SettlementReportPage() {
             {driveCommissionLoading ? '저장 중…' : '💾 Drive 저장 (수수료)'}
           </button>
           {/* Google 인증 상태 표시 */}
+          <GoogleConnect />
         </div>
 
         {/* Monthly Report */}

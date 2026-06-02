@@ -6,7 +6,7 @@ import { saveBookingToSheet } from '@/lib/services/booking-sheet';
 import { SERVICES, autoEndTime, sortByAttendance, type UiTherapist } from './booking-helpers';
 import { getCompanies, getGuides } from '@/lib/api/companies-client';
 import { useT } from '@/lib/i18n';
-
+import GoogleConnect from '@/components/GoogleConnect';
 import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
 
 // ============================================================
@@ -267,6 +267,7 @@ export default function BookingSheetTable() {
           <span className="text-xs text-slate-300">{tr(`Entered: ${filledCount}`, `입력됨: ${filledCount}건`)}</span>
           <button onClick={saveAll} className="px-4 py-2 rounded-lg bg-pink-600 hover:bg-pink-700 font-bold text-sm">{tr('Save All (DB + Sheet)', '전체 저장 (DB + 구글시트)')}</button>
           {/* ── Drive 저장 영역 ── */}
+          <GoogleConnect />
           <button
             onClick={() => handleDriveExport(false)}
             disabled={driveLoading || filledCount === 0}
