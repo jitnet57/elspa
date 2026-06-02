@@ -1,12 +1,11 @@
-# ElSpa 백엔드 - 최소 프로덕션 의존성
-fastapi==0.115.2
-uvicorn[standard]==0.30.0
-sqlalchemy==2.0.23
-psycopg[binary]==3.2.1
-python-dotenv==1.0.0
-httpx==0.27.0
-pydantic==2.7.1
-pydantic-settings==2.2.1
-google-auth==2.28.0
-google-auth-oauthlib==1.2.0
-google-api-python-client==2.108.0
+# ElSpa 백엔드 - 핵심 패키지만
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+python-dotenv
+pydantic
+pydantic-settings
+google-auth
+google-auth-oauthlib
+google-api-python-client
