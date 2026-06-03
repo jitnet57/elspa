@@ -4,9 +4,74 @@ import { useEffect } from 'react';
 import { startSyncOnReconnect, pullFromSupabase } from '@/lib/db/syncService';
 import { startAutoSave, checkFileServer } from '@/lib/api/file-save-client';
 
+// ============================================================
+// 📌 함수: clearIndexedDBCache
+// 📋 목적: 앱 시작 시 오래된 IndexedDB 캐시 클리어
+// 🔧 실행: 브라우저 캐시 정리 후 페이지 리프레시
+// 📅 작성일: 2026-06-03
+// ============================================================
+async function clearIndexedDBCache() {
+  try {
+    if (!('indexedDB' in window)) return;
+
+    // 모든 IndexedDB 데이터베이스 삭제
+    const dbs = await window.indexedDB.databases();
+    for (const db of dbs) {
+      window.indexedDB.deleteDatabase(db.name);
+      console.log(`🧹 IndexedDB 캐시 삭제: ${db.name}`);
+    }
+
+    // localStorage 중 특정 키 클리어 (설정 제외)
+    const keysToKeep = ['bookingRowCount', 'autoSaveSettings'];
+    Object.keys(localStorage).forEach((key) => {
+      if (!keysToKeep.includes(key)) {
+        localStorage.removeItem(key);
+      }
+    });
+    console.log('🧹 localStorage 캐시 정리 완료');
+
+    // Service Worker 캐시 클리어
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      for (const cacheName of cacheNames) {
+        await caches.delete(cacheName);
+        console.log(`🧹 Service Worker 캐시 삭제: ${cacheName}`);
+      }
+    }
+
+    return true;
+  } catch (error) {
+    console.error('❌ 캐시 클리어 실패:', error);
+    return false;
+  }
+}
+
 export function PWAInit() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    // 앱 시작 시 캐시 클리어 후 리프레시
+    (async () => {
+      const lastClearTime = sessionStorage.getItem('lastCacheClear');
+      const now = Date.now();
+      const ONE_DAY = 24 * 60 * 60 * 1000; // 24시간
+
+      // 마지막 캐시 클리어 후 24시간 이상 경과했으면 다시 클리어
+      if (!lastClearTime || now - parseInt(lastClearTime) > ONE_DAY) {
+        console.log('🔄 IndexedDB 캐시 클리어 및 리프레시 시작...');
+        const cleared = await clearIndexedDBCache();
+
+        if (cleared) {
+          sessionStorage.setItem('lastCacheClear', now.toString());
+          // 캐시 클리어 완료 후 1초 후 리프레시
+          setTimeout(() => {
+            console.log('🔄 페이지 리프레시...');
+            window.location.reload();
+          }, 1000);
+          return; // 여기서 함수 종료 (리프레시 될 것)
+        }
+      }
+    })();
 
     // 오프라인 복구 시 자동 싱크 리스너 등록
     startSyncOnReconnect(() => new Date().toISOString().split('T')[0]);
