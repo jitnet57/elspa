@@ -9,9 +9,24 @@
  */
 
 import { massageServices } from '@/app/admin/massage/mockData/bookingData';
+import { massageTypesApi } from '@/lib/api/massage-types-client';
 
 // 서비스 카탈로그 (이름 + 소요시간) — bookings.treatment 는 이 이름 문자열로 저장
 export const SERVICES = massageServices.map((s) => ({ name: s.name, duration: s.duration }));
+
+/**
+ * API에서 마사지 서비스를 동적으로 로드하는 함수
+ * 실패 시 기본 SERVICES 상수 반환
+ */
+export async function fetchMassageServices(): Promise<Array<{ name: string; duration: number }>> {
+  try {
+    const services = await massageTypesApi.list(true); // 활성 서비스만
+    return services.map((s) => ({ name: s.name, duration: s.baseDurationMinutes }));
+  } catch (err) {
+    console.warn('마사지 서비스 로드 실패, 기본값 사용:', err);
+    return SERVICES;
+  }
+}
 
 // 이름 → 소요시간(분)
 export const durationByName = (name: string): number =>

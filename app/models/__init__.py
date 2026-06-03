@@ -19,6 +19,7 @@ from .sss_contribution import SssContribution
 from .financial import ExpenseCategory, Expense, Budget, MonthlyRevenue
 from .driver import Driver, DriverBooking, DriverEarnings, DriverWithdrawal
 from .knowledge_network import KnowledgeNetworkNode
+from .massage_service import MassageService
 
 __all__ = [
     "Customer", "Service", "Booking", "Staff", "Transaction", "Chat",
@@ -27,5 +28,5 @@ __all__ = [
     "Stamp", "Coupon", "SssContribution",
     "ExpenseCategory", "Expense", "Budget", "MonthlyRevenue",
     "Driver", "DriverBooking", "DriverEarnings", "DriverWithdrawal",
-    "KnowledgeNetworkNode"
+    "KnowledgeNetworkNode", "MassageService"
 ]

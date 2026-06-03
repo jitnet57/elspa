@@ -17,7 +17,9 @@
       "Bash(npx next *)",
       "mcp__Claude_Preview__preview_start",
       "Bash(export PATH=\"/opt/homebrew/Cellar/node/25.2.1/bin:$PATH\")",
-      "Bash(vercel --prod --confirm)"
+      "Bash(vercel --prod --confirm)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx|js\\)$\")",
+      "Bash(grep -E \"\\\\.\\(ts|sql\\)$\")"
     ],
     "additionalDirectories": [
       "/Users/kwangseobpark/elspa/.git/refs"

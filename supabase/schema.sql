@@ -158,3 +158,44 @@ select * from (values
   (current_date, 6, 'Swedish Massage',  '10:30', '11:30', '06', 'Lucy Han',    'Hana',   'normal')
 ) as v(booking_date, seq_no, treatment, start_time, end_time, room_num, guest_name, therapist_name, status)
 where not exists (select 1 from public.bookings);
+
+-- ------------------------------------------------------------
+-- 4) 마사지 종류 (massage_services) — 동적 서비스 관리
+-- 📋 용도: 관리자가 제공하는 마사지 종류를 데이터베이스에서 CRUD할 수 있도록 지원
+-- 📅 생성일: 2026-06-03
+-- ------------------------------------------------------------
+create table if not exists public.massage_services (
+  id bigint generated always as identity primary key,
+  name text not null unique,
+  base_price numeric(10,2) not null check (base_price >= 0),
+  base_duration_minutes integer not null check (base_duration_minutes > 0),
+  description text,
+  is_active boolean not null default true,
+  icon text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists idx_massage_services_active on public.massage_services(is_active);
+create index if not exists idx_massage_services_name on public.massage_services(name);
+
+-- 마사지_서비스 updated_at 트리거
+drop trigger if exists trg_massage_services_touch on public.massage_services;
+create trigger trg_massage_services_touch before update on public.massage_services
+  for each row execute function public.touch_updated_at();
+
+-- RLS for massage_services
+alter table public.massage_services enable row level security;
+drop policy if exists anon_all_massage_services on public.massage_services;
+create policy anon_all_massage_services on public.massage_services
+  for all to anon using (true) with check (true);
+
+-- 시드: 기본 마사지 종류 (초기 데이터)
+insert into public.massage_services (name, base_price, base_duration_minutes, description, icon) values
+  ('Swedish Massage', 1500, 60, '근육의 긴장을 풀어주는 스웨디시 마사지', '💆'),
+  ('Thai Massage', 1500, 90, '전통 타이 마사지로 깊은 휴식 제공', '🙏'),
+  ('Hot Stone Massage', 1800, 60, '따뜻한 돌로 근육을 이완시키는 테라피', '🪨'),
+  ('Deep Tissue', 2000, 60, '깊은 근층을 집중적으로 치료하는 마사지', '💪'),
+  ('Aromatherapy', 1200, 45, '향기 치료와 함께하는 휴식 마사지', '🌸'),
+  ('Facial Treatment', 1000, 45, '얼굴 피부 관리 및 스킨케어', '✨')
+on conflict (name) do nothing;

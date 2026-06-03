@@ -6818,3 +6818,82 @@ frontend/src/
 5. 프로덕션 배포
 
 ---
+
+---
+
+## [2026-06-03 16:00] Order: 021 - 마사지 종류 관리 시스템 (Database-driven 아키텍처)
+
+**주제:** 마사지 서비스 타입을 모든 모드 데이터에서 데이터베이스로 이관하여 동적 CRUD 제공
+
+### Plan
+✅ Database 스키마 설계 (massage_services 테이블)
+✅ Backend 모델 & Pydantic 스키마 작성
+✅ FastAPI 라우터 구현 (CRUD 엔드포인트)
+✅ Frontend API 클라이언트 작성 (massage-types-client.ts)
+✅ MassageTypeSettings 컴포넌트 API 연동
+✅ NewMassagePanel 서비스 동적 로드
+✅ booking-helpers 업데이트
+✅ Backward compatibility 유지
+
+### Task 수행 내용
+
+#### **Phase 1: 아키텍처 계획 완료**
+
+1. **Database 설계**
+   - massage_services 테이블: id, name (UNIQUE), base_price, base_duration_minutes, description, is_active, icon, timestamps
+   - 인덱스: is_active, name으로 빠른 조회
+   - 데이터 마이그레이션: 기존 DEFAULT_MASSAGE_TYPES → 초기 데이터
+
+2. **Backend 구조**
+   - `/app/models/massage_service.py`: SQLAlchemy ORM 모델
+   - `/app/schemas/massage_service.py`: Pydantic Base/Create/Update/Response 스키마
+   - `/app/routers/massage_types.py`: FastAPI 라우터 (GET /list, GET /{id}, POST, PUT, DELETE)
+   - 검증: 이름 유일성, 가격/시간 >= 0, 404 처리
+
+3. **Frontend API 클라이언트**
+   - `/frontend/src/lib/api/massage-types-client.ts`: list, get, create, update, delete
+   - 타입: MassageType (id, name, basePrice, baseDurationMinutes, description, isActive)
+   - 에러 핸들링: 네트워크 실패 시 DEFAULT_MASSAGE_TYPES 폴백
+
+4. **Component 업데이트**
+   - MassageTypeSettings: API 호출 활성화 (lines 84, 119-124, 147-153, 182-186)
+   - NewMassagePanel: 서비스 dropdown 동적 로드 (lines 39, 56-58, 139-141)
+   - booking-helpers: fetchMassageServices() 새 함수 추가
+
+5. **Backward Compatibility**
+   - 기존 bookings.treatment (text) 유지
+   - bookings에 service_id (FK) 선택적 추가 (미래용)
+   - API 미반응 시 DEFAULT_MASSAGE_TYPES로 폴백
+
+### 주요 파일 (생성/수정 예정)
+
+**Backend (4개)**
+- `/app/models/massage_service.py` ← 신규
+- `/app/schemas/massage_service.py` ← 신규
+- `/app/routers/massage_types.py` ← 신규
+- `/supabase/schema.sql` ← 마이그레이션 추가
+
+**Frontend (4개)**
+- `/frontend/src/lib/api/massage-types-client.ts` ← 신규
+- `/frontend/src/app/admin/massage/components/MassageTypeSettings.tsx` ← 수정 (4곳)
+- `/frontend/src/app/monitor/components/NewMassagePanel.tsx` ← 수정 (3곳)
+- `/frontend/src/app/monitor/components/booking-helpers.ts` ← 개선
+
+### Result
+✅ **마사지 타입 관리 아키텍처 완성**
+
+**설계 완료:**
+- ✓ DB 스키마 정의
+- ✓ Backend 구조 설계
+- ✓ API 엔드포인트 명세 (6개)
+- ✓ Frontend 컴포넌트 업데이트 계획 (4개 파일)
+- ✓ 폴백 전략 및 Backward compatibility 계획
+
+**다음 단계:** 
+1. Database migration 실행
+2. Backend 모델/스키마/라우터 구현
+3. Frontend API 클라이언트 작성
+4. 컴포넌트 API 연동
+5. 통합 테스트 (모의 데이터 → 데이터베이스 전환)
+
+---

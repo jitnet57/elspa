@@ -6,6 +6,7 @@ import { saveBookingToSheet } from '@/lib/services/booking-sheet';
 import { SERVICES, autoEndTime, initials, sortByAttendance, type UiTherapist } from './booking-helpers';
 import { getCompanies, getGuides } from '@/lib/api/companies-client';
 import { useT } from '@/lib/i18n';
+import { massageTypesApi, type MassageType } from '@/lib/api/massage-types-client';
 
 /**
  * ============================================================
@@ -36,6 +37,7 @@ export default function NewMassagePanel({
   const [therapists, setTherapists] = useState<UiTherapist[]>([]);
   const [search, setSearch] = useState('');
   const [therapistName, setTherapistName] = useState<string>(prefillTherapist ?? '');
+  const [massageServices, setMassageServices] = useState<MassageType[]>([]);
   const [service, setService] = useState(SERVICES[0]?.name ?? '');
   const [startTime, setStartTime] = useState('10:00');
   const [guestName, setGuestName] = useState('');
@@ -53,9 +55,48 @@ export default function NewMassagePanel({
     Promise.all([getCompanies().catch(() => []), getGuides().catch(() => [])]).then(([cs, gs]) => {
       setReferrals([...cs.map((c: any) => `${c.name} (업체)`), ...gs.map((g: any) => `${g.name} (가이드)`)]);
     });
+    // API에서 마사지 서비스 로드
+    massageTypesApi
+      .list(true) // 활성 서비스만
+      .then((services) => {
+        setMassageServices(services);
+        // 첫 번째 서비스 기본값으로 설정
+        if (services.length > 0) {
+          setService(services[0].name);
+        }
+      })
+      .catch((err) => {
+        console.warn('마사지 서비스 로드 실패, 기본값 사용:', err);
+        // 폴백: 기본 SERVICES 사용
+        setMassageServices(
+          SERVICES.map((s, idx) => ({
+            id: idx + 1,
+            name: s.name,
+            basePrice: 0,
+            baseDurationMinutes: s.duration,
+            isActive: true,
+            createdAt: '',
+            updatedAt: '',
+          }))
+        );
+      });
   }, []);
 
-  const endTime = autoEndTime(startTime, service);
+  // API 로드 서비스에서 선택된 서비스의 duration 찾기
+  const selectedServiceDuration = massageServices.find((s) => s.name === service)?.baseDurationMinutes
+    ?? SERVICES.find((s) => s.name === service)?.duration
+    ?? 60;
+
+  const endTime = startTime
+    ? (() => {
+        const [h, m] = startTime.split(':').map(Number);
+        const startDecimal = h + (m || 0) / 60;
+        const endDecimal = startDecimal + selectedServiceDuration / 60;
+        const endH = Math.floor(endDecimal);
+        const endM = Math.round((endDecimal - endH) * 60);
+        return `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+      })()
+    : '';
   // 출근 순번 정렬 + 진행중(in_service)은 뒤로 → 다음 가용 테라피스트가 먼저
   const filtered = therapists
     .filter((t) => t.name.toLowerCase().includes(search.toLowerCase()) || (t.specialty ?? '').toLowerCase().includes(search.toLowerCase()))
@@ -137,7 +178,10 @@ export default function NewMassagePanel({
             <div>
               <label className="text-sm font-bold text-gray-700">💆 {t('Massage Type', '마사지 종류')}</label>
               <select value={service} onChange={(e) => setService(e.target.value)} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900">
-                {SERVICES.map((s) => <option key={s.name} value={s.name}>{s.name} ({s.duration}{t('min', '분')})</option>)}
+                {massageServices.length > 0
+                  ? massageServices.map((s) => <option key={s.id} value={s.name}>{s.name} ({s.baseDurationMinutes}{t('min', '분')})</option>)
+                  : SERVICES.map((s) => <option key={s.name} value={s.name}>{s.name} ({s.duration}{t('min', '분')})</option>)
+                }
               </select>
             </div>
             <div className="grid grid-cols-2 gap-3">

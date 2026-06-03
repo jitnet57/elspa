@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, Save, X, AlertCircle } from 'lucide-react';
+import { massageTypesApi, MassageType as ApiMassageType } from '@/lib/api/massage-types-client';
 
 /**
  * 📌 컴포넌트: MassageTypeSettings
@@ -86,6 +87,7 @@ export default function MassageTypeSettings() {
   const [showForm, setShowForm] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // 폼 입력 상태
   const [formData, setFormData] = useState({
@@ -95,40 +97,52 @@ export default function MassageTypeSettings() {
     description: '',
   });
 
+  // API에서 마사지 종류 로드
+  useEffect(() => {
+    const loadMassageTypes = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await massageTypesApi.list(false); // 모든 타입 로드
+        setMassageTypes(data);
+      } catch (err) {
+        console.error('마사지 종류 로드 실패:', err);
+        setError('마사지 종류를 로드할 수 없습니다. 기본 데이터를 사용합니다.');
+        // 폴백: 기본 데이터 사용
+        setMassageTypes(DEFAULT_MASSAGE_TYPES);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadMassageTypes();
+  }, []);
+
   // ============================================================
   // 새 마사지 종류 추가
   // ============================================================
   const handleAddMassageType = async () => {
     if (!formData.name.trim() || formData.basePrice <= 0 || formData.baseDurationMinutes <= 0) {
-      alert('모든 필드를 올바르게 입력해주세요.');
+      setError('모든 필드를 올바르게 입력해주세요.');
       return;
     }
 
     setLoading(true);
+    setError(null);
     try {
-      const newMassageType: MassageType = {
-        id: Math.max(0, ...massageTypes.map(m => m.id)) + 1,
+      const response = await massageTypesApi.create({
         name: formData.name,
         basePrice: formData.basePrice,
         baseDurationMinutes: formData.baseDurationMinutes,
         description: formData.description,
         isActive: true,
-        createdAt: new Date().toISOString(),
-      };
+      });
 
-      // API 호출 시뮬레이션 (실제로는 POST /api/admin/massage-types)
-      // const response = await fetch('/api/admin/massage-types', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(newMassageType),
-      // });
-
-      setMassageTypes([...massageTypes, newMassageType]);
+      setMassageTypes([...massageTypes, response]);
       setFormData({ name: '', basePrice: 0, baseDurationMinutes: 30, description: '' });
       setShowForm(false);
     } catch (error) {
       console.error('마사지 종류 추가 실패:', error);
-      alert('추가에 실패했습니다.');
+      setError(String(error));
     } finally {
       setLoading(false);
     }
@@ -139,36 +153,27 @@ export default function MassageTypeSettings() {
   // ============================================================
   const handleEditMassageType = async () => {
     if (!formData.name.trim() || formData.basePrice <= 0 || formData.baseDurationMinutes <= 0) {
-      alert('모든 필드를 올바르게 입력해주세요.');
+      setError('모든 필드를 올바르게 입력해주세요.');
       return;
     }
 
     setLoading(true);
+    setError(null);
     try {
-      // API 호출 시뮬레이션 (실제로는 PUT /api/admin/massage-types/:id)
-      // const response = await fetch(`/api/admin/massage-types/${editingId}`, {
-      //   method: 'PUT',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData),
-      // });
+      const response = await massageTypesApi.update(editingId!, {
+        name: formData.name,
+        basePrice: formData.basePrice,
+        baseDurationMinutes: formData.baseDurationMinutes,
+        description: formData.description,
+      });
 
       setMassageTypes(
-        massageTypes.map(m =>
-          m.id === editingId
-            ? {
-                ...m,
-                name: formData.name,
-                basePrice: formData.basePrice,
-                baseDurationMinutes: formData.baseDurationMinutes,
-                description: formData.description,
-              }
-            : m
-        )
+        massageTypes.map(m => (m.id === editingId ? response : m))
       );
       handleCancelEdit();
     } catch (error) {
       console.error('마사지 종류 수정 실패:', error);
-      alert('수정에 실패했습니다.');
+      setError(String(error));
     } finally {
       setLoading(false);
     }
@@ -179,17 +184,14 @@ export default function MassageTypeSettings() {
   // ============================================================
   const handleDeleteMassageType = async (id: number) => {
     setLoading(true);
+    setError(null);
     try {
-      // API 호출 시뮬레이션 (실제로는 DELETE /api/admin/massage-types/:id)
-      // const response = await fetch(`/api/admin/massage-types/${id}`, {
-      //   method: 'DELETE',
-      // });
-
+      await massageTypesApi.delete(id, false); // soft delete
       setMassageTypes(massageTypes.filter(m => m.id !== id));
       setDeleteConfirm(null);
     } catch (error) {
       console.error('마사지 종류 삭제 실패:', error);
-      alert('삭제에 실패했습니다.');
+      setError(String(error));
     } finally {
       setLoading(false);
     }
@@ -247,6 +249,20 @@ export default function MassageTypeSettings() {
           )}
         </div>
       </div>
+
+      {/* 에러 메시지 */}
+      {error && (
+        <div className="px-6 py-3 bg-red-900 border-b border-red-700 flex items-center gap-2 text-red-100">
+          <AlertCircle size={18} />
+          <span>{error}</span>
+          <button
+            onClick={() => setError(null)}
+            className="ml-auto text-red-300 hover:text-red-100"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
 
       {/* 내용 */}
       <div className="flex-1 overflow-auto">
