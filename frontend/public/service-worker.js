@@ -2,7 +2,7 @@
 // 오프라인 지원 및 캐싱 전략
 // 배포할 때마다 버전을 올려서 캐시를 무효화합니다
 
-const CACHE_VERSION = '20260602-v39'; // v39: Payroll 급여설정 버튼 추가 + SW 캐시 무효화
+const CACHE_VERSION = '20260603-v40'; // v40: Service Worker response cloning 에러 수정 (line 105)
 const CACHE_NAME = `elspa-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
@@ -99,11 +99,14 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // 성공한 응답을 캐시에 저장
+          // 응답 본문은 한 번만 사용 가능하므로, 즉시 clone해서 원본과 사본 분리
           if (response.ok) {
-            const cache = caches.open(CACHE_NAME);
-            cache.then((c) => c.put(request, response.clone()));
+            // 사본으로 캐싱 (async, non-blocking)
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, response.clone());
+            });
           }
+          // 원본은 caller에게 반환
           return response;
         })
         .catch(() => {
