@@ -25,7 +25,8 @@
       "Bash(python3 -c \"import sys, json; data = json.load\\(sys.stdin\\); print\\('\\\\n'.join\\(f'   {path}' for path in data.get\\('paths', {}\\).keys\\(\\)\\)\\)\")",
       "Bash(cat > *)",
       "Bash(curl -s -I https://elspa.pages.dev/monitor.html)",
-      "Bash(curl -s -I https://elspa.pages.dev/monitor)"
+      "Bash(curl -s -I https://elspa.pages.dev/monitor)",
+      "Bash(curl -s https://elspa.pages.dev/ -I)"
     ],
     "additionalDirectories": [
       "/Users/kwangseobpark/elspa/.git/refs",
