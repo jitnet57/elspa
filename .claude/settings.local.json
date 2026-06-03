@@ -27,7 +27,8 @@
       "Bash(curl -s -I https://elspa.pages.dev/monitor.html)",
       "Bash(curl -s -I https://elspa.pages.dev/monitor)",
       "Bash(curl -s https://elspa.pages.dev/ -I)",
-      "Bash(curl -s -I https://elspa.pages.dev/)"
+      "Bash(curl -s -I https://elspa.pages.dev/)",
+      "Bash(vercel --version)"
     ],
     "additionalDirectories": [
       "/Users/kwangseobpark/elspa/.git/refs",

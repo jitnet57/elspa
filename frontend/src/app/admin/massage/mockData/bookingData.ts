@@ -30,10 +30,12 @@ export interface Therapist {
 export interface MassageService {
   id: string;
   name: string;
-  duration: number; // minutes
-  price: number;
+  duration: number; // minutes (기본값 또는 첫 번째 옵션)
+  price: number; // 기본값 또는 첫 번째 옵션 가격
   description: string;
   therapistRequired: boolean;
+  // 시간별 가격 옵션 (선택사항)
+  durationOptions?: Array<{ duration: number; price: number }>;
 }
 
 export interface TimeSlot {
@@ -186,64 +188,180 @@ export const therapists: Therapist[] = [
 ];
 
 // ============================================================
-// 마사지 서비스
+// 마사지 서비스 — EL SPA 메뉴판 기준 (2026-06-03)
+// 시간별 가격 옵션 포함 (60m / 90m / 120m)
 // ============================================================
 export const massageServices: MassageService[] = [
+  // ── 스톤 마사지 ───────────────────────────────────────────
   {
     id: 'SVC-001',
-    name: 'Thai Massage',
-    duration: 60,
-    price: 800,
-    description: 'Traditional Thai massage with stretching',
+    name: 'Hawaii Pink Stone',
+    duration: 90,
+    price: 2500,
+    description: '하와이안 핑크 스톤 마사지',
     therapistRequired: true,
+    durationOptions: [
+      { duration: 90, price: 2500 },
+      { duration: 120, price: 3300 },
+    ],
   },
   {
     id: 'SVC-002',
-    name: 'Swedish Massage',
-    duration: 60,
-    price: 750,
-    description: 'Relaxing full body massage',
+    name: 'Vulcaner Black Stone (Hot)',
+    duration: 90,
+    price: 1700,
+    description: '불카너 블랙 스톤 (핫) 마사지',
     therapistRequired: true,
+    durationOptions: [
+      { duration: 90, price: 1700 },
+      { duration: 120, price: 2200 },
+    ],
   },
+
+  // ── 테라피 ───────────────────────────────────────────────
   {
     id: 'SVC-003',
-    name: 'Deep Tissue',
-    duration: 90,
-    price: 1200,
-    description: 'Intense muscle tension release',
+    name: 'Hibang (Traditional)',
+    duration: 60,
+    price: 1700,
+    description: '전통 히방 마사지',
     therapistRequired: true,
+    durationOptions: [
+      { duration: 60, price: 1700 },
+      { duration: 90, price: 2200 },
+    ],
   },
   {
     id: 'SVC-004',
-    name: 'Foot Massage',
-    duration: 45,
-    price: 500,
-    description: 'Reflexology foot massage',
+    name: 'Smooth Coconut',
+    duration: 60,
+    price: 1300,
+    description: '곱은 코코넛 오일 마사지',
     therapistRequired: true,
+    durationOptions: [
+      { duration: 60, price: 1300 },
+      { duration: 90, price: 1700 },
+      { duration: 120, price: 2200 },
+    ],
   },
   {
     id: 'SVC-005',
-    name: 'Facial Treatment',
+    name: 'Clinical Full Body',
     duration: 60,
-    price: 1000,
-    description: 'Relaxing facial spa treatment',
+    price: 1300,
+    description: '임상부 전용 마사지',
     therapistRequired: true,
+    durationOptions: [
+      { duration: 60, price: 1300 },
+      { duration: 90, price: 1700 },
+      { duration: 120, price: 2200 },
+    ],
   },
+
+  // ── 피부 진정 ───────────────────────────────────────────
   {
     id: 'SVC-006',
-    name: 'Aromatherapy',
-    duration: 45,
-    price: 600,
-    description: 'Relaxation with essential oils',
-    therapistRequired: false,
+    name: 'Green Jade Stone (Cold)',
+    duration: 90,
+    price: 1700,
+    description: '그린 제이드 스톤 (콜드) 마사지',
+    therapistRequired: true,
+    durationOptions: [
+      { duration: 90, price: 1700 },
+      { duration: 120, price: 2200 },
+    ],
   },
   {
     id: 'SVC-007',
-    name: 'Hot Stone Massage',
-    duration: 75,
-    price: 1100,
-    description: 'Heated stones for muscle relief',
+    name: 'Aloe (Cold)',
+    duration: 60,
+    price: 1300,
+    description: '알로에 (콜드) 마사지',
     therapistRequired: true,
+    durationOptions: [
+      { duration: 60, price: 1300 },
+      { duration: 90, price: 1700 },
+      { duration: 120, price: 2200 },
+    ],
+  },
+
+  // ── 기본 마사지 ───────────────────────────────────────────
+  {
+    id: 'SVC-008',
+    name: 'Aroma Massage',
+    duration: 60,
+    price: 1100,
+    description: '아로마 마사지',
+    therapistRequired: false,
+    durationOptions: [
+      { duration: 60, price: 1100 },
+      { duration: 90, price: 1500 },
+      { duration: 120, price: 2200 },
+    ],
+  },
+  {
+    id: 'SVC-009',
+    name: 'Dry Massage',
+    duration: 60,
+    price: 1100,
+    description: '드라이 마사지',
+    therapistRequired: true,
+    durationOptions: [
+      { duration: 60, price: 1100 },
+      { duration: 90, price: 1500 },
+      { duration: 120, price: 2200 },
+    ],
+  },
+  {
+    id: 'SVC-010',
+    name: 'Coconut Oil Massage',
+    duration: 60,
+    price: 1100,
+    description: '코코넛 오일 마사지',
+    therapistRequired: true,
+    durationOptions: [
+      { duration: 60, price: 1100 },
+      { duration: 90, price: 1500 },
+      { duration: 120, price: 2200 },
+    ],
+  },
+  {
+    id: 'SVC-011',
+    name: 'Corporate Massage',
+    duration: 60,
+    price: 700,
+    description: '정장 마사지 (짧은 시간)',
+    therapistRequired: true,
+    durationOptions: [
+      { duration: 60, price: 700 },
+      { duration: 90, price: 900 },
+      { duration: 120, price: 1100 },
+    ],
+  },
+
+  // ── 발 마사지 ───────────────────────────────────────────
+  {
+    id: 'SVC-012',
+    name: 'Foot Pack (Scrub + Massage)',
+    duration: 60,
+    price: 1300,
+    description: '발광풋팩 (풋 스크럽 + 발 마사지)',
+    therapistRequired: true,
+    durationOptions: [
+      { duration: 60, price: 1300 },
+    ],
+  },
+  {
+    id: 'SVC-013',
+    name: 'Basic Foot Massage',
+    duration: 60,
+    price: 900,
+    description: '발 마사지 (기본)',
+    therapistRequired: true,
+    durationOptions: [
+      { duration: 60, price: 900 },
+      { duration: 90, price: 1300 },
+    ],
   },
 ];
 

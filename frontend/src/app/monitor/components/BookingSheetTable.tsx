@@ -193,8 +193,26 @@ export default function BookingSheetTable() {
     setRows((prev) => padToRowCount(prev, clamped));
   };
 
-  const update = (i: number, patch: Partial<Row>) =>
+  // ============================================================
+  // 📌 함수: getServiceInfo
+  // 📋 목적: 마사지 이름으로 서비스 정보 조회 (가격, 시간옵션)
+  // 🔧 매개변수: serviceName (string)
+  // 📤 반환값: { duration: number; price: number; durationOptions?: ... }
+  // 📅 작성일: 2026-06-03
+  // ============================================================
+  const getServiceInfo = (serviceName: string) => {
+    const service = SERVICES.find((s) => s.name === serviceName);
+    return service || { name: '', duration: 60, price: 0 };
+  };
+
+  const update = (i: number, patch: Partial<Row>) => {
+    // 마사지 선택 시 자동으로 시간과 금액 설정
+    if (patch.service && !patch.totalAmount) {
+      const serviceInfo = getServiceInfo(patch.service);
+      patch.totalAmount = serviceInfo.price || 0;
+    }
     setRows((prev) => prev.map((r, idx) => (idx === i ? { ...r, ...patch, saved: false } : r)));
+  };
 
   const endTimeOf = (r: Row) => autoEndTime(r.startTime, r.service);
   const isFilled = (r: Row) => r.therapistName && r.service && r.startTime && r.guestName.trim();
