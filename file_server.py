@@ -229,8 +229,8 @@ if __name__ == '__main__':
     print("🚀 ElSpa 파일 저장 서버 시작")
     print("="*60)
     print(f"📁 데이터 디렉토리: {DATA_DIR}")
-    print(f"🌐 서버: http://localhost:5000")
-    print(f"📊 API: POST http://localhost:5000/api/save-all")
+    print(f"🌐 서버: http://localhost:5001")
+    print(f"📊 API: POST http://localhost:5001/api/save-all")
     print("="*60 + "\n")
 
-    app.run(host='localhost', port=5000, debug=False)
+    app.run(host='localhost', port=5001, debug=False)
