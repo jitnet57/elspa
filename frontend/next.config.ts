@@ -21,9 +21,10 @@ const nextConfig: NextConfig = {
 
   // ============================================================
   // 📌 배포 설정 (Cloudflare Pages)
-  // 📋 API Routes 지원을 위해 export 모드 제거
+  // 📋 API Routes 지원을 위해 export 모드 비활성화
   // ============================================================
-  // output: "export", ← API Routes 사용을 위해 비활성화
+  // output: "export", ← API Routes 사용으로 비활성화
+  trailingSlash: false,
 
   // ============================================================
   // 📌 이미지 최적화
