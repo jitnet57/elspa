@@ -1,101 +1,146 @@
 # ============================================================
-# 📌 docker-compose.yml - ElSpa Multi-Container Orchestration
-# 📋 목적: 백엔드, 프론트엔드, 데이터베이스 통합 운영
-# 🔧 개발/테스트 환경용 오케스트레이션
-# 📅 작성일: 2026-05-22
+# 🐳 Docker Compose - ElSpa 로컬 개발 환경
+# ============================================================
+# 프론트엔드 + 백엔드 + PostgreSQL을 한 번에 실행
+# 실행: docker-compose up
 # ============================================================
 
 version: '3.8'
 
 services:
-  # ==========================================
-  # Database: PostgreSQL (Supabase 호환)
-  # ==========================================
-  db:
-    image: postgres:15-alpine
-    container_name: elspa-db
+  # ============================================================
+  # 📱 프론트엔드 (Next.js)
+  # ============================================================
+  frontend:
+    image: node:18-alpine
+    working_dir: /app/frontend
+    volumes:
+      - ./frontend:/app/frontend
+      - /app/frontend/node_modules
+    ports:
+      - "3000:3000"
     environment:
-      POSTGRES_USER: ${DB_USER:-elspa_user}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-elspa_password}
-      POSTGRES_DB: ${DB_NAME:-elspa_dev}
-      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=en_US.UTF-8"
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+    command: bash -c "npm install && npm run dev"
+    depends_on:
+      - backend
+    networks:
+      - elspa-network
+
+  # ============================================================
+  # ⚙️  백엔드 (FastAPI)
+  # ============================================================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/elspa
+      - PORT=8000
+      - ENVIRONMENT=development
+      - PYTHONUNBUFFERED=1
+      - CORS_ORIGINS=http://localhost:3000,http://frontend:3000
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./app:/app/app
+      - ./main.py:/app/main.py
+      - ./requirements.txt:/app/requirements.txt
+    depends_on:
+      - postgres
+    networks:
+      - elspa-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ============================================================
+  # 🗄️  데이터베이스 (PostgreSQL)
+  # ============================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: elspa-postgres
+    environment:
+      - POSTGRES_DB=elspa
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./supabase/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    networks:
+      - elspa-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-elspa_user}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - elspa_network
 
-  # ==========================================
-  # Backend API: FastAPI + uvicorn
-  # ==========================================
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
-    container_name: elspa-backend
-    ports:
-      - "8000:8000"
+  # ============================================================
+  # 📊 pgAdmin (데이터베이스 관리 UI) - 선택사항
+  # ============================================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: elspa-pgadmin
     environment:
-      DATABASE_URL: postgresql://${DB_USER:-elspa_user}:${DB_PASSWORD:-elspa_password}@db:5432/${DB_NAME:-elspa_dev}
-      DEBUG: ${DEBUG:-false}
-      ENVIRONMENT: ${ENVIRONMENT:-development}
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:3001}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-secret-key-change-in-production}
-      JWT_ALGORITHM: HS256
-      JWT_EXPIRATION_HOURS: 24
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-
-    depends_on:
-      db:
-        condition: service_healthy
-
-    volumes:
-      - ./app:/app/app
-      - ./main.py:/app/main.py
-      - ./scripts:/app/scripts
-
-    networks:
-      - elspa_network
-
-    restart: unless-stopped
-
-  # ==========================================
-  # Frontend: Next.js (Port 3000)
-  # ==========================================
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend
-    container_name: elspa-frontend
+      - PGADMIN_DEFAULT_EMAIL=admin@example.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
     ports:
-      - "3000:3000"
-    environment:
-      NODE_ENV: ${NEXT_ENV:-development}
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
-      NEXT_PUBLIC_APP_NAME: ElSpa Manager
-
+      - "5050:80"
     depends_on:
-      - backend
-
-    volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/public:/app/public
-
+      - postgres
     networks:
-      - elspa_network
-
-    restart: unless-stopped
+      - elspa-network
 
 volumes:
   postgres_data:
     driver: local
 
 networks:
-  elspa_network:
+  elspa-network:
     driver: bridge
+
+# ============================================================
+# 📝 사용 방법
+# ============================================================
+# 1. 모든 서비스 시작
+#    docker-compose up
+#
+# 2. 배경 실행
+#    docker-compose up -d
+#
+# 3. 로그 확인
+#    docker-compose logs -f backend
+#    docker-compose logs -f frontend
+#
+# 4. 서비스 중지
+#    docker-compose down
+#
+# 5. 데이터 초기화 (볼륨 삭제)
+#    docker-compose down -v
+#
+# 6. 특정 서비스만 재시작
+#    docker-compose restart backend
+#
+# ============================================================
+# 🌐 접속
+# ============================================================
+# Frontend:  http://localhost:3000
+# Backend:   http://localhost:8000
+# API Docs:  http://localhost:8000/docs
+# pgAdmin:   http://localhost:5050
+#            Email: admin@example.com
+#            Password: admin
+#
+# DB Connection (pgAdmin):
+#   Host: postgres
+#   Port: 5432
+#   Username: postgres
+#   Password: password
+#   Database: elspa
+# ============================================================
