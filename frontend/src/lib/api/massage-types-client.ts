@@ -7,7 +7,7 @@
  * ============================================================
  */
 
-import { API_BASE_URL } from './config';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 /**
  * 마사지 타입 인터페이스
