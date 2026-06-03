@@ -28,7 +28,7 @@ export default function AdminShell({ children }: AdminShellProps) {
       <div className="absolute w-[600px] h-[600px] rounded-full bg-cyan-600 bottom-[-200px] left-[-100px] filter blur-[120px] opacity-10 -z-10 pointer-events-none"></div>
 
       {/* Navigation Sidebar */}
-      <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-full w-[280px] bg-slate-900/40 backdrop-blur-xl border-r border-indigo-500/10 shadow-2xl shadow-black/50 z-50 p-6 overflow-hidden">
+      <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-full w-[280px] bg-slate-900/40 backdrop-blur-xl border-r border-indigo-500/10 shadow-2xl shadow-black/50 z-50 p-6 overflow-y-auto">
         <div className="flex flex-col gap-4 min-h-0 flex-1">
           <div className="px-4 py-6 flex-shrink-0">
             <h2 className="text-3xl font-black text-[#8aebff] tracking-tighter drop-shadow-[0_0_8px_rgba(138,235,255,0.4)]">ELSPA</h2>
