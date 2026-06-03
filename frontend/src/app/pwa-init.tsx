@@ -50,28 +50,30 @@ export function PWAInit() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // 앱 시작 시 캐시 클리어 후 리프레시
-    (async () => {
-      const lastClearTime = sessionStorage.getItem('lastCacheClear');
-      const now = Date.now();
-      const ONE_DAY = 24 * 60 * 60 * 1000; // 24시간
+    // ⚠️ 프로덕션에서만 캐시 클리어 수행 (프리뷰 CORS 에러 방지)
+    const isProduction = window.location.hostname === 'elspa.pages.dev';
 
-      // 마지막 캐시 클리어 후 24시간 이상 경과했으면 다시 클리어
-      if (!lastClearTime || now - parseInt(lastClearTime) > ONE_DAY) {
-        console.log('🔄 IndexedDB 캐시 클리어 및 리프레시 시작...');
-        const cleared = await clearIndexedDBCache();
+    if (isProduction) {
+      (async () => {
+        const lastClearTime = sessionStorage.getItem('lastCacheClear');
+        const now = Date.now();
+        const ONE_DAY = 24 * 60 * 60 * 1000;
 
-        if (cleared) {
-          sessionStorage.setItem('lastCacheClear', now.toString());
-          // 캐시 클리어 완료 후 1초 후 리프레시
-          setTimeout(() => {
-            console.log('🔄 페이지 리프레시...');
-            window.location.reload();
-          }, 1000);
-          return; // 여기서 함수 종료 (리프레시 될 것)
+        if (!lastClearTime || now - parseInt(lastClearTime) > ONE_DAY) {
+          console.log('🔄 IndexedDB 캐시 클리어 시작...');
+          const cleared = await clearIndexedDBCache();
+
+          if (cleared) {
+            sessionStorage.setItem('lastCacheClear', now.toString());
+            setTimeout(() => {
+              console.log('🔄 페이지 리프레시...');
+              window.location.reload();
+            }, 1000);
+            return;
+          }
         }
-      }
-    })();
+      })();
+    }
 
     // 오프라인 복구 시 자동 싱크 리스너 등록
     startSyncOnReconnect(() => new Date().toISOString().split('T')[0]);
