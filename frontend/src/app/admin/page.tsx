@@ -31,8 +31,11 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      const tab = params.get('tab') as 'dashboard' | 'payroll' | 'payroll-calc' | 'knowledge-network' | null;
-      if (tab) setAdminTab(tab);
+      const tab = params.get('tab');
+      if (tab === 'dashboard' || tab === 'payroll' || tab === 'payroll-calc' || tab === 'knowledge-network') {
+        setAdminTab(tab);
+      }
+      // 쿼리 파라미터 없으면 기본값 'dashboard' 유지
     }
   }, []);
 
