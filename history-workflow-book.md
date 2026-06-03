@@ -7451,3 +7451,234 @@ Cloudflare Pages / Railway
 6. **분석**: Google Analytics 통합
 
 ---
+
+---
+
+## [2026-06-03 08:50] Order: 024 - Railway asyncpg 의존성 제거 및 동기 데이터베이스 전환
+
+**주제:** Railway 배포 후 asyncpg 모듈 누락 에러 해결 및 데이터베이스 아키텍처 변경
+
+### 🎯 문제 분석
+
+**에러 발생:**
+```
+ModuleNotFoundError: No module named 'asyncpg'
+```
+
+**원인:**
+- app/database.py에서 `create_async_engine` 사용 (asyncpg 필요)
+- Railway 컨테이너에 asyncpg 패키지 미설치
+- requirements.txt에 asyncpg 추가 안 됨
+
+**증상:**
+```
+❌ Backend 502 Error
+❌ API 응답 없음
+✅ Frontend 정상 (Monitor, Admin 페이지 로드 가능)
+```
+
+### 📋 Plan
+
+✅ asyncpg 의존성 제거  
+✅ SQLAlchemy 동기 방식으로 통일  
+✅ app/database.py 리팩토링  
+✅ Flask/FastAPI 호환성 확인
+
+### 🔧 Task 수행 내용
+
+#### 섹션 1: 데이터베이스 아키텍처 변경
+
+**파일: app/database.py (원본: 101줄 → 변경: 48줄)**
+
+**변경 전 (비동기 + asyncpg):**
+```python
+# 비동기 엔진 (고성능이라고 생각했지만 Railway에서 작동 안 함)
+async_engine = create_async_engine(
+    async_database_url,  # postgresql+asyncpg://...
+    echo=False,
+    pool_pre_ping=True,
+    poolclass=NullPool,
+)
+
+# 비동기 세션
+SessionLocal = async_sessionmaker(
+    async_engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+)
+
+async def get_db() -> AsyncSession:
+    async with SessionLocal() as session:
+        yield session
+```
+
+**변경 후 (동기 방식):**
+```python
+# 동기 엔진 (Railway 환경 최적화)
+engine = create_engine(
+    DATABASE_URL,  # postgresql://...
+    echo=False,
+    pool_pre_ping=True,
+    poolclass=NullPool,
+)
+
+# 동기 세션
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine,
+)
+
+def get_db() -> Session:
+    db = SessionLocal()
+    try:
+        yield db
+    except Exception as e:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+```
+
+**제거된 코드:**
+- `create_async_engine` (asyncpg 불필요)
+- `AsyncSession`, `async_sessionmaker` (동기로 통일)
+- `async def get_db()` (동기 함수로 변경)
+
+**장점:**
+```
+1. 의존성 감소
+   - asyncpg 제거
+   - aiosqlite 제거
+   - psycopg2 하나만 필요
+
+2. Railway 호환성
+   - 추가 패키지 설치 불필요
+   - 빠른 부팅
+
+3. 코드 단순화
+   - async/await 제거
+   - 이해하기 쉬운 동기 코드
+
+4. FastAPI 호환성
+   - FastAPI는 동기 엔드포인트도 지원
+   - massage_types.py와 일치
+```
+
+#### 섹션 2: Git 커밋 및 배포
+
+**커밋:**
+```bash
+b7c1ea3c 🔧 Fix: asyncpg 의존성 제거 - 동기 데이터베이스로 변경
+```
+
+**배포 프로세스:**
+1. GitHub push (자동 감지)
+2. Railway 자동 빌드 시작
+3. Docker 이미지 생성
+4. 컨테이너 시작
+5. FastAPI 서버 시작 (uvicorn)
+
+**예상 완료 시간:** 약 2-3분
+
+### 📊 Result
+
+✅ **1개 파일 리팩토링 완료 (101줄 → 48줄)**
+
+**코드 라인 수 감소:**
+```
+감소: -53줄 (-53%)
+- 불필요한 async 코드 제거
+- import 문 정리
+```
+
+**의존성 정리:**
+```
+제거됨:
+- asyncpg
+- aiosqlite
+
+유지됨:
+- psycopg2 (PostgreSQL 동기 드라이버)
+- SQLAlchemy (ORM)
+```
+
+### 🔗 배포 상태
+
+| 구성 요소 | 상태 | 상세 |
+|---------|------|------|
+| Frontend | ✅ | https://elspa.pages.dev (Cloudflare Pages) |
+| Backend | 🔄 | Railway 자동 재배포 중... |
+| Database | ✅ | Supabase PostgreSQL 연결 대기 |
+
+### 📌 기술 개념 (학생 여러분께)
+
+**동기 vs 비동기 데이터베이스**
+
+```
+비동기 방식 (async/await):
+- 장점: 높은 동시성 처리 (수천 개 연결 가능)
+- 단점: 복잡도 ↑, 의존성 ↑, 학습 곡선 가파름
+- 사용처: 초고성능 API (수백만 사용자)
+
+동기 방식 (blocking):
+- 장점: 간단함, 의존성 적음, 빠른 배포
+- 단점: 동시성 제한 (수십~수백 사용자)
+- 사용처: 일반적인 비즈니스 API, 마사지샵 예약 시스템
+```
+
+**ElSpa 시스템 규모:**
+- 예상 사용자: 수십~수백 명 (작은 마사지샵)
+- 동시 요청: 수 개~수십 개
+- 결론: **동기 방식이 충분함!** ✅
+
+### 🚀 다음 단계
+
+1. **Railway 자동 재배포 완료 대기** (1-2분)
+   ```bash
+   curl https://web-production-25f37.up.railway.app/health
+   ```
+
+2. **Backend 헬스 체크 확인**
+   ```
+   기대값: {"status":"ok"}
+   ```
+
+3. **마사지 종류 API 테스트**
+   ```
+   GET /api/v1/massage-types
+   응답: [Swedish, Thai, Hot Stone, ...]
+   ```
+
+4. **Frontend 최종 테스트**
+   ```
+   https://elspa.pages.dev/
+   → Monitor 클릭 → 서비스 드롭다운 로드 확인
+   → Admin 클릭 → 마사지 종류 추가 테스트
+   ```
+
+### 📚 배운 점
+
+**1. 의존성 관리의 중요성**
+- 모든 패키지가 모든 환경(로컬, Railway, Vercel)에서 작동하지 않음
+- 클라우드 배포 전에 의존성 확인 필수
+
+**2. 아키텍처 단순화**
+- "고급 기능이 항상 좋은 것은 아니다"
+- 프로젝트 규모에 맞는 적절한 도구 선택
+
+**3. 에러 메시지의 중요성**
+- Railway 로그가 정확한 에러를 보여줌
+- CloudFlare, Railway 대시보드에서 로그 확인 필수
+
+### 🎯 완료 체크리스트
+
+- [x] asyncpg 의존성 제거
+- [x] SQLAlchemy 동기 방식으로 통일
+- [x] app/database.py 리팩토링 (101줄 → 48줄)
+- [x] Git 커밋 및 push
+- [ ] Railway 자동 재배포 완료 (진행 중...)
+- [ ] Backend 헬스 체크 확인 (대기 중...)
+- [ ] Frontend-Backend 통합 테스트 (대기 중...)
+
+---
