@@ -97,6 +97,21 @@ const nextConfig: NextConfig = {
     // 타입스크립트 검사 활성화
     resolveExtensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
   },
+
+  // ============================================================
+  // 📌 리다이렉트 설정 (Cloudflare Pages)
+  // 📋 /monitor.html → /monitor 등의 HTML 확장자 제거
+  // ============================================================
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/:path*.html',
+          destination: '/:path*',
+        },
+      ],
+    };
+  },
 };
 
 export default nextConfig;
