@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import * as XLSX from 'xlsx';
 import excelImportClient, {
   ImportTableName,
   ValidateMappingResponse,
@@ -10,6 +11,9 @@ import excelImportClient, {
   formatFileSize,
   ImportStatistics,
   ValidationError,
+  autoDetectAndMap,
+  detectTableFromHeaders,
+  generateAutoMapping,
 } from '@/lib/api/excel-import-client';
 import { useT } from '@/lib/i18n';
 
@@ -21,6 +25,7 @@ import { useT } from '@/lib/i18n';
 // ============================================================
 
 type DialogStep = 'select' | 'parse' | 'mapping' | 'validate' | 'preview' | 'execute' | 'complete';
+type Mode = 'excel' | 'receipt';
 
 interface DialogState {
   step: DialogStep;
@@ -33,6 +38,14 @@ interface DialogState {
   validateResult: ValidateMappingResponse | null;
   progress: Array<{ row: number; status: string; message: string }>;
   stats: ImportStatistics | null;
+  autoDetectConfidence?: number;
+}
+
+interface ReceiptState {
+  images: File[];
+  processing: boolean;
+  results: Array<{ amount: number; category: string }>;
+  error: string | null;
 }
 
 interface TableInfo {
@@ -43,6 +56,7 @@ interface TableInfo {
 
 export default function ExcelImportPage() {
   const t = useT();
+  const [mode, setMode] = useState<Mode>('excel');
   const [state, setState] = useState<DialogState>({
     step: 'select',
     selectedFile: null,
@@ -54,6 +68,13 @@ export default function ExcelImportPage() {
     validateResult: null,
     progress: [],
     stats: null,
+  });
+
+  const [receiptState, setReceiptState] = useState<ReceiptState>({
+    images: [],
+    processing: false,
+    results: [],
+    error: null,
   });
 
   const [tables, setTables] = useState<TableInfo[]>([]);
@@ -262,38 +283,162 @@ export default function ExcelImportPage() {
     });
   };
 
+  // 📌 Excel 자동 분류 및 매핑
+  const handleAutoDetect = async () => {
+    if (!state.selectedFile) {
+      setState((prev) => ({ ...prev, error: 'Excel 파일을 선택하세요' }));
+      return;
+    }
+
+    setState((prev) => ({ ...prev, loading: true, error: null }));
+
+    try {
+      // XLSX로 Excel 파일 읽기
+      const arrayBuffer = await state.selectedFile.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+      const headers = Object.keys(jsonData[0] || {});
+
+      // 자동 감지 및 매핑
+      const { table, mapping, confidence } = autoDetectAndMap(headers);
+
+      setState((prev) => ({
+        ...prev,
+        selectedTable: table,
+        mapping: mapping,
+        autoDetectConfidence: confidence,
+        step: 'mapping',
+        parseResult: {
+          headers,
+          sample_data: jsonData.slice(0, 3),
+          total_rows: jsonData.length,
+          suggested_mapping: mapping,
+        },
+        loading: false,
+      }));
+    } catch (error) {
+      setState((prev) => ({
+        ...prev,
+        error: `파일 읽기 실패: ${(error as Error).message}`,
+        loading: false,
+      }));
+    }
+  };
+
+  // 📌 Receipt 이미지 선택
+  const handleReceiptImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setReceiptState((prev) => ({
+      ...prev,
+      images: [...prev.images, ...files],
+      error: null,
+    }));
+  };
+
+  // 📌 Receipt 이미지 제거
+  const handleRemoveReceiptImage = (index: number) => {
+    setReceiptState((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
+  };
+
+  // 📌 영수증 처리 (OCR)
+  const handleProcessReceipts = async () => {
+    if (receiptState.images.length === 0) {
+      setReceiptState((prev) => ({
+        ...prev,
+        error: '이미지를 선택하세요',
+      }));
+      return;
+    }
+
+    setReceiptState((prev) => ({ ...prev, processing: true, error: null }));
+
+    try {
+      // 실제로는 backend ExpenseOCRService 호출
+      // 임시로 모의 데이터 반환
+      const mockResults = receiptState.images.map(() => ({
+        amount: Math.floor(Math.random() * 100000) + 10000,
+        category: ['식대', '교통비', '숙박료'][Math.floor(Math.random() * 3)],
+      }));
+
+      setReceiptState((prev) => ({
+        ...prev,
+        results: mockResults,
+        processing: false,
+      }));
+    } catch (error) {
+      setReceiptState((prev) => ({
+        ...prev,
+        error: `영수증 처리 실패: ${(error as Error).message}`,
+        processing: false,
+      }));
+    }
+  };
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
       {/* 헤더 */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Link
-            href="/admin/policies"
-            className="text-cyan-400 hover:text-cyan-300 text-sm font-mono"
-          >
-            Settings
-          </Link>
-          <span className="text-indigo-400/50">/</span>
-          <span className="text-indigo-400/70 text-sm font-mono">Import Data</span>
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Link
+              href="/admin/policies"
+              className="text-cyan-400 hover:text-cyan-300 text-sm font-mono"
+            >
+              Settings
+            </Link>
+            <span className="text-indigo-400/50">/</span>
+            <span className="text-indigo-400/70 text-sm font-mono">Import Data</span>
+          </div>
+          <h1 className="text-3xl font-black text-[#8aebff] drop-shadow-[0_0_8px_rgba(138,235,255,0.4)]">
+            📥 데이터 임포트
+          </h1>
+          <p className="text-indigo-300/70 text-sm">
+            대량 데이터를 Excel 파일 또는 영수증 이미지로부터 가져옵니다.
+          </p>
         </div>
-        <h1 className="text-3xl font-black text-[#8aebff] drop-shadow-[0_0_8px_rgba(138,235,255,0.4)]">
-          📥 Import Data from Excel
-        </h1>
-        <p className="text-indigo-300/70 text-sm">
-          업체, 직원, 테라피스트 등 대량의 데이터를 Excel 파일에서 가져옵니다.
-        </p>
+
+        {/* 📌 Mode Tabs */}
+        <div className="flex gap-3 border-b border-white/10">
+          <button
+            onClick={() => setMode('excel')}
+            className={`px-4 py-2.5 font-bold transition-all ${
+              mode === 'excel'
+                ? 'text-cyan-400 border-b-2 border-cyan-400'
+                : 'text-indigo-300/70 hover:text-indigo-300'
+            }`}
+          >
+            📊 Excel 임포트
+          </button>
+          <button
+            onClick={() => setMode('receipt')}
+            className={`px-4 py-2.5 font-bold transition-all ${
+              mode === 'receipt'
+                ? 'text-cyan-400 border-b-2 border-cyan-400'
+                : 'text-indigo-300/70 hover:text-indigo-300'
+            }`}
+          >
+            📸 영수증 스캔
+          </button>
+        </div>
       </div>
 
       {/* Error Alert */}
-      {state.error && (
+      {(state.error || receiptState.error) && (
         <div className="bg-rose-500/10 border border-rose-500/30 rounded-lg p-4 text-rose-300 text-sm">
           <p className="font-bold mb-1">오류</p>
-          <p>{state.error}</p>
+          <p>{state.error || receiptState.error}</p>
         </div>
       )}
 
-      {/* Step 1: Select File & Table */}
-      {state.step === 'select' && (
+      {/* 📌 Excel 모드 */}
+      {mode === 'excel' && (
+        <>
+          {/* Step 1: Select File & Table */}
+          {state.step === 'select' && (
         <div className="bg-white/5 border border-white/10 rounded-lg p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* File Upload */}
@@ -383,18 +528,25 @@ export default function ExcelImportPage() {
           {/* Action Button */}
           <div className="flex justify-end gap-3 pt-4">
             <button
+              onClick={handleAutoDetect}
+              disabled={!state.selectedFile || state.loading}
+              className="px-6 py-2.5 bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all"
+            >
+              {state.loading ? '분석 중...' : '🤖 자동 분류'}
+            </button>
+            <button
               onClick={handleParseExcel}
               disabled={!state.selectedFile || !state.selectedTable || state.loading}
               className="px-6 py-2.5 bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all"
             >
-              {state.loading ? '파싱 중...' : '다음 단계 →'}
+              {state.loading ? '파싱 중...' : '수동 선택 →'}
             </button>
           </div>
         </div>
       )}
 
       {/* Step 2: Mapping */}
-      {state.step === 'mapping' && state.parseResult && (
+          {state.step === 'mapping' && state.parseResult && (
         <div className="bg-white/5 border border-white/10 rounded-lg p-6 space-y-6">
           <div className="space-y-4">
             <h2 className="text-lg font-bold text-cyan-400">
@@ -748,6 +900,105 @@ export default function ExcelImportPage() {
               새 파일 임포트
             </button>
           </div>
+        </div>
+      )}
+        </>
+      )}
+
+      {/* 📌 Receipt 모드 - 영수증 이미지 스캔 */}
+      {mode === 'receipt' && (
+        <div className="bg-white/5 border border-white/10 rounded-lg p-6 space-y-6">
+          {/* 이미지 업로드 */}
+          <div className="space-y-3">
+            <label className="block">
+              <span className="text-sm font-bold text-indigo-300 block mb-2">
+                📸 영수증 이미지 선택
+              </span>
+              <div className="relative border-2 border-dashed border-indigo-500/30 rounded-lg p-6 text-center hover:border-indigo-500/60 transition-all cursor-pointer bg-indigo-500/5">
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleReceiptImageSelect}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <div className="text-3xl mb-2">📷</div>
+                <p className="text-sm font-bold text-indigo-300">
+                  클릭하여 이미지 선택
+                </p>
+                <p className="text-xs text-indigo-300/60">
+                  여러 장을 선택할 수 있습니다 (JPG, PNG)
+                </p>
+              </div>
+            </label>
+          </div>
+
+          {/* 선택된 이미지 목록 */}
+          {receiptState.images.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-indigo-300">
+                선택된 이미지 ({receiptState.images.length}개)
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {receiptState.images.map((image, idx) => (
+                  <div key={idx} className="relative group">
+                    <img
+                      src={URL.createObjectURL(image)}
+                      alt={`Receipt ${idx}`}
+                      className="w-full h-32 object-cover rounded-lg border border-white/10"
+                    />
+                    <button
+                      onClick={() => handleRemoveReceiptImage(idx)}
+                      className="absolute top-1 right-1 bg-rose-600 hover:bg-rose-700 text-white rounded-full w-6 h-6 text-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                    >
+                      ×
+                    </button>
+                    <p className="text-xs text-indigo-300/60 mt-1 truncate">
+                      {image.name}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 처리 버튼 */}
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={handleProcessReceipts}
+              disabled={receiptState.images.length === 0 || receiptState.processing}
+              className="px-6 py-2.5 bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all"
+            >
+              {receiptState.processing ? '처리 중...' : '🤖 OCR 처리'}
+            </button>
+          </div>
+
+          {/* 처리 결과 */}
+          {receiptState.results.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-indigo-300">처리 결과</h3>
+              <div className="space-y-2">
+                {receiptState.results.map((result, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between bg-white/5 border border-white/10 rounded p-3"
+                  >
+                    <div>
+                      <p className="text-sm text-white font-semibold">
+                        영수증 #{idx + 1}
+                      </p>
+                      <p className="text-xs text-indigo-300/70">
+                        분류: {result.category}
+                      </p>
+                    </div>
+                    <p className="text-lg font-bold text-cyan-400">
+                      ₩{result.amount.toLocaleString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

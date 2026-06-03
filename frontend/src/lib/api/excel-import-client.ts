@@ -785,3 +785,195 @@ export async function bulkExecuteImportUtil(
 
   return results;
 }
+
+/**
+ * ============================================================
+ * 📌 자동 분류 및 매핑 (Auto-Classification & Mapping)
+ * 📋 목적: Excel 헤더 분석으로 테이블 추천 및 자동 매핑
+ * 📅 작성일: 2026-06-03
+ * ============================================================
+ */
+
+// 각 테이블별 헤더 패턴 정의
+const TABLE_PATTERNS: Record<ImportTableName, { keywords: string[]; priority: number }> = {
+  therapists: {
+    keywords: ['therapist', 'name', 'specialty', 'license', 'phone', 'certificate'],
+    priority: 1,
+  },
+  employees: {
+    keywords: ['employee', 'staff', 'position', 'department', 'salary', 'hire_date'],
+    priority: 2,
+  },
+  customers: {
+    keywords: ['customer', 'client', 'member', 'phone', 'email', 'address'],
+    priority: 3,
+  },
+  beds: {
+    keywords: ['bed', 'room', 'status', 'therapist'],
+    priority: 4,
+  },
+  expense_categories: {
+    keywords: ['category', 'expense', 'cost', 'type'],
+    priority: 5,
+  },
+};
+
+// 컬럼 매핑을 위한 동의어 사전
+const COLUMN_SYNONYMS: Record<string, string[]> = {
+  name: ['name', 'full_name', 'therapist_name', 'employee_name', 'customer_name', 'person_name'],
+  specialty: ['specialty', 'specialization', 'field', 'expertise'],
+  license: ['license', 'license_number', 'certificate', 'cert_number'],
+  phone: ['phone', 'phone_number', 'phone_num', 'contact', 'mobile'],
+  email: ['email', 'email_address', 'mail'],
+  address: ['address', 'location', 'addr'],
+  status: ['status', 'state', 'condition'],
+  room_number: ['room', 'room_number', 'room_num', 'room_id'],
+  position: ['position', 'job', 'title', 'job_title'],
+  department: ['department', 'dept', 'division'],
+  salary: ['salary', 'wage', 'pay', 'compensation'],
+  hire_date: ['hire_date', 'start_date', 'date_hired'],
+  category: ['category', 'type', 'kind'],
+  cost: ['cost', 'price', 'amount', 'value'],
+};
+
+/**
+ * 📌 함수: detectTableFromHeaders
+ * 📋 목적: Excel 헤더 패턴 분석으로 테이블 자동 추천
+ * 🔧 매개변수: headers (string[]) - Excel 파일의 헤더 배열
+ * 📤 반환값: {table: ImportTableName, confidence: number}
+ * 📅 작성일: 2026-06-03
+ */
+export function detectTableFromHeaders(
+  headers: string[]
+): { table: ImportTableName; confidence: number } {
+  const normalizedHeaders = headers.map((h) => h.toLowerCase().trim());
+
+  // 각 테이블별 점수 계산
+  const scores: Record<ImportTableName, number> = {
+    therapists: 0,
+    employees: 0,
+    customers: 0,
+    beds: 0,
+    expense_categories: 0,
+  };
+
+  for (const [tableName, pattern] of Object.entries(TABLE_PATTERNS)) {
+    const table = tableName as ImportTableName;
+    let matchCount = 0;
+
+    for (const keyword of pattern.keywords) {
+      const found = normalizedHeaders.some((h) => h.includes(keyword));
+      if (found) matchCount++;
+    }
+
+    scores[table] = matchCount / pattern.keywords.length;
+  }
+
+  // 가장 높은 점수의 테이블 선택
+  const [bestTable, bestScore] = Object.entries(scores).reduce((prev, curr) =>
+    curr[1] > prev[1] ? curr : prev
+  ) as [ImportTableName, number];
+
+  return {
+    table: bestTable,
+    confidence: Math.round(bestScore * 100),
+  };
+}
+
+/**
+ * 📌 함수: generateAutoMapping
+ * 📋 목적: Excel 헤더와 데이터베이스 필드를 자동으로 매핑 (규칙 기반)
+ * 🔧 매개변수:
+ *    - headers: Excel 헤더 배열
+ *    - tableName: 대상 테이블명
+ *    - fields: 테이블 필드 정의 배열 (선택)
+ * 📤 반환값: Record<string, string> (Excel헤더 -> DB필드 매핑)
+ * 📅 작성일: 2026-06-03
+ * ⚠️ 주의: 동의어 매칭 사용, 매칭 없으면 공백
+ */
+export function generateAutoMapping(
+  headers: string[],
+  tableName: ImportTableName,
+  fields?: FieldDefinition[]
+): Record<string, string> {
+  const mapping: Record<string, string> = {};
+  const normalizedHeaders = headers.map((h) => h.toLowerCase().trim());
+
+  // 필드 목록이 없으면 기본 필드 목록 사용
+  const dbFields = fields ? fields.map((f) => f.name) : getDefaultFields(tableName);
+
+  for (const header of normalizedHeaders) {
+    let matchedField = '';
+
+    // 정확한 매칭 시도
+    if (dbFields.includes(header)) {
+      matchedField = header;
+    } else {
+      // 동의어로 매칭 시도
+      for (const [dbField, synonyms] of Object.entries(COLUMN_SYNONYMS)) {
+        if (dbFields.includes(dbField)) {
+          const found = synonyms.some(
+            (syn) =>
+              header === syn ||
+              header.includes(syn) ||
+              syn.includes(header.split('_')[0])
+          );
+
+          if (found) {
+            matchedField = dbField;
+            break;
+          }
+        }
+      }
+    }
+
+    mapping[header] = matchedField;
+  }
+
+  return mapping;
+}
+
+/**
+ * 📌 헬퍼 함수: getDefaultFields
+ * 📋 목적: 테이블별 기본 필드 목록 반환
+ * 🔧 매개변수: tableName - 테이블명
+ * 📤 반환값: string[] - 필드명 배열
+ */
+function getDefaultFields(tableName: ImportTableName): string[] {
+  const defaultFields: Record<ImportTableName, string[]> = {
+    therapists: ['name', 'specialty', 'license', 'phone', 'email', 'hire_date'],
+    employees: ['name', 'position', 'department', 'salary', 'hire_date', 'phone'],
+    customers: ['name', 'phone', 'email', 'address'],
+    beds: ['room_number', 'status', 'therapist_id'],
+    expense_categories: ['category', 'cost'],
+  };
+
+  return defaultFields[tableName] || [];
+}
+
+/**
+ * 📌 함수: autoDetectAndMap
+ * 📋 목적: Excel 헤더 분석 및 자동 매핑 (통합)
+ * 🔧 매개변수:
+ *    - headers: Excel 헤더 배열
+ *    - fields: 테이블 필드 정의 배열 (선택)
+ * 📤 반환값: {table: ImportTableName, mapping: Record<string, string>, confidence: number}
+ * 📅 작성일: 2026-06-03
+ */
+export function autoDetectAndMap(
+  headers: string[],
+  fields?: FieldDefinition[]
+): {
+  table: ImportTableName;
+  mapping: Record<string, string>;
+  confidence: number;
+} {
+  const { table, confidence } = detectTableFromHeaders(headers);
+  const mapping = generateAutoMapping(headers, table, fields);
+
+  return {
+    table,
+    mapping,
+    confidence,
+  };
+}
