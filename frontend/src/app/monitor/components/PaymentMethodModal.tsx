@@ -48,7 +48,7 @@ export default function PaymentMethodModal({
 
   return (
     <dialog className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-sm md:text-lg font-bold text-gray-900">

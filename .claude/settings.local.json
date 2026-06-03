@@ -16,7 +16,8 @@
       "Bash(pkill -f \"next dev\")",
       "Bash(npx next *)",
       "mcp__Claude_Preview__preview_start",
-      "Bash(export PATH=\"/opt/homebrew/Cellar/node/25.2.1/bin:$PATH\")"
+      "Bash(export PATH=\"/opt/homebrew/Cellar/node/25.2.1/bin:$PATH\")",
+      "Bash(vercel --prod --confirm)"
     ],
     "additionalDirectories": [
       "/Users/kwangseobpark/elspa/.git/refs"
