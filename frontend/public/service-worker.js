@@ -2,7 +2,7 @@
 // 오프라인 지원 및 캐싱 전략
 // 배포할 때마다 버전을 올려서 캐시를 무효화합니다
 
-const CACHE_VERSION = '20260603-v40'; // v40: Service Worker response cloning 에러 수정 (line 105)
+const CACHE_VERSION = '20260603-v41'; // v41: API 응답 clone() 에러 수정 - response 검증 추가
 const CACHE_NAME = `elspa-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
@@ -99,13 +99,23 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // 응답 본문은 한 번만 사용 가능하므로, 즉시 clone해서 원본과 사본 분리
-          if (response.ok) {
-            // 사본으로 캐싱 (async, non-blocking)
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, response.clone());
-            });
+          // 응답이 없거나 실패한 경우 즉시 반환
+          if (!response || !response.ok) {
+            return response;
           }
+
+          // 응답을 복사: 캐싱용 + 반환용
+          const responseClone = response.clone();
+
+          // 사본으로 캐싱 (async, non-blocking)
+          caches.open(CACHE_NAME).then((cache) => {
+            try {
+              cache.put(request, responseClone);
+            } catch (error) {
+              console.log('[Service Worker] Cache put failed:', error);
+            }
+          });
+
           // 원본은 caller에게 반환
           return response;
         })

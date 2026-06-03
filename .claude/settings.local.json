@@ -28,7 +28,9 @@
       "Bash(curl -s -I https://elspa.pages.dev/monitor)",
       "Bash(curl -s https://elspa.pages.dev/ -I)",
       "Bash(curl -s -I https://elspa.pages.dev/)",
-      "Bash(vercel --version)"
+      "Bash(vercel --version)",
+      "Bash(python3:*)",
+      "Bash(grep -l \"staff\\\\|Staff\" /Users/kwangseobpark/elspa/app/routers/*.py)"
     ],
     "additionalDirectories": [
       "/Users/kwangseobpark/elspa/.git/refs",

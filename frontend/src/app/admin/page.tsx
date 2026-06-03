@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import React from 'react';
 import dynamic from 'next/dynamic';
 import { usePayrollStore } from '@/lib/store/payroll-store';
@@ -10,7 +10,15 @@ import { getSupabase } from '@/lib/supabase/client';
 // Lazy load 3D 네트워크 대시보드 (SSR 방지)
 const NetworkDashboardAdmin = dynamic(
   () => import('@/components/20250529-2100-network-dashboard-admin'),
-  { ssr: false, loading: () => <div className="p-8 text-center text-indigo-300/50">3D 네트워크 로딩 중...</div> }
+  {
+    ssr: false,
+    loading: () => (
+      <div className="p-8 text-center text-indigo-300/50 bg-white/3 backdrop-blur-md border border-indigo-500/20 rounded-3xl">
+        <div className="w-12 h-12 rounded-full border-2 border-cyan-400/30 border-t-cyan-400 animate-spin mx-auto mb-4"></div>
+        <p className="text-indigo-300/60 text-sm font-semibold">🧠 3D 네트워크 로딩 중...</p>
+      </div>
+    )
+  }
 );
 
 // ============================================================
@@ -302,12 +310,19 @@ export default function AdminDashboard() {
 
 
       {adminTab === 'knowledge-network' && (
-        <>
+        <section className="space-y-6">
           {/* ============================================================
               📊 3D 지식 네트워크 통합 섹션
               ============================================================ */}
-          <NetworkDashboardAdmin />
-        </>
+          <Suspense fallback={
+            <div className="p-8 text-center text-indigo-300/50 bg-white/3 backdrop-blur-md border border-indigo-500/20 rounded-3xl">
+              <div className="w-12 h-12 rounded-full border-2 border-cyan-400/30 border-t-cyan-400 animate-spin mx-auto mb-4"></div>
+              <p className="text-indigo-300/60 text-sm font-semibold">🧠 3D 네트워크 로딩 중...</p>
+            </div>
+          }>
+            <NetworkDashboardAdmin />
+          </Suspense>
+        </section>
       )}
 
       {adminTab === 'payroll' && (

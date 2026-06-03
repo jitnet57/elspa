@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from app.routers.massage_types import router as massage_types_router
+from app.routers.staff_api import router as staff_api_router
 
 
 # FastAPI 앱 생성
@@ -27,6 +28,7 @@ app.add_middleware(
 
 # 라우터 등록
 app.include_router(massage_types_router)
+app.include_router(staff_api_router)
 
 # 헬스 체크
 @app.get("/health")
