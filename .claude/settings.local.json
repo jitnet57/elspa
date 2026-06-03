@@ -11,7 +11,12 @@
       "Bash(\n# 임시 디렉토리 정리\nrm -rf .git-rewrite\nrm -rf .git/refs/original\n\n# 현재 변경사항 확인\ngit diff HEAD frontend/src/app/admin/settings/import/page.tsx | wc -l\ngit diff HEAD frontend/src/lib/api/excel-import-client.ts | wc -l\n\n# 변경사항 스테이징 및 커밋\ngit add frontend/src/app/admin/settings/import/page.tsx \\\\\n         frontend/src/lib/api/excel-import-client.ts \\\\\n         .gitignore 2>/dev/null || true\n\ngit status --short\n)",
       "Bash(rm -rf .git/refs/original)",
       "Bash(git reflog:*)",
-      "Bash(git gc:*)"
+      "Bash(git gc:*)",
+      "Bash(kill 8320)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(npx next *)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(export PATH=\"/opt/homebrew/Cellar/node/25.2.1/bin:$PATH\")"
     ],
     "additionalDirectories": [
       "/Users/kwangseobpark/elspa/.git/refs"

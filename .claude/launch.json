@@ -1,0 +1,25 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Frontend (Next.js)",
+      "runtimeExecutable": "/tmp/start-dev.sh",
+      "runtimeArgs": [],
+      "port": 3000,
+      "autoPort": true,
+      "cwd": "/Users/kwangseobpark/elspa/frontend"
+    },
+    {
+      "name": "Backend (FastAPI)",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["main.py"],
+      "port": 8000
+    },
+    {
+      "name": "File Server (Flask)",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["file_server.py"],
+      "port": 5001
+    }
+  ]
+}
