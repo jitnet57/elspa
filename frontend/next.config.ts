@@ -99,19 +99,9 @@ const nextConfig: NextConfig = {
   },
 
   // ============================================================
-  // 📌 리다이렉트 설정 (Cloudflare Pages)
-  // 📋 /monitor.html → /monitor 등의 HTML 확장자 제거
+  // 📌 Cloudflare Pages는 _redirects 파일을 사용하여 리다이렉트 처리
+  // 📋 next.config의 rewrites는 Cloudflare 환경에서 작동 안 함
   // ============================================================
-  async rewrites() {
-    return {
-      beforeFiles: [
-        {
-          source: '/:path*.html',
-          destination: '/:path*',
-        },
-      ],
-    };
-  },
 };
 
 export default nextConfig;
