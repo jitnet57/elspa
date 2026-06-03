@@ -22,7 +22,7 @@ import AttendanceView from './components/AttendanceView';
  */
 
 export default function MonitorPage() {
-  const [activeTab, setActiveTab] = useState<'beds' | 'schedule' | 'booking' | 'attendance'>('beds');
+  const [activeTab, setActiveTab] = useState<'beds' | 'schedule' | 'booking' | 'attendance'>('booking');
   const t = useT();
   const lang = useLang();
 
