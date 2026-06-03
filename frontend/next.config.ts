@@ -3,10 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // ============================================================
   // 📌 환경 변수 주입 (빌드 타임)
-  // 📋 Cloudflare Pages에서 환경 변수 미인식 문제 해결
+  // 📋 Cloudflare Pages 환경 변수에서 주입됨
   // ============================================================
   env: {
-    NEXT_PUBLIC_API_URL: 'https://elspa-api-production.jitnet57.workers.dev',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://web-production-25f37.up.railway.app',
   },
 
   reactStrictMode: true,

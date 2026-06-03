@@ -19,10 +19,15 @@
       "Bash(export PATH=\"/opt/homebrew/Cellar/node/25.2.1/bin:$PATH\")",
       "Bash(vercel --prod --confirm)",
       "Bash(grep -E \"\\\\.\\(ts|tsx|js\\)$\")",
-      "Bash(grep -E \"\\\\.\\(ts|sql\\)$\")"
+      "Bash(grep -E \"\\\\.\\(ts|sql\\)$\")",
+      "Bash(curl -s http://localhost:8001/health)",
+      "Bash(curl -s http://localhost:8001/openapi.json)",
+      "Bash(python3 -c \"import sys, json; data = json.load\\(sys.stdin\\); print\\('\\\\n'.join\\(f'   {path}' for path in data.get\\('paths', {}\\).keys\\(\\)\\)\\)\")",
+      "Bash(cat > *)"
     ],
     "additionalDirectories": [
-      "/Users/kwangseobpark/elspa/.git/refs"
+      "/Users/kwangseobpark/elspa/.git/refs",
+      "/tmp"
     ]
   }
 }

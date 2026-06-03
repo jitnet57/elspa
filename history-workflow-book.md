@@ -7099,3 +7099,152 @@ frontend/src/
 
 ---
 
+
+---
+
+## [2026-06-03 08:21] Order: 022 - Railway 백엔드 배포 및 Cloudflare Pages 환경 변수 설정
+
+**주제:** Railway에서 FastAPI 백엔드 배포 및 Frontend-Backend 연동
+
+### 🎯 프롬프트 & 진행 과정
+
+**사용자 요청:**
+```
+"https://web-production-25f37.up.railway.app/ (Railway deployment URL provided)"
+```
+
+**에러 분석:**
+- Railway 백엔드 컨테이너에서 DATABASE_URL 환경 변수 미설정
+- SQLAlchemy ArgumentError: "Expected string or URL object, got None"
+- Frontend next.config.ts에 Cloudflare Workers URL이 하드코딩되어 있음
+
+### 📋 Plan
+
+✅ Railway DATABASE_URL 환경 변수 설정 가이드 제공  
+✅ Cloudflare Pages NEXT_PUBLIC_API_URL 환경 변수 설정 가이드 제공  
+✅ Frontend next.config.ts API URL 환경 변수화  
+✅ 배포 후 최종 테스트 계획 수립
+
+### 🔧 Task 수행 내용
+
+#### 섹션 1: Frontend 설정 수정
+
+**1. next.config.ts 수정 (파일: `/Users/kwangseobpark/elspa/frontend/next.config.ts`, 라인: 3-11)**
+
+**변경 전:**
+```typescript
+env: {
+  NEXT_PUBLIC_API_URL: 'https://elspa-api-production.jitnet57.workers.dev',
+},
+```
+
+**변경 후:**
+```typescript
+env: {
+  NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://web-production-25f37.up.railway.app',
+},
+```
+
+**목적:** 
+- Cloudflare Pages의 환경 변수에서 API URL을 주입받도록 변경
+- 기본값은 Railway 백엔드 URL로 설정
+- 배포 환경에 따라 다른 API URL 사용 가능
+
+#### 섹션 2: 배포 환경 변수 설정 가이드
+
+**Railway — DATABASE_URL 설정**
+
+```bash
+# Railway 대시보드
+URL: https://railway.app
+경로: Projects → elspa → Backend Service → Variables Tab
+
+설정값:
+DATABASE_URL: postgresql://[user]:[password]@[host]:[port]/[database]
+
+# Supabase에서 URL 가져오기
+1. https://supabase.com → Project → Settings → Database
+2. Connection Pooling Tab → Connection String 복사
+3. [PASSWORD]를 실제 비밀번호로 변경
+```
+
+**Cloudflare Pages — NEXT_PUBLIC_API_URL 설정**
+
+```bash
+# Cloudflare 대시보드
+URL: https://dash.cloudflare.com
+경로: Pages → elspa → Settings → Environment Variables
+
+설정 테이블:
+┌─────────────┬───────────────────────┬──────────────────────────────────────┐
+│ 환경        │ 변수명                │ 값                                   │
+├─────────────┼───────────────────────┼──────────────────────────────────────┤
+│ Production  │ NEXT_PUBLIC_API_URL   │ https://web-production-25f37.up...   │
+│ Preview     │ NEXT_PUBLIC_API_URL   │ https://web-production-25f37.up...   │
+└─────────────┴───────────────────────┴──────────────────────────────────────┘
+```
+
+### 📊 Result
+
+✅ **1개 파일 수정 완료 + 2개 배포 단계 설정 가이드 제공**
+
+- next.config.ts: 환경 변수 기반 API URL 설정 ✓
+- Railway DATABASE_URL 설정 가이드 제공 ✓
+- Cloudflare Pages NEXT_PUBLIC_API_URL 설정 가이드 제공 ✓
+
+### 🚀 배포 체크리스트
+
+- [ ] Railway DATABASE_URL 환경 변수 설정 (Supabase 연결 URL 복사)
+- [ ] Railway 자동 재배포 완료 대기 (1-2분)
+- [ ] Cloudflare Pages NEXT_PUBLIC_API_URL 설정
+- [ ] Cloudflare Pages 자동 재배포 완료 대기 (2-3분)
+- [ ] 최종 통합 테스트:
+  - [ ] https://elspa.pages.dev/ 접속
+  - [ ] Landing Page 로드 확인 (Monitor/Admin 버튼)
+  - [ ] Monitor 페이지 마사지 종류 드롭다운 API 로드 확인
+  - [ ] Admin → Settings → 마사지 종류 추가 테스트
+  - [ ] Booking 페이지 서비스 선택 후 가격/시간 자동 계산 확인
+
+### 📌 주요 기술 개념 (학생 여러분께)
+
+**환경 변수와 배포 환경**
+
+개발할 때는 로컬 PC에서 `.env` 파일을 사용하지만, 배포 환경(Railway, Cloudflare)에서는 각 플랫폼의 대시보드에서 직접 환경 변수를 설정합니다.
+
+```
+로컬 개발           → .env 파일 (git에 올리지 않음)
+Railway 배포        → Railway 대시보드 Variables
+Cloudflare Pages    → Cloudflare 대시보드 Environment Variables
+```
+
+**next.config.ts에서의 환경 변수**
+
+```typescript
+// ❌ 나쁜 예: 하드코딩
+NEXT_PUBLIC_API_URL: 'https://example.com',
+
+// ✅ 좋은 예: 환경 변수에서 읽기 + 기본값
+NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://fallback.com',
+```
+
+이렇게 하면:
+1. CI/CD 배포 시 다른 URL을 쉽게 주입 가능
+2. 기본값이 있어서 설정 누락 시에도 동작
+3. 유연한 배포 전략 구현 가능
+
+### 🎯 Next Steps
+
+1. Railway DATABASE_URL 설정 (사용자 - Supabase 연결 URL 필요)
+2. Cloudflare Pages NEXT_PUBLIC_API_URL 설정 (사용자)
+3. 자동 재배포 대기
+4. 최종 통합 테스트 수행
+5. 모든 기능 동작 확인 후 프로젝트 완료
+
+### 📎 관련 파일
+
+- `frontend/next.config.ts` — API URL 환경 변수화
+- Railway 대시보드 — DATABASE_URL 설정
+- Cloudflare 대시보드 — NEXT_PUBLIC_API_URL 설정
+- `배포방법백엔드와프론트엔드.md` — 상세 배포 가이드
+
+---
