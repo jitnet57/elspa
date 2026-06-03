@@ -1,8 +1,7 @@
 # API 라우터
-from .bookings import router as bookings_router
-from .customers import router as customers_router
-from .services import router as services_router
-from .chats import router as chats_router
-from .matching import router as matching_router
+try:
+    from .massage_types import router as massage_types_router
+except ImportError:
+    massage_types_router = None
 
-__all__ = ["bookings_router", "customers_router", "services_router", "chats_router", "matching_router"]
+__all__ = ["massage_types_router"]
