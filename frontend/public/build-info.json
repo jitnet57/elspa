@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-04",
-  "buildTimeHMS": "2026-06-04 13:15:40",
-  "buildTimeShort": "2026- 06- 04- PM 09:15",
+  "buildTimeHMS": "2026-06-04 13:30:49",
+  "buildTimeShort": "2026- 06- 04- PM 09:30",
   "timestamp": "2026-06-0413",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "372fa1fe",
-    "shortHash": "372fa1f",
-    "message": "✨ Feat: 헤더에 배포 날짜/시간 표시 (DeploymentBadge)\n\n- build-info.json 자동 생성 스크립트 추가\n- Admin & Mobile 헤더에 배포 정보 배지 표시\n- npm run build 실행 시 자동으로 배포 시간 기록",
+    "hash": "bb640452",
+    "shortHash": "bb64045",
+    "message": "🚀 Feat: 자동 서버 시작/종료 스크립트 (start.sh, stop.sh, start.bat, stop.bat)",
     "author": "jitnet57",
-    "date": "2026-06-04 12:14:59 +0800"
+    "date": "2026-06-04 12:23:09 +0800"
   }
 }
