@@ -34,7 +34,22 @@
       "Bash(kill 52658)",
       "Bash(ls -la requirements*.txt)",
       "Bash(pip3 install:*)",
-      "Bash(kill 54081)"
+      "Bash(kill 54081)",
+      "Bash(curl -s http://localhost:3000/build-info.json)",
+      "Bash(curl -s https://elspa.pages.dev/build-info.json)",
+      "Bash(curl -s https://elspa.pages.dev/)",
+      "Bash(curl -s http://localhost:3000/admin)",
+      "Bash(curl -s https://elspa.pages.dev/admin)",
+      "Bash(curl -s http://localhost:3000/monitor)",
+      "Bash(curl -s https://elspa.pages.dev/monitor)",
+      "Bash(chmod +x /tmp/start-dev.sh)",
+      "Bash(node -e \"console.log\\(''UTC:'', new Date\\(\\).toISOString\\(\\)\\); console.log\\(''Local:'', new Date\\(\\).toString\\(\\)\\);\")",
+      "Bash(/opt/homebrew/bin/npm run:*)",
+      "Bash(curl -s -I https://e0ae6d93.elspa.pages.dev/)",
+      "Bash(ls -la /Users/kwangseobpark/elspa/frontend/.next/*.html)",
+      "Bash(curl -s -I https://frontend-b5d3wxrrk-jitnet-7048s-projects.vercel.app/)",
+      "Bash(curl -L -s https://frontend-b5d3wxrrk-jitnet-7048s-projects.vercel.app/)",
+      "Bash(find /Users/kwangseobpark/elspa -name .env* -type f)"
     ],
     "additionalDirectories": [
       "/Users/kwangseobpark/elspa/.git/refs",
