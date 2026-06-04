@@ -1,0 +1,11 @@
+# ElSpa 백엔드 - 핵심 패키지만
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+python-dotenv
+pydantic
+pydantic-settings
+google-auth
+google-auth-oauthlib
+google-api-python-client

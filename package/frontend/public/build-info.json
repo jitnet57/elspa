@@ -1,0 +1,15 @@
+{
+  "buildTime": "2026-06-04",
+  "buildTimeHMS": "2026-06-04 13:15:40",
+  "buildTimeShort": "2026- 06- 04- PM 09:15",
+  "timestamp": "2026-06-0413",
+  "version": "0.1.0",
+  "environment": "production",
+  "commit": {
+    "hash": "372fa1fe",
+    "shortHash": "372fa1f",
+    "message": "✨ Feat: 헤더에 배포 날짜/시간 표시 (DeploymentBadge)\n\n- build-info.json 자동 생성 스크립트 추가\n- Admin & Mobile 헤더에 배포 정보 배지 표시\n- npm run build 실행 시 자동으로 배포 시간 기록",
+    "author": "jitnet57",
+    "date": "2026-06-04 12:14:59 +0800"
+  }
+}

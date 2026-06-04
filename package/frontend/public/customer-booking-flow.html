@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELSPA - 예약하기</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      color: #ffffff;
+      background: #0f1419;
+    }
+
+    /* 네비게이션 */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: rgba(15, 20, 25, 0.95);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+
+    .logo {
+      font-size: 1.5em;
+      font-weight: 700;
+      color: #ff8c42;
+    }
+
+    .nav-icons {
+      display: flex;
+      gap: 20px;
+      font-size: 1.2em;
+      cursor: pointer;
+    }
+
+    /* 헤더 섹션 */
+    .header {
+      background: linear-gradient(135deg, rgba(15, 20, 25, 0.8) 0%, rgba(30, 40, 60, 0.8) 100%),
+                  url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><linearGradient id="grad1" x1="0%25" y1="0%25" x2="100%25" y2="100%25"><stop offset="0%25" style="stop-color:rgb(255,140,66);stop-opacity:0.1" /><stop offset="100%25" style="stop-color:rgb(255,180,100);stop-opacity:0.05" /></linearGradient></defs><rect fill="url(%23grad1)" width="1200" height="600"/></svg>');
+      background-attachment: fixed;
+      padding: 60px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, rgba(255,140,66,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 15px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .header p {
+      font-size: 1.1em;
+      opacity: 0.85;
+      margin-bottom: 10px;
+    }
+
+    /* 스텝 인디케이터 */
+    .steps-section {
+      background: #1a1f2e;
+      padding: 50px 24px;
+    }
+
+    .steps-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .steps-header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .steps-header h2 {
+      font-size: 2em;
+      color: #ffffff;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .steps-header p {
+      color: #b0b8c1;
+      font-size: 1.05em;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+      margin-bottom: 60px;
+    }
+
+    .step {
+      text-align: center;
+      padding: 25px 15px;
+      background: rgba(255, 140, 66, 0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 140, 66, 0.2);
+      transition: all 0.3s;
+    }
+
+    .step:hover {
+      background: rgba(255, 140, 66, 0.15);
+      border-color: rgba(255, 140, 66, 0.4);
+      transform: translateY(-5px);
+    }
+
+    .step-number {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 15px;
+      background: linear-gradient(135deg, #ff8c42 0%, #ffb366 100%);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8em;
+      font-weight: bold;
+    }
+
+    .step h3 {
+      font-size: 1.1em;
+      color: #ffffff;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .step p {
+      color: #b0b8c1;
+      font-size: 0.9em;
+      line-height: 1.5;
+    }
+
+    /* 예약 폼 섹션 */
+    .booking-form-container {
+      background: #252d3d;
+      padding: 40px 24px;
+      border-radius: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 10px;
+      font-size: 0.95em;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid rgba(255, 140, 66, 0.3);
+      border-radius: 8px;
+      font-size: 1em;
+      font-family: inherit;
+      background: rgba(255, 255, 255, 0.05);
+      color: #ffffff;
+      transition: all 0.3s;
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: #7a8391;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #ff8c42;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.2);
+    }
+
+    .service-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .service-option {
+      padding: 15px;
+      border: 2px solid rgba(255, 140, 66, 0.2);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      background: rgba(255, 140, 66, 0.05);
+    }
+
+    .service-option:hover {
+      border-color: #ff8c42;
+      background: rgba(255, 140, 66, 0.15);
+    }
+
+    .service-option input[type="radio"] {
+      display: none;
+    }
+
+    .service-option input[type="radio"]:checked + label {
+      color: #ff8c42;
+      font-weight: 700;
+    }
+
+    .service-option label {
+      cursor: pointer;
+      font-size: 0.95em;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .service-icon {
+      font-size: 2em;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .service-price {
+      font-weight: bold;
+      color: #ff8c42;
+      font-size: 1.1em;
+      margin-top: 5px;
+    }
+
+    /* 버튼 */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #ff8c42 0%, #ffb366 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255, 140, 66, 0.4);
+    }
+
+    .btn-submit:active {
+      transform: translateY(0);
+    }
+
+    /* 선택된 서비스 요약 */
+    .summary-section {
+      background: rgba(255, 140, 66, 0.1);
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 25px;
+      border-left: 4px solid #ff8c42;
+    }
+
+    .summary-section h3 {
+      color: #ffffff;
+      margin-bottom: 15px;
+      font-size: 0.95em;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      color: #b0b8c1;
+      font-size: 0.9em;
+    }
+
+    .summary-item.total {
+      border-top: 1px solid rgba(255, 140, 66, 0.3);
+      padding-top: 10px;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #ff8c42;
+      font-size: 1.1em;
+    }
+
+    /* 바텀 네비게이션 */
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(15, 20, 25, 0.98);
+      border-top: 1px solid rgba(255, 140, 66, 0.2);
+      padding: 12px 0;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .bottom-nav-items {
+      display: flex;
+      justify-content: space-around;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .bottom-nav-item {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      cursor: pointer;
+      color: #7a8391;
+      text-decoration: none;
+      font-size: 0.85em;
+      transition: color 0.3s;
+    }
+
+    .bottom-nav-item:hover,
+    .bottom-nav-item.active {
+      color: #ff8c42;
+      font-weight: 600;
+    }
+
+    /* 모바일 반응형 */
+    @media (max-width: 640px) {
+      .bottom-nav {
+        display: block;
+        padding-bottom: 70px;
+      }
+
+      nav {
+        padding: 16px 20px;
+      }
+
+      .logo {
+        font-size: 1.3em;
+      }
+
+      .header {
+        padding: 40px 20px;
+      }
+
+      .header h1 {
+        font-size: 1.8em;
+      }
+
+      .steps {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      .step {
+        padding: 18px 10px;
+      }
+
+      .step-number {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5em;
+      }
+
+      .step h3 {
+        font-size: 0.9em;
+      }
+
+      .step p {
+        font-size: 0.8em;
+      }
+
+      .service-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .booking-form-container {
+        padding: 30px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 네비게이션 -->
+  <nav>
+    <div class="logo">✨ ELSPA</div>
+    <div class="nav-icons">
+      <span>🔍</span>
+      <span>❤️</span>
+      <span>👤</span>
+    </div>
+  </nav>
+
+  <!-- 헤더 -->
+  <div class="header">
+    <div class="header-content">
+      <h1>예약하기</h1>
+      <p>당신의 평온함으로의 여정을 시작하세요</p>
+    </div>
+  </div>
+
+  <!-- 스텝 섹션 -->
+  <div class="steps-section">
+    <div class="steps-container">
+      <div class="steps-header">
+        <h2>간단한 6단계</h2>
+        <p>몇 분 안에 예약하세요</p>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>서비스 선택</h3>
+          <p>원하는 마사지를 고르세요</p>
+        </div>
+
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>위치 입력</h3>
+          <p>서비스 위치를 설정하세요</p>
+        </div>
+
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>날짜 & 시간</h3>
+          <p>편한 시간을 선택하세요</p>
+        </div>
+
+        <div class="step">
+          <div class="step-number">4</div>
+          <h3>추가 요청</h3>
+          <p>특별한 요청을 남기세요</p>
+        </div>
+
+        <div class="step">
+          <div class="step-number">5</div>
+          <h3>결제하기</h3>
+          <p>안전하게 결제하세요</p>
+        </div>
+
+        <div class="step">
+          <div class="step-number">6</div>
+          <h3>완료!</h3>
+          <p>예약이 확정되었습니다</p>
+        </div>
+      </div>
+
+      <!-- 예약 폼 -->
+      <div class="booking-form-container">
+        <form>
+          <!-- 서비스 선택 -->
+          <div class="form-group">
+            <label>서비스 선택 *</label>
+            <div class="service-grid">
+              <div class="service-option">
+                <input type="radio" id="service1" name="service" value="swedish">
+                <label for="service1">
+                  <span class="service-icon">💆</span>
+                  <div>스웨디시</div>
+                  <div class="service-price">₱2,500</div>
+                </label>
+              </div>
+              <div class="service-option">
+                <input type="radio" id="service2" name="service" value="thai">
+                <label for="service2">
+                  <span class="service-icon">🧘</span>
+                  <div>타이 마사지</div>
+                  <div class="service-price">₱3,000</div>
+                </label>
+              </div>
+              <div class="service-option">
+                <input type="radio" id="service3" name="service" value="foot">
+                <label for="service3">
+                  <span class="service-icon">🦶</span>
+                  <div>발마사지</div>
+                  <div class="service-price">₱1,800</div>
+                </label>
+              </div>
+              <div class="service-option">
+                <input type="radio" id="service4" name="service" value="hot-stone">
+                <label for="service4">
+                  <span class="service-icon">🔥</span>
+                  <div>핫스톤</div>
+                  <div class="service-price">₱3,500</div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 지속시간 -->
+          <div class="form-group">
+            <label>시술 시간 *</label>
+            <select required>
+              <option value="">-- 선택하세요 --</option>
+              <option value="30">30분</option>
+              <option value="60">60분</option>
+              <option value="90">90분</option>
+              <option value="120">120분</option>
+            </select>
+          </div>
+
+          <!-- 위치 -->
+          <div class="form-group">
+            <label>서비스 위치 *</label>
+            <input type="text" placeholder="주소를 입력하세요" required>
+          </div>
+
+          <!-- 날짜 -->
+          <div class="form-group">
+            <label>예약 날짜 *</label>
+            <input type="date" required>
+          </div>
+
+          <!-- 시간 -->
+          <div class="form-group">
+            <label>예약 시간 *</label>
+            <select required>
+              <option value="">-- 선택하세요 --</option>
+              <option value="09:00">09:00 AM</option>
+              <option value="10:00">10:00 AM</option>
+              <option value="11:00">11:00 AM</option>
+              <option value="12:00">12:00 PM</option>
+              <option value="14:00">02:00 PM</option>
+              <option value="15:00">03:00 PM</option>
+              <option value="16:00">04:00 PM</option>
+              <option value="17:00">05:00 PM</option>
+              <option value="18:00">06:00 PM</option>
+            </select>
+          </div>
+
+          <!-- 특수 요청 -->
+          <div class="form-group">
+            <label>특수 요청 (선택)</label>
+            <textarea rows="3" placeholder="특별한 요청사항이 있으면 적어주세요"></textarea>
+          </div>
+
+          <!-- 요약 -->
+          <div class="summary-section">
+            <h3>예약 요약</h3>
+            <div class="summary-item">
+              <span>서비스:</span>
+              <span id="summary-service">선택 안 함</span>
+            </div>
+            <div class="summary-item">
+              <span>위치:</span>
+              <span id="summary-location">입력 필요</span>
+            </div>
+            <div class="summary-item total">
+              <span>예상 가격:</span>
+              <span id="summary-price">₱0</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit">📅 예약 확인</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 바텀 네비게이션 -->
+  <div class="bottom-nav">
+    <div class="bottom-nav-items">
+      <a href="#" class="bottom-nav-item">🏠 홈</a>
+      <a href="#" class="bottom-nav-item">🔍 검색</a>
+      <a href="#" class="bottom-nav-item active">📅 예약</a>
+      <a href="#" class="bottom-nav-item">❤️ 찜</a>
+      <a href="#" class="bottom-nav-item">👤 프로필</a>
+    </div>
+  </div>
+
+  <script>
+    const serviceRadios = document.querySelectorAll('input[name="service"]');
+    const durationSelect = document.querySelector('select[required]');
+    const priceMap = {
+      swedish: 2500,
+      thai: 3000,
+      foot: 1800,
+      'hot-stone': 3500
+    };
+
+    function updateSummary() {
+      const selectedService = document.querySelector('input[name="service"]:checked');
+      const selectedDuration = durationSelect.value;
+
+      if (selectedService) {
+        const serviceName = selectedService.nextElementSibling.innerText.split('\n')[1];
+        const basePrice = priceMap[selectedService.value];
+        const durationMultiplier = selectedDuration === '30' ? 1 :
+                                  selectedDuration === '60' ? 1.5 :
+                                  selectedDuration === '90' ? 2 :
+                                  selectedDuration === '120' ? 2.5 : 1;
+
+        document.getElementById('summary-service').textContent = serviceName;
+        document.getElementById('summary-price').textContent = `₱${Math.round(basePrice * durationMultiplier)}`;
+      }
+    }
+
+    serviceRadios.forEach(radio => {
+      radio.addEventListener('change', updateSummary);
+    });
+
+    durationSelect.addEventListener('change', updateSummary);
+
+    document.querySelector('form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('예약 신청이 완료되었습니다!');
+    });
+  </script>
+</body>
+</html>

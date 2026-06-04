@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELSPA - 마이페이지</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      color: #ffffff;
+      background: #0f1419;
+    }
+
+    /* 네비게이션 */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: rgba(15, 20, 25, 0.95);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+
+    .logo {
+      font-size: 1.5em;
+      font-weight: 700;
+      color: #ff8c42;
+    }
+
+    .nav-icons {
+      display: flex;
+      gap: 20px;
+      font-size: 1.2em;
+      cursor: pointer;
+    }
+
+    /* 프로필 헤더 */
+    .profile-header {
+      background: linear-gradient(135deg, rgba(30, 40, 60, 0.9) 0%, rgba(15, 20, 25, 0.9) 100%);
+      color: white;
+      padding: 40px 24px;
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #ff8c42 0%, #ffb366 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3em;
+      flex-shrink: 0;
+    }
+
+    .profile-info h1 {
+      font-size: 1.8em;
+      margin-bottom: 10px;
+    }
+
+    .profile-info p {
+      opacity: 0.8;
+      margin-bottom: 8px;
+      font-size: 0.95em;
+    }
+
+    .profile-stats {
+      display: flex;
+      gap: 30px;
+      margin-top: 15px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 1.6em;
+      font-weight: bold;
+      display: block;
+      color: #ff8c42;
+    }
+
+    .stat-label {
+      font-size: 0.85em;
+      opacity: 0.8;
+    }
+
+    /* 탭 */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 30px 24px 80px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      border-bottom: 2px solid rgba(255, 140, 66, 0.2);
+      overflow-x: auto;
+    }
+
+    .tab {
+      padding: 15px 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #7a8391;
+      font-weight: 600;
+      font-size: 1em;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      color: #ff8c42;
+      border-bottom-color: #ff8c42;
+    }
+
+    /* 카드 */
+    .card {
+      background: #252d3d;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      border: 1px solid rgba(255, 140, 66, 0.1);
+    }
+
+    .card h3 {
+      color: #ffffff;
+      margin-bottom: 20px;
+      font-size: 1.2em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* 예약 내역 */
+    .booking-item {
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      gap: 20px;
+      padding: 20px;
+      border-bottom: 1px solid rgba(255, 140, 66, 0.2);
+      background: rgba(255, 140, 66, 0.05);
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    .booking-item:last-child {
+      border-bottom: none;
+    }
+
+    .booking-thumbnail {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #ff8c42 0%, #ffb366 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5em;
+      flex-shrink: 0;
+    }
+
+    .booking-details h4 {
+      color: #ffffff;
+      margin-bottom: 5px;
+    }
+
+    .booking-details p {
+      color: #b0b8c1;
+      font-size: 0.9em;
+      margin-bottom: 5px;
+    }
+
+    .booking-status {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8em;
+      font-weight: 600;
+      white-space: nowrap;
+      margin-bottom: 10px;
+    }
+
+    .status-completed {
+      background: rgba(76, 175, 80, 0.2);
+      color: #4caf50;
+      border: 1px solid #4caf50;
+    }
+
+    .status-upcoming {
+      background: rgba(255, 140, 66, 0.2);
+      color: #ff8c42;
+      border: 1px solid #ff8c42;
+    }
+
+    .status-cancelled {
+      background: rgba(244, 67, 54, 0.2);
+      color: #f44336;
+      border: 1px solid #f44336;
+    }
+
+    .booking-actions {
+      display: flex;
+      gap: 10px;
+      flex-direction: column;
+    }
+
+    .btn-small {
+      padding: 8px 14px;
+      border: 1px solid rgba(255, 140, 66, 0.3);
+      background: rgba(255, 140, 66, 0.1);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85em;
+      color: #ff8c42;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .btn-small:hover {
+      border-color: #ff8c42;
+      background: rgba(255, 140, 66, 0.2);
+    }
+
+    /* 포인트 */
+    .points-display {
+      background: linear-gradient(135deg, rgba(255, 140, 66, 0.15) 0%, rgba(255, 180, 100, 0.1) 100%);
+      border: 2px solid #ff8c42;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .points-amount {
+      font-size: 3em;
+      font-weight: bold;
+      color: #ff8c42;
+      margin-bottom: 8px;
+    }
+
+    .points-label {
+      color: #b0b8c1;
+      font-size: 0.95em;
+    }
+
+    .points-history {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .point-transaction {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background: rgba(255, 140, 66, 0.08);
+      border-radius: 8px;
+      border-left: 3px solid #ff8c42;
+    }
+
+    .point-transaction.negative {
+      border-left-color: #f44336;
+    }
+
+    .point-info h4 {
+      color: #ffffff;
+      margin-bottom: 3px;
+      font-size: 0.95em;
+    }
+
+    .point-info p {
+      color: #7a8391;
+      font-size: 0.85em;
+    }
+
+    .point-amount {
+      font-weight: bold;
+      color: #4caf50;
+      font-size: 1.05em;
+    }
+
+    .point-amount.negative {
+      color: #ff8c42;
+    }
+
+    /* 리뷰 */
+    .review-item {
+      padding: 18px;
+      background: rgba(255, 140, 66, 0.05);
+      border-radius: 10px;
+      border-left: 3px solid #ff8c42;
+      margin-bottom: 15px;
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .review-header h4 {
+      color: #ffffff;
+    }
+
+    .review-rating {
+      color: #ffc107;
+      font-size: 0.9em;
+    }
+
+    .review-text {
+      color: #b0b8c1;
+      line-height: 1.6;
+      margin-bottom: 8px;
+      font-size: 0.95em;
+    }
+
+    .review-date {
+      color: #7a8391;
+      font-size: 0.85em;
+    }
+
+    /* 설정 */
+    .settings-group {
+      padding: 15px 0;
+      border-bottom: 1px solid rgba(255, 140, 66, 0.2);
+    }
+
+    .settings-group:last-child {
+      border-bottom: none;
+    }
+
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+    }
+
+    .setting-label h4 {
+      color: #ffffff;
+      margin-bottom: 3px;
+    }
+
+    .setting-label p {
+      color: #7a8391;
+      font-size: 0.85em;
+    }
+
+    .toggle-switch {
+      width: 50px;
+      height: 28px;
+      background: #3a4452;
+      border-radius: 14px;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.3s;
+    }
+
+    .toggle-switch.on {
+      background: #ff8c42;
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: left 0.3s;
+    }
+
+    .toggle-switch.on::after {
+      left: 24px;
+    }
+
+    /* 버튼 */
+    .btn-edit {
+      padding: 10px 20px;
+      background: #ff8c42;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .btn-edit:hover {
+      background: #ffb366;
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      padding: 10px 20px;
+      background: rgba(244, 67, 54, 0.2);
+      color: #f44336;
+      border: 1px solid #f44336;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .btn-danger:hover {
+      background: rgba(244, 67, 54, 0.3);
+    }
+
+    /* 탭 콘텐츠 */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* 바텀 네비게이션 */
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(15, 20, 25, 0.98);
+      border-top: 1px solid rgba(255, 140, 66, 0.2);
+      padding: 12px 0;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .bottom-nav-items {
+      display: flex;
+      justify-content: space-around;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .bottom-nav-item {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      cursor: pointer;
+      color: #7a8391;
+      text-decoration: none;
+      font-size: 0.85em;
+      transition: color 0.3s;
+    }
+
+    .bottom-nav-item:hover,
+    .bottom-nav-item.active {
+      color: #ff8c42;
+      font-weight: 600;
+    }
+
+    /* 모바일 */
+    @media (max-width: 640px) {
+      .bottom-nav {
+        display: block;
+        padding-bottom: 70px;
+      }
+
+      .profile-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+        padding: 30px 20px;
+      }
+
+      .profile-stats {
+        justify-content: center;
+      }
+
+      .tabs {
+        gap: 5px;
+      }
+
+      .tab {
+        padding: 12px 15px;
+        font-size: 0.9em;
+      }
+
+      .container {
+        padding: 20px 16px 80px;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .booking-item {
+        grid-template-columns: 60px 1fr;
+        gap: 15px;
+      }
+
+      .booking-thumbnail {
+        width: 60px;
+        height: 60px;
+      }
+
+      .booking-actions {
+        grid-column: 1 / -1;
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 네비게이션 -->
+  <nav>
+    <div class="logo">✨ ELSPA</div>
+    <div class="nav-icons">
+      <span>🔍</span>
+      <span>❤️</span>
+      <span>👤</span>
+    </div>
+  </nav>
+
+  <!-- 프로필 헤더 -->
+  <div class="profile-header">
+    <div class="profile-avatar">👤</div>
+    <div class="profile-info">
+      <h1>박미영</h1>
+      <p>park.miyoung@email.com</p>
+      <p>가입일: 2024년 3월 15일</p>
+      <div class="profile-stats">
+        <div class="stat">
+          <span class="stat-number">12</span>
+          <span class="stat-label">총 예약</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number">4.8</span>
+          <span class="stat-label">평가</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number">8,500</span>
+          <span class="stat-label">포인트</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 메인 콘텐츠 -->
+  <div class="container">
+    <!-- 탭 -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('bookings')">📅 예약 내역</button>
+      <button class="tab" onclick="switchTab('points')">⭐ 포인트</button>
+      <button class="tab" onclick="switchTab('reviews')">💬 리뷰</button>
+      <button class="tab" onclick="switchTab('settings')">⚙️ 설정</button>
+    </div>
+
+    <!-- 예약 내역 -->
+    <div id="bookings" class="tab-content active">
+      <div class="card">
+        <h3>📅 최근 예약</h3>
+
+        <div class="booking-item">
+          <div class="booking-thumbnail">💆</div>
+          <div class="booking-details">
+            <h4>스웨디시 마사지 - 60분</h4>
+            <p>테라피스트: 김현정</p>
+            <p>📍 서울시 강남구 도곡동</p>
+            <p>📅 2024년 3월 18일, 오후 3:00</p>
+          </div>
+          <div>
+            <div class="booking-status status-completed">✅ 완료</div>
+            <div class="booking-actions">
+              <button class="btn-small">⭐ 리뷰 작성</button>
+              <button class="btn-small">재예약</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="booking-item">
+          <div class="booking-thumbnail">🧘</div>
+          <div class="booking-details">
+            <h4>타이 마사지 - 90분</h4>
+            <p>테라피스트: 이지은</p>
+            <p>📍 서울시 강남구 삼성동</p>
+            <p>📅 2024년 3월 25일, 오전 10:00</p>
+          </div>
+          <div>
+            <div class="booking-status status-upcoming">⏳ 예정</div>
+            <div class="booking-actions">
+              <button class="btn-small">편집</button>
+              <button class="btn-small">취소</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="booking-item">
+          <div class="booking-thumbnail">🦶</div>
+          <div class="booking-details">
+            <h4>발마사지 - 45분</h4>
+            <p>테라피스트: 최수진</p>
+            <p>📍 서울시 강남구 압구정동</p>
+            <p>📅 2024년 3월 10일, 오후 6:00</p>
+          </div>
+          <div>
+            <div class="booking-status status-completed">✅ 완료</div>
+            <div class="booking-actions">
+              <button class="btn-small">⭐ 리뷰 보기</button>
+              <button class="btn-small">재예약</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 포인트 탭 -->
+    <div id="points" class="tab-content">
+      <div class="card">
+        <h3>⭐ 포인트</h3>
+
+        <div class="points-display">
+          <div class="points-amount">8,500 P</div>
+          <div class="points-label">현재 보유 포인트</div>
+        </div>
+
+        <p style="color: #b0b8c1; margin-bottom: 20px; font-size: 0.95em;">
+          💡 매 예약마다 총액의 10%를 포인트로 적립받고, 다음 예약에 사용할 수 있습니다.
+        </p>
+
+        <h4 style="color: #ffffff; margin-bottom: 15px;">포인트 거래 내역</h4>
+        <div class="points-history">
+          <div class="point-transaction">
+            <div class="point-info">
+              <h4>스웨디시 마사지 적립</h4>
+              <p>2024년 3월 18일</p>
+            </div>
+            <div class="point-amount">+850 P</div>
+          </div>
+
+          <div class="point-transaction">
+            <div class="point-info">
+              <h4>타이 마사지 예약 사용</h4>
+              <p>2024년 3월 15일</p>
+            </div>
+            <div class="point-amount negative">-1,500 P</div>
+          </div>
+
+          <div class="point-transaction">
+            <div class="point-info">
+              <h4>가입 보너스</h4>
+              <p>2024년 3월 1일</p>
+            </div>
+            <div class="point-amount">+5,000 P</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 리뷰 탭 -->
+    <div id="reviews" class="tab-content">
+      <div class="card">
+        <h3>💬 내 리뷰</h3>
+
+        <div class="review-item">
+          <div class="review-header">
+            <h4>스웨디시 마사지 - 김현정 테라피스트</h4>
+            <div class="review-rating">⭐⭐⭐⭐⭐ (5/5)</div>
+          </div>
+          <p class="review-text">정말 최고예요! 강도가 완벽했고 매우 편안했어요. 다음에도 꼭 다시 예약하겠습니다!</p>
+          <div class="review-date">2024년 3월 18일</div>
+        </div>
+
+        <div class="review-item">
+          <div class="review-header">
+            <h4>발마사지 - 최수진 테라피스트</h4>
+            <div class="review-rating">⭐⭐⭐⭐ (4/5)</div>
+          </div>
+          <p class="review-text">매우 전문적이고 친절했습니다. 발이 한결 가벼워졌어요!</p>
+          <div class="review-date">2024년 3월 10일</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 설정 탭 -->
+    <div id="settings" class="tab-content">
+      <div class="card">
+        <h3>⚙️ 계정 설정</h3>
+
+        <div class="settings-group">
+          <h4 style="color: #ffffff; margin-bottom: 15px;">개인 정보</h4>
+          <div class="setting-row">
+            <div class="setting-label">
+              <h4>이름</h4>
+              <p>박미영</p>
+            </div>
+            <button class="btn-edit">편집</button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">
+              <h4>이메일</h4>
+              <p>park.miyoung@email.com</p>
+            </div>
+            <button class="btn-edit">변경</button>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h4 style="color: #ffffff; margin-bottom: 15px;">알림 설정</h4>
+          <div class="setting-row">
+            <div class="setting-label">
+              <h4>예약 알림</h4>
+              <p>예약 확정 알림</p>
+            </div>
+            <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">
+              <h4>프로모션 알림</h4>
+              <p>특가 정보</p>
+            </div>
+            <div class="toggle-switch" onclick="this.classList.toggle('on')"></div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h4 style="color: #ffffff; margin-bottom: 15px;">보안</h4>
+          <div class="setting-row">
+            <div class="setting-label">
+              <h4>비밀번호 변경</h4>
+              <p>정기적으로 변경하세요</p>
+            </div>
+            <button class="btn-edit">변경</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 바텀 네비게이션 -->
+  <div class="bottom-nav">
+    <div class="bottom-nav-items">
+      <a href="#" class="bottom-nav-item">🏠 홈</a>
+      <a href="#" class="bottom-nav-item">🔍 검색</a>
+      <a href="#" class="bottom-nav-item">📅 예약</a>
+      <a href="#" class="bottom-nav-item">❤️ 찜</a>
+      <a href="#" class="bottom-nav-item active">👤 프로필</a>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabName) {
+      const contents = document.querySelectorAll('.tab-content');
+      contents.forEach(content => {
+        content.classList.remove('active');
+      });
+
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      document.getElementById(tabName).classList.add('active');
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>

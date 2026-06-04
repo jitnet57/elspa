@@ -1,0 +1,108 @@
+{
+  "page": "PayrollRecordDetail",
+  "layout": "detail-view",
+  "sections": {
+    "header": {
+      "type": "topAppBar",
+      "title": "ElSpa Payroll",
+      "subtitle": "Admin Controller"
+    },
+    "employeeProfile": {
+      "type": "profileCard",
+      "fields": {
+        "status": { "type": "badge", "value": "Permanent Staff" },
+        "id": { "type": "label", "value": "ID: 2024-0082" },
+        "name": { "type": "heading", "size": "lg" },
+        "period": { "type": "text", "icon": "calendar_today" },
+        "hireDate": { "type": "field", "label": "Hire Date" },
+        "department": { "type": "field", "label": "Department" }
+      }
+    },
+    "bentoLayout": {
+      "type": "grid",
+      "cols": 2,
+      "cards": [
+        {
+          "id": "earnings",
+          "title": "Earnings / Income",
+          "icon": "payments",
+          "type": "table",
+          "columns": [
+            { "label": "Item", "type": "text" },
+            { "label": "Amount", "type": "currency", "align": "right" }
+          ],
+          "rows": [
+            "Base Salary",
+            "Commission (Service)",
+            "Overtime (8.5 hrs)",
+            "Holiday Bonus",
+            "Meal Allowance"
+          ],
+          "subtotal": "SUBTOTAL GROSS"
+        },
+        {
+          "id": "deductions",
+          "title": "Deductions",
+          "icon": "money_off",
+          "type": "table",
+          "columns": [
+            { "label": "Item", "type": "text" },
+            { "label": "Amount", "type": "currency", "align": "right" }
+          ],
+          "rows": [
+            "Late / Tardy",
+            "Absence (1 Day)",
+            "SSS Loan Payment",
+            "Cash Advance Repay",
+            "Health Check Surcharge",
+            "13th Month Adjustment"
+          ],
+          "subtotal": "SUBTOTAL DEDUCTIONS"
+        }
+      ]
+    },
+    "netPayHighlight": {
+      "type": "highlightBox",
+      "bgColor": "primary",
+      "content": {
+        "label": "NET PAY (Take-Home)",
+        "amount": "display-lg",
+        "breakdown": [
+          { "label": "Gross Pay", "value": "grossPay" },
+          { "label": "Deductions", "value": "deductions", "color": "error" }
+        ]
+      }
+    },
+    "actions": {
+      "type": "actionButtons",
+      "buttons": [
+        { "icon": "arrow_back", "label": "Back", "variant": "outlined" },
+        { "icon": "print", "label": "Print", "variant": "outlined" },
+        { "icon": "download", "label": "Download PDF", "variant": "filled" }
+      ]
+    },
+    "approvalSection": {
+      "type": "conditionalBlock",
+      "condition": "status !== 'Paid'",
+      "buttons": [
+        { "label": "Approve", "variant": "success" },
+        { "label": "Reject", "variant": "error" }
+      ]
+    }
+  },
+  "design": {
+    "colors": {
+      "primary": "#004e9f",
+      "error": "#ba1a1a",
+      "success": "#2e7d32",
+      "surface": "#f9f9f9"
+    },
+    "typography": {
+      "display-lg": { "size": "48px", "weight": 700 }
+    },
+    "spacing": {
+      "gutter": "16px",
+      "stack-lg": "24px"
+    }
+  }
+}

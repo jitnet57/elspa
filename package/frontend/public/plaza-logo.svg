@@ -1,0 +1,48 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Top arc path for text -->
+    <path id="topArc" d="M 80,256 A 176,176 0 0,1 432,256" fill="none"/>
+    <!-- Bottom arc path for text -->
+    <path id="bottomArc" d="M 432,256 A 176,176 0 0,1 80,256" fill="none"/>
+  </defs>
+
+  <!-- Outer circle - thin black stroke -->
+  <circle cx="256" cy="256" r="248" fill="white" stroke="#1a1a1a" stroke-width="2"/>
+
+  <!-- Inner decorative circle -->
+  <circle cx="256" cy="256" r="238" fill="none" stroke="#d4af37" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- Top text: RESTAURANT · SKIN · SPATEL · NAIL CARE COFFEE -->
+  <text font-family="Georgia, serif" font-size="20" font-weight="normal" fill="#c9a961" letter-spacing="2">
+    <textPath href="#topArc" startOffset="50%" text-anchor="middle">
+      RESTAURANT · SKIN · SPATEL · NAIL CARE COFFEE
+    </textPath>
+  </text>
+
+  <!-- Bottom text: PLAZA -->
+  <text font-family="Georgia, serif" font-size="26" font-weight="bold" fill="#c9a961" letter-spacing="3">
+    <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">
+      PLAZA
+    </textPath>
+  </text>
+
+  <!-- Center "EL" logo -->
+  <g transform="translate(256, 280)">
+    <!-- E -->
+    <text x="-55" y="45" font-family="Georgia, serif" font-size="140" font-weight="bold" fill="#c9a961" text-anchor="middle">E</text>
+
+    <!-- L with elegant flourish -->
+    <g>
+      <!-- L letter -->
+      <text x="55" y="45" font-family="Georgia, serif" font-size="140" font-weight="bold" fill="#c9a961" text-anchor="middle">L</text>
+
+      <!-- Decorative flourish wrapping around L -->
+      <path d="M 75,0 Q 95,-10 105,10 Q 110,30 90,45 Q 70,55 60,35"
+            stroke="#c9a961" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+
+  <!-- Decorative corner elements -->
+  <text x="40" y="265" font-family="Georgia, serif" font-size="18" fill="#c9a961" opacity="0.7">|</text>
+  <text x="472" y="265" font-family="Georgia, serif" font-size="18" fill="#c9a961" opacity="0.7">|</text>
+</svg>

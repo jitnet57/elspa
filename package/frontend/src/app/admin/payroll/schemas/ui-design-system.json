@@ -1,0 +1,200 @@
+{
+  "version": "1.0",
+  "designSystem": "Material Design 3",
+  "framework": "React 19 + Next.js 16.2.4",
+  "styling": "Tailwind CSS 4 + custom config",
+  "documentedDate": "2026-05-25",
+  "pages": [
+    {
+      "name": "PayrollRecords",
+      "path": "/admin/payroll/records",
+      "component": "PayrollRecords.tsx",
+      "schema": "payroll-records-schema.json",
+      "purpose": "List and filter payroll records with status badges"
+    },
+    {
+      "name": "HolidayManagement",
+      "path": "/admin/payroll/holidays",
+      "component": "HolidayManagement.tsx",
+      "schema": "holidays-schema.json",
+      "purpose": "Manage Philippine national and special holidays"
+    },
+    {
+      "name": "PayrollRecordDetail",
+      "path": "/admin/payroll/records/[id]",
+      "component": "PayrollRecordDetail.tsx",
+      "schema": "record-detail-schema.json",
+      "purpose": "Display detailed payroll breakdown with earnings and deductions"
+    }
+  ],
+  "designTokens": {
+    "colors": {
+      "primary": {
+        "main": "#004e9f",
+        "container": "#0066cc",
+        "fixed": "#d7e3ff",
+        "dim": "#aac7ff"
+      },
+      "secondary": {
+        "main": "#505f76",
+        "container": "#d0e1fb",
+        "fixed": "#d3e4fe"
+      },
+      "tertiary": {
+        "main": "#485066",
+        "container": "#60687f",
+        "fixed": "#dae2fd"
+      },
+      "error": {
+        "main": "#ba1a1a",
+        "container": "#ffdad6"
+      },
+      "success": "#2e7d32",
+      "surface": {
+        "default": "#f9f9f9",
+        "bright": "#f9f9f9",
+        "dim": "#dadada",
+        "container": "#eeeeee",
+        "containerLow": "#f3f3f3",
+        "containerHigh": "#e8e8e8",
+        "containerHighest": "#e2e2e2",
+        "containerLowest": "#ffffff"
+      },
+      "outline": "#727784",
+      "outlineVariant": "#c1c6d5"
+    },
+    "typography": {
+      "displayLg": {
+        "fontSize": "48px",
+        "lineHeight": "1.1",
+        "fontWeight": 700,
+        "letterSpacing": "-0.02em",
+        "fontFamily": "Hanken Grotesk"
+      },
+      "headlineLg": {
+        "fontSize": "32px",
+        "lineHeight": "1.2",
+        "fontWeight": 600,
+        "fontFamily": "Hanken Grotesk"
+      },
+      "headlineMd": {
+        "fontSize": "24px",
+        "lineHeight": "1.3",
+        "fontWeight": 600,
+        "fontFamily": "Hanken Grotesk"
+      },
+      "headlineSm": {
+        "fontSize": "20px",
+        "lineHeight": "1.4",
+        "fontWeight": 600,
+        "fontFamily": "Hanken Grotesk"
+      },
+      "bodyLg": {
+        "fontSize": "16px",
+        "lineHeight": "1.6",
+        "fontWeight": 400,
+        "fontFamily": "Inter"
+      },
+      "bodyMd": {
+        "fontSize": "14px",
+        "lineHeight": "1.5",
+        "fontWeight": 400,
+        "fontFamily": "Inter"
+      },
+      "labelSm": {
+        "fontSize": "12px",
+        "lineHeight": "1",
+        "fontWeight": 500,
+        "letterSpacing": "0.05em",
+        "fontFamily": "Inter"
+      },
+      "dataMono": {
+        "fontSize": "14px",
+        "lineHeight": "1.4",
+        "fontWeight": 600,
+        "letterSpacing": "0.02em",
+        "fontFamily": "Inter"
+      }
+    },
+    "spacing": {
+      "containerMargin": "24px",
+      "stackLg": "24px",
+      "stackMd": "12px",
+      "gutter": "16px",
+      "base": "8px",
+      "stackSm": "4px",
+      "touchTarget": "44px"
+    },
+    "borderRadius": {
+      "none": "0.125rem",
+      "lg": "0.25rem",
+      "xl": "0.5rem",
+      "full": "0.75rem"
+    },
+    "shadows": {
+      "sm": "0 2px 8px rgba(0,0,0,0.08)",
+      "md": "0 4px 16px rgba(0,0,0,0.12)",
+      "lg": "0 8px 24px rgba(0,0,0,0.16)"
+    }
+  },
+  "componentLibrary": {
+    "layouts": [
+      "TopAppBar",
+      "BottomNavBar",
+      "PageHeader",
+      "FilterSection",
+      "CardList",
+      "BentoGrid",
+      "DetailView"
+    ],
+    "components": [
+      "Button",
+      "TextField",
+      "Select",
+      "Card",
+      "Badge",
+      "Avatar",
+      "Icon",
+      "Table",
+      "HighlightBox"
+    ]
+  },
+  "responsiveness": {
+    "breakpoints": {
+      "mobile": "< 768px",
+      "tablet": "768px - 1024px",
+      "desktop": "> 1024px"
+    },
+    "patterns": {
+      "mobile": {
+        "navigation": "bottom-nav-bar",
+        "layout": "single-column",
+        "cards": "stacked"
+      },
+      "desktop": {
+        "navigation": "top-nav + sidebar",
+        "layout": "multi-column",
+        "cards": "grid/flex"
+      }
+    }
+  },
+  "colorModes": {
+    "light": {
+      "background": "#f9f9f9",
+      "surface": "#ffffff",
+      "text": "#1a1c1c"
+    }
+  },
+  "interactions": {
+    "hover": "opacity-90 + subtle shadow",
+    "press": "scale(0.98)",
+    "focus": "ring-2 ring-primary",
+    "disabled": "opacity-50 cursor-not-allowed"
+  },
+  "accessibility": {
+    "contrastRatio": "WCAG AA",
+    "focusIndicators": "visible",
+    "touchTargets": "44x44px minimum",
+    "labels": "semantic HTML + aria-labels"
+  }
+}
