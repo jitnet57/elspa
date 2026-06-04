@@ -37,6 +37,12 @@ export default function AuditLogsPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  // Hydration fix: ensure client-side only rendering
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const [filters, setFilters] = useState<AuditFilters>({
     action: '',
@@ -172,6 +178,8 @@ export default function AuditLogsPage() {
   };
 
   const handleExport = () => {
+    if (typeof window === 'undefined') return; // Hydration guard
+
     const csv = [
       ['Timestamp', 'User', 'Action', 'Entity Type', 'Entity ID', 'Changes'],
       ...filteredLogs.map((log) => [

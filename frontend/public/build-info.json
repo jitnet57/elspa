@@ -1,15 +1,6 @@
 {
-  "buildTime": "2026-06-04",
-  "buildTimeHMS": "2026-06-04 13:51:46",
-  "buildTimeShort": "2026- 06- 04- PM 09:51",
-  "timestamp": "2026-06-0413",
-  "version": "0.1.0",
-  "environment": "production",
-  "commit": {
-    "hash": "ff1d7e33",
-    "shortHash": "ff1d7e3",
-    "message": "✨ Feat: 직책 구분 기능 추가 - 부서별 직책 관리\n\n- Office, Hollys Coffee, Nail, Maintenance, Driver, Therapist: manager, staff\n- Yega: manager, staff, chef\n- 백엔드: Staff 모델에 department, job_title 필드 추가\n- API: 부서/직책 검증 및 필터링 기능 추가\n- 프론트엔드: 부서 선택 시 직책 동적 필터링\n- DB: Supabase 마이그레이션 스크립트 추가",
-    "author": "jitnet57",
-    "date": "2026-06-04 12:35:17 +0800"
-  }
+  "version": "2.0.0-dept-job-title",
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "commit": "ff1d7e33",
+  "features": ["department", "job_title", "dynamic-job-filter"]
 }
