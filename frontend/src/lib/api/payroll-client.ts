@@ -15,7 +15,9 @@ export interface Employee {
   id: number;
   name: string;
   phone: string;
-  employee_type: 'therapist' | 'driver' | 'manager' | 'nail' | 'maintenance' | 'hollys';
+  department?: string;  // Office, Hollys Coffee, Nail, Maintenance, Driver, Therapist, Yega
+  job_title?: string;   // manager, staff, chef
+  employee_type: 'therapist' | 'driver' | 'manager' | 'nail' | 'maintenance' | 'hollys' | string;
   pay_group: 'weekly' | 'biweekly';
   base_salary: number;
   daily_wage?: number;       // 개별 일급 (payroll_daily_wage.sql)

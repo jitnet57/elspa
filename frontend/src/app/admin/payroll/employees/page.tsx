@@ -12,14 +12,35 @@ import { useState, useEffect } from 'react';
 import { usePayrollStore } from '@/lib/store/payroll-store';
 import { Employee } from '@/lib/api/payroll-client';
 
-const EMPLOYEE_TYPES = [
-  { value: 'manager', label: '👔 매니저', color: 'bg-purple-100 text-purple-700' },
-  { value: 'hollys', label: '☕ 할리스커피', color: 'bg-amber-100 text-amber-700' },
-  { value: 'nail', label: '💅 네일', color: 'bg-pink-100 text-pink-700' },
-  { value: 'maintenance', label: '🔧 메인테넌스', color: 'bg-slate-100 text-slate-700' },
-  { value: 'driver', label: '🚗 드라이버', color: 'bg-orange-100 text-orange-700' },
-  { value: 'therapist', label: '👨‍⚕️ 테라피스트', color: 'bg-blue-100 text-blue-700' },
+// 부서별 직책 매핑
+const DEPARTMENTS = {
+  'Office': ['manager', 'staff'],
+  'Hollys Coffee': ['manager', 'staff'],
+  'Nail': ['manager', 'staff'],
+  'Maintenance': ['manager', 'staff'],
+  'Driver': ['manager', 'staff'],
+  'Therapist': ['manager', 'staff'],
+  'Yega': ['manager', 'staff', 'chef'],
+};
+
+const DEPARTMENT_DISPLAY = [
+  { value: 'Office', label: '👔 Office', color: 'bg-purple-100 text-purple-700' },
+  { value: 'Hollys Coffee', label: '☕ Hollys Coffee', color: 'bg-amber-100 text-amber-700' },
+  { value: 'Nail', label: '💅 Nail', color: 'bg-pink-100 text-pink-700' },
+  { value: 'Maintenance', label: '🔧 Maintenance', color: 'bg-slate-100 text-slate-700' },
+  { value: 'Driver', label: '🚗 Driver', color: 'bg-orange-100 text-orange-700' },
+  { value: 'Therapist', label: '👨‍⚕️ Therapist', color: 'bg-blue-100 text-blue-700' },
+  { value: 'Yega', label: '🏪 Yega', color: 'bg-green-100 text-green-700' },
 ];
+
+const JOB_TITLES = {
+  'manager': '👔 Manager',
+  'staff': '👤 Staff',
+  'chef': '👨‍🍳 Chef',
+};
+
+// Legacy support for old EMPLOYEE_TYPES
+const EMPLOYEE_TYPES = DEPARTMENT_DISPLAY;
 
 export default function EmployeesPage() {
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
@@ -69,7 +90,9 @@ export default function EmployeesPage() {
   const handleOpenNewModal = () => {
     setSelectedEmployee(null);
     setFormData({
-      employee_type: 'manager',
+      department: 'Office',
+      job_title: 'staff',
+      employee_type: 'Office', // Legacy field
       pay_group: 'biweekly',
       commission_rate: 0,
       base_salary: 0,
@@ -87,27 +110,31 @@ export default function EmployeesPage() {
   };
 
   const handleSaveEmployee = async () => {
-    if (!formData.name || !formData.employee_type) {
-      alert('직원명과 직군을 입력하세요');
+    if (!formData.name || !(formData as any).department || !(formData as any).job_title) {
+      alert('Please fill in all required fields: Name, Department, Job Title');
       return;
     }
 
     try {
+      const payload = {
+        name: formData.name || '',
+        phone: formData.phone || '',
+        department: (formData as any).department || 'Office',
+        job_title: (formData as any).job_title || 'staff',
+        employee_type: (formData as any).department || 'Office', // Legacy field
+        pay_group: formData.pay_group || 'biweekly',
+        base_salary: formData.base_salary || 0,
+        daily_wage: formData.daily_wage || 0,
+        commission_rate: formData.commission_rate || 0,
+        hire_date: formData.hire_date || new Date().toISOString().split('T')[0],
+        is_active: true,
+      } as any;
+
       if (isEditing && selectedEmployee) {
-        await updateExistingEmployee(selectedEmployee.id, formData);
+        await updateExistingEmployee(selectedEmployee.id, payload);
         alert('Employee updated successfully');
       } else {
-        await createNewEmployee({
-          name: formData.name || '',
-          phone: formData.phone || '',
-          employee_type: formData.employee_type || 'manager',
-          pay_group: formData.pay_group || 'biweekly',
-          base_salary: formData.base_salary || 0,
-          daily_wage: formData.daily_wage || 0,
-          commission_rate: formData.commission_rate || 0,
-          hire_date: formData.hire_date || new Date().toISOString().split('T')[0],
-          is_active: true,
-        } as any);
+        await createNewEmployee(payload);
         alert('Employee created successfully');
       }
       setShowModal(false);
@@ -423,16 +450,42 @@ export default function EmployeesPage() {
                 />
               </div>
 
+              {/* Department Selection */}
               <div>
-                <label className="text-sm font-bold text-gray-700 mb-2 block">Employee Type *</label>
+                <label className="text-sm font-bold text-gray-700 mb-2 block">Department *</label>
                 <select
-                  value={formData.employee_type || 'therapist'}
-                  onChange={e => setFormData({ ...formData, employee_type: e.target.value as any })}
+                  value={(formData as any).department || 'Office'}
+                  onChange={e => {
+                    const dept = e.target.value;
+                    const availableTitles = DEPARTMENTS[dept as keyof typeof DEPARTMENTS];
+                    setFormData({
+                      ...formData,
+                      department: dept,
+                      job_title: availableTitles?.[0] || 'staff',
+                      employee_type: dept, // Legacy field
+                    });
+                  }}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                 >
-                  {EMPLOYEE_TYPES.map(type => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
+                  {DEPARTMENT_DISPLAY.map(dept => (
+                    <option key={dept.value} value={dept.value}>
+                      {dept.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Job Title Selection */}
+              <div>
+                <label className="text-sm font-bold text-gray-700 mb-2 block">Job Title *</label>
+                <select
+                  value={(formData as any).job_title || 'staff'}
+                  onChange={e => setFormData({ ...formData, job_title: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                >
+                  {DEPARTMENTS[(formData as any).department as keyof typeof DEPARTMENTS]?.map(title => (
+                    <option key={title} value={title}>
+                      {JOB_TITLES[title as keyof typeof JOB_TITLES]}
                     </option>
                   ))}
                 </select>

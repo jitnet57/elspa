@@ -33,8 +33,25 @@ router = APIRouter(prefix="/staff", tags=["Staff Management"])
 # ============================================================
 # 📋 Pydantic Schemas
 # ============================================================
+
+# 부서별 직책 매핑
+DEPARTMENT_JOB_TITLES = {
+    "Office": ["manager", "staff"],
+    "Hollys Coffee": ["manager", "staff"],
+    "Nail": ["manager", "staff"],
+    "Maintenance": ["manager", "staff"],
+    "Driver": ["manager", "staff"],
+    "Therapist": ["manager", "staff"],
+    "Yega": ["manager", "staff", "chef"],
+}
+
+VALID_DEPARTMENTS = list(DEPARTMENT_JOB_TITLES.keys())
+
+
 class StaffCreate(BaseModel):
     name: str
+    department: str  # Office, Hollys Coffee, Nail, Maintenance, Driver, Therapist, Yega
+    job_title: str  # manager, staff, chef (부서별로 다름)
     phone: Optional[str] = None
     position: Optional[str] = None
     employment_type: str = "계약직"  # 정직원, 계약직, 아르바이트, 드라이버 등
@@ -43,6 +60,8 @@ class StaffCreate(BaseModel):
 
 class StaffUpdate(BaseModel):
     name: Optional[str] = None
+    department: Optional[str] = None
+    job_title: Optional[str] = None
     phone: Optional[str] = None
     position: Optional[str] = None
     employment_type: Optional[str] = None
@@ -53,6 +72,8 @@ class StaffUpdate(BaseModel):
 class StaffResponse(BaseModel):
     id: int
     name: str
+    department: str
+    job_title: str
     phone: Optional[str]
     position: Optional[str]
     employment_type: str
@@ -90,6 +111,21 @@ async def bulk_import_staff(
 
         for staff_data in staff_list:
             try:
+                # 부서와 직책 검증
+                if staff_data.department not in VALID_DEPARTMENTS:
+                    errors.append({
+                        "name": staff_data.name,
+                        "error": f"유효하지 않은 부서: {staff_data.department}"
+                    })
+                    continue
+
+                if staff_data.job_title not in DEPARTMENT_JOB_TITLES[staff_data.department]:
+                    errors.append({
+                        "name": staff_data.name,
+                        "error": f"'{staff_data.department}' 부서의 유효하지 않은 직책: {staff_data.job_title}"
+                    })
+                    continue
+
                 # 중복 확인 (이름 기준)
                 existing = await db.execute(
                     select(Staff).where(
@@ -103,6 +139,8 @@ async def bulk_import_staff(
                 # 새 직원 생성
                 new_staff = Staff(
                     name=staff_data.name,
+                    department=staff_data.department,
+                    job_title=staff_data.job_title,
                     phone=staff_data.phone,
                     position=staff_data.position,
                     employment_type=staff_data.employment_type,
@@ -140,6 +178,21 @@ async def create_staff(
 ):
     """새 직원을 추가합니다."""
     try:
+        # 부서 검증
+        if staff_data.department not in VALID_DEPARTMENTS:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"유효하지 않은 부서: {staff_data.department}. 유효한 부서: {', '.join(VALID_DEPARTMENTS)}"
+            )
+
+        # 직책 검증
+        if staff_data.job_title not in DEPARTMENT_JOB_TITLES[staff_data.department]:
+            valid_titles = ", ".join(DEPARTMENT_JOB_TITLES[staff_data.department])
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"'{staff_data.department}' 부서의 유효하지 않은 직책: {staff_data.job_title}. 유효한 직책: {valid_titles}"
+            )
+
         # 중복 확인
         existing = await db.execute(
             select(Staff).where(func.lower(Staff.name) == staff_data.name.lower())
@@ -155,7 +208,7 @@ async def create_staff(
         await db.commit()
         await db.refresh(new_staff)
 
-        logger.info(f"✅ 새 직원 추가: {new_staff.name} ({new_staff.employment_type})")
+        logger.info(f"✅ 새 직원 추가: {new_staff.name} ({new_staff.department}/{new_staff.job_title})")
         return new_staff
 
     except HTTPException:
@@ -171,7 +224,9 @@ async def create_staff(
 # ============================================================
 @router.get("", response_model=StaffListResponse)
 async def get_staff_list(
-    employment_type: Optional[str] = Query(None, description="정직원, 드라이버, 계약직 등"),
+    department: Optional[str] = Query(None, description="부서 필터"),
+    job_title: Optional[str] = Query(None, description="직책 필터"),
+    employment_type: Optional[str] = Query(None, description="고용 형태"),
     position: Optional[str] = Query(None, description="직급 필터"),
     is_active: Optional[int] = Query(None, description="활성 여부 (1=활성, 0=비활성)"),
     search: Optional[str] = Query(None, description="이름 검색"),
@@ -184,6 +239,10 @@ async def get_staff_list(
         query = select(Staff)
 
         # 필터 적용
+        if department:
+            query = query.where(Staff.department == department)
+        if job_title:
+            query = query.where(Staff.job_title == job_title)
         if employment_type:
             query = query.where(Staff.employment_type == employment_type)
         if position:
@@ -261,6 +320,22 @@ async def update_staff(
                 detail=f"직원을 찾을 수 없습니다: ID {staff_id}",
             )
 
+        # 부서 검증
+        if staff_data.department and staff_data.department not in VALID_DEPARTMENTS:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"유효하지 않은 부서: {staff_data.department}"
+            )
+
+        # 직책 검증 (부서가 제공된 경우)
+        department = staff_data.department or staff.department
+        if staff_data.job_title and staff_data.job_title not in DEPARTMENT_JOB_TITLES[department]:
+            valid_titles = ", ".join(DEPARTMENT_JOB_TITLES[department])
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"'{department}' 부서의 유효하지 않은 직책: {staff_data.job_title}. 유효한 직책: {valid_titles}"
+            )
+
         # 수정 필드 적용
         update_data = staff_data.model_dump(exclude_unset=True)
         for field, value in update_data.items():
@@ -282,13 +357,52 @@ async def update_staff(
 
 
 # ============================================================
-# 6️⃣ 통계 엔드포인트
+# 6️⃣ GET /api/staff/config/departments - 부서/직책 설정
 # ============================================================
+@router.get("/config/departments", response_model=dict)
+async def get_department_config():
+    """부서별 직책 매핑을 반환합니다."""
+    return {
+        "departments": VALID_DEPARTMENTS,
+        "department_job_titles": DEPARTMENT_JOB_TITLES,
+    }
+
+
+# ============================================================
+# 7️⃣ 통계 엔드포인트
+# ============================================================
+@router.get("/stats/by-department", response_model=dict)
+async def get_staff_stats_by_department(
+    db: AsyncSession = Depends(get_db),
+):
+    """부서별 직원 통계"""
+    try:
+        result = await db.execute(
+            select(
+                Staff.department,
+                Staff.job_title,
+                func.count(Staff.id).label("count"),
+            ).group_by(Staff.department, Staff.job_title)
+        )
+
+        stats = result.all()
+        return {
+            "stats": [
+                {"department": row[0], "job_title": row[1], "count": row[2]}
+                for row in stats
+            ]
+        }
+
+    except Exception as e:
+        logger.error(f"❌ 통계 조회 실패: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"조회 실패: {str(e)}")
+
+
 @router.get("/stats/by-type", response_model=dict)
 async def get_staff_stats_by_type(
     db: AsyncSession = Depends(get_db),
 ):
-    """직원 분류별 통계"""
+    """직원 분류별 통계 (레거시 호환)"""
     try:
         result = await db.execute(
             select(

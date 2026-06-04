@@ -10,7 +10,7 @@
 import { db } from '@/lib/db/localDb';
 
 // 설정
-const FILE_SERVER_URL = 'http://localhost:5000/api';
+const FILE_SERVER_URL = 'http://localhost:5001/api';
 const AUTO_SAVE_INTERVAL = 15 * 60 * 1000; // 15분마다
 
 let autoSaveTimer: NodeJS.Timeout | null = null;

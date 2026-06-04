@@ -18,7 +18,9 @@ class Staff(Base):
     id = Column(BigInteger, primary_key=True)
     name = Column(String(255), nullable=False)
     phone = Column(String(20))
-    position = Column(String(50))  # 마사지사, 테라피스트 등
+    department = Column(String(50), nullable=False)  # Office, Hollys Coffee, Nail, Maintenance, Driver, Therapist, Yega
+    job_title = Column(String(50), nullable=False)  # manager, staff, chef (department별로 다름)
+    position = Column(String(50))  # 마사지사, 테라피스트 등 (레거시 호환성)
     employment_type = Column(String(50), default='계약직')  # 정직원, 계약직, 아르바이트, 드라이버 등
 
     # 매칭 알고리즘을 위한 필드
