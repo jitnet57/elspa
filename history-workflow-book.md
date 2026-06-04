@@ -2,6 +2,87 @@
 
 ---
 
+## [2026-06-04 15:40] Order: 016 - 배포 및 인프라 최적화: DeploymentBadge, Monitor URL 탭, Service Worker 수정
+
+**주제:** Cloudflare Pages 배포 최적화 및 UI 개선 (데이터 표시, 탭 관리, 캐싱 수정)
+
+### Plan
+✅ DeploymentBadge 컴포넌트 생성 (배포 시간/정보 표시)
+✅ Monitor 페이지 URL 기반 탭 관리 (/monitor?tab=beds)
+✅ build-info.json 자동 생성 (npm prebuild)
+✅ Service Worker Response.clone() 에러 수정
+✅ Admin/Mobile 헤더에 배포 배지 통합
+✅ Cloudflare Pages 배포 완료
+
+### Task 수행 내용
+
+#### 섹션 1: DeploymentBadge 컴포넌트
+1. frontend/src/components/DeploymentBadge.tsx (생성)
+   - 배포 시간 표시 (한국어 포맷)
+   - 클릭/호버 시 commit 정보 표시
+   - 초록색 배지 + pulsing 애니메이션
+
+#### 섹션 2: Monitor 페이지 개선
+1. frontend/src/app/monitor/page.tsx (수정)
+   - Suspense 경계 추가 (SSR 에러 해결)
+2. frontend/src/app/monitor/MonitorContent.tsx (생성)
+   - useSearchParams() 로 URL 파라미터 관리
+   - router.push(/monitor?tab=X) 로 탭 변경
+   - 4개 탭: beds, schedule, booking, attendance
+
+#### 섹션 3: build-info.json 자동 생성
+1. frontend/scripts/generate-build-info.js (생성)
+   - git commit 정보 추출 (hash, message, author, date)
+   - build-info.json 생성
+2. frontend/package.json (수정)
+   - prebuild 스크립트 추가
+   - build 스크립트에 prebuild 포함
+
+#### 섹션 4: Service Worker 수정
+1. frontend/public/service-worker.js (수정)
+   - Response.clone() 에러 해결
+   - response.ok 확인 후 clone
+   - CACHE_VERSION v41 → v42
+
+#### 섹션 5: 헤더 통합
+1. frontend/src/app/admin/_components/AdminShell.tsx (수정)
+   - DeploymentBadge import 및 추가
+2. frontend/src/components/MobileHeader.tsx (수정)
+   - DeploymentBadge import 및 추가
+
+### Result
+✅ **6개 파일 생성 + 5개 파일 수정 완료**
+- DeploymentBadge 컴포넌트 ✓
+- Monitor 페이지 URL 기반 탭 ✓
+- build-info.json 자동 생성 ✓
+- Service Worker clone 에러 해결 ✓
+- Admin/Mobile 헤더 배치 추가 ✓
+- Cloudflare Pages 배포 완료 ✓
+
+### 주요 파일
+- DeploymentBadge.tsx (4.4KB)
+- MonitorContent.tsx (3.5KB)
+- generate-build-info.js (1.2KB)
+- build-info.json (자동 생성)
+- service-worker.js (v42)
+- AdminShell.tsx, MobileHeader.tsx (통합)
+
+### 기술 스택
+- Next.js 16.2.4 (Turbopack)
+- React 19 (Suspense boundary)
+- TypeScript (타입 안정성)
+- Tailwind CSS (스타일)
+- Cloudflare Pages (배포)
+
+### 배포 현황
+✅ 로컬 dev 서버: 작동 중
+✅ GitHub 커밋: fe24f649 push 완료
+✅ Cloudflare Pages: 배포 완료 (HTTP 200)
+✅ DeploymentBadge: 헤더에 표시됨
+✅ Monitor 탭: ?tab= URL 파라미터로 관리
+
+---
+
 ## [2026-05-22 14:30] Order: 015 - 급여 정산 시스템 Phase 1-10 완성 (BMAD + Wave 병렬 오케스트레이션)
 
 **주제:** ElSpa 급여 정산 시스템 전체 구현 완료 (Phase 1-10, 14일, 100%)
