@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { BarChart3, Settings } from 'lucide-react';
+import DeploymentBadge from '@/components/DeploymentBadge';
 
 // ============================================================
 // 📌 컴포넌트명: Home (ElSpa 랜딩 페이지)
@@ -13,7 +14,12 @@ export default function Home() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white font-sans flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white font-sans flex flex-col items-center justify-center p-4">
+      {/* 배포 배지 (상단 우측) */}
+      <div className="absolute top-4 right-4">
+        <DeploymentBadge />
+      </div>
+
       <div className="text-center space-y-12 max-w-2xl">
         {/* 헤더 */}
         <div className="space-y-4">
