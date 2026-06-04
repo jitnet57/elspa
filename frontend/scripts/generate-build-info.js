@@ -3,7 +3,7 @@
 /**
  * ============================================================
  * 📌 빌드 정보 생성 스크립트
- * 📋 목적: 배포 시간을 public/build-info.json에 저장
+ * 📋 목적: 배포 시간 & 최근 커밋 정보를 public/build-info.json에 저장
  * 🔧 실행: npm run prebuild로 자동 실행
  * 📅 작성일: 2026-06-04
  * ============================================================
@@ -11,10 +11,28 @@
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 // 현재 시간
 const now = new Date();
 const kstTime = new Date(now.getTime() + 9 * 60 * 60 * 1000); // KST (+9시간)
+
+// 🔄 Git 정보 추출
+let commitHash = '';
+let commitMessage = '';
+let commitAuthor = '';
+let commitDate = '';
+
+try {
+  commitHash = execSync('git rev-parse --short HEAD', { encoding: 'utf-8' }).trim();
+  commitMessage = execSync('git log -1 --pretty=%B', { encoding: 'utf-8' }).trim();
+  commitAuthor = execSync('git log -1 --pretty=%an', { encoding: 'utf-8' }).trim();
+  commitDate = execSync('git log -1 --pretty=%ai', { encoding: 'utf-8' }).trim();
+} catch (error) {
+  console.warn('⚠️  Git 정보를 읽을 수 없습니다. (오프라인 환경일 수 있음)');
+  commitHash = 'unknown';
+  commitMessage = '업데이트됨';
+}
 
 const buildInfo = {
   // 배포 시간 (한국 시간)
@@ -36,6 +54,15 @@ const buildInfo = {
 
   // 배포 환경
   environment: process.env.ENVIRONMENT || 'production',
+
+  // 🔄 Git 정보
+  commit: {
+    hash: commitHash,
+    shortHash: commitHash.slice(0, 7),
+    message: commitMessage,
+    author: commitAuthor,
+    date: commitDate,
+  },
 };
 
 // public/build-info.json 생성
@@ -48,6 +75,9 @@ console.log(`
 📅 배포 시간: ${buildInfo.buildTimeShort}
 🕐 ISO 시간: ${buildInfo.buildTimeHMS}
 📌 버전: ${buildInfo.version}
-📦 파일: ${buildInfoPath}
+📦 Git Hash: ${buildInfo.commit.shortHash}
+📝 커밋: ${buildInfo.commit.message.split('\n')[0]}
+👤 작성자: ${buildInfo.commit.author}
+📍 파일: ${buildInfoPath}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `);
