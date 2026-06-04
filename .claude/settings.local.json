@@ -33,7 +33,8 @@
       "Bash(grep -l \"staff\\\\|Staff\" /Users/kwangseobpark/elspa/app/routers/*.py)",
       "Bash(kill 52658)",
       "Bash(ls -la requirements*.txt)",
-      "Bash(pip3 install:*)"
+      "Bash(pip3 install:*)",
+      "Bash(kill 54081)"
     ],
     "additionalDirectories": [
       "/Users/kwangseobpark/elspa/.git/refs",

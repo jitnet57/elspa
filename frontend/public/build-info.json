@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-04",
-  "buildTimeHMS": "2026-06-04 15:10:10",
-  "buildTimeShort": "2026- 06- 04- PM 11:10",
+  "buildTimeHMS": "2026-06-04 15:43:57",
+  "buildTimeShort": "2026- 06- 04- PM 11:43",
   "timestamp": "2026-06-0415",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "c5b35bc3",
-    "shortHash": "c5b35bc",
-    "message": "🔄 Auto Deploy: 🔄 Auto Deploy: ✨ Feat: 직책 구분 기능 추가 - 부서별 직책 관리",
+    "hash": "bd5f6243",
+    "shortHash": "bd5f624",
+    "message": "📚 Docs: 배포 및 UI 개선 히스토리 기록 (Order 016)",
     "author": "jitnet57",
-    "date": "2026-06-04 14:04:49 +0800"
+    "date": "2026-06-04 14:40:13 +0800"
   }
 }
