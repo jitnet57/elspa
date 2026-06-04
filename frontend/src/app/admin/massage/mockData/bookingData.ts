@@ -62,76 +62,10 @@ export interface BedGroup {
 }
 
 // ============================================================
-// 86개 베드 생성 함수: 마사지실1(30), 마사지실2(30), VIP실(14), 기타실(12)
+// 86개 베드 생성 함수 (초기화)
 // ============================================================
 const generateBeds = (): TherapyBed[] => {
-  const beds: TherapyBed[] = [];
-  let bedId = 1;
-
-  // 마사지실1 (A-1 ~ A-30, room1)
-  for (let i = 1; i <= 30; i++) {
-    const isOccupied = i === 1 || i === 4 || i === 7;
-    beds.push({
-      id: `BED-${String(bedId).padStart(3, '0')}`,
-      name: `A-${i}`,
-      roomNumber: `Room1-A${i}`,
-      room: 'room1',
-      type: i % 5 === 0 ? 'spa' : i % 12 === 0 ? 'premium' : i % 8 === 0 ? 'facial' : 'massage',
-      status: i === 5 || i === 26 ? 'cleaning' : isOccupied ? 'occupied' : 'available',
-      capacity: i % 12 === 0 ? 2 : 1,
-      ...(i === 1 && { therapistId: 'THER-001', serviceName: 'Thai Massage', endTime: '10:15' }),
-      ...(i === 4 && { therapistId: 'THER-002', serviceName: 'Swedish Massage', endTime: '14:00' }),
-      ...(i === 7 && { therapistId: 'THER-003', serviceName: 'Aromatherapy', endTime: '15:30' }),
-    });
-    bedId++;
-  }
-
-  // 마사지실2 (B-1 ~ B-30, room2)
-  for (let i = 1; i <= 30; i++) {
-    const isOccupied = i === 2 || i === 7;
-    beds.push({
-      id: `BED-${String(bedId).padStart(3, '0')}`,
-      name: `B-${i}`,
-      roomNumber: `Room2-B${i}`,
-      room: 'room2',
-      type: i % 5 === 0 ? 'spa' : i % 10 === 0 ? 'premium' : i % 8 === 0 ? 'facial' : 'massage',
-      status: i === 11 ? 'cleaning' : isOccupied ? 'occupied' : 'available',
-      capacity: i % 10 === 0 ? 2 : 1,
-      ...(i === 2 && { therapistId: 'THER-004', serviceName: 'Deep Tissue', endTime: '16:30' }),
-      ...(i === 7 && { therapistId: 'THER-005', serviceName: 'Hot Stone', endTime: '17:45' }),
-    });
-    bedId++;
-  }
-
-  // VIP실 (V-1 ~ V-14, room3)
-  for (let i = 1; i <= 14; i++) {
-    beds.push({
-      id: `BED-${String(bedId).padStart(3, '0')}`,
-      name: `V-${i}`,
-      roomNumber: `VIP-V${i}`,
-      room: 'room3',
-      type: 'premium',
-      status: 'available',
-      capacity: 2,
-    });
-    bedId++;
-  }
-
-  // 기타실 (E-1 ~ E-12, room4)
-  for (let i = 1; i <= 12; i++) {
-    beds.push({
-      id: `BED-${String(bedId).padStart(3, '0')}`,
-      name: `E-${i}`,
-      roomNumber: `ETC-E${i}`,
-      room: 'room4',
-      type: 'massage',
-      status: 'available',
-      capacity: 1,
-    });
-    bedId++;
-  }
-
-  return beds;
+  return [];
 };
 
 export const therapyBeds: TherapyBed[] = generateBeds();
