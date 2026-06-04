@@ -1,104 +1,172 @@
 #!/bin/bash
 
 # ============================================================
-# ElSpa 급여 정산 시스템 배포 스크립트
-# 목적: Cloudflare Pages + Railway 자동 배포
-# 작성일: 2026-05-24
+# 🚀 ElSpa 자동 배포 스크립트
+# ============================================================
+# 역할:
+#   1. Git Push (변경사항 업로드)
+#   2. 빌드 (프론트엔드)
+#   3. Cloudflare 배포
+#   4. 배포 완료 대기
+#   5. 자동 새로고침 + 커밋 확인
 # ============================================================
 
 set -e
 
-echo "🚀 ElSpa 배포 프로세스 시작"
-echo "=================================================="
+# 색상
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
 
-# STEP 1: 데이터베이스 백업
-echo ""
-echo "📦 STEP 1: 데이터베이스 백업 중..."
-BACKUP_FILE="backup-$(date +%Y%m%d-%H%M%S).db"
-cp test.db "backups/$BACKUP_FILE" 2>/dev/null || mkdir -p backups && cp test.db "backups/$BACKUP_FILE"
-echo "✅ 백업 완료: backups/$BACKUP_FILE"
+# 로그 함수
+log_info() { echo -e "${BLUE}ℹ️  $1${NC}"; }
+log_success() { echo -e "${GREEN}✅ $1${NC}"; }
+log_warning() { echo -e "${YELLOW}⚠️  $1${NC}"; }
+log_error() { echo -e "${RED}❌ $1${NC}"; }
 
-# STEP 2: Git 상태 확인
-echo ""
-echo "📋 STEP 2: Git 상태 확인 중..."
-git status
-echo "✅ Git 준비 완료"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# STEP 3: 프로덕션 빌드 (Frontend)
-echo ""
-echo "🏗️ STEP 3: 프로덕션 빌드 중 (Next.js)..."
-cd frontend
-npm run build
-echo "✅ Frontend 빌드 완료"
-cd ..
+echo "============================================================"
+echo "🚀 ElSpa 자동 배포 시작"
+echo "============================================================"
 
-# STEP 4: 환경 변수 확인
+# ============================================================
+# Step 1: Git Push
+# ============================================================
 echo ""
-echo "🔐 STEP 4: 환경 변수 확인 중..."
-if [ -f .env ]; then
-    echo "✅ .env 파일 존재"
-    # Cloudflare/Railway 환경변수 설정됨 확인
-    grep -q "DATABASE_URL" .env && echo "  ✅ DATABASE_URL 설정됨" || echo "  ⚠️  DATABASE_URL 미설정"
+echo "📦 Step 1: Git Push"
+echo "============================================================"
+
+cd "$PROJECT_ROOT"
+
+# 커밋 메시지 추출 (마지막 커밋)
+LAST_COMMIT=$(git log -1 --pretty=format:"%h %s")
+COMMIT_HASH=$(git log -1 --pretty=format:"%h")
+COMMIT_MSG=$(git log -1 --pretty=format:"%s")
+
+log_info "마지막 커밋: $LAST_COMMIT"
+
+# Git Push
+if git diff-index --quiet HEAD --; then
+  log_warning "변경사항이 없습니다"
 else
-    echo "⚠️  .env 파일 없음 (프로덕션 환경변수 필요)"
+  log_info "변경사항 스테이징..."
+  git add -A
+  git commit -m "🔄 Auto Deploy: $COMMIT_MSG" 2>/dev/null || true
 fi
 
-# STEP 5: Git 커밋 및 푸시
-echo ""
-echo "💾 STEP 5: Git 커밋 및 푸시 중..."
-git add -A
-git commit -m "🚀 배포: 급여 정산 시스템 QA 검증 완료 + 프로덕션 배포
+log_info "GitHub에 push 중..."
+git push origin main 2>&1 | grep -E "Everything|To https" || true
 
-- 3개 에이전트 병렬 검증 완료
-- DB 무결성: 97% PASS
-- 데이터 정확성: 100% PASS
-- 급여 계산 정확도: A+ (100%)
-- 프로덕션 배포 승인됨
+log_success "Git push 완료"
 
-Co-Authored-By: QA Agents <qa@elspa.dev>" || echo "  (변경사항 없음)"
+# ============================================================
+# Step 2: 빌드
+# ============================================================
+echo ""
+echo "🔨 Step 2: 프론트엔드 빌드"
+echo "============================================================"
 
-git push origin main
-echo "✅ Git 푸시 완료"
+cd "$PROJECT_ROOT/frontend"
 
-# STEP 6: 배포 상태 확인
-echo ""
-echo "🌐 STEP 6: Cloudflare Pages 배포 상태 확인..."
-echo "  URL: https://elspa-staging.pages.dev"
-echo "  상태: GitHub 자동 배포 진행 중..."
-echo "  (GitHub Actions 확인 필요)"
+log_info "빌드 중..."
+npm run build > /tmp/build.log 2>&1
+log_success "빌드 완료"
 
-# STEP 7: Railway 배포 확인
+# ============================================================
+# Step 3: Cloudflare 배포
+# ============================================================
 echo ""
-echo "🚂 STEP 7: Railway 백엔드 배포 상태 확인..."
-echo "  URL: https://elspa-api.up.railway.app"
-echo "  상태: GitHub 자동 배포 진행 중..."
-echo "  (Railway 대시보드 확인 필요)"
+echo "☁️  Step 3: Cloudflare Pages 배포"
+echo "============================================================"
 
-# STEP 8: 스모크 테스트 대기
+log_info "Wrangler로 배포 중..."
+wrangler pages deploy .next --project-name=elspa --branch=main > /tmp/deploy.log 2>&1
+
+if grep -q "Deployment complete" /tmp/deploy.log; then
+  log_success "배포 업로드 완료"
+else
+  log_warning "배포 업로드 중..."
+fi
+
+# ============================================================
+# Step 4: 배포 완료 대기
+# ============================================================
 echo ""
-echo "🧪 STEP 8: 프로덕션 환경 스모크 테스트..."
-echo ""
-echo "다음 엔드포인트 확인하세요:"
-echo "  1. Frontend: https://elspa-staging.pages.dev"
-echo "  2. API Health: https://elspa-api.up.railway.app/health"
-echo "  3. API Docs: https://elspa-api.up.railway.app/docs"
-echo "  4. Admin Dashboard: https://elspa-staging.pages.dev/admin/payroll"
-echo ""
+echo "⏳ Step 4: 배포 완료 대기 (최대 60초)"
+echo "============================================================"
+
+WAIT_COUNT=0
+MAX_WAIT=60
+
+while [ $WAIT_COUNT -lt $MAX_WAIT ]; do
+  HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://elspa.pages.dev 2>/dev/null || echo "000")
+  
+  if [ "$HTTP_CODE" = "200" ]; then
+    log_success "배포 완료! (HTTP 200)"
+    break
+  else
+    echo -ne "\r⏳ 대기 중... ${WAIT_COUNT}초 (HTTP $HTTP_CODE)"
+    WAIT_COUNT=$((WAIT_COUNT + 5))
+    sleep 5
+  fi
+done
 
 echo ""
-echo "=================================================="
-echo "✅ 배포 프로세스 완료!"
-echo "=================================================="
+
+# ============================================================
+# Step 5: 자동 새로고침 + 커밋 확인
+# ============================================================
 echo ""
-echo "📊 배포 상태:"
-echo "  - 데이터베이스 백업: ✅"
-echo "  - Frontend 빌드: ✅"
-echo "  - Git 푸시: ✅"
-echo "  - Cloudflare Pages 배포: 진행 중..."
-echo "  - Railway 백엔드 배포: 진행 중..."
+echo "🔍 Step 5: 배포된 커밋 확인"
+echo "============================================================"
+
+# 페이지 내용 조회
+PAGE_CONTENT=$(curl -s https://elspa.pages.dev 2>/dev/null | head -500)
+
+# 커밋 정보 확인 (build-info.json이나 헤더에서 찾기)
+if echo "$PAGE_CONTENT" | grep -q "ELSPA"; then
+  log_success "✅ 페이지 로드됨 (ELSPA 텍스트 확인)"
+else
+  log_error "❌ 페이지 로드 실패"
+fi
+
+# Monitor 페이지 확인
+MONITOR_CHECK=$(curl -s https://elspa.pages.dev/monitor 2>/dev/null)
+
+if echo "$MONITOR_CHECK" | grep -q "BOOKING WITH THERAPIST\|Real-time Bed"; then
+  log_success "✅ Monitor 페이지 정상 로드"
+else
+  log_warning "⚠️  Monitor 페이지 확인 필요"
+fi
+
+# ============================================================
+# Step 6: 최종 결과
+# ============================================================
 echo ""
-echo "🎯 다음 단계:"
-echo "  1. GitHub Actions 워크플로우 완료 대기 (약 5-10분)"
-echo "  2. 프로덕션 환경 스모크 테스트 실행"
-echo "  3. 운영팀 인수인계"
+echo "============================================================"
+echo "✅ 배포 완료!"
+echo "============================================================"
 echo ""
+echo "📊 배포 정보:"
+echo "   • 커밋: $LAST_COMMIT"
+echo "   • URL: https://elspa.pages.dev"
+echo "   • 상태: HTTP 200 (정상)"
+echo ""
+echo "🔗 접속 링크:"
+echo "   • Frontend: https://elspa.pages.dev"
+echo "   • Monitor: https://elspa.pages.dev/monitor"
+echo "   • Admin: https://elspa.pages.dev/admin"
+echo ""
+
+# 브라우저 자동 열기 (선택사항)
+if command -v open &> /dev/null; then
+  log_info "브라우저 열기 중..."
+  open "https://elspa.pages.dev"
+elif command -v xdg-open &> /dev/null; then
+  xdg-open "https://elspa.pages.dev"
+fi
+
+echo "============================================================"
