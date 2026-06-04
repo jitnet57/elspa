@@ -1,5 +1,7 @@
 'use client';
 
+import DeploymentBadge from './DeploymentBadge';
+
 interface MobileHeaderProps {
   onMenuClick: () => void;
   title: string;
@@ -25,6 +27,7 @@ export function MobileHeader({ onMenuClick, title, rightContent }: MobileHeaderP
 
         {/* 우측 콘텐츠 */}
         <div className="flex items-center gap-2">
+          <DeploymentBadge />
           {rightContent}
         </div>
       </div>

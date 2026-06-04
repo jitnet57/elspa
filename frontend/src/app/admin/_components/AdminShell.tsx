@@ -4,6 +4,7 @@ import Link from 'next/link';
 import React from 'react';
 import { useAdminGate } from '@/lib/store/admin-gate-store';
 import { useT } from '@/lib/i18n';
+import DeploymentBadge from '@/components/DeploymentBadge';
 
 // ============================================================
 // 📌 컴포넌트명: AdminShell
@@ -130,6 +131,7 @@ export default function AdminShell({ children }: AdminShellProps) {
             </h2>
           </div>
           <div className="flex items-center gap-4">
+            <DeploymentBadge />
             <button
               onClick={logout}
               className="flex items-center gap-2 px-4 py-2 rounded-full border border-rose-500/30 text-rose-500 hover:bg-rose-500/10 transition-all font-mono text-[9px] font-black tracking-wider"

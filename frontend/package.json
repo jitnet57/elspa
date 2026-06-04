@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "prebuild": "node scripts/generate-build-info.js",
+    "build": "npm run prebuild && rm -rf .next && next build",
+    "build:clean": "rm -rf .next .turbo node_modules/.cache && npm run build",
     "start": "next start",
     "lint": "eslint",
     "cypress:open": "cypress open",
