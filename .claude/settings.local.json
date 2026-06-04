@@ -30,7 +30,10 @@
       "Bash(curl -s -I https://elspa.pages.dev/)",
       "Bash(vercel --version)",
       "Bash(python3:*)",
-      "Bash(grep -l \"staff\\\\|Staff\" /Users/kwangseobpark/elspa/app/routers/*.py)"
+      "Bash(grep -l \"staff\\\\|Staff\" /Users/kwangseobpark/elspa/app/routers/*.py)",
+      "Bash(kill 52658)",
+      "Bash(ls -la requirements*.txt)",
+      "Bash(pip3 install:*)"
     ],
     "additionalDirectories": [
       "/Users/kwangseobpark/elspa/.git/refs",
