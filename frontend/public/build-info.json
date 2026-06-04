@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-04",
-  "buildTimeHMS": "2026-06-04 16:12:36",
-  "buildTimeShort": "2026- 06- 05- AM 12:12",
-  "timestamp": "2026-06-0416",
+  "buildTimeHMS": "2026-06-04 08:02:22",
+  "buildTimeShort": "2026-06-04 PM 04:02",
+  "timestamp": "2026-06-0408",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "c883233f",
-    "shortHash": "c883233",
-    "message": "🐛 Fix: build-info.json 배포 경로 수정 (public → .next)",
+    "hash": "8cacfd97",
+    "shortHash": "8cacfd9",
+    "message": "✨ Feat: 홈페이지에 DeploymentBadge 추가 (배포 시간 표시)",
     "author": "jitnet57",
-    "date": "2026-06-04 14:56:08 +0800"
+    "date": "2026-06-04 15:19:06 +0800"
   }
 }

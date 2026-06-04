@@ -137,55 +137,9 @@ const generateBeds = (): TherapyBed[] => {
 export const therapyBeds: TherapyBed[] = generateBeds();
 
 // ============================================================
-// 테라피스트
+// 테라피스트 (초기화)
 // ============================================================
-export const therapists: Therapist[] = [
-  {
-    id: 'THER-001',
-    name: 'Maria Christina Santos',
-    specialties: ['Thai Massage', 'Swedish', 'Deep Tissue'],
-    avatar: 'MS',
-    status: 'busy',
-    experience: 8,
-    rating: 4.9,
-  },
-  {
-    id: 'THER-002',
-    name: 'Jennifer Cruz',
-    specialties: ['Aromatherapy', 'Relaxation', 'Foot Massage'],
-    avatar: 'JC',
-    status: 'available',
-    experience: 6,
-    rating: 4.8,
-  },
-  {
-    id: 'THER-003',
-    name: 'Rosa Maria Gonzalez',
-    specialties: ['Facial', 'Hot Stone', 'Reflexology'],
-    avatar: 'RG',
-    status: 'busy',
-    experience: 7,
-    rating: 4.7,
-  },
-  {
-    id: 'THER-004',
-    name: 'Lucia Mendoza',
-    specialties: ['Sports Massage', 'Swedish', 'Shiatsu'],
-    avatar: 'LM',
-    status: 'available',
-    experience: 5,
-    rating: 4.6,
-  },
-  {
-    id: 'THER-005',
-    name: 'Angela Lopez',
-    specialties: ['Thai Massage', 'Pregnancy Massage', 'Relaxation'],
-    avatar: 'AL',
-    status: 'break',
-    experience: 9,
-    rating: 5.0,
-  },
-];
+export const therapists: Therapist[] = [];
 
 // ============================================================
 // 마사지 서비스 — EL SPA 메뉴판 기준 (2026-06-03)
@@ -366,147 +320,19 @@ export const massageServices: MassageService[] = [
 ];
 
 // ============================================================
-// 시간대별 예약 (2026-05-26)
+// 시간대별 예약 (초기화)
 // ============================================================
-export const bookings: TimeSlot[] = [
-  // Morning
-  {
-    id: 'BK-001',
-    bedId: 'BED-001',
-    therapistId: 'THER-001',
-    startTime: '08:00',
-    endTime: '09:00',
-    serviceId: 'SVC-001',
-    clientName: 'John Smith',
-    clientPhone: '555-0001',
-    status: 'completed',
-    date: '2026-05-26',
-    notes: 'Regular customer',
-  },
-  {
-    id: 'BK-002',
-    bedId: 'BED-001',
-    therapistId: 'THER-001',
-    startTime: '09:15',
-    endTime: '10:15',
-    serviceId: 'SVC-002',
-    clientName: 'Maria Johnson',
-    clientPhone: '555-0002',
-    status: 'confirmed',
-    date: '2026-05-26',
-    notes: '',
-  },
-  {
-    id: 'BK-003',
-    bedId: 'BED-003',
-    therapistId: 'THER-003',
-    startTime: '09:00',
-    endTime: '10:00',
-    serviceId: 'SVC-005',
-    clientName: 'Lisa Wong',
-    clientPhone: '555-0003',
-    status: 'confirmed',
-    date: '2026-05-26',
-    notes: 'First-time client',
-  },
-  {
-    id: 'BK-004',
-    bedId: 'BED-002',
-    therapistId: 'THER-002',
-    startTime: '10:00',
-    endTime: '10:45',
-    serviceId: 'SVC-004',
-    clientName: 'Robert Brown',
-    clientPhone: '555-0004',
-    status: 'confirmed',
-    date: '2026-05-26',
-    notes: '',
-  },
-
-  // Afternoon
-  {
-    id: 'BK-005',
-    bedId: 'BED-004',
-    therapistId: 'THER-004',
-    startTime: '13:00',
-    endTime: '14:30',
-    serviceId: 'SVC-003',
-    clientName: 'James Davis',
-    clientPhone: '555-0005',
-    status: 'pending',
-    date: '2026-05-26',
-    notes: 'Request for evening massage',
-  },
-  {
-    id: 'BK-006',
-    bedId: 'BED-001',
-    therapistId: 'THER-001',
-    startTime: '14:00',
-    endTime: '15:00',
-    serviceId: 'SVC-001',
-    clientName: 'Emily Chen',
-    clientPhone: '555-0006',
-    status: 'confirmed',
-    date: '2026-05-26',
-    notes: '',
-  },
-  {
-    id: 'BK-007',
-    bedId: 'BED-002',
-    therapistId: 'THER-002',
-    startTime: '15:00',
-    endTime: '16:00',
-    serviceId: 'SVC-002',
-    clientName: 'David Garcia',
-    clientPhone: '555-0007',
-    status: 'confirmed',
-    date: '2026-05-26',
-    notes: 'Recurring appointment',
-  },
-
-  // Evening
-  {
-    id: 'BK-008',
-    bedId: 'BED-004',
-    therapistId: 'THER-005',
-    startTime: '17:00',
-    endTime: '18:00',
-    serviceId: 'SVC-002',
-    clientName: 'Amanda White',
-    clientPhone: '555-0008',
-    status: 'confirmed',
-    date: '2026-05-26',
-    notes: '',
-  },
-  {
-    id: 'BK-009',
-    bedId: 'BED-003',
-    therapistId: 'THER-003',
-    startTime: '17:30',
-    endTime: '18:30',
-    serviceId: 'SVC-007',
-    clientName: 'Paul Miller',
-    clientPhone: '555-0009',
-    status: 'confirmed',
-    date: '2026-05-26',
-    notes: 'VIP customer',
-  },
-];
+export const bookings: TimeSlot[] = [];
 
 // ============================================================
-// 통계
+// 통계 (초기화)
 // ============================================================
 export const bookingSummary = {
   totalBookings: bookings.length,
   confirmedBookings: bookings.filter(b => b.status === 'confirmed').length,
   pendingBookings: bookings.filter(b => b.status === 'pending').length,
   completedBookings: bookings.filter(b => b.status === 'completed').length,
-  totalRevenue: bookings
-    .filter(b => b.status === 'confirmed' || b.status === 'completed')
-    .reduce((sum, b) => {
-      const service = massageServices.find(s => s.id === b.serviceId);
-      return sum + (service?.price || 0);
-    }, 0),
+  totalRevenue: 0,
   availableTherapists: therapists.filter(t => t.status === 'available').length,
   availableBeds: therapyBeds.filter(b => b.status === 'available').length,
 };

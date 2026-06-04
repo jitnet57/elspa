@@ -13,9 +13,8 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-// 현재 시간
+// 현재 시간 (시스템 시간대 그대로 사용)
 const now = new Date();
-const kstTime = new Date(now.getTime() + 9 * 60 * 60 * 1000); // KST (+9시간)
 
 // 🔄 Git 정보 추출
 let commitHash = '';
@@ -35,19 +34,22 @@ try {
 }
 
 const buildInfo = {
-  // 배포 시간 (한국 시간)
-  buildTime: kstTime.toISOString().split('T')[0], // YYYY-MM-DD
-  buildTimeHMS: kstTime.toISOString().split('.')[0].replace('T', ' '), // YYYY-MM-DD HH:MM:SS
-  buildTimeShort: kstTime.toLocaleString('ko-KR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).replace(/\./g, '-').replace(/\s/g, ' '),
+  // 배포 시간 (현재 시스템 시간)
+  buildTime: now.toISOString().split('T')[0], // YYYY-MM-DD
+  buildTimeHMS: now.toISOString().split('.')[0].replace('T', ' '), // YYYY-MM-DD HH:MM:SS
+  buildTimeShort: (() => {
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
+    const displayHours = now.getHours() % 12 || 12;
+    return `${year}-${month}-${day} ${ampm} ${String(displayHours).padStart(2, '0')}:${minutes}`;
+  })(),
 
   // 타임스탐프 (Service Worker 캐시 버전용)
-  timestamp: kstTime.toISOString().slice(0, 13).replace('T', '').replace(/:/g, ''), // YYYYMMDDHH
+  timestamp: now.toISOString().slice(0, 13).replace('T', '').replace(/:/g, ''), // YYYYMMDDHH
 
   // 버전 정보
   version: require('../package.json').version,
