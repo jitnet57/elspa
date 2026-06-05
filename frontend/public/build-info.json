@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 20:40:08",
-  "buildTimeShort": "2026-06-06 AM 04:40",
+  "buildTimeHMS": "2026-06-05 20:41:55",
+  "buildTimeShort": "2026-06-06 AM 04:41",
   "timestamp": "2026-06-0520",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "ea26d0e7",
-    "shortHash": "ea26d0e",
-    "message": "🔧 Fix: 시간대 변경 (12시간 → 24시간 00:00 ~ 23:00)",
+    "hash": "96d4caae",
+    "shortHash": "96d4caa",
+    "message": "🔧 Fix: 자동 백업 기능 완전 비활성화 (파일저장 대화 제거)",
     "author": "jitnet57",
-    "date": "2026-06-06 04:37:49 +0800"
+    "date": "2026-06-06 04:40:22 +0800"
   }
 }

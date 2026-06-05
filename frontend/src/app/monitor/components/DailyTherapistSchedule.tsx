@@ -149,7 +149,8 @@ export default function DailyTherapistSchedule({ openNewOnMount = false }: { ope
           ) : (
             therapists.slice().sort(sortByAttendance).map((t, idx) => {
               const st = therapistStatusMeta[(t.status as DbTherapistStatus) ?? 'idle'] ?? therapistStatusMeta.idle;
-              const rows = bookings.filter((b) => b.therapist_name === t.name);
+              // 대소문자 무시하고 일치하는 예약 필터링
+              const rows = bookings.filter((b) => (b.therapist_name || '').toLowerCase() === (t.name || '').toLowerCase());
               return (
                 <div key={t.id} className={`flex border-b border-gray-100 ${idx % 2 ? 'bg-gray-50/40' : 'bg-white'}`}>
                   {/* 이름/상태 */}
