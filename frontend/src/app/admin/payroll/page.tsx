@@ -12,6 +12,7 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { usePayrollStore } from '@/lib/store/payroll-store';
 import { PayrollPeriod } from '@/lib/api/payroll-client';
+import { useRealtimePayroll } from '@/lib/hooks/useRealtimePayroll';
 
 interface PayrollStats {
   totalPeriods: number;
@@ -36,6 +37,9 @@ export default function PayrollDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
 
+  // 🔄 실시간 급여 데이터
+  const { payrollSummary, loading: realtimeLoading } = useRealtimePayroll();
+
   // Zustand store
   const { periods, loading, error, fetchPeriods, startCalculation, approvePeriodAction, clearError } =
     usePayrollStore();
@@ -45,17 +49,17 @@ export default function PayrollDashboard() {
     fetchPeriods({ pay_group: payGroup });
   }, [payGroup, fetchPeriods]);
 
-  // Update stats when periods change
+  // Update stats when periods or realtime data change
   useEffect(() => {
     setStats({
       totalPeriods: periods.length,
-      draftCount: periods.filter(p => p.status === 'draft').length,
-      approvedCount: periods.filter(p => p.status === 'approved').length,
-      paidCount: periods.filter(p => p.status === 'paid').length,
-      totalGrossPay: periods.reduce((sum, p) => sum + (p.employeeCount || 0) * 10000, 0),
-      averageNetPay: 35000,
+      draftCount: payrollSummary.draftCount,
+      approvedCount: payrollSummary.approvedCount,
+      paidCount: payrollSummary.paidCount,
+      totalGrossPay: payrollSummary.totalGrossPay,
+      averageNetPay: payrollSummary.averageNetPay,
     });
-  }, [periods]);
+  }, [periods, payrollSummary]);
 
   const handleCalculatePayroll = async (periodId: number) => {
     try {
