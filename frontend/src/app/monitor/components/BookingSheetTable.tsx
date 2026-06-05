@@ -558,7 +558,7 @@ export default function BookingSheetTable() {
               <th className="px-2 py-2 w-24">{tr('Room', '방번호')}</th>
               <th className="px-2 py-2">{tr('Guest', '고객이름')}</th>
               <th className="px-2 py-2">{tr('Company (Note)', '업체명(노트)')}</th>
-              <th className="px-2 py-2 w-32">{tr('Payment Method', '결제 수단')}</th>
+              <th className="px-2 py-2 w-32">{tr('Pay (Breakdown)', 'Pay 구분')}</th>
               <th className="px-2 py-2 w-24">{tr('Total', '청구액')}</th>
               <th className="px-2 py-2 w-20">{tr('Tip', '팁')}</th>
               <th className="px-2 py-2 w-16">{tr('Save', '저장')}</th>
