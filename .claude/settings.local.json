@@ -64,7 +64,8 @@
       "Bash(pkill -f \"start-dev.sh\")",
       "Bash(npm -v)",
       "Bash(check_schema.py:*)",
-      "Bash(check_full_schema.py:*)"
+      "Bash(check_full_schema.py:*)",
+      "Bash(grep -E \"\\\\.\\(py|ts|tsx\\)$\")"
     ],
     "additionalDirectories": [
       "/Users/kwangseobpark/elspa/.git/refs",

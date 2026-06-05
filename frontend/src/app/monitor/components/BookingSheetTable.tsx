@@ -133,25 +133,29 @@ export default function BookingSheetTable() {
     if (sb) {
       sb.from('massage_services')
         .select('name,base_price,base_duration_minutes')
+        .order('name')
         .then(({ data, error }) => {
-          if (data && !error) {
-            setMassageServices(
-              data.map((d: any) => ({
-                name: d.name,
-                price: Number(d.base_price),
-                duration: Number(d.base_duration_minutes),
-              }))
-            );
-            console.log('✅ 마사지 서비스 로드:', data.length, 'items');
-          } else if (error) {
-            console.warn('마사지 서비스 로드 실패:', error);
+          if (data && !error && data.length > 0) {
+            const services = data.map((d: any) => ({
+              name: d.name,
+              price: Number(d.base_price),
+              duration: Number(d.base_duration_minutes),
+            }));
+            setMassageServices(services);
+            console.log('✅ 마사지 서비스 Supabase 로드:', services.length, 'items');
+            console.log('   샘플:', services.slice(0, 3));
+          } else {
+            console.warn('⚠️ 마사지 서비스 로드 실패 (데이터 없음 또는 에러):', error);
+            console.warn('   data:', data, 'error:', error);
             setMassageServices([]);
           }
         })
         .catch((err) => {
-          console.warn('마사지 서비스 로드 에러:', err);
+          console.error('❌ 마사지 서비스 로드 에러:', err);
           setMassageServices([]);
         });
+    } else {
+      console.warn('⚠️ Supabase 클라이언트 초기화 실패');
     }
 
     // 업체/가이드 레퍼럴 후보
