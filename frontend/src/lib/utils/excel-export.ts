@@ -20,10 +20,10 @@ interface BookingRow {
   방번호: string;
   총액: number;
   팁: number;
-  현금: number;
-  카드: number;
-  계좌이체: number;
-  기타: number;
+  Bank1: number;
+  Bank2: number;
+  GCash: number;
+  Other: number;
   업체: string;
 }
 
@@ -38,27 +38,27 @@ export async function exportBookingsToExcel(
     // SheetJS 동적 로드
     const XLSX = await import('xlsx');
 
-    // 데이터 변환 (결제수단별 컬럼 분리)
+    // 데이터 변환 (결제수단별 컬럼 분리: Bank1, Bank2, GCash)
     const excelData: BookingRow[] = bookings
       .filter((b) => b.booking_date === date && b.therapist_name)
       .map((b, idx) => {
         const methods = b.payment_methods || [];
         const paymentByMethod: Record<string, number> = {
-          현금: 0,
-          카드: 0,
-          계좌이체: 0,
-          기타: 0,
+          Bank1: 0,
+          Bank2: 0,
+          GCash: 0,
+          Other: 0,
         };
 
         // 결제수단별로 금액 분류
         methods.forEach((m: any) => {
-          const method = (m.method || '기타').trim();
+          const method = (m.method || 'Other').trim();
           const amount = Number(m.amount) || 0;
 
-          if (method === '현금') paymentByMethod['현금'] += amount;
-          else if (method === '카드') paymentByMethod['카드'] += amount;
-          else if (method === '계좌이체') paymentByMethod['계좌이체'] += amount;
-          else paymentByMethod['기타'] += amount;
+          if (method.toLowerCase() === 'bank1') paymentByMethod['Bank1'] += amount;
+          else if (method.toLowerCase() === 'bank2') paymentByMethod['Bank2'] += amount;
+          else if (method.toLowerCase() === 'gcash') paymentByMethod['GCash'] += amount;
+          else paymentByMethod['Other'] += amount;
         });
 
         return {
@@ -72,10 +72,10 @@ export async function exportBookingsToExcel(
           방번호: b.room_num || '',
           총액: b.pay || 0,
           팁: b.tip || 0,
-          현금: paymentByMethod['현금'],
-          카드: paymentByMethod['카드'],
-          계좌이체: paymentByMethod['계좌이체'],
-          기타: paymentByMethod['기타'],
+          Bank1: paymentByMethod['Bank1'],
+          Bank2: paymentByMethod['Bank2'],
+          GCash: paymentByMethod['GCash'],
+          Other: paymentByMethod['Other'],
           업체: b.note || '',
         };
       });
@@ -87,7 +87,7 @@ export async function exportBookingsToExcel(
 
     // 워크북 생성
     const worksheet = XLSX.utils.json_to_sheet(excelData, {
-      header: ['일자', '순번', '테라피스트', '마사지종류', '시작시간', '종료시간', '고객명', '방번호', '총액', '팁', '현금', '카드', '계좌이체', '기타', '업체'],
+      header: ['일자', '순번', '테라피스트', '마사지종류', '시작시간', '종료시간', '고객명', '방번호', '총액', '팁', 'Bank1', 'Bank2', 'GCash', 'Other', '업체'],
     });
 
     // 열 너비 설정
@@ -102,10 +102,10 @@ export async function exportBookingsToExcel(
       { wch: 10 },  // 방번호
       { wch: 10 },  // 총액
       { wch: 8 },   // 팁
-      { wch: 10 },  // 현금
-      { wch: 10 },  // 카드
-      { wch: 12 },  // 계좌이체
-      { wch: 10 },  // 기타
+      { wch: 10 },  // Bank1
+      { wch: 10 },  // Bank2
+      { wch: 10 },  // GCash
+      { wch: 10 },  // Other
       { wch: 20 },  // 업체
     ];
 
