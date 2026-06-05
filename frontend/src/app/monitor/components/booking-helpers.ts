@@ -88,8 +88,9 @@ export interface UiTherapist {
   checked_in_at?: string; // "HH:MM" 출근시각 (출근 순번 정렬용)
 }
 
-// 가용 우선순위: 대기(idle) → 휴식 → 진행중(in_service) → 퇴근. 같으면 출근순(checked_in_at) → id
-const STATUS_RANK: Record<string, number> = { idle: 0, resting: 1, in_service: 2, checked_out: 3 };
+// 출근 순서 정렬: 출근(idle) → 휴식(resting) → 퇴근(checked_out) → 진행중(in_service-맨뒤)
+// 같은 상태면 출근순(checked_in_at) → id로 정렬
+const STATUS_RANK: Record<string, number> = { idle: 0, resting: 1, checked_out: 2, in_service: 999 };
 export function sortByAttendance(a: UiTherapist, b: UiTherapist): number {
   const r = (STATUS_RANK[a.status] ?? 9) - (STATUS_RANK[b.status] ?? 9);
   if (r !== 0) return r;
