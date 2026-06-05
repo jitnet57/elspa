@@ -552,11 +552,6 @@ export default function BookingSheetTable() {
       </div>
 
       {/* 테라피스트 검색 자동완성 옵션 (공유) */}
-      <datalist id="bk-therapist-options">
-        {therapists.slice().sort(sortByAttendance).map((t) => (
-          <option key={t.id} value={t.name} />
-        ))}
-      </datalist>
       {/* 빈 룸 검색 자동완성 (available 베드 − 현재 표에서 사용중인 룸) */}
       <datalist id="bk-room-options">
         {availableRooms.map((r) => (
@@ -608,7 +603,12 @@ export default function BookingSheetTable() {
               <tr key={i} className={`border-b border-white/5 ${r.saved ? 'bg-emerald-900/30' : ''}`}>
                 <td className="px-2 py-1 text-slate-400">{i + 1}</td>
                 <td className="px-2 py-1">
-                  <input list="bk-therapist-options" value={r.therapistName} onChange={(e) => update(i, { therapistName: e.target.value })} placeholder={tr('search/select…','검색/선택…')} className={inp} />
+                  <select value={r.therapistName} onChange={(e) => update(i, { therapistName: e.target.value })} className={inp}>
+                    <option value="">{tr('Select…','선택…')}</option>
+                    {therapists.map((t) => (
+                      <option key={t.id} value={t.name}>{t.name}</option>
+                    ))}
+                  </select>
                 </td>
                 <td className="px-2 py-1">
                   <select value={r.service} onChange={(e) => update(i, { service: e.target.value })} className={inp}>
