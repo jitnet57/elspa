@@ -13,8 +13,9 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-// 현재 시간 (시스템 시간대 그대로 사용)
+// 현재 시간 (필리핀 시간 PHT = UTC+8)
 const now = new Date();
+const phtTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
 
 // 🔄 Git 정보 추출
 let commitHash = '';
@@ -34,22 +35,22 @@ try {
 }
 
 const buildInfo = {
-  // 배포 시간 (현재 시스템 시간)
-  buildTime: now.toISOString().split('T')[0], // YYYY-MM-DD
-  buildTimeHMS: now.toISOString().split('.')[0].replace('T', ' '), // YYYY-MM-DD HH:MM:SS
+  // 배포 시간 (필리핀 시간 PHT = UTC+8)
+  buildTime: phtTime.toISOString().split('T')[0], // YYYY-MM-DD
+  buildTimeHMS: phtTime.toISOString().split('.')[0].replace('T', ' '), // YYYY-MM-DD HH:MM:SS
   buildTimeShort: (() => {
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
-    const displayHours = now.getHours() % 12 || 12;
+    const year = phtTime.getFullYear();
+    const month = String(phtTime.getMonth() + 1).padStart(2, '0');
+    const day = String(phtTime.getDate()).padStart(2, '0');
+    const hours = String(phtTime.getHours()).padStart(2, '0');
+    const minutes = String(phtTime.getMinutes()).padStart(2, '0');
+    const ampm = phtTime.getHours() >= 12 ? 'PM' : 'AM';
+    const displayHours = phtTime.getHours() % 12 || 12;
     return `${year}-${month}-${day} ${ampm} ${String(displayHours).padStart(2, '0')}:${minutes}`;
   })(),
 
   // 타임스탐프 (Service Worker 캐시 버전용)
-  timestamp: now.toISOString().slice(0, 13).replace('T', '').replace(/:/g, ''), // YYYYMMDDHH
+  timestamp: phtTime.toISOString().slice(0, 13).replace('T', '').replace(/:/g, ''), // YYYYMMDDHH
 
   // 버전 정보
   version: require('../package.json').version,
