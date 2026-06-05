@@ -144,9 +144,22 @@ export const supabaseApiAdapter = {
     const sb = getSupabase();
     if (!sb) return mockApiAdapter.getTherapists();
     try {
-      const { data, error } = await sb.from('therapists').select('*').order('id', { ascending: true });
+      // employees 테이블에서 employment_type='therapist'인 직원만 조회
+      const { data, error } = await sb
+        .from('employees')
+        .select('id, name')
+        .eq('employment_type', 'therapist')
+        .order('name', { ascending: true });
+
       if (error) throw error;
-      const rows = (data ?? []) as Therapist[];
+
+      // employees 형식을 Therapist 형식으로 변환
+      const rows = (data ?? []).map((emp: any) => ({
+        id: emp.id,
+        name: emp.name,
+        status: 'idle' as const,
+      })) as Therapist[];
+
       saveSnapshot(CACHE_THERAPISTS, rows); // ✅ 우선 저장
       return rows;
     } catch (err) {
