@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 21:21:04",
-  "buildTimeShort": "2026-06-06 AM 05:21",
+  "buildTimeHMS": "2026-06-05 21:34:13",
+  "buildTimeShort": "2026-06-06 AM 05:34",
   "timestamp": "2026-06-0521",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "26d5583e",
-    "shortHash": "26d5583",
-    "message": "🔍 Debug: therapists 로드 console.log 추가",
+    "hash": "2be8fc56",
+    "shortHash": "2be8fc5",
+    "message": "✨ Feat: 고유 코드 시스템 적용 (employees, companies, bookings, beds, services)",
     "author": "jitnet57",
-    "date": "2026-06-06 05:04:10 +0800"
+    "date": "2026-06-06 05:21:17 +0800"
   }
 }
