@@ -15,7 +15,6 @@ import { PaymentFromSelect, type SettlementImpact } from '@/components/PaymentFr
 import PaymentMethodModal from './PaymentMethodModal';
 import NewMassagePanel from './NewMassagePanel';
 import { exportBookingsToExcel } from '@/lib/utils/excel-export';
-import { useUnsavedChanges, setUnsavedState, showUnsavedConfirm } from '@/lib/hooks/useUnsavedChanges';
 import {
   convertLegacyPayToMethods,
   calculateTotalFromMethods,
@@ -414,15 +413,6 @@ export default function BookingSheetTable() {
   const filledCount = rows.filter(isFilled).length;
   // 저장되지 않은 행 = 입력되었지만 saved=false인 행
   const unsavedCount = rows.filter((r) => isFilled(r) && !r.saved).length;
-  const hasUnsavedChanges = unsavedCount > 0;
-
-  // ── 저장되지 않은 변경사항 추적 ──────────────────────────────
-  useEffect(() => {
-    setUnsavedState('bookings', hasUnsavedChanges);
-  }, [hasUnsavedChanges]);
-
-  // ── 페이지 이탈 시 확인 ──────────────────────────────
-  useUnsavedChanges(hasUnsavedChanges);
 
   // 빈 룸 = available 베드 라벨 − 현재 표에서 이미 쓰인 룸
   const usedRooms = new Set(rows.filter(isFilled).map((r) => r.roomNumber).filter(Boolean));
