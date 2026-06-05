@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 10:26:19",
-  "buildTimeShort": "2026-06-05 PM 06:26",
-  "timestamp": "2026-06-0510",
+  "buildTimeHMS": "2026-06-05 13:23:55",
+  "buildTimeShort": "2026-06-05 PM 09:23",
+  "timestamp": "2026-06-0513",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "4a6e5fa5",
-    "shortHash": "4a6e5fa",
-    "message": "🗄️ Refactor: Supabase 스키마 단일 통합 (SUPABASE_SCHEMA.sql 21테이블)\n\n- SUPABASE_SCHEMA.sql: 프론트 전수 21테이블 + 인덱스/트리거/RLS/SSS시드 통합\n  employees/companies/bookings superset (employee_type+employment_type,\n  daily_wage/department/job_title/sss_no 등 ALTER 컬럼 모두 포함)\n- SUPABASE_INIT.md: 8→21테이블, '이 파일 하나만 Run' 안내\n- supabase/_archive/: 통합된 개별 스키마 6개 보관 (유틸/목데이터는 유지)\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>",
+    "hash": "91625244",
+    "shortHash": "9162524",
+    "message": "⏰ Fix: 배포 시간을 필리핀 시간(PHT, UTC+8)으로 변경",
     "author": "jitnet57",
-    "date": "2026-06-05 18:23:19 +0800"
+    "date": "2026-06-05 21:23:55 +0800"
   }
 }
