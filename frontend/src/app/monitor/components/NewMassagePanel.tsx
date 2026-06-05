@@ -94,26 +94,14 @@ export default function NewMassagePanel({
         }
       })
       .catch((err) => {
-        console.warn('마사지 서비스 로드 실패, 기본값 사용:', err);
-        // 폴백: 기본 SERVICES 사용
-        setMassageServices(
-          SERVICES.map((s, idx) => ({
-            id: idx + 1,
-            name: s.name,
-            basePrice: 0,
-            baseDurationMinutes: s.duration,
-            isActive: true,
-            createdAt: '',
-            updatedAt: '',
-          }))
-        );
+        console.error('마사지 서비스 로드 실패:', err);
+        // Supabase에서 로드 실패 시 빈 배열 (폴백 제거)
+        setMassageServices([]);
       });
   }, []);
 
-  // API 로드 서비스에서 선택된 서비스의 duration 찾기
-  const selectedServiceDuration = massageServices.find((s) => s.name === service)?.baseDurationMinutes
-    ?? SERVICES.find((s) => s.name === service)?.duration
-    ?? 60;
+  // Supabase 서비스에서 선택된 서비스의 duration 찾기
+  const selectedServiceDuration = massageServices.find((s) => s.name === service)?.baseDurationMinutes ?? 60;
 
   const endTime = startTime
     ? (() => {

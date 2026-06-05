@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 22:40:37",
-  "buildTimeShort": "2026-06-06 AM 06:40",
+  "buildTimeHMS": "2026-06-05 22:45:48",
+  "buildTimeShort": "2026-06-06 AM 06:45",
   "timestamp": "2026-06-0522",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "5f67fb9e",
-    "shortHash": "5f67fb9",
-    "message": "🔍 Debug: NewMassagePanel props 직접 확인",
+    "hash": "7e1fdf1a",
+    "shortHash": "7e1fdf1",
+    "message": "✨ Feat: Supabase에서 마사지 서비스 직접 로드 (mock data 제거)",
     "author": "jitnet57",
-    "date": "2026-06-06 06:34:40 +0800"
+    "date": "2026-06-06 06:41:05 +0800"
   }
 }
