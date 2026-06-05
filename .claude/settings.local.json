@@ -68,7 +68,10 @@
       "Bash(grep -E \"\\\\.\\(py|ts|tsx\\)$\")",
       "Bash(echo $PATH)",
       "Read(//Users/kwangseobpark/**)",
-      "Bash(awk '{print $NF}')"
+      "Bash(awk '{print $NF}')",
+      "Bash(command -v code)",
+      "Bash(code SUPABASE_SCHEMA.sql)",
+      "Bash(open SUPABASE_SCHEMA.sql)"
     ],
     "additionalDirectories": [
       "/Users/kwangseobpark/elspa/.git/refs",

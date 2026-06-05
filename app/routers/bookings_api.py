@@ -23,6 +23,33 @@ from app.schemas.booking import (
 router = APIRouter(prefix="/api/bookings", tags=["bookings"])
 
 
+@router.get("/pending")
+async def get_pending_bookings(db: AsyncSession = Depends(get_db)):
+    """대기 중인 예약 조회 (대시보드용)"""
+    from datetime import date, datetime
+    from sqlalchemy import func
+
+    today = date.today().isoformat()
+    query = select(Booking).where(
+        Booking.status == "pending"
+    )
+    result = await db.execute(query)
+    bookings = result.scalars().all()
+
+    return {
+        "total": len(bookings),
+        "date": today,
+        "bookings": [
+            {
+                "id": b.id,
+                "status": b.status,
+                "created_at": b.created_at.isoformat() if b.created_at else None,
+            }
+            for b in bookings
+        ]
+    }
+
+
 @router.get("/", response_model=List[BookingResponse])
 async def get_bookings(
     customer_id: int = None,
