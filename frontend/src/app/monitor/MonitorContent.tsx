@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { useT, useLang, setLang } from '@/lib/i18n';
+import DeploymentBadge from '@/components/DeploymentBadge';
 import BedLayoutView from './components/BedLayoutView';
 import DailyTherapistSchedule from './components/DailyTherapistSchedule';
 import BookingSheetTable from './components/BookingSheetTable';
@@ -79,10 +80,13 @@ export default function MonitorContent() {
               👥 {t('Attendance', '출결')}
             </button>
           </div>
-          <div className="flex gap-1">
-            <button onClick={() => setLang('en')} className={`px-3 py-1 rounded-lg font-bold text-sm ${lang === 'en' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}>EN</button>
-            <button onClick={() => setLang('ko')} className={`px-3 py-1 rounded-lg font-bold text-sm ${lang === 'ko' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}>KO</button>
-            <button className="p-1 text-gray-600 hover:text-gray-800">⚙️</button>
+          <div className="flex gap-3 items-center">
+            <DeploymentBadge />
+            <div className="flex gap-1">
+              <button onClick={() => setLang('en')} className={`px-3 py-1 rounded-lg font-bold text-sm ${lang === 'en' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}>EN</button>
+              <button onClick={() => setLang('ko')} className={`px-3 py-1 rounded-lg font-bold text-sm ${lang === 'ko' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}>KO</button>
+              <button className="p-1 text-gray-600 hover:text-gray-800">⚙️</button>
+            </div>
           </div>
         </div>
       </div>
