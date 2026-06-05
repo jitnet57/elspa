@@ -97,24 +97,29 @@ def init_employees():
     print("🔄 테라피스트 upsert 시작...")
 
     try:
-        rows = []
+        # 기존 직원 name→id 매핑 (DB UNIQUE 제약에 의존하지 않는 수동 upsert)
+        existing = supabase.table("employees").select("id,name").execute().data or []
+        by_name = {r["name"]: r["id"] for r in existing}
+
+        inserted = updated = 0
         for t in therapists:
-            rows.append({
+            row = {
                 **t,
                 # payroll 분류용(employee_type) + monitor용(employment_type) 둘 다 채움
                 "employee_type": "therapist",
                 "department": "Therapy",
                 "job_title": "Therapist",
                 "is_active": True,
-            })
+            }
+            if t["name"] in by_name:
+                supabase.table("employees").update(row).eq("id", by_name[t["name"]]).execute()
+                updated += 1
+            else:
+                supabase.table("employees").insert(row).execute()
+                inserted += 1
 
-        # name 기준 비파괴 upsert (지원: supabase-py upsert on_conflict)
-        supabase.table("employees").upsert(rows, on_conflict="name").execute()
-
-        print(f"✅ 테라피스트 {len(rows)}명 upsert 완료")
-        print(f"   - 1ST: 18명 (40% 수수료)")
-        print(f"   - 2ND: 18명 (45% 수수료)")
-        print(f"   - 3RD:  4명 (50% 수수료)")
+        print(f"✅ 테라피스트 처리 완료: 신규 {inserted} / 갱신 {updated} (총 {len(therapists)})")
+        print(f"   - 1ST: 18명 (40%) / 2ND: 18명 (45%) / 3RD: 4명 (50%)")
 
     except Exception as e:
         print(f"❌ 오류 발생: {e}")
@@ -126,11 +131,16 @@ def init_beds():
     print("\n🔄 침대 upsert 시작...")
 
     try:
-        # bed_number(UNIQUE) 충돌 시 갱신 — 기존 예약/상태 보존
-        supabase.table("beds").upsert(beds, on_conflict="bed_number").execute()
+        # 기존 bed_number→id (제약 무관 수동 upsert, 예약/상태 보존)
+        existing = supabase.table("beds").select("id,bed_number").execute().data or []
+        by_num = {r["bed_number"]: r["id"] for r in existing}
         for bed in beds:
+            if bed["bed_number"] in by_num:
+                supabase.table("beds").update(bed).eq("id", by_num[bed["bed_number"]]).execute()
+            else:
+                supabase.table("beds").insert(bed).execute()
             print(f"✅ Bed {bed['bed_number']} - {bed['room_zone']}")
-        print(f"\n✅ 침대 {len(beds)}개 upsert 완료")
+        print(f"\n✅ 침대 {len(beds)}개 처리 완료")
 
     except Exception as e:
         print(f"❌ 오류 발생: {e}")

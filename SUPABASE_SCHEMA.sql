@@ -428,6 +428,9 @@ alter table public.bookings add column if not exists status          text defaul
 alter table public.guides add column if not exists commission_rate numeric(5,2) default 0;
 alter table public.guides add column if not exists status          text default 'active';
 
+-- 낡은 CHECK 제약 제거 (예전 스키마: beds.room_zone 한글 방이름만 허용 → 영어 방이름 차단)
+alter table public.beds drop constraint if exists beds_room_zone_check;
+
 -- ============================================================
 -- updated_at 트리거 (전 21개 테이블)
 -- ============================================================
