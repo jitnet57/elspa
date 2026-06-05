@@ -102,7 +102,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 <ExchangeRateMount />
                 <ExternalLinkHandler />
                 <CacheClearMount />
-                <AutoBackupMount />
+                {/* <AutoBackupMount /> 파일 저장 대화 방지 */}
                 {children}
             </QueryClientProvider>
         </LanguageProvider>
