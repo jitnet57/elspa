@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabaseApiAdapter, type Booking } from '@/lib/api/supabase-adapter';
 import { getSupabase } from '@/lib/supabase/client';
 // import { saveBookingToSheet } from '@/lib/services/booking-sheet'; // DISABLED: no need shync with google drive
@@ -12,6 +13,8 @@ import { PaymentMethodInput, type PaymentMethodData } from '@/components/Payment
 import { SSSOptionSelect, type PayrollImpact } from '@/components/SSSOptionSelect';
 import { PaymentFromSelect, type SettlementImpact } from '@/components/PaymentFromSelect';
 import PaymentMethodModal from './PaymentMethodModal';
+import { exportBookingsToExcel } from '@/lib/utils/excel-export';
+import { useUnsavedChanges, setUnsavedState, showUnsavedConfirm } from '@/hooks/useUnsavedChanges';
 import {
   convertLegacyPayToMethods,
   calculateTotalFromMethods,
@@ -270,7 +273,7 @@ export default function BookingSheetTable() {
       ...(r.paymentFrom && { payment_from: r.paymentFrom }),
     } as any;
 
-    // 1) DB 저장 (신규=create / 기존=update)
+    // 1) Supabase DB 저장 (신규=create / 기존=update)
     let dbOk = false;
     let newId = r.bookingId;
     try {
@@ -282,20 +285,39 @@ export default function BookingSheetTable() {
       }
       dbOk = true;
     } catch (err) {
-      console.warn('DB 저장 실패(Supabase 미설정?):', err);
+      console.warn('Supabase 저장 실패:', err);
     }
 
-    // 2) 구글시트 저장 — DISABLED (사용자 요청: "no need shync with google drive")
-    // const sheetOk = await saveBookingToSheet({
-    //   therapist: r.therapistName,
-    //   service: r.service,
-    //   date,
-    //   time: r.startTime,
-    //   endTime: endTimeOf(r),
-    //   guestName: r.guestName,
-    //   roomNumber: r.roomNumber,
-    //   notes: `${r.note}${r.pay ? ` | pay:${r.pay}` : ''}${r.tip ? ` | tip:${r.tip}` : ''}`,
-    // });
+    // 2) Excel 저장 (모든 저장된 행을 포함해서 다시 내보내기)
+    if (dbOk) {
+      try {
+        const filledBookings = rows
+          .map((row, idx) => ({
+            ...row,
+            bookingId: row.bookingId || (idx === i ? newId : undefined),
+          } as any))
+          .filter((row) => isFilled(row))
+          .map((row, idx) => ({
+            id: row.bookingId,
+            seq_no: idx + 1,
+            booking_date: date,
+            therapist_name: row.therapistName,
+            treatment: row.service,
+            start_time: row.startTime,
+            end_time: endTimeOf(row),
+            room_num: row.roomNumber,
+            guest_name: row.guestName,
+            note: row.note,
+            pay: row.totalAmount || row.pay,
+            tip: row.tip,
+            payment_methods: row.paymentMethods,
+          }));
+
+        await exportBookingsToExcel(filledBookings, date);
+      } catch (err) {
+        console.warn('Excel 저장 실패:', err);
+      }
+    }
 
     setRows((prev) =>
       prev.map((row, idx) => (idx === i ? { ...row, saving: false, saved: dbOk, bookingId: newId } : row)),
@@ -374,6 +396,18 @@ export default function BookingSheetTable() {
   // }, [handleDriveExport, autoSaveEnabled, autoSaveIntervalMs]);
 
   const filledCount = rows.filter(isFilled).length;
+  // 저장되지 않은 행 = 입력되었지만 saved=false인 행
+  const unsavedCount = rows.filter((r) => isFilled(r) && !r.saved).length;
+  const hasUnsavedChanges = unsavedCount > 0;
+
+  // ── 저장되지 않은 변경사항 추적 ──────────────────────────────
+  useEffect(() => {
+    setUnsavedState('bookings', hasUnsavedChanges);
+  }, [hasUnsavedChanges]);
+
+  // ── 페이지 이탈 시 확인 ──────────────────────────────
+  useUnsavedChanges(hasUnsavedChanges);
+
   // 빈 룸 = available 베드 라벨 − 현재 표에서 이미 쓰인 룸
   const usedRooms = new Set(rows.filter(isFilled).map((r) => r.roomNumber).filter(Boolean));
   const availableRooms = beds

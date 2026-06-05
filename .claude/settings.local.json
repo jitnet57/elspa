@@ -61,7 +61,10 @@
       "Bash(__NEW_LINE_f40002bfac9bf78b__ python3:*)",
       "Bash(/tmp/check_therapists.py:*)",
       "Bash(__NEW_LINE_32b1860b9581cb24__ python3:*)",
-      "Bash(pkill -f \"start-dev.sh\")"
+      "Bash(pkill -f \"start-dev.sh\")",
+      "Bash(npm -v)",
+      "Bash(check_schema.py:*)",
+      "Bash(check_full_schema.py:*)"
     ],
     "additionalDirectories": [
       "/Users/kwangseobpark/elspa/.git/refs",

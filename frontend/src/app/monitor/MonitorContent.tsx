@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { useT, useLang, setLang } from '@/lib/i18n';
+import { getUnsavedState, showUnsavedConfirm } from '@/hooks/useUnsavedChanges';
 import DeploymentBadge from '@/components/DeploymentBadge';
 import BedLayoutView from './components/BedLayoutView';
 import DailyTherapistSchedule from './components/DailyTherapistSchedule';
@@ -28,7 +29,18 @@ export default function MonitorContent() {
   const tab = (searchParams.get('tab') as 'beds' | 'schedule' | 'booking' | 'attendance') || 'booking';
   const activeTab = tab;
 
-  const setActiveTab = (newTab: 'beds' | 'schedule' | 'booking' | 'attendance') => {
+  const setActiveTab = async (newTab: 'beds' | 'schedule' | 'booking' | 'attendance') => {
+    // 저장되지 않은 변경사항 확인
+    const hasUnsaved = getUnsavedState('bookings');
+    if (hasUnsaved && newTab !== activeTab) {
+      const shouldSave = await showUnsavedConfirm(
+        '저장되지 않은 변경사항이 있습니다.\n저장하시겠습니까?'
+      );
+      if (!shouldSave) {
+        // 사용자가 거절하면 이동하지 않음
+        return;
+      }
+    }
     router.push(`/monitor?tab=${newTab}`);
   };
 
