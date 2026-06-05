@@ -226,8 +226,10 @@ export default function BookingSheetTable() {
         bookingId: r.bookingId,
         therapist: r.therapistName,
         guest: r.guestName,
-        treatment: r.service,
+        service: r.service,
         startTime: r.startTime,
+        pay: r.pay,
+        tip: r.tip,
         saved: r.saved,
       })));
       setRows(padToRowCount(filled, rowCount));
@@ -488,11 +490,11 @@ export default function BookingSheetTable() {
             date={date}
             prefillTherapist={editRow?.therapistName}
             prefillRoom={editRow?.roomNumber}
-            prefillTreatment={editRow?.treatment}
+            prefillTreatment={editRow?.service}
             prefillStartTime={editRow?.startTime}
             prefillEndTime={editRow?.endTime}
             prefillGuestName={editRow?.guestName}
-            prefillPayAmount={editRow?.payAmount}
+            prefillPayAmount={editRow?.pay}
             prefillTip={editRow?.tip}
             prefillPayMethod={editRow?.payMethod}
             prefillNote={editRow?.note}
