@@ -18,9 +18,12 @@ interface BookingRow {
   종료시간: string;
   고객명: string;
   방번호: string;
-  비용: number;
+  총액: number;
   팁: number;
-  결제수단: string;
+  현금: number;
+  카드: number;
+  계좌이체: number;
+  기타: number;
   업체: string;
 }
 
@@ -35,23 +38,47 @@ export async function exportBookingsToExcel(
     // SheetJS 동적 로드
     const XLSX = await import('xlsx');
 
-    // 데이터 변환
+    // 데이터 변환 (결제수단별 컬럼 분리)
     const excelData: BookingRow[] = bookings
       .filter((b) => b.booking_date === date && b.therapist_name)
-      .map((b, idx) => ({
-        일자: date,
-        순번: b.seq_no || idx + 1,
-        테라피스트: b.therapist_name || '',
-        마사지종류: b.treatment || '',
-        시작시간: b.start_time || '',
-        종료시간: b.end_time || '',
-        고객명: b.guest_name || '',
-        방번호: b.room_num || '',
-        비용: b.pay || 0,
-        팁: b.tip || 0,
-        결제수단: getPaymentMethodsSummary(b.payment_methods),
-        업체: b.note || '',
-      }));
+      .map((b, idx) => {
+        const methods = b.payment_methods || [];
+        const paymentByMethod: Record<string, number> = {
+          현금: 0,
+          카드: 0,
+          계좌이체: 0,
+          기타: 0,
+        };
+
+        // 결제수단별로 금액 분류
+        methods.forEach((m: any) => {
+          const method = (m.method || '기타').trim();
+          const amount = Number(m.amount) || 0;
+
+          if (method === '현금') paymentByMethod['현금'] += amount;
+          else if (method === '카드') paymentByMethod['카드'] += amount;
+          else if (method === '계좌이체') paymentByMethod['계좌이체'] += amount;
+          else paymentByMethod['기타'] += amount;
+        });
+
+        return {
+          일자: date,
+          순번: b.seq_no || idx + 1,
+          테라피스트: b.therapist_name || '',
+          마사지종류: b.treatment || '',
+          시작시간: b.start_time || '',
+          종료시간: b.end_time || '',
+          고객명: b.guest_name || '',
+          방번호: b.room_num || '',
+          총액: b.pay || 0,
+          팁: b.tip || 0,
+          현금: paymentByMethod['현금'],
+          카드: paymentByMethod['카드'],
+          계좌이체: paymentByMethod['계좌이체'],
+          기타: paymentByMethod['기타'],
+          업체: b.note || '',
+        };
+      });
 
     if (excelData.length === 0) {
       console.warn('⚠️ 내보낼 예약 데이터가 없습니다');
@@ -60,7 +87,7 @@ export async function exportBookingsToExcel(
 
     // 워크북 생성
     const worksheet = XLSX.utils.json_to_sheet(excelData, {
-      header: ['일자', '순번', '테라피스트', '마사지종류', '시작시간', '종료시간', '고객명', '방번호', '비용', '팁', '결제수단', '업체'],
+      header: ['일자', '순번', '테라피스트', '마사지종류', '시작시간', '종료시간', '고객명', '방번호', '총액', '팁', '현금', '카드', '계좌이체', '기타', '업체'],
     });
 
     // 열 너비 설정
@@ -73,9 +100,12 @@ export async function exportBookingsToExcel(
       { wch: 10 },  // 종료시간
       { wch: 15 },  // 고객명
       { wch: 10 },  // 방번호
-      { wch: 10 },  // 비용
+      { wch: 10 },  // 총액
       { wch: 8 },   // 팁
-      { wch: 20 },  // 결제수단
+      { wch: 10 },  // 현금
+      { wch: 10 },  // 카드
+      { wch: 12 },  // 계좌이체
+      { wch: 10 },  // 기타
       { wch: 20 },  // 업체
     ];
 
