@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 20:46:38",
-  "buildTimeShort": "2026-06-06 AM 04:46",
+  "buildTimeHMS": "2026-06-05 20:51:16",
+  "buildTimeShort": "2026-06-06 AM 04:51",
   "timestamp": "2026-06-0520",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "866d5fc0",
-    "shortHash": "866d5fc",
-    "message": "🔧 Fix: 테라피스트 필터링 대소문자 무시 (Fatima 데이터 동기화 수정)",
+    "hash": "95d026a6",
+    "shortHash": "95d026a",
+    "message": "🔧 Fix: useUnsavedChanges.ts 파일 완전 삭제",
     "author": "jitnet57",
-    "date": "2026-06-06 04:42:08 +0800"
+    "date": "2026-06-06 04:46:51 +0800"
   }
 }

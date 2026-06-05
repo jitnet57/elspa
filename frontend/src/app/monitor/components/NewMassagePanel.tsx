@@ -115,12 +115,20 @@ export default function NewMassagePanel({
 
     let dbOk = false;
     try {
+      console.log('💾 예약 저장:', {
+        therapist_name: therapistName,
+        booking_date: date,
+        guest_name: guestName,
+        treatment: service,
+        start_time: startTime,
+      });
       await supabaseApiAdapter.createBooking({
         booking_date: date, treatment: service, start_time: startTime, end_time: endTime,
         guest_name: guestName, therapist_name: therapistName, room_num: roomNumber,
         note, pay: payAmount, payment_method: payMethod, tip, status: 'normal',
       });
       dbOk = true;
+      console.log('✅ 예약 저장 완료');
     } catch (err) {
       console.warn('DB 저장 실패(Supabase 미설정?):', err);
     }

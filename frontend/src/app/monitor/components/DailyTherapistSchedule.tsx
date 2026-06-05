@@ -52,8 +52,10 @@ export default function DailyTherapistSchedule({ openNewOnMount = false }: { ope
     setLoading(true);
     try {
       const rows = await supabaseApiAdapter.getBookings(selectedDate);
+      console.log(`📅 ${selectedDate} 예약 로드:`, rows.map(r => ({ therapist_name: r.therapist_name, treatment: r.treatment })));
       setBookings(rows);
-    } catch {
+    } catch (err) {
+      console.error('예약 로드 실패:', err);
       setBookings([]);
     } finally {
       setLoading(false);
@@ -151,6 +153,9 @@ export default function DailyTherapistSchedule({ openNewOnMount = false }: { ope
               const st = therapistStatusMeta[(t.status as DbTherapistStatus) ?? 'idle'] ?? therapistStatusMeta.idle;
               // 대소문자 무시하고 일치하는 예약 필터링
               const rows = bookings.filter((b) => (b.therapist_name || '').toLowerCase() === (t.name || '').toLowerCase());
+              if (rows.length > 0) {
+                console.log(`🧑‍⚕️ ${t.name}: ${rows.length}개 예약`);
+              }
               return (
                 <div key={t.id} className={`flex border-b border-gray-100 ${idx % 2 ? 'bg-gray-50/40' : 'bg-white'}`}>
                   {/* 이름/상태 */}
