@@ -28,6 +28,7 @@ interface Bed {
 interface Therapist {
   id: number;
   name: string;
+  code?: string;  // 고유 코드 (THR-001 등)
   status: 'idle' | 'in_service' | 'resting' | 'checked_out';
   current_bed?: number;
   remaining_minutes?: number;
@@ -147,7 +148,7 @@ export const supabaseApiAdapter = {
       // employees 테이블에서 테라피스트(therapist) 조회
       const { data, error } = await sb
         .from('employees')
-        .select('id, name')
+        .select('id, name, code')
         .or('employee_type.eq.therapist,employment_type.eq.therapist')
         .eq('is_active', true)
         .order('name', { ascending: true });
@@ -163,6 +164,7 @@ export const supabaseApiAdapter = {
       const rows = (data ?? []).map((emp: any) => ({
         id: emp.id,
         name: emp.name,
+        code: emp.code,
         status: 'idle' as const,
       })) as Therapist[];
 

@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 21:03:57",
-  "buildTimeShort": "2026-06-06 AM 05:03",
+  "buildTimeHMS": "2026-06-05 21:21:04",
+  "buildTimeShort": "2026-06-06 AM 05:21",
   "timestamp": "2026-06-0521",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "b7ca9e33",
-    "shortHash": "b7ca9e3",
-    "message": "🔄 Feat: 데이터베이스 통합 (therapists→employees, guides→companies)",
+    "hash": "26d5583e",
+    "shortHash": "26d5583",
+    "message": "🔍 Debug: therapists 로드 console.log 추가",
     "author": "jitnet57",
-    "date": "2026-06-06 04:56:56 +0800"
+    "date": "2026-06-06 05:04:10 +0800"
   }
 }
