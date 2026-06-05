@@ -8,13 +8,15 @@ export interface TherapyBed {
   id: string;
   name: string;
   roomNumber: string;
-  room: 'room1' | 'room2' | 'room3' | 'room4';
+  room?: 'room1' | 'room2' | 'room3' | 'room4';
   type: 'massage' | 'spa' | 'facial' | 'premium';
   status: 'available' | 'occupied' | 'maintenance' | 'cleaning';
   capacity: number;
   therapistId?: string;
   serviceName?: string;
   endTime?: string;
+  room_zone?: string; // Supabase 데이터용
+  bed_number?: number; // Supabase 데이터용
 }
 
 export interface Therapist {
