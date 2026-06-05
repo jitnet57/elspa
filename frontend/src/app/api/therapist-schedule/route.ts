@@ -31,13 +31,23 @@ export async function POST(request: NextRequest) {
     // 2️⃣ 해당 날짜의 예약 조회
     const { data: bookings, error: bookingsError } = await supabase
       .from('massage_bookings')
-      .select('id, therapist_id, service_name, start_time, end_time, status, customer_name, room_number')
+      .select('id, therapist_id, service_name, start_time, end_time, status, customer_name, room_number, bed_id')
       .gte('start_time', `${date}T00:00:00`)
       .lt('start_time', `${date}T23:59:59`)
       .order('start_time', { ascending: true });
 
     if (bookingsError) {
       throw bookingsError;
+    }
+
+    // 3️⃣ 모든 침대 상태 조회
+    const { data: beds, error: bedsError } = await supabase
+      .from('beds')
+      .select('id, name, room_zone, bed_number, status')
+      .order('room_zone', { ascending: true });
+
+    if (bedsError) {
+      throw bedsError;
     }
 
     // 3️⃣ 테라피스트별 세션 정렬
@@ -74,8 +84,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       therapists: therapistSessions,
+      beds: beds || [],
       date,
-      total: therapists?.length || 0,
+      stats: {
+        totalTherapists: therapists?.length || 0,
+        totalBeds: beds?.length || 0,
+        availableBeds: beds?.filter(b => b.status === 'available').length || 0,
+        occupiedBeds: beds?.filter(b => b.status === 'occupied').length || 0,
+      }
     });
   } catch (error) {
     console.error('❌ API 오류:', error);
