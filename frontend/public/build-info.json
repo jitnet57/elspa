@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 21:43:55",
-  "buildTimeShort": "2026-06-06 AM 05:43",
+  "buildTimeHMS": "2026-06-05 21:47:55",
+  "buildTimeShort": "2026-06-06 AM 05:47",
   "timestamp": "2026-06-0521",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "703df999",
-    "shortHash": "703df99",
-    "message": "🔍 Debug: 테라피스트 선택 console.log 추가",
+    "hash": "163cfd5e",
+    "shortHash": "163cfd5",
+    "message": "✨ Feat: 테라피스트 선택을 input → select 드롭다운으로 변경 (정확한 name 보장)",
     "author": "jitnet57",
-    "date": "2026-06-06 05:42:08 +0800"
+    "date": "2026-06-06 05:44:20 +0800"
   }
 }

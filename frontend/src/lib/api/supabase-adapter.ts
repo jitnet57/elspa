@@ -45,7 +45,8 @@ export interface Booking {
   end_time?: string;      // "10:00"
   room_num?: string;      // RM#
   guest_name?: string;    // GUEST
-  therapist_name?: string;
+  therapist_id?: number;  // 테라피스트 ID (employees.id)
+  therapist_name?: string; // 호환성용 (읽기만)
   note?: string;
   pay?: number;
   tip?: number;

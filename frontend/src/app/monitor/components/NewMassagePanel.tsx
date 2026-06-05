@@ -37,6 +37,7 @@ export default function NewMassagePanel({
   const [therapists, setTherapists] = useState<UiTherapist[]>([]);
   const [search, setSearch] = useState('');
   const [therapistName, setTherapistName] = useState<string>(prefillTherapist ?? '');
+  const [therapistId, setTherapistId] = useState<number | null>(null);
   const [massageServices, setMassageServices] = useState<MassageType[]>([]);
   const [service, setService] = useState(SERVICES[0]?.name ?? '');
   const [startTime, setStartTime] = useState('10:00');
@@ -124,7 +125,7 @@ export default function NewMassagePanel({
       });
       await supabaseApiAdapter.createBooking({
         booking_date: date, treatment: service, start_time: startTime, end_time: endTime,
-        guest_name: guestName, therapist_name: therapistName, room_num: roomNumber,
+        guest_name: guestName, therapist_id: therapistId || undefined, therapist_name: therapistName, room_num: roomNumber,
         note, pay: payAmount, payment_method: payMethod, tip, status: 'normal',
       });
       dbOk = true;
@@ -164,6 +165,7 @@ export default function NewMassagePanel({
                   onClick={() => {
                     console.log('🧑‍⚕️ 테라피스트 선택:', { id: t.id, name: t.name, code: t.code });
                     setTherapistName(t.name);
+                    setTherapistId(t.id);
                   }}
                   className={`px-3 py-2 rounded-lg cursor-grab active:cursor-grabbing border text-sm flex items-center gap-2 ${
                     therapistName === t.name ? 'bg-blue-50 border-blue-400' : 'bg-white hover:bg-gray-50'
