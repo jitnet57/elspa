@@ -79,9 +79,9 @@ export default function ExpensePage() {
     try {
       setDates([]);
     } catch (e) {
-      setRecError(e instanceof Error ? e.message : t('Error', '오류'));
+      setRecError(e instanceof Error ? e.message : 'Error');
     } finally { setLoadingDates(false); }
-  }, [t]);
+  }, []);
 
   // ── 레코드 로드 (온라인: 백엔드 API, 오프라인: IndexedDB 폴백) ─
   // 📝 API 제거 - IndexedDB만 사용
@@ -94,12 +94,12 @@ export default function ExpensePage() {
       setRecords(local.map(r => ({ ...r, dirty: false })) as any);
       setRecError('');
     } catch (e) {
-      setRecError(e instanceof Error ? e.message : t('Error', '오류'));
+      setRecError(e instanceof Error ? e.message : 'Error');
     } finally { setLoadingRecs(false); }
-  }, [t]);
+  }, []);
 
-  useEffect(() => { fetchDates(); }, []);
-  useEffect(() => { fetchRecords(selectedDate); }, [selectedDate, fetchRecords]);
+  useEffect(() => { fetchDates(); }, [fetchDates]);
+  useEffect(() => { fetchRecords(selectedDate); }, [selectedDate]);
 
   // ── 셀 편집 ─────────────────────────────────────────────────
   const updateCell = (id: number, field: keyof EditRow, value: string | number) => {
