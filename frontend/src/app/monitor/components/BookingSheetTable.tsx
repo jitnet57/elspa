@@ -306,6 +306,12 @@ export default function BookingSheetTable() {
       ...(r.paymentFrom && { payment_from: r.paymentFrom }),
     } as any;
 
+    console.log('💾 예약 저장:', {
+      bookingId: r.bookingId,
+      paymentMethods: r.paymentMethods,
+      totalAmount: r.totalAmount,
+    });
+
     // 1) Supabase DB 저장 (신규=create / 기존=update)
     let dbOk = false;
     let newId = r.bookingId;
