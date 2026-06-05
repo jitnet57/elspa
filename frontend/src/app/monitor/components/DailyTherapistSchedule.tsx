@@ -152,17 +152,8 @@ export default function DailyTherapistSchedule({ openNewOnMount = false }: { ope
             therapists.slice().sort(sortByAttendance).map((t, idx) => {
               const st = therapistStatusMeta[(t.status as DbTherapistStatus) ?? 'idle'] ?? therapistStatusMeta.idle;
               // 대소문자 무시하고 일치하는 예약 필터링
-              // therapist_id로 매칭, 또는 therapist_name으로 부분 매칭 (폴백)
-              const rows = bookings.filter((b) => {
-                if (b.therapist_id === t.id) return true;
-                if (b.therapist_id === null) {
-                  const bName = (b.therapist_name || '').toLowerCase().trim();
-                  const tName = (t.name || '').toLowerCase().trim();
-                  // 부분일치 (Fatima ⊂ FATIMA TAMPAN)
-                  return tName.includes(bName) || bName.includes(tName);
-                }
-                return false;
-              });
+              // therapist_id로만 매칭 (가장 안정적)
+              const rows = bookings.filter((b) => b.therapist_id === t.id);
               if (rows.length > 0) {
                 console.log(`🧑‍⚕️ ${t.name}: ${rows.length}개 예약`);
               }

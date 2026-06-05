@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 21:57:48",
-  "buildTimeShort": "2026-06-06 AM 05:57",
+  "buildTimeHMS": "2026-06-05 21:59:23",
+  "buildTimeShort": "2026-06-06 AM 05:59",
   "timestamp": "2026-06-0521",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "3e736933",
-    "shortHash": "3e73693",
-    "message": "🔧 Fix: therapist_id NULL일 때 therapist_name으로 폴백 (기존 데이터 호환)",
+    "hash": "4f3f8d00",
+    "shortHash": "4f3f8d0",
+    "message": "🔧 Fix: 부분일치 로직 추가 (Fatima ⊂ FATIMA TAMPAN)",
     "author": "jitnet57",
-    "date": "2026-06-06 05:54:42 +0800"
+    "date": "2026-06-06 05:58:08 +0800"
   }
 }
