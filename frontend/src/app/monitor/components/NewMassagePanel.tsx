@@ -43,10 +43,13 @@ export default function NewMassagePanel({
   const [guestName, setGuestName] = useState('');
   const [roomNumber, setRoomNumber] = useState(prefillRoom ?? '');
   const [note, setNote] = useState('');   // 업체명(노트)
-  const [pay, setPay] = useState(0);       // 지불
+  const [payMethod, setPayMethod] = useState('Card');  // 결제 수단
+  const [payAmount, setPayAmount] = useState(0);       // 지불액
   const [tip, setTip] = useState(0);       // 팁
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
+
+  const payMethods = ['Card', 'Cash', 'GCash', 'Bank A', 'Bank B'];
 
   const [referrals, setReferrals] = useState<string[]>([]);
 
@@ -115,7 +118,7 @@ export default function NewMassagePanel({
       await supabaseApiAdapter.createBooking({
         booking_date: date, treatment: service, start_time: startTime, end_time: endTime,
         guest_name: guestName, therapist_name: therapistName, room_num: roomNumber,
-        note, pay, tip, status: 'normal',
+        note, pay: payAmount, payment_method: payMethod, tip, status: 'normal',
       });
       dbOk = true;
     } catch (err) {
@@ -214,8 +217,16 @@ export default function NewMassagePanel({
               </datalist>
             </div>
             <div>
-              <label className="text-sm font-bold text-gray-700">{t('Pay', '지불')}</label>
-              <input type="number" value={pay || ''} onChange={(e) => setPay(Number(e.target.value) || 0)} placeholder="0" className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900 text-right" />
+              <label className="text-sm font-bold text-gray-700">💳 {t('Pay Method', '결제 수단')}</label>
+              <select value={payMethod} onChange={(e) => setPayMethod(e.target.value)} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900">
+                {payMethods.map((method) => (
+                  <option key={method} value={method}>{method}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-bold text-gray-700">{t('Amount', '금액')}</label>
+              <input type="number" value={payAmount || ''} onChange={(e) => setPayAmount(Number(e.target.value) || 0)} placeholder="0" className="w-full mt-1 px-3 py-2 border rounded-lg text-sm text-gray-900 text-right" />
             </div>
             <div>
               <label className="text-sm font-bold text-gray-700">{t('Tip', '팁')}</label>
