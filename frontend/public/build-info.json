@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 20:41:55",
-  "buildTimeShort": "2026-06-06 AM 04:41",
+  "buildTimeHMS": "2026-06-05 20:46:38",
+  "buildTimeShort": "2026-06-06 AM 04:46",
   "timestamp": "2026-06-0520",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "96d4caae",
-    "shortHash": "96d4caa",
-    "message": "🔧 Fix: 자동 백업 기능 완전 비활성화 (파일저장 대화 제거)",
+    "hash": "866d5fc0",
+    "shortHash": "866d5fc",
+    "message": "🔧 Fix: 테라피스트 필터링 대소문자 무시 (Fatima 데이터 동기화 수정)",
     "author": "jitnet57",
-    "date": "2026-06-06 04:40:22 +0800"
+    "date": "2026-06-06 04:42:08 +0800"
   }
 }
