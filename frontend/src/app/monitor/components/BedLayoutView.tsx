@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { therapyBeds, getBedsByRoom, therapists, type TherapyBed } from '@/app/admin/massage/mockData/bookingData';
 import { useT } from '@/lib/i18n';
+import { supabaseApiAdapter } from '@/lib/api/supabase-adapter';
 import NewMassagePanel from './NewMassagePanel';
 
 // 📌 테라피스트 id → 정보 매핑 (진행중 표시용)
@@ -26,18 +27,41 @@ export default function BedLayoutView() {
   const [pwOpen, setPwOpen] = useState(false);          // 비밀번호 모달
   const [pw, setPw] = useState('');
   const [pwErr, setPwErr] = useState('');
+  const [beds, setBeds] = useState<TherapyBed[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Supabase에서 침대 데이터 로드
+  useEffect(() => {
+    const loadBeds = async () => {
+      try {
+        const data = await supabaseApiAdapter.getBeds();
+        setBeds(data as TherapyBed[]);
+      } catch (error) {
+        console.warn('침대 데이터 로드 실패, 기본값 사용:', error);
+        setBeds(therapyBeds); // 실패 시 mockData 사용
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadBeds();
+  }, []);
+
+  // 침대를 방별로 분류
+  const getRoomBeds = (roomName: string) => {
+    return beds.filter((b) => b.name?.includes(roomName));
+  };
 
   const rooms = [
-    { id: 'room1', name: t('Massage Room 1', '마사지룸1'), beds: getBedsByRoom('room1') },
-    { id: 'room2', name: t('Massage Room 2', '마사지룸2'), beds: getBedsByRoom('room2') },
-    { id: 'room3', name: t('VIP Room', 'VIP실'), beds: getBedsByRoom('room3') },
-    { id: 'room4', name: t('Other Room', '기타실'), beds: getBedsByRoom('room4') },
+    { id: 'room1', name: 'Massage Room 1', beds: getRoomBeds('Massage Room 1') },
+    { id: 'room2', name: 'Massage Room 2', beds: getRoomBeds('Massage Room 2') },
+    { id: 'room3', name: 'VIP Room', beds: getRoomBeds('VIP Room') },
+    { id: 'room4', name: 'Other Room', beds: getRoomBeds('Other Room') },
   ];
   const summary = {
-    available: therapyBeds.filter((b) => b.status === 'available').length,
-    occupied: therapyBeds.filter((b) => b.status === 'occupied').length,
-    cleaning: therapyBeds.filter((b) => b.status === 'cleaning').length,
-    maintenance: therapyBeds.filter((b) => b.status === 'maintenance').length,
+    available: beds.filter((b) => b.status === 'available').length,
+    occupied: beds.filter((b) => b.status === 'occupied').length,
+    cleaning: beds.filter((b) => b.status === 'cleaning').length,
+    maintenance: beds.filter((b) => b.status === 'maintenance').length,
   };
 
   const bedNo = (bed: TherapyBed) => bed.name.split('-')[1] ?? bed.name;
