@@ -3,7 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { useT, useLang, setLang } from '@/lib/i18n';
-import { getUnsavedState, showUnsavedConfirm } from '@/hooks/useUnsavedChanges';
+import { getUnsavedState, showUnsavedConfirm } from '@/lib/hooks/useUnsavedChanges';
 import DeploymentBadge from '@/components/DeploymentBadge';
 import BedLayoutView from './components/BedLayoutView';
 import DailyTherapistSchedule from './components/DailyTherapistSchedule';
