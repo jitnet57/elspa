@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 13:23:55",
-  "buildTimeShort": "2026-06-05 PM 09:23",
-  "timestamp": "2026-06-0513",
+  "buildTimeHMS": "2026-06-05 20:21:03",
+  "buildTimeShort": "2026-06-06 AM 04:21",
+  "timestamp": "2026-06-0520",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "91625244",
-    "shortHash": "9162524",
-    "message": "⏰ Fix: 배포 시간을 필리핀 시간(PHT, UTC+8)으로 변경",
+    "hash": "080428c6",
+    "shortHash": "080428c",
+    "message": "✨ Feat: Supabase 서버 관리자 클라이언트 추가 (admin.ts)",
     "author": "jitnet57",
-    "date": "2026-06-05 21:23:55 +0800"
+    "date": "2026-06-06 04:20:59 +0800"
   }
 }
