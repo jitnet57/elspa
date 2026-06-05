@@ -151,7 +151,12 @@ export const supabaseApiAdapter = {
         .eq('employment_type', 'therapist')
         .order('name', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Supabase therapists 상세 에러:', error);
+        throw error;
+      }
+
+      console.log('✅ Supabase therapists 로드 성공:', data?.length, 'items');
 
       // employees 형식을 Therapist 형식으로 변환
       const rows = (data ?? []).map((emp: any) => ({
@@ -163,7 +168,7 @@ export const supabaseApiAdapter = {
       saveSnapshot(CACHE_THERAPISTS, rows); // ✅ 우선 저장
       return rows;
     } catch (err) {
-      console.warn('⚠️ Supabase therapists 조회 실패 → 스냅샷 폴백:', err);
+      console.error('❌ Supabase therapists 조회 실패:', err instanceof Error ? err.message : err);
       const snap = loadSnapshot<Therapist>(CACHE_THERAPISTS); // ✅ 다시 불러옴
       return snap ?? mockApiAdapter.getTherapists();
     }

@@ -52,7 +52,16 @@
       "Bash(find /Users/kwangseobpark/elspa -name .env* -type f)",
       "Bash(/opt/homebrew/Cellar/node/25.2.1/bin/npm run:*)",
       "Bash(/opt/homebrew/Cellar/node/25.2.1/bin/node ./node_modules/.bin/next build)",
-      "Bash(scripts/import_massage_services_simple.py:*)"
+      "Bash(scripts/import_massage_services_simple.py:*)",
+      "Bash(scripts/check_massage_services_schema.py:*)",
+      "Bash(__NEW_LINE_974cbb126d86fc84__ python3:*)",
+      "Bash(scripts/list_all_tables.py:*)",
+      "Bash(__NEW_LINE_a005bb053c75ec77__ python3:*)",
+      "Bash(scripts/check_our_services.py:*)",
+      "Bash(__NEW_LINE_f40002bfac9bf78b__ python3:*)",
+      "Bash(/tmp/check_therapists.py:*)",
+      "Bash(__NEW_LINE_32b1860b9581cb24__ python3:*)",
+      "Bash(pkill -f \"start-dev.sh\")"
     ],
     "additionalDirectories": [
       "/Users/kwangseobpark/elspa/.git/refs",

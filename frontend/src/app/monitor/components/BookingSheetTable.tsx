@@ -3,11 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabaseApiAdapter, type Booking } from '@/lib/api/supabase-adapter';
 import { getSupabase } from '@/lib/supabase/client';
-import { saveBookingToSheet } from '@/lib/services/booking-sheet';
+// import { saveBookingToSheet } from '@/lib/services/booking-sheet'; // DISABLED: no need shync with google drive
 import { SERVICES, autoEndTime, sortByAttendance, type UiTherapist } from './booking-helpers';
 import { getCompanies, getGuides } from '@/lib/api/companies-client';
 import { useT } from '@/lib/i18n';
-import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
+// import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings'; // DISABLED: no need live
 import { PaymentMethodInput, type PaymentMethodData } from '@/components/PaymentMethodInput';
 import { SSSOptionSelect, type PayrollImpact } from '@/components/SSSOptionSelect';
 import { PaymentFromSelect, type SettlementImpact } from '@/components/PaymentFromSelect';
@@ -115,10 +115,8 @@ export default function BookingSheetTable() {
   const [selectedPaymentRowIndex, setSelectedPaymentRowIndex] = useState<number | null>(null);
 
   // ============================================================
-  // 📌 상태: driveLoading + 마지막 자동저장 시각
-  const [driveLoading, setDriveLoading] = useState(false);
-  const [lastAutoSave, setLastAutoSave] = useState<string | null>(null);
-  const { enabled: autoSaveEnabled, intervalMs: autoSaveIntervalMs } = useAutoSaveSettings();
+  // 📌 상태: Google Drive 동기화 제거됨 (사용자 요청)
+  // DISABLED: driveLoading, lastAutoSave, useAutoSaveSettings
 
   useEffect(() => {
     // 테라피스트 로드
@@ -287,103 +285,93 @@ export default function BookingSheetTable() {
       console.warn('DB 저장 실패(Supabase 미설정?):', err);
     }
 
-    // 2) 구글시트 저장
-    const sheetOk = await saveBookingToSheet({
-      therapist: r.therapistName,
-      service: r.service,
-      date,
-      time: r.startTime,
-      endTime: endTimeOf(r),
-      guestName: r.guestName,
-      roomNumber: r.roomNumber,
-      notes: `${r.note}${r.pay ? ` | pay:${r.pay}` : ''}${r.tip ? ` | tip:${r.tip}` : ''}`,
-    });
+    // 2) 구글시트 저장 — DISABLED (사용자 요청: "no need shync with google drive")
+    // const sheetOk = await saveBookingToSheet({
+    //   therapist: r.therapistName,
+    //   service: r.service,
+    //   date,
+    //   time: r.startTime,
+    //   endTime: endTimeOf(r),
+    //   guestName: r.guestName,
+    //   roomNumber: r.roomNumber,
+    //   notes: `${r.note}${r.pay ? ` | pay:${r.pay}` : ''}${r.tip ? ` | tip:${r.tip}` : ''}`,
+    // });
 
     setRows((prev) =>
-      prev.map((row, idx) => (idx === i ? { ...row, saving: false, saved: dbOk || sheetOk, bookingId: newId } : row)),
+      prev.map((row, idx) => (idx === i ? { ...row, saving: false, saved: dbOk, bookingId: newId } : row)),
     );
   };
 
 
   // ============================================================
-  // 📌 함수: handleDriveExport
+  // 📌 함수: handleDriveExport — DISABLED (사용자 요청: "no need shync with google drive")
   // 📋 목적: 현재 예약 데이터를 Google Drive 스프레드시트로 저장
-  //         - 채워진 행만 포함 (빈 행 제외)
-  //         - category = '예약', title_prefix = 선택된 날짜
-  // 🔧 매개변수: 없음 (rows, date 상태 참조)
-  // 📤 반환값: 없음 (성공/실패 alert 표시)
-  // 📅 작성일: 2026-06-02
   // ============================================================
-  // silent=true 이면 alert 없이 조용히 저장 (자동 저장용)
-  const handleDriveExport = useCallback(async (silent = false) => {
-    const filled = rows.filter((r, i) => isFilled(rows[i]));
-    if (filled.length === 0) return;
-    if (!silent) setDriveLoading(true);
-    try {
-      const bookingData = filled.map((r, idx) => ({
-        id: idx + 1,
-        booking_date: date,
-        therapist_name: r.therapistName,
-        treatment: r.service,
-        start_time: r.startTime,
-        end_time: endTimeOf(r),
-        room_number: r.roomNumber,
-        guest_name: r.guestName,
-        note: r.note,
-        pay: r.totalAmount || r.pay,
-        tip: r.tip,
-        status: 'completed',
-        created_at: new Date().toISOString(),
-      }));
+  // const handleDriveExport = useCallback(async (silent = false) => {
+  //   const filled = rows.filter((r, i) => isFilled(rows[i]));
+  //   if (filled.length === 0) return;
+  //   if (!silent) setDriveLoading(true);
+  //   try {
+  //     const bookingData = filled.map((r, idx) => ({
+  //       id: idx + 1,
+  //       booking_date: date,
+  //       therapist_name: r.therapistName,
+  //       treatment: r.service,
+  //       start_time: r.startTime,
+  //       end_time: endTimeOf(r),
+  //       room_number: r.roomNumber,
+  //       guest_name: r.guestName,
+  //       note: r.note,
+  //       pay: r.totalAmount || r.pay,
+  //       tip: r.tip,
+  //       status: 'completed',
+  //       created_at: new Date().toISOString(),
+  //     }));
+  //
+  //     const [localRes, driveRes] = await Promise.all([
+  //       fetch('http://localhost:5001/api/save-bookings', {
+  //         method: 'POST',
+  //         headers: { 'Content-Type': 'application/json' },
+  //         body: JSON.stringify({ bookings: bookingData }),
+  //       }),
+  //       fetch(`${API_BASE}/api/drive/save-booking`, {
+  //         method: 'POST',
+  //         headers: { 'Content-Type': 'application/json' },
+  //         body: JSON.stringify(bookingData),
+  //       }),
+  //     ]);
+  //
+  //     const localJson = await localRes.json();
+  //     const driveJson = await driveRes.json();
+  //
+  //     const stamp = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+  //     setLastAutoSave(stamp);
+  //
+  //     const localSuccess = localRes.ok && localJson.success;
+  //     const driveSuccess = driveRes.ok && driveJson.status === 'success';
+  //
+  //     if (localSuccess && driveSuccess) {
+  //       if (!silent) alert(`✅ 저장 완료!\n📁 로컬: ~/elspa/data/\n☁️ Google Drive: elspa/예약\n${stamp}`);
+  //     } else if (localSuccess || driveSuccess) {
+  //       const msg = localSuccess ? '📁 로컬 ✓' : '❌ 로컬 실패';
+  //       const gMsg = driveSuccess ? '☁️ Google Drive ✓' : '❌ Google Drive 실패';
+  //       if (!silent) alert(`⚠️ 부분 저장\n${msg}\n${gMsg}`);
+  //     } else {
+  //       if (!silent) alert(`❌ 저장 실패\n로컬: ${localJson.error}\nGoogle Drive: ${driveJson.error}`);
+  //     }
+  //   } catch (err) {
+  //     if (!silent) alert(`❌ 저장 오류: ${err instanceof Error ? err.message : '서버 연결 확인'}`);
+  //   } finally {
+  //     if (!silent) setDriveLoading(false);
+  //   }
+  // }, [rows, date]);
 
-      // ✅ 로컬 폴더 + Google Drive 동시 저장
-      const [localRes, driveRes] = await Promise.all([
-        // 1️⃣ 로컬 파일 저장 (Flask: ~/elspa/data/)
-        fetch('http://localhost:5001/api/save-bookings', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ bookings: bookingData }),
-        }),
-        // 2️⃣ Google Drive 저장 (Cloudflare Workers API)
-        fetch(`${API_BASE}/api/drive/save-booking`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(bookingData),
-        }),
-      ]);
-
-      const localJson = await localRes.json();
-      const driveJson = await driveRes.json();
-
-      const stamp = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-      setLastAutoSave(stamp);
-
-      // 결과 판정
-      const localSuccess = localRes.ok && localJson.success;
-      const driveSuccess = driveRes.ok && driveJson.status === 'success';
-
-      if (localSuccess && driveSuccess) {
-        if (!silent) alert(`✅ 저장 완료!\n📁 로컬: ~/elspa/data/\n☁️ Google Drive: elspa/예약\n${stamp}`);
-      } else if (localSuccess || driveSuccess) {
-        const msg = localSuccess ? '📁 로컬 ✓' : '❌ 로컬 실패';
-        const gMsg = driveSuccess ? '☁️ Google Drive ✓' : '❌ Google Drive 실패';
-        if (!silent) alert(`⚠️ 부분 저장\n${msg}\n${gMsg}`);
-      } else {
-        if (!silent) alert(`❌ 저장 실패\n로컬: ${localJson.error}\nGoogle Drive: ${driveJson.error}`);
-      }
-    } catch (err) {
-      if (!silent) alert(`❌ 저장 오류: ${err instanceof Error ? err.message : '서버 연결 확인'}`);
-    } finally {
-      if (!silent) setDriveLoading(false);
-    }
-  }, [rows, date]);
-
-  // ── 설정된 간격마다 자동 Drive 저장 (Google Apps Script) ───────────
-  useEffect(() => {
-    if (!autoSaveEnabled) return;
-    const timer = setInterval(() => { handleDriveExport(true); }, autoSaveIntervalMs);
-    return () => clearInterval(timer);
-  }, [handleDriveExport, autoSaveEnabled, autoSaveIntervalMs]);
+  // ── 설정된 간격마다 자동 Drive 저장 — DISABLED (사용자 요청: "no need live") ───────────
+  // useEffect(() => {
+  //   if (!autoSaveEnabled) return;
+  //   const timer = setInterval(() => { handleDriveExport(true); }, autoSaveIntervalMs);
+  //   return () => clearInterval(timer);
+  // }, [handleDriveExport, autoSaveEnabled, autoSaveIntervalMs]);
 
   const filledCount = rows.filter(isFilled).length;
   // 빈 룸 = available 베드 라벨 − 현재 표에서 이미 쓰인 룸
@@ -443,10 +431,12 @@ export default function BookingSheetTable() {
           </div>
           <div className="ml-auto flex items-center gap-3">
             <span className="text-[10px] md:text-xs text-slate-300">{tr(`Entered: ${filledCount}`, `입력됨: ${filledCount}건`)}</span>
-            {lastAutoSave && (
+            {/* ✅ Supabase 자동 저장 (Google Drive/Sheet 동기화 DISABLED) */}
+            {/* {lastAutoSave && (
               <span className="text-[10px] md:text-xs text-emerald-400 font-semibold">✅ 저장됨 {lastAutoSave}</span>
-            )}
-            <button
+            )} */}
+            {/* Drive 저장 버튼 — DISABLED (사용자 요청: "no need shync with google drive") */}
+            {/* <button
               onClick={() => handleDriveExport(false)}
               disabled={driveLoading || filledCount === 0}
               className={`px-3 py-1.5 rounded text-[10px] md:text-xs font-semibold transition ${
@@ -458,7 +448,7 @@ export default function BookingSheetTable() {
               }`}
             >
               {driveLoading ? '💾 저장 중...' : '💾 Drive 저장'}
-            </button>
+            </button> */}
           </div>
         </div>
 
