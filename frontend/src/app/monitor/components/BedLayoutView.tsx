@@ -46,16 +46,24 @@ export default function BedLayoutView() {
     loadBeds();
   }, []);
 
+  // room_zone 매핑 (한글 → 영어)
+  const roomZoneMap: Record<string, string> = {
+    '마사지룸1': 'Massage Room 1',
+    '마사지룸2': 'Massage Room 2',
+    'VIP실': 'VIP Room',
+    '기타실': 'Other Room',
+  };
+
   // 침대를 방별로 분류
-  const getRoomBeds = (roomName: string) => {
-    return beds.filter((b) => b.name?.includes(roomName));
+  const getRoomBeds = (zoneKey: string) => {
+    return beds.filter((b) => b.room_zone === zoneKey);
   };
 
   const rooms = [
-    { id: 'room1', name: 'Massage Room 1', beds: getRoomBeds('Massage Room 1') },
-    { id: 'room2', name: 'Massage Room 2', beds: getRoomBeds('Massage Room 2') },
-    { id: 'room3', name: 'VIP Room', beds: getRoomBeds('VIP Room') },
-    { id: 'room4', name: 'Other Room', beds: getRoomBeds('Other Room') },
+    { id: 'room1', name: 'Massage Room 1', beds: getRoomBeds('마사지룸1') },
+    { id: 'room2', name: 'Massage Room 2', beds: getRoomBeds('마사지룸2') },
+    { id: 'room3', name: 'VIP Room', beds: getRoomBeds('VIP실') },
+    { id: 'room4', name: 'Other Room', beds: getRoomBeds('기타실') },
   ];
   const summary = {
     available: beds.filter((b) => b.status === 'available').length,
@@ -64,7 +72,7 @@ export default function BedLayoutView() {
     maintenance: beds.filter((b) => b.status === 'maintenance').length,
   };
 
-  const bedNo = (bed: TherapyBed) => bed.name.split('-')[1] ?? bed.name;
+  const bedNo = (bed: TherapyBed) => String(bed.bed_number || bed.id);
   const currentTherapist = selectedBed?.therapistId ? therapistById.get(selectedBed.therapistId)?.name : undefined;
 
   const clickBed = (bed: TherapyBed) => {
