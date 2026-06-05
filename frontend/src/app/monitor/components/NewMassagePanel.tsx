@@ -52,6 +52,10 @@ export default function NewMassagePanel({
   const t = useT();
   const [therapists, setTherapists] = useState<UiTherapist[]>([]);
   const [search, setSearch] = useState('');
+  console.log('🎨 NewMassagePanel props:', {
+    prefillTherapist, prefillGuestName, prefillPayAmount, prefillTip, prefillTreatment,
+  });
+
   const [therapistName, setTherapistName] = useState<string>(prefillTherapist ?? '');
   const [therapistId, setTherapistId] = useState<number | null>(null);
   const [massageServices, setMassageServices] = useState<MassageType[]>([]);

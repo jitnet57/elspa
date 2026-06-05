@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 22:31:51",
-  "buildTimeShort": "2026-06-06 AM 06:31",
+  "buildTimeHMS": "2026-06-05 22:34:27",
+  "buildTimeShort": "2026-06-06 AM 06:34",
   "timestamp": "2026-06-0522",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "0446538f",
-    "shortHash": "0446538",
-    "message": "🔍 Debug: Bookings 로드 데이터 console.log 추가",
+    "hash": "e0b8eaf7",
+    "shortHash": "e0b8eaf",
+    "message": "🔧 Fix: prefillPayAmount → prefillPay, treatment → service 필드명 수정",
     "author": "jitnet57",
-    "date": "2026-06-06 06:23:11 +0800"
+    "date": "2026-06-06 06:32:09 +0800"
   }
 }
