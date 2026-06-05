@@ -71,7 +71,10 @@
       "Bash(awk '{print $NF}')",
       "Bash(command -v code)",
       "Bash(code SUPABASE_SCHEMA.sql)",
-      "Bash(open SUPABASE_SCHEMA.sql)"
+      "Bash(open SUPABASE_SCHEMA.sql)",
+      "Bash(grep -r \"5001\\\\|file.save\\\\|fileSave\\\\|FileSave\" /Users/kwangseobpark/elspa/frontend/src --include=*.ts --include=*.tsx)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
+      "Bash(ls -lah /Users/kwangseobpark/elspa/*.db /Users/kwangseobpark/elspa/*.sqlite)"
     ],
     "additionalDirectories": [
       "/Users/kwangseobpark/elspa/.git/refs",
