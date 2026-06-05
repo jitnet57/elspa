@@ -28,21 +28,31 @@ export interface ExpenseRange {
 // ============================================================
 // 📌 getRevenueRange: 기간 매출 자동 집계
 // 📤 RevenueRange — 일자별 매출/예약건수 + 총합
+// 📝 API 제거 - 더미 데이터 반환
 // ============================================================
 export async function getRevenueRange(start: string, end: string): Promise<RevenueRange> {
-  const res = await fetch(`${API_BASE}/api/massage-bookings/revenue/range?start=${start}&end=${end}`);
-  if (!res.ok) throw new Error('매출 집계 오류');
-  return res.json();
+  return {
+    start,
+    end,
+    total_revenue: 0,
+    total_count: 0,
+    by_date: [],
+  };
 }
 
 // ============================================================
 // 📌 getExpenseRange: 기간 비용 자동 집계
 // 📤 ExpenseRange — 카테고리별·일자별 비용 + 총합
+// 📝 API 제거 - 더미 데이터 반환
 // ============================================================
 export async function getExpenseRange(start: string, end: string): Promise<ExpenseRange> {
-  const res = await fetch(`${API_BASE}/api/expense/range?start=${start}&end=${end}`);
-  if (!res.ok) throw new Error('비용 집계 오류');
-  return res.json();
+  return {
+    start,
+    end,
+    total: 0,
+    by_category: {},
+    by_date: [],
+  };
 }
 
 // ============================================================
@@ -77,38 +87,33 @@ export interface ExpenseRecordInput {
 }
 
 // ── 특정 날짜의 비용 항목 목록 조회 ──────────────────────────
+// 📝 API 제거 - 빈 배열 반환
 export async function getExpenseRecords(date: string): Promise<ExpenseRecord[]> {
-  const res = await fetch(`${API_BASE}/api/expense/records?date=${date}`);
-  if (!res.ok) throw new Error('비용 항목 조회 오류');
-  return res.json();
+  return [];
 }
 
 // ── 비용 항목 생성 (201) ─────────────────────────────────────
+// 📝 API 제거 - 더미 데이터 반환
 export async function createExpenseRecord(body: ExpenseRecordInput): Promise<ExpenseRecord> {
-  const res = await fetch(`${API_BASE}/api/expense/records`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error('비용 항목 저장 오류');
-  return res.json();
+  return {
+    id: 0,
+    ...body,
+  };
 }
 
 // ── 비용 항목 수정 ───────────────────────────────────────────
+// 📝 API 제거 - 더미 데이터 반환
 export async function updateExpenseRecord(id: number, body: ExpenseRecordInput): Promise<ExpenseRecord> {
-  const res = await fetch(`${API_BASE}/api/expense/records/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error('비용 항목 수정 오류');
-  return res.json();
+  return {
+    id,
+    ...body,
+  };
 }
 
 // ── 비용 항목 삭제 ───────────────────────────────────────────
+// 📝 API 제거 - 빈 응답 반환
 export async function deleteExpenseRecord(id: number): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/expense/records/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error('비용 항목 삭제 오류');
+  return;
 }
 
 // ── 비용 카테고리 라벨 (expense 라우터와 동일) ──────────────────
