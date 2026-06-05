@@ -370,6 +370,65 @@ create table if not exists public.app_settings (
 );
 
 -- ============================================================
+-- 🔁 멱등 컬럼 업그레이드 (이미 존재하는 테이블 보정)
+-- ⚠️ create table if not exists 는 기존 테이블에 컬럼을 추가하지 않으므로,
+--    예전 스키마로 만들어진 테이블도 아래 ALTER 로 superset 컬럼을 채운다.
+--    (모두 ADD COLUMN IF NOT EXISTS — 여러 번 실행해도 안전)
+-- ============================================================
+-- employees superset 보정
+alter table public.employees add column if not exists employee_type     text default 'therapist';
+alter table public.employees add column if not exists employment_type   text;
+alter table public.employees add column if not exists pay_group         text default 'weekly';
+alter table public.employees add column if not exists status            text default 'active';
+alter table public.employees add column if not exists base_salary       numeric(12,2) not null default 0;
+alter table public.employees add column if not exists daily_wage        numeric(12,2) not null default 0;
+alter table public.employees add column if not exists commission_rate   numeric not null default 0.40;
+alter table public.employees add column if not exists hire_date         date;
+alter table public.employees add column if not exists is_active         boolean not null default true;
+alter table public.employees add column if not exists department        text default 'Office';
+alter table public.employees add column if not exists job_title         text default 'staff';
+alter table public.employees add column if not exists phone             text;
+alter table public.employees add column if not exists email             text;
+alter table public.employees add column if not exists specialty         text;
+alter table public.employees add column if not exists sss_no            text;
+alter table public.employees add column if not exists current_bed       integer;
+alter table public.employees add column if not exists remaining_minutes integer;
+alter table public.employees add column if not exists checked_in_at     timestamptz;
+alter table public.employees add column if not exists checked_out_at    timestamptz;
+
+-- companies superset 보정
+alter table public.companies add column if not exists representative  text;
+alter table public.companies add column if not exists phone           text;
+alter table public.companies add column if not exists address         text;
+alter table public.companies add column if not exists settlement_day  integer;
+alter table public.companies add column if not exists commission_rate numeric(5,2) default 0;
+alter table public.companies add column if not exists status          text default 'active';
+alter table public.companies add column if not exists gcash_number    text;
+alter table public.companies add column if not exists bank_name       text;
+alter table public.companies add column if not exists bank_account    text;
+alter table public.companies add column if not exists bank_holder     text;
+
+-- bookings superset 보정
+alter table public.bookings add column if not exists seq_no          integer;
+alter table public.bookings add column if not exists treatment       text;
+alter table public.bookings add column if not exists start_time      text;
+alter table public.bookings add column if not exists end_time        text;
+alter table public.bookings add column if not exists room_num        text;
+alter table public.bookings add column if not exists guest_name      text;
+alter table public.bookings add column if not exists therapist_name  text;
+alter table public.bookings add column if not exists note            text;
+alter table public.bookings add column if not exists pay             numeric;
+alter table public.bookings add column if not exists tip             numeric;
+alter table public.bookings add column if not exists payment_methods jsonb default '[]'::jsonb;
+alter table public.bookings add column if not exists sss_option      text;
+alter table public.bookings add column if not exists payment_from    text;
+alter table public.bookings add column if not exists status          text default 'normal';
+
+-- guides 보정
+alter table public.guides add column if not exists commission_rate numeric(5,2) default 0;
+alter table public.guides add column if not exists status          text default 'active';
+
+-- ============================================================
 -- updated_at 트리거 (전 21개 테이블)
 -- ============================================================
 do $$
