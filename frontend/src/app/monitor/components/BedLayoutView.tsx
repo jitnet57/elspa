@@ -36,20 +36,31 @@ export default function BedLayoutView() {
       try {
         const data: any[] = await supabaseApiAdapter.getBeds();
 
+        // 한글 room_zone → 영어 매핑
+        const roomZoneToEnglish: Record<string, string> = {
+          '마사지룸1': 'Massage Room 1',
+          '마사지룸2': 'Massage Room 2',
+          'VIP실': 'VIP Room',
+          '기타실': 'Other Room',
+        };
+
         // Supabase 데이터를 TherapyBed 형식으로 변환
-        const converted: TherapyBed[] = data.map((bed: any) => ({
-          id: String(bed.id),
-          name: `${bed.room_zone}-${bed.bed_number}`,
-          roomNumber: String(bed.bed_number),
-          room_zone: bed.room_zone,
-          bed_number: bed.bed_number,
-          status: bed.status,
-          type: 'massage' as const,
-          capacity: 1,
-          therapistId: bed.therapist_name ? bed.id : undefined,
-          serviceName: bed.service_name,
-          endTime: bed.ends_at,
-        }));
+        const converted: TherapyBed[] = data.map((bed: any) => {
+          const englishZone = roomZoneToEnglish[bed.room_zone] || bed.room_zone;
+          return {
+            id: String(bed.id),
+            name: `${englishZone}-${bed.bed_number}`,
+            roomNumber: String(bed.bed_number),
+            room_zone: englishZone, // 영어로 변환
+            bed_number: bed.bed_number,
+            status: bed.status,
+            type: 'massage' as const,
+            capacity: 1,
+            therapistId: bed.therapist_name ? bed.id : undefined,
+            serviceName: bed.service_name,
+            endTime: bed.ends_at,
+          };
+        });
 
         setBeds(converted);
       } catch (error) {
@@ -62,24 +73,16 @@ export default function BedLayoutView() {
     loadBeds();
   }, []);
 
-  // room_zone 매핑 (한글 → 영어)
-  const roomZoneMap: Record<string, string> = {
-    '마사지룸1': 'Massage Room 1',
-    '마사지룸2': 'Massage Room 2',
-    'VIP실': 'VIP Room',
-    '기타실': 'Other Room',
-  };
-
-  // 침대를 방별로 분류
-  const getRoomBeds = (zoneKey: string) => {
-    return beds.filter((b) => b.room_zone === zoneKey);
+  // 침대를 방별로 분류 (영어 room_zone 사용)
+  const getRoomBeds = (englishZone: string) => {
+    return beds.filter((b) => b.room_zone === englishZone);
   };
 
   const rooms = [
-    { id: 'room1', name: 'Massage Room 1', beds: getRoomBeds('마사지룸1') },
-    { id: 'room2', name: 'Massage Room 2', beds: getRoomBeds('마사지룸2') },
-    { id: 'room3', name: 'VIP Room', beds: getRoomBeds('VIP실') },
-    { id: 'room4', name: 'Other Room', beds: getRoomBeds('기타실') },
+    { id: 'room1', name: 'Massage Room 1', beds: getRoomBeds('Massage Room 1') },
+    { id: 'room2', name: 'Massage Room 2', beds: getRoomBeds('Massage Room 2') },
+    { id: 'room3', name: 'VIP Room', beds: getRoomBeds('VIP Room') },
+    { id: 'room4', name: 'Other Room', beds: getRoomBeds('Other Room') },
   ];
   const summary = {
     available: beds.filter((b) => b.status === 'available').length,

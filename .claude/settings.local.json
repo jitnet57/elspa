@@ -74,7 +74,21 @@
       "Bash(open SUPABASE_SCHEMA.sql)",
       "Bash(grep -r \"5001\\\\|file.save\\\\|fileSave\\\\|FileSave\" /Users/kwangseobpark/elspa/frontend/src --include=*.ts --include=*.tsx)",
       "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
-      "Bash(ls -lah /Users/kwangseobpark/elspa/*.db /Users/kwangseobpark/elspa/*.sqlite)"
+      "Bash(ls -lah /Users/kwangseobpark/elspa/*.db /Users/kwangseobpark/elspa/*.sqlite)",
+      "Bash(curl -s -w \"HTTP Status: %{http_code}\\\\n\" http://localhost:8000/api)",
+      "Bash(curl -s -w \"HTTP Status: %{http_code}\\\\n\" https://web-production-25f37.up.railway.app/api)",
+      "Bash(curl -s \"http://localhost:8000/api/therapists\")",
+      "Bash(curl -s \"https://web-production-25f37.up.railway.app/api/therapists\")",
+      "Bash(curl -s \"http://localhost:8000/api/beds\")",
+      "Bash(curl -s \"https://web-production-25f37.up.railway.app/api/beds\")",
+      "Bash(sqlite3 /Users/kwangseobpark/elspa/test.db \".tables\")",
+      "Bash(sqlite3 /Users/kwangseobpark/elspa/test.db \".schema\")",
+      "Bash(sqlite3 /Users/kwangseobpark/elspa/test.db \"SELECT COUNT\\(*\\) as 총개수 FROM therapists;\")",
+      "Bash(sqlite3 /Users/kwangseobpark/elspa/test.db \"SELECT * FROM therapists LIMIT 5;\")",
+      "Bash(sqlite3 /Users/kwangseobpark/elspa/test.db \"SELECT COUNT\\(*\\) as 총개수 FROM beds;\")",
+      "Bash(sqlite3 /Users/kwangseobpark/elspa/test.db \"SELECT * FROM beds LIMIT 5;\")",
+      "Bash(sqlite3 /Users/kwangseobpark/elspa/test.db \"SELECT COUNT\\(*\\) as 총개수 FROM employees;\")",
+      "Bash(vercel projects *)"
     ],
     "additionalDirectories": [
       "/Users/kwangseobpark/elspa/.git/refs",

@@ -1,4 +1,4 @@
-# ElSpa 백엔드 - 핵심 패키지만
+# ElSpa 백엔드 - 핵심 패키지
 fastapi
 uvicorn[standard]
 sqlalchemy
@@ -9,3 +9,7 @@ pydantic-settings
 google-auth
 google-auth-oauthlib
 google-api-python-client
+anthropic
+supabase
+openpyxl
+gspread

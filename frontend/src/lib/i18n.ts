@@ -18,9 +18,9 @@ const KEY = 'elspa.lang';
 const listeners = new Set<() => void>();
 
 let current: Lang = 'en';
+// 항상 영어로 시작 (한글 설정 무시)
 if (typeof window !== 'undefined') {
-  const saved = window.localStorage.getItem(KEY);
-  if (saved === 'ko' || saved === 'en') current = saved;
+  window.localStorage.setItem(KEY, 'en');
 }
 
 export function getLang(): Lang {
