@@ -630,15 +630,16 @@ export default function BookingSheetTable() {
                   {r.bookingId && (
                     <button
                       onClick={() => {
-                        if (confirm(tr('Delete this booking?', '이 예약을 삭제하시겠습니까?'))) {
-                          setRows(rows.filter((_, idx) => idx !== i));
-                          setUnsavedState('bookings', true);
-                        }
+                        // Edit 모드 활성화: saved 상태 초기화
+                        setRows(rows.map((row, idx) =>
+                          idx === i ? { ...row, saved: false } : row
+                        ));
+                        setUnsavedState('bookings', true);
                       }}
-                      className="px-2 py-1.5 rounded font-bold text-[11px] md:text-xs bg-red-600 hover:bg-red-700 text-white"
-                      title={tr('Delete', '삭제')}
+                      className="px-2 py-1.5 rounded font-bold text-[11px] md:text-xs bg-orange-600 hover:bg-orange-700 text-white"
+                      title={tr('Edit', '수정')}
                     >
-                      🗑️
+                      ✏️
                     </button>
                   )}
                 </td>
