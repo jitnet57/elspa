@@ -13,6 +13,7 @@ import { PaymentMethodInput, type PaymentMethodData } from '@/components/Payment
 import { SSSOptionSelect, type PayrollImpact } from '@/components/SSSOptionSelect';
 import { PaymentFromSelect, type SettlementImpact } from '@/components/PaymentFromSelect';
 import PaymentMethodModal from './PaymentMethodModal';
+import NewMassagePanel from './NewMassagePanel';
 import { exportBookingsToExcel } from '@/lib/utils/excel-export';
 import { useUnsavedChanges, setUnsavedState, showUnsavedConfirm } from '@/lib/hooks/useUnsavedChanges';
 import {
@@ -116,6 +117,12 @@ export default function BookingSheetTable() {
   // 📋 목적: 각 행별 결제 수단 입력 모달 관리
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [selectedPaymentRowIndex, setSelectedPaymentRowIndex] = useState<number | null>(null);
+
+  // ============================================================
+  // 📌 상태: Edit 모달 제어
+  // 📋 목적: NewMassagePanel으로 예약 수정
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
 
   // ============================================================
   // 📌 상태: Google Drive 동기화 제거됨 (사용자 요청)
@@ -455,6 +462,26 @@ export default function BookingSheetTable() {
         />
       )}
 
+      {/* Edit Modal - NewMassagePanel */}
+      {editingRowIndex !== null && isEditModalOpen && (
+        <NewMassagePanel
+          date={date}
+          prefillTherapist={rows[editingRowIndex]?.therapistName}
+          prefillRoom={rows[editingRowIndex]?.roomNumber}
+          title={`✏️ Edit Booking · ${rows[editingRowIndex]?.guestName}`}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditingRowIndex(null);
+          }}
+          onSaved={() => {
+            setIsEditModalOpen(false);
+            setEditingRowIndex(null);
+            // 데이터 새로고침
+            fetchBookings();
+          }}
+        />
+      )}
+
       <div className="flex-1 overflow-auto bg-slate-900 text-white">
       {/* 헤더 */}
       <div className="px-6 py-4 border-b border-white/10">
@@ -630,11 +657,9 @@ export default function BookingSheetTable() {
                   {r.bookingId && (
                     <button
                       onClick={() => {
-                        // Edit 모드 활성화: saved 상태 초기화
-                        setRows(rows.map((row, idx) =>
-                          idx === i ? { ...row, saved: false } : row
-                        ));
-                        setUnsavedState('bookings', true);
+                        // NewMassagePanel 모달 열기
+                        setEditingRowIndex(i);
+                        setIsEditModalOpen(true);
                       }}
                       className="px-2 py-1.5 rounded font-bold text-[11px] md:text-xs bg-orange-600 hover:bg-orange-700 text-white"
                       title={tr('Edit', '수정')}
