@@ -43,7 +43,10 @@ export default function DailyTherapistSchedule({ openNewOnMount = false }: { ope
   useEffect(() => {
     supabaseApiAdapter
       .getTherapists()
-      .then((rows) => setTherapists(rows as UiTherapist[]))
+      .then((rows) => {
+        console.log('👥 테라피스트 로드:', rows.map(t => ({ id: t.id, name: t.name, code: t.code })));
+        setTherapists(rows as UiTherapist[]);
+      })
       .catch(() => setTherapists([]));
   }, []);
 
@@ -52,7 +55,7 @@ export default function DailyTherapistSchedule({ openNewOnMount = false }: { ope
     setLoading(true);
     try {
       const rows = await supabaseApiAdapter.getBookings(selectedDate);
-      console.log(`📅 ${selectedDate} 예약 로드:`, rows.map(r => ({ therapist_name: r.therapist_name, treatment: r.treatment })));
+      console.log(`📅 ${selectedDate} 예약 로드:`, rows.map(r => ({ id: r.id, therapist_id: r.therapist_id, therapist_name: r.therapist_name, treatment: r.treatment })));
       setBookings(rows);
     } catch (err) {
       console.error('예약 로드 실패:', err);
@@ -151,11 +154,11 @@ export default function DailyTherapistSchedule({ openNewOnMount = false }: { ope
           ) : (
             therapists.slice().sort(sortByAttendance).map((t, idx) => {
               const st = therapistStatusMeta[(t.status as DbTherapistStatus) ?? 'idle'] ?? therapistStatusMeta.idle;
-              // 대소문자 무시하고 일치하는 예약 필터링
               // therapist_id로만 매칭 (가장 안정적)
               const rows = bookings.filter((b) => b.therapist_id === t.id);
+              console.log(`🧑‍⚕️ ${t.name} (id=${t.id}): therapist_id=${t.id} 매칭 결과 = ${rows.length}개`);
               if (rows.length > 0) {
-                console.log(`🧑‍⚕️ ${t.name}: ${rows.length}개 예약`);
+                console.log(`  ✅ 매칭된 bookings:`, rows.map(r => ({ therapist_id: r.therapist_id, therapist_name: r.therapist_name })));
               }
               return (
                 <div key={t.id} className={`flex border-b border-gray-100 ${idx % 2 ? 'bg-gray-50/40' : 'bg-white'}`}>
