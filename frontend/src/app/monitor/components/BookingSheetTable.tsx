@@ -623,10 +623,24 @@ export default function BookingSheetTable() {
                 <td className="px-2 py-1">
                   <input type="number" value={r.tip || ''} onChange={(e) => update(i, { tip: Number(e.target.value) || 0 })} placeholder="0" className={inp + ' text-right'} />
                 </td>
-                <td className="px-2 py-1">
-                  <button onClick={() => saveRow(i)} disabled={!isFilled(r) || r.saving} className={`w-full px-2 py-1.5 rounded font-bold text-[11px] md:text-xs ${r.saved ? 'bg-emerald-600' : 'bg-blue-600 hover:bg-blue-700 disabled:opacity-30'}`}>
+                <td className="px-2 py-1 flex gap-1">
+                  <button onClick={() => saveRow(i)} disabled={!isFilled(r) || r.saving} className={`flex-1 px-2 py-1.5 rounded font-bold text-[11px] md:text-xs ${r.saved ? 'bg-emerald-600' : 'bg-blue-600 hover:bg-blue-700 disabled:opacity-30'}`}>
                     {r.saving ? '…' : r.saved ? '✓' : tr('Save', '저장')}
                   </button>
+                  {r.bookingId && (
+                    <button
+                      onClick={() => {
+                        if (confirm(tr('Delete this booking?', '이 예약을 삭제하시겠습니까?'))) {
+                          setRows(rows.filter((_, idx) => idx !== i));
+                          setUnsavedState('bookings', true);
+                        }
+                      }}
+                      className="px-2 py-1.5 rounded font-bold text-[11px] md:text-xs bg-red-600 hover:bg-red-700 text-white"
+                      title={tr('Delete', '삭제')}
+                    >
+                      🗑️
+                    </button>
+                  )}
                 </td>
               </tr>
             );})}
