@@ -26,7 +26,7 @@ import {
  * ============================================================
  */
 
-const HOURS = Array.from({ length: 13 }, (_, i) => 9 + i); // 09:00 ~ 21:00
+const HOURS = Array.from({ length: 24 }, (_, i) => i); // 00:00 ~ 23:00 (24시간)
 const HOUR_W = 84;
 
 export default function DailyTherapistSchedule({ openNewOnMount = false }: { openNewOnMount?: boolean }) {

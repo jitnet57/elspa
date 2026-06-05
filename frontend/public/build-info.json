@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 20:36:55",
-  "buildTimeShort": "2026-06-06 AM 04:36",
+  "buildTimeHMS": "2026-06-05 20:37:36",
+  "buildTimeShort": "2026-06-06 AM 04:37",
   "timestamp": "2026-06-0520",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "83eec651",
-    "shortHash": "83eec65",
-    "message": "🔧 Fix: 테라피스트 조회 쿼리 수정 (employees → therapists 테이블로 변경)",
+    "hash": "5eafe974",
+    "shortHash": "5eafe97",
+    "message": "✨ Feat: DailyTherapistSchedule에 Supabase Realtime 구독 추가 (예약 자동 동기화)",
     "author": "jitnet57",
-    "date": "2026-06-06 04:32:30 +0800"
+    "date": "2026-06-06 04:37:17 +0800"
   }
 }
