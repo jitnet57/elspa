@@ -16,6 +16,7 @@ import { getMonthlySettlements } from '@/lib/api/companies-client';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import PeriodReport from './PeriodReport';
 import { useT } from '@/lib/i18n';
+import { useRealtimeMetrics } from '@/lib/hooks/useRealtimeMetrics';
 
 type Period = 'daily' | 'weekly' | 'monthly';
 
@@ -47,6 +48,9 @@ export default function ManagementMetricsPage() {
   const [m, setM] = useState<MetricsMonth>(emptyMonth());
   const [yearData, setYearData] = useState<Record<string, MetricsMonth>>({});
   const [loadingRev, setLoadingRev] = useState(false);
+
+  // 🔄 실시간 메트릭 데이터
+  const { metrics: realtimeMetrics, loading: realtimeLoading } = useRealtimeMetrics(year, month);
 
   const key = `${year}-${String(month).padStart(2, '0')}`;
 
@@ -156,10 +160,22 @@ export default function ManagementMetricsPage() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <Kpi label={t('Total Revenue', '총매출')} value={peso(m.revenue)} cls="from-blue-500 to-blue-600" />
-          <Kpi label={t('Total Expenses', '총지출')} value={peso(expenseTotal(m))} cls="from-red-500 to-red-600" />
-          <Kpi label={t('Operating Profit', '영업이익')} value={peso(operatingProfit(m))} cls="from-emerald-500 to-emerald-600" />
-          <Kpi label={t('Net Profit (−Tax)', '순이익 (−세금)')} value={peso(netProfit(m))} cls="from-purple-500 to-purple-600" />
+          <div className="relative">
+            <Kpi label={t('Total Revenue', '총매출')} value={peso(realtimeMetrics.totalRevenue)} cls="from-blue-500 to-blue-600" />
+            {realtimeLoading && <div className="absolute top-2 right-2 text-xs text-blue-300">🔄 {t('Syncing...', '동기화중...')}</div>}
+          </div>
+          <div className="relative">
+            <Kpi label={t('Total Expenses', '총지출')} value={peso(realtimeMetrics.totalExpenses)} cls="from-red-500 to-red-600" />
+            {realtimeLoading && <div className="absolute top-2 right-2 text-xs text-red-300">🔄 {t('Syncing...', '동기화중...')}</div>}
+          </div>
+          <div className="relative">
+            <Kpi label={t('Operating Profit', '영업이익')} value={peso(realtimeMetrics.operatingProfit)} cls="from-emerald-500 to-emerald-600" />
+            {realtimeLoading && <div className="absolute top-2 right-2 text-xs text-emerald-300">🔄 {t('Syncing...', '동기화중...')}</div>}
+          </div>
+          <div className="relative">
+            <Kpi label={t('Net Profit (−Tax)', '순이익 (−세금)')} value={peso(realtimeMetrics.netProfit)} cls="from-purple-500 to-purple-600" />
+            {realtimeLoading && <div className="absolute top-2 right-2 text-xs text-purple-300">🔄 {t('Syncing...', '동기화중...')}</div>}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
