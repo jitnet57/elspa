@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 21:47:55",
-  "buildTimeShort": "2026-06-06 AM 05:47",
+  "buildTimeHMS": "2026-06-05 21:54:30",
+  "buildTimeShort": "2026-06-06 AM 05:54",
   "timestamp": "2026-06-0521",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "163cfd5e",
-    "shortHash": "163cfd5",
-    "message": "✨ Feat: 테라피스트 선택을 input → select 드롭다운으로 변경 (정확한 name 보장)",
+    "hash": "33a9aa86",
+    "shortHash": "33a9aa8",
+    "message": "🔄 Refactor: therapist_name → therapist_id로 변경 (안정적인 ID 매칭)",
     "author": "jitnet57",
-    "date": "2026-06-06 05:44:20 +0800"
+    "date": "2026-06-06 05:48:09 +0800"
   }
 }
