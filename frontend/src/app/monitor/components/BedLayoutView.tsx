@@ -34,8 +34,24 @@ export default function BedLayoutView() {
   useEffect(() => {
     const loadBeds = async () => {
       try {
-        const data = await supabaseApiAdapter.getBeds();
-        setBeds(data as TherapyBed[]);
+        const data: any[] = await supabaseApiAdapter.getBeds();
+
+        // Supabase 데이터를 TherapyBed 형식으로 변환
+        const converted: TherapyBed[] = data.map((bed: any) => ({
+          id: String(bed.id),
+          name: `${bed.room_zone}-${bed.bed_number}`,
+          roomNumber: String(bed.bed_number),
+          room_zone: bed.room_zone,
+          bed_number: bed.bed_number,
+          status: bed.status,
+          type: 'massage' as const,
+          capacity: 1,
+          therapistId: bed.therapist_name ? bed.id : undefined,
+          serviceName: bed.service_name,
+          endTime: bed.ends_at,
+        }));
+
+        setBeds(converted);
       } catch (error) {
         console.warn('침대 데이터 로드 실패, 기본값 사용:', error);
         setBeds(therapyBeds); // 실패 시 mockData 사용
