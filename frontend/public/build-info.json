@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 22:18:12",
-  "buildTimeShort": "2026-06-06 AM 06:18",
+  "buildTimeHMS": "2026-06-05 22:22:48",
+  "buildTimeShort": "2026-06-06 AM 06:22",
   "timestamp": "2026-06-0522",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "c09391d7",
-    "shortHash": "c09391d",
-    "message": "🔍 Debug: Edit 모달에 전달되는 데이터 console.log 추가",
+    "hash": "c957892d",
+    "shortHash": "c957892",
+    "message": "🔧 Fix: 중복된 코드 제거",
     "author": "jitnet57",
-    "date": "2026-06-06 06:16:38 +0800"
+    "date": "2026-06-06 06:18:36 +0800"
   }
 }

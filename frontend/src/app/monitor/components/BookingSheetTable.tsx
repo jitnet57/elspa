@@ -222,8 +222,17 @@ export default function BookingSheetTable() {
           saving: false,
         };
       });
+      console.log('📊 Bookings 로드됨:', filled.map(r => ({
+        bookingId: r.bookingId,
+        therapist: r.therapistName,
+        guest: r.guestName,
+        treatment: r.service,
+        startTime: r.startTime,
+        saved: r.saved,
+      })));
       setRows(padToRowCount(filled, rowCount));
-    } catch {
+    } catch (err) {
+      console.error('❌ Bookings 로드 실패:', err);
       setRows(padToRowCount([], rowCount));
     } finally {
       setLoading(false);
