@@ -88,27 +88,33 @@ beds = [
 
 
 def init_employees():
-    """테라피스트 40명 등록"""
-    print("🔄 테라피스트 등록 시작...")
+    """테라피스트 40명 등록 (name 기준 upsert — 비파괴)
+
+    ⚠️ delete-all 금지: employees 삭제 시 FK on delete cascade 로
+       attendance_logs/payroll_records/cash_advances 등이 함께 삭제됨.
+       → name(UNIQUE) 충돌 시 갱신하는 upsert 로 기존 급여데이터 보호.
+    """
+    print("🔄 테라피스트 upsert 시작...")
 
     try:
-        # 기존 데이터 삭제
-        print("⏳ 기존 직원 데이터 제거 중...")
-        supabase.table("employees").delete().neq("id", 0).execute()
-        print("✅ 기존 데이터 제거 완료")
+        rows = []
+        for t in therapists:
+            rows.append({
+                **t,
+                # payroll 분류용(employee_type) + monitor용(employment_type) 둘 다 채움
+                "employee_type": "therapist",
+                "department": "Therapy",
+                "job_title": "Therapist",
+                "is_active": True,
+            })
 
-        # 새 데이터 삽입
-        print("\n⏳ 새로운 테라피스트 등록 중...")
-        for idx, therapist in enumerate(therapists, 1):
-            supabase.table("employees").insert(therapist).execute()
-            shift = "1ST" if idx <= 18 else ("2ND" if idx <= 36 else "3RD")
-            print(f"✅ {idx:2d}. {therapist['name']} ({shift} - {int(therapist['commission_rate']*100)}%)")
+        # name 기준 비파괴 upsert (지원: supabase-py upsert on_conflict)
+        supabase.table("employees").upsert(rows, on_conflict="name").execute()
 
-        print(f"\n✅ 모든 테라피스트 등록 완료!")
-        print(f"📊 총 {len(therapists)}명 등록됨")
+        print(f"✅ 테라피스트 {len(rows)}명 upsert 완료")
         print(f"   - 1ST: 18명 (40% 수수료)")
         print(f"   - 2ND: 18명 (45% 수수료)")
-        print(f"   - 3RD: 4명 (50% 수수료)")
+        print(f"   - 3RD:  4명 (50% 수수료)")
 
     except Exception as e:
         print(f"❌ 오류 발생: {e}")
@@ -116,23 +122,15 @@ def init_employees():
 
 
 def init_beds():
-    """침대 4개 등록"""
-    print("\n🔄 침대 등록 시작...")
+    """침대 4개 등록 (bed_number 기준 upsert — 비파괴)"""
+    print("\n🔄 침대 upsert 시작...")
 
     try:
-        # 기존 데이터 삭제
-        print("⏳ 기존 침대 데이터 제거 중...")
-        supabase.table("beds").delete().neq("id", 0).execute()
-        print("✅ 기존 데이터 제거 완료")
-
-        # 새 데이터 삽입
-        print("\n⏳ 새로운 침대 등록 중...")
+        # bed_number(UNIQUE) 충돌 시 갱신 — 기존 예약/상태 보존
+        supabase.table("beds").upsert(beds, on_conflict="bed_number").execute()
         for bed in beds:
-            supabase.table("beds").insert(bed).execute()
             print(f"✅ Bed {bed['bed_number']} - {bed['room_zone']}")
-
-        print(f"\n✅ 모든 침대 등록 완료!")
-        print(f"📊 총 {len(beds)}개 침대 등록됨")
+        print(f"\n✅ 침대 {len(beds)}개 upsert 완료")
 
     except Exception as e:
         print(f"❌ 오류 발생: {e}")
