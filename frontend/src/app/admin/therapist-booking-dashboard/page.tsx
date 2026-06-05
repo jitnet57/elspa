@@ -163,15 +163,46 @@ const generateMockTherapists = (): ScheduleTherapist[] => {
   });
 };
 
-const MOCK_THERAPISTS: ScheduleTherapist[] = generateMockTherapists();
 const START_HOUR = 9;
 const END_HOUR = 21;
 const COLUMN_WIDTH = 80;
 
 export default function TherapistBookingDashboard() {
-  const [therapists, setTherapists] = useState<ScheduleTherapist[]>(MOCK_THERAPISTS);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date(2026, 4, 18));
+  const [therapists, setTherapists] = useState<ScheduleTherapist[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  // Supabase에서 실시간 데이터 로드
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+
+        // Supabase에서 therapists와 bookings 데이터 조회
+        const response = await fetch('/api/therapist-schedule', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ date: selectedDate.toISOString().split('T')[0] })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setTherapists(data.therapists || []);
+        } else {
+          console.warn('❌ Supabase 데이터 로드 실패, 목 데이터 사용');
+          setTherapists(generateMockTherapists());
+        }
+      } catch (error) {
+        console.error('❌ 데이터 로드 실패:', error);
+        setTherapists(generateMockTherapists());
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [selectedDate]);
 
   const formatTime = (hour: number) => {
     const hh = Math.floor(hour);
