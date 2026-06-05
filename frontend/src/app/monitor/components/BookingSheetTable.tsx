@@ -465,6 +465,14 @@ export default function BookingSheetTable() {
           date={date}
           prefillTherapist={rows[editingRowIndex]?.therapistName}
           prefillRoom={rows[editingRowIndex]?.roomNumber}
+          prefillTreatment={rows[editingRowIndex]?.treatment}
+          prefillStartTime={rows[editingRowIndex]?.startTime}
+          prefillEndTime={rows[editingRowIndex]?.endTime}
+          prefillGuestName={rows[editingRowIndex]?.guestName}
+          prefillPayAmount={rows[editingRowIndex]?.payAmount}
+          prefillTip={rows[editingRowIndex]?.tip}
+          prefillPayMethod={rows[editingRowIndex]?.payMethod}
+          prefillNote={rows[editingRowIndex]?.note}
           title={`✏️ Edit Booking · ${rows[editingRowIndex]?.guestName}`}
           onClose={() => {
             setIsEditModalOpen(false);

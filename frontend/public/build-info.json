@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 22:01:49",
-  "buildTimeShort": "2026-06-06 AM 06:01",
+  "buildTimeHMS": "2026-06-05 22:13:50",
+  "buildTimeShort": "2026-06-06 AM 06:13",
   "timestamp": "2026-06-0522",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "01b36957",
-    "shortHash": "01b3695",
-    "message": "✨ Simplify: therapist_id 매칭만 사용 (SQL에서 데이터 수정 필요)",
+    "hash": "fdfa3922",
+    "shortHash": "fdfa392",
+    "message": "🔍 Debug: 상세한 console.log 추가 (데이터 흐름 추적)",
     "author": "jitnet57",
-    "date": "2026-06-06 05:59:37 +0800"
+    "date": "2026-06-06 06:02:03 +0800"
   }
 }

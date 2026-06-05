@@ -22,6 +22,14 @@ export default function NewMassagePanel({
   date,
   prefillTherapist,
   prefillRoom,
+  prefillTreatment,
+  prefillStartTime,
+  prefillEndTime,
+  prefillGuestName,
+  prefillPayAmount,
+  prefillTip,
+  prefillPayMethod,
+  prefillNote,
   title = '+ Start New Massage',
   onClose,
   onSaved,
@@ -29,6 +37,14 @@ export default function NewMassagePanel({
   date: string;
   prefillTherapist?: string;
   prefillRoom?: string;
+  prefillTreatment?: string;
+  prefillStartTime?: string;
+  prefillEndTime?: string;
+  prefillGuestName?: string;
+  prefillPayAmount?: number;
+  prefillTip?: number;
+  prefillPayMethod?: string;
+  prefillNote?: string;
   title?: string;
   onClose: () => void;
   onSaved: () => void;
@@ -39,14 +55,14 @@ export default function NewMassagePanel({
   const [therapistName, setTherapistName] = useState<string>(prefillTherapist ?? '');
   const [therapistId, setTherapistId] = useState<number | null>(null);
   const [massageServices, setMassageServices] = useState<MassageType[]>([]);
-  const [service, setService] = useState(SERVICES[0]?.name ?? '');
-  const [startTime, setStartTime] = useState('10:00');
-  const [guestName, setGuestName] = useState('');
+  const [service, setService] = useState(prefillTreatment ?? SERVICES[0]?.name ?? '');
+  const [startTime, setStartTime] = useState(prefillStartTime ?? '10:00');
+  const [guestName, setGuestName] = useState(prefillGuestName ?? '');
   const [roomNumber, setRoomNumber] = useState(prefillRoom ?? '');
-  const [note, setNote] = useState('');   // 업체명(노트)
-  const [payMethod, setPayMethod] = useState('Card');  // 결제 수단
-  const [payAmount, setPayAmount] = useState(0);       // 지불액
-  const [tip, setTip] = useState(0);       // 팁
+  const [note, setNote] = useState(prefillNote ?? '');   // 업체명(노트)
+  const [payMethod, setPayMethod] = useState(prefillPayMethod ?? 'Card');  // 결제 수단
+  const [payAmount, setPayAmount] = useState(prefillPayAmount ?? 0);       // 지불액
+  const [tip, setTip] = useState(prefillTip ?? 0);       // 팁
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
 
