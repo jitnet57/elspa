@@ -11,13 +11,13 @@ const API_BASE = 'https://elspa-api-production.jitnet57.workers.dev';
 
 // ── 카테고리 정의 ───────────────────────────────────────────────
 const CATEGORIES = [
-  { value: 'food',          label: '🍽️ Food (식비)',           bg: 'bg-orange-100 text-orange-800',  border: 'border-orange-200',  bar: 'bg-orange-400' },
-  { value: 'transport',     label: '🚗 Transport (교통비)',     bg: 'bg-sky-100 text-sky-800',         border: 'border-sky-200',     bar: 'bg-sky-400' },
-  { value: 'supplies',      label: '🛒 Supplies (소모품)',      bg: 'bg-green-100 text-green-800',     border: 'border-green-200',   bar: 'bg-green-400' },
-  { value: 'utilities',     label: '💡 Utilities (공과금)',     bg: 'bg-yellow-100 text-yellow-800',   border: 'border-yellow-200',  bar: 'bg-yellow-400' },
-  { value: 'entertainment', label: '🤝 Entertainment (접대비)', bg: 'bg-pink-100 text-pink-800',       border: 'border-pink-200',    bar: 'bg-pink-400' },
-  { value: 'medical',       label: '🏥 Medical (의료비)',       bg: 'bg-purple-100 text-purple-800',   border: 'border-purple-200',  bar: 'bg-purple-400' },
-  { value: 'other',         label: '📦 Other (기타)',           bg: 'bg-gray-100 text-gray-700',       border: 'border-gray-200',    bar: 'bg-gray-400' },
+  { value: 'food',          label: '🍽️ Food',           bg: 'bg-orange-100 text-orange-800',  border: 'border-orange-200',  bar: 'bg-orange-400' },
+  { value: 'transport',     label: '🚗 Transport',       bg: 'bg-sky-100 text-sky-800',         border: 'border-sky-200',     bar: 'bg-sky-400' },
+  { value: 'supplies',      label: '🛒 Supplies',        bg: 'bg-green-100 text-green-800',     border: 'border-green-200',   bar: 'bg-green-400' },
+  { value: 'utilities',     label: '💡 Utilities',       bg: 'bg-yellow-100 text-yellow-800',   border: 'border-yellow-200',  bar: 'bg-yellow-400' },
+  { value: 'entertainment', label: '🤝 Entertainment',   bg: 'bg-pink-100 text-pink-800',       border: 'border-pink-200',    bar: 'bg-pink-400' },
+  { value: 'medical',       label: '🏥 Medical',         bg: 'bg-purple-100 text-purple-800',   border: 'border-purple-200',  bar: 'bg-purple-400' },
+  { value: 'other',         label: '📦 Other',           bg: 'bg-gray-100 text-gray-700',       border: 'border-gray-200',    bar: 'bg-gray-400' },
 ] as const;
 
 type CatValue = typeof CATEGORIES[number]['value'];
@@ -73,38 +73,28 @@ export default function ExpensePage() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   // ── 날짜 목록 로드 ──────────────────────────────────────────
+  // 📝 API 제거 - 빈 배열 반환
   const fetchDates = useCallback(async () => {
     setLoadingDates(true);
     try {
-      const res = await fetch(`${API_BASE}/api/expense/dates`);
-      if (!res.ok) throw new Error(t('Date list error', '날짜 목록 오류'));
-      const data: DateSummary[] = await res.json();
-      setDates(data);
+      setDates([]);
     } catch (e) {
       setRecError(e instanceof Error ? e.message : t('Error', '오류'));
     } finally { setLoadingDates(false); }
   }, [t]);
 
   // ── 레코드 로드 (온라인: 백엔드 API, 오프라인: IndexedDB 폴백) ─
+  // 📝 API 제거 - IndexedDB만 사용
   const fetchRecords = useCallback(async (date: string) => {
     if (!date) return;
     setLoadingRecs(true); setRecError('');
     try {
-      const res = await fetch(`${API_BASE}/api/expense/records?date=${encodeURIComponent(date)}`);
-      if (!res.ok) throw new Error(t('Failed to load records', '레코드 로드 실패'));
-      const data: ExpenseRecord[] = await res.json();
-      // 온라인 성공 시 IndexedDB에도 캐시
-      db.expenseRecords.bulkPut(data as any).catch(() => {});
-      setRecords(data.map(r => ({ ...r, dirty: false })));
+      // IndexedDB에서만 로드
+      const local = await db.expenseRecords.where('report_date').equals(date).toArray();
+      setRecords(local.map(r => ({ ...r, dirty: false })) as any);
+      setRecError('');
     } catch (e) {
-      // 오프라인이면 IndexedDB 폴백
-      if (!isOnline()) {
-        const local = await db.expenseRecords.where('report_date').equals(date).toArray();
-        setRecords(local.map(r => ({ ...r, dirty: false })) as any);
-        setRecError('');
-      } else {
-        setRecError(e instanceof Error ? e.message : t('Error', '오류'));
-      }
+      setRecError(e instanceof Error ? e.message : t('Error', '오류'));
     } finally { setLoadingRecs(false); }
   }, [t]);
 
@@ -119,23 +109,20 @@ export default function ExpensePage() {
   };
 
   // ── 행 저장 ─────────────────────────────────────────────────
+  // 📝 API 제거 - IndexedDB만 사용
   const saveRow = async (row: EditRow) => {
     setSaving(prev => new Set(prev).add(row.id));
     try {
-      const res = await fetch(`${API_BASE}/api/expense/records/${row.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          vendor:        row.vendor,
-          expense_date:  row.expense_date,
-          amount:        row.amount,
-          currency:      row.currency,
-          category_name: row.category_name,
-          items_json:    JSON.stringify(row.items),
-          description:   row.description,
-        }),
+      // IndexedDB에 저장
+      await db.expenseRecords.update(row.id, {
+        vendor:        row.vendor,
+        expense_date:  row.expense_date,
+        amount:        row.amount,
+        currency:      row.currency,
+        category_name: row.category_name,
+        items:         row.items,
+        description:   row.description,
       });
-      if (!res.ok) throw new Error(t('Save failed', '저장 실패'));
       setRecords(prev => prev.map(r => r.id === row.id ? { ...r, dirty: false } : r));
     } catch (e) { alert(e instanceof Error ? e.message : t('Save error', '저장 오류')); }
     finally { setSaving(prev => { const s = new Set(prev); s.delete(row.id); return s; }); }
@@ -161,44 +148,50 @@ export default function ExpensePage() {
   };
 
   // ── 새 행 추가 ──────────────────────────────────────────────
+  // 📝 API 제거 - IndexedDB만 사용
   const addRow = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/expense/records`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          report_date:   selectedDate,
-          vendor:        '',
-          expense_date:  selectedDate,
-          amount:        0,
-          currency:      'PHP',
-          category_name: 'other',
-          items_json:    '[]',
-          description:   '',
-        }),
-      });
-      if (!res.ok) throw new Error(t('Add failed', '추가 실패'));
-      const newRow: ExpenseRecord = await res.json();
+      const newId = Math.max(...records.map(r => r.id), 0) + 1;
+      const newRow: ExpenseRecord = {
+        id: newId,
+        report_date: selectedDate,
+        vendor: '',
+        expense_date: selectedDate,
+        amount: 0,
+        currency: 'PHP',
+        category_name: 'other',
+        items: [],
+        description: '',
+      };
+      await db.expenseRecords.add(newRow as any);
       setRecords(prev => [...prev, { ...newRow, dirty: false }]);
-      fetchDates();
     } catch (e) { alert(e instanceof Error ? e.message : t('Add error', '추가 오류')); }
   };
 
   // ── Excel 내보내기 ──────────────────────────────────────────
+  // 📝 API 제거 - 로컬 다운로드만 지원
   const handleExport = async () => {
     setExporting(true);
     try {
-      const res = await fetch(`${API_BASE}/api/expense/export`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ report_date: selectedDate }),
-      });
-      if (!res.ok) throw new Error(t('Export failed', '내보내기 실패'));
-      const blob = await res.blob();
-      const url  = URL.createObjectURL(blob);
-      const cd   = res.headers.get('Content-Disposition') ?? '';
-      const name = cd.match(/filename="?([^"]+)"?/)?.[1] ?? `Expense_${selectedDate}.xlsx`;
-      const a = document.createElement('a'); a.href = url; a.download = name; a.click();
+      // 로컬에서 CSV로 내보내기 (간단한 구현)
+      const csv = [
+        ['Date', 'Vendor', 'Category', 'Amount', 'Currency', 'Description'].join(','),
+        ...records.map(r => [
+          r.expense_date,
+          r.vendor,
+          r.category_name,
+          r.amount,
+          r.currency,
+          r.description,
+        ].join(',')),
+      ].join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Expense_${selectedDate}.csv`;
+      a.click();
       URL.revokeObjectURL(url);
     } catch (e) { alert(e instanceof Error ? e.message : t('Export error', '내보내기 오류')); }
     finally { setExporting(false); }
@@ -268,11 +261,11 @@ export default function ExpensePage() {
   }, [records, selectedDate]);
 
   // 설정에 따라 자동 저장 인터벌 (꺼져 있으면 등록 안 함)
+  // 📝 자동 저장 비활성화 (API 제거)
   useEffect(() => {
-    if (!autoSaveEnabled) return;
-    const id = setInterval(autoExport, autoSaveIntervalMs);
-    return () => clearInterval(id);
-  }, [autoExport, autoSaveEnabled, autoSaveIntervalMs]);
+    // 자동 저장 불활성화
+    return () => {};
+  }, []);
 
 
   // ── 집계 ────────────────────────────────────────────────────
