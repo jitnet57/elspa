@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import { startSyncOnReconnect, pullFromSupabase } from '@/lib/db/syncService';
-import { startAutoSave, checkFileServer } from '@/lib/api/file-save-client';
 
 // ============================================================
 // 📌 함수: clearIndexedDBCache
@@ -82,16 +81,7 @@ export function PWAInit() {
       pullFromSupabase(new Date().toISOString().split('T')[0]).catch(() => {});
     }
 
-    // ✨ 파일 자동 저장 시작 (15분마다)
-    checkFileServer().then((isConnected) => {
-      if (isConnected) {
-        console.log('🚀 파일 자동 저장 시작');
-        startAutoSave(15 * 60 * 1000); // 15분마다
-      } else {
-        console.log('⚠️  로컬 파일 서버에 연결할 수 없습니다');
-        console.log('💡 팁: python3 ~/elspa/file_server.py를 실행하세요');
-      }
-    });
+    // ℹ️ 데이터 저장은 Supabase 직결로 처리 (로컬 파일서버 localhost:5001 제거 — 프로덕션 CORS 원인)
 
     // Register Service Worker
     if ('serviceWorker' in navigator) {
