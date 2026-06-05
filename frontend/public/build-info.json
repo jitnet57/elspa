@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 21:39:01",
-  "buildTimeShort": "2026-06-06 AM 05:39",
+  "buildTimeHMS": "2026-06-05 21:41:46",
+  "buildTimeShort": "2026-06-06 AM 05:41",
   "timestamp": "2026-06-0521",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "91071231",
-    "shortHash": "9107123",
-    "message": "🔧 Fix: 모든 백업 훅 제거 (파일 저장 대화 완전 제거)",
+    "hash": "db6c1038",
+    "shortHash": "db6c103",
+    "message": "🔧 Fix: 테라피스트 매칭 유연화 (약자/전체이름 호환)",
     "author": "jitnet57",
-    "date": "2026-06-06 05:34:26 +0800"
+    "date": "2026-06-06 05:39:31 +0800"
   }
 }

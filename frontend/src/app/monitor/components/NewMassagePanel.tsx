@@ -161,7 +161,10 @@ export default function NewMassagePanel({
                   key={t.id}
                   draggable
                   onDragStart={(e) => e.dataTransfer.setData('text/therapist', t.name)}
-                  onClick={() => setTherapistName(t.name)}
+                  onClick={() => {
+                    console.log('🧑‍⚕️ 테라피스트 선택:', { id: t.id, name: t.name, code: t.code });
+                    setTherapistName(t.name);
+                  }}
                   className={`px-3 py-2 rounded-lg cursor-grab active:cursor-grabbing border text-sm flex items-center gap-2 ${
                     therapistName === t.name ? 'bg-blue-50 border-blue-400' : 'bg-white hover:bg-gray-50'
                   }`}
