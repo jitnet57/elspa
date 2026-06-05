@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabaseApiAdapter, type Booking } from '@/lib/api/supabase-adapter';
+import { getSupabase } from '@/lib/supabase/client';
 import { saveBookingToSheet } from '@/lib/services/booking-sheet';
 import { SERVICES, autoEndTime, sortByAttendance, type UiTherapist } from './booking-helpers';
 import { getCompanies, getGuides } from '@/lib/api/companies-client';
@@ -85,6 +86,7 @@ export default function BookingSheetTable() {
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
   const [date, setDate] = useState(today);
   const [therapists, setTherapists] = useState<UiTherapist[]>([]);
+  const [massageServices, setMassageServices] = useState<Array<{ name: string; price: number; duration: number }>>([]);
 
   // ============================================================
   // 📌 상태: rowCount (LocalStorage 기반, 기본값: 60)
@@ -119,8 +121,38 @@ export default function BookingSheetTable() {
   const { enabled: autoSaveEnabled, intervalMs: autoSaveIntervalMs } = useAutoSaveSettings();
 
   useEffect(() => {
+    // 테라피스트 로드
     supabaseApiAdapter.getTherapists().then((r) => setTherapists(r as UiTherapist[])).catch(() => setTherapists([]));
+
+    // 침대 정보 로드
     supabaseApiAdapter.getBeds().then((r) => setBeds((r as any[]).map((b) => ({ bed_number: b.bed_number, room_zone: b.room_zone, status: b.status })))).catch(() => setBeds([]));
+
+    // 마사지 서비스 로드 (Supabase REST API)
+    const sb = getSupabase();
+    if (sb) {
+      sb.from('massage_services')
+        .select('name,base_price,base_duration_minutes')
+        .then(({ data, error }) => {
+          if (data && !error) {
+            setMassageServices(
+              data.map((d: any) => ({
+                name: d.name,
+                price: Number(d.base_price),
+                duration: Number(d.base_duration_minutes),
+              }))
+            );
+            console.log('✅ 마사지 서비스 로드:', data.length, 'items');
+          } else if (error) {
+            console.warn('마사지 서비스 로드 실패:', error);
+            setMassageServices([]);
+          }
+        })
+        .catch((err) => {
+          console.warn('마사지 서비스 로드 에러:', err);
+          setMassageServices([]);
+        });
+    }
+
     // 업체/가이드 레퍼럴 후보
     Promise.all([getCompanies().catch(() => []), getGuides().catch(() => [])]).then(([cs, gs]) => {
       setReferrals([
@@ -197,11 +229,12 @@ export default function BookingSheetTable() {
   // 📌 함수: getServiceInfo
   // 📋 목적: 마사지 이름으로 서비스 정보 조회 (가격, 시간옵션)
   // 🔧 매개변수: serviceName (string)
-  // 📤 반환값: { duration: number; price: number; durationOptions?: ... }
+  // 📤 반환값: { duration: number; price: number }
   // 📅 작성일: 2026-06-03
   // ============================================================
   const getServiceInfo = (serviceName: string) => {
-    const service = SERVICES.find((s) => s.name === serviceName);
+    // Supabase에서 로드한 마사지 서비스 사용
+    const service = massageServices.find((s) => s.name === serviceName);
     return service || { name: '', duration: 60, price: 0 };
   };
 
@@ -523,7 +556,7 @@ export default function BookingSheetTable() {
                 <td className="px-2 py-1">
                   <select value={r.service} onChange={(e) => update(i, { service: e.target.value })} className={inp}>
                     <option value="">{tr('Select…','선택…')}</option>
-                    {SERVICES.map((s) => (<option key={s.name} value={s.name}>{s.name} ({s.duration}분)</option>))}
+                    {(massageServices.length > 0 ? massageServices : SERVICES).map((s) => (<option key={s.name} value={s.name}>{s.name} ({s.duration}분)</option>))}
                   </select>
                 </td>
                 <td className="px-2 py-1">

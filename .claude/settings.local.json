@@ -49,7 +49,10 @@
       "Bash(ls -la /Users/kwangseobpark/elspa/frontend/.next/*.html)",
       "Bash(curl -s -I https://frontend-b5d3wxrrk-jitnet-7048s-projects.vercel.app/)",
       "Bash(curl -L -s https://frontend-b5d3wxrrk-jitnet-7048s-projects.vercel.app/)",
-      "Bash(find /Users/kwangseobpark/elspa -name .env* -type f)"
+      "Bash(find /Users/kwangseobpark/elspa -name .env* -type f)",
+      "Bash(/opt/homebrew/Cellar/node/25.2.1/bin/npm run:*)",
+      "Bash(/opt/homebrew/Cellar/node/25.2.1/bin/node ./node_modules/.bin/next build)",
+      "Bash(scripts/import_massage_services_simple.py:*)"
     ],
     "additionalDirectories": [
       "/Users/kwangseobpark/elspa/.git/refs",
