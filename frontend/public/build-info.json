@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 20:32:13",
-  "buildTimeShort": "2026-06-06 AM 04:32",
+  "buildTimeHMS": "2026-06-05 20:36:55",
+  "buildTimeShort": "2026-06-06 AM 04:36",
   "timestamp": "2026-06-0520",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "a2efeec2",
-    "shortHash": "a2efeec",
-    "message": "🔧 Fix: 자동 백업 파일 저장 대화 제거 (XLSX.writeFile() 비활성화)",
+    "hash": "83eec651",
+    "shortHash": "83eec65",
+    "message": "🔧 Fix: 테라피스트 조회 쿼리 수정 (employees → therapists 테이블로 변경)",
     "author": "jitnet57",
-    "date": "2026-06-06 04:28:17 +0800"
+    "date": "2026-06-06 04:32:30 +0800"
   }
 }

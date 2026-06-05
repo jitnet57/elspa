@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabaseApiAdapter, type Booking } from '@/lib/api/supabase-adapter';
+import { getSupabase } from '@/lib/supabase/client';
 import { useT } from '@/lib/i18n';
 import NewMassagePanel from './NewMassagePanel';
 import {
@@ -61,6 +62,36 @@ export default function DailyTherapistSchedule({ openNewOnMount = false }: { ope
 
   useEffect(() => {
     loadBookings();
+  }, [loadBookings]);
+
+  // 🔄 Supabase Realtime 구독 (예약 데이터 변경 감지)
+  useEffect(() => {
+    const sb = getSupabase();
+    if (!sb) return;
+
+    try {
+      const subscription = sb
+        .channel(`massage_bookings:schedule`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'massage_bookings',
+          },
+          () => {
+            console.log('📅 예약 데이터 변경 감지, 스케줄 새로고침...');
+            loadBookings();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        sb.removeChannel(subscription);
+      };
+    } catch (err) {
+      console.warn('⚠️ Realtime 구독 실패:', err);
+    }
   }, [loadBookings]);
 
   const shiftDate = (delta: number) => {
