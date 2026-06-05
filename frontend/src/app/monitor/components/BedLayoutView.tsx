@@ -40,8 +40,8 @@ export default function BedLayoutView() {
         const roomZoneToEnglish: Record<string, string> = {
           '마사지룸1': 'Massage Room 1',
           '마사지룸2': 'Massage Room 2',
-          'VIP실': 'VIP Room',
-          '기타실': 'Other Room',
+          'VIP룸': 'VIP Room',
+          '커플룸': 'Couple Room',
         };
 
         // Supabase 데이터를 TherapyBed 형식으로 변환
@@ -82,7 +82,7 @@ export default function BedLayoutView() {
     { id: 'room1', name: 'Massage Room 1', beds: getRoomBeds('Massage Room 1') },
     { id: 'room2', name: 'Massage Room 2', beds: getRoomBeds('Massage Room 2') },
     { id: 'room3', name: 'VIP Room', beds: getRoomBeds('VIP Room') },
-    { id: 'room4', name: 'Other Room', beds: getRoomBeds('Other Room') },
+    { id: 'room4', name: 'Couple Room', beds: getRoomBeds('Couple Room') },
   ];
   const summary = {
     available: beds.filter((b) => b.status === 'available').length,
