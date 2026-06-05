@@ -5,6 +5,7 @@ import { useT } from '@/lib/i18n';
 import { useAutoSaveSettings } from '@/lib/hooks/useAutoSaveSettings';
 import { isOnline } from '@/lib/db/syncService';
 import { db } from '@/lib/db/localDb';
+import { getSupabase } from '@/lib/supabase/client';
 
 const API_BASE = 'https://elspa-api-production.jitnet57.workers.dev';
 
@@ -203,43 +204,64 @@ export default function ExpensePage() {
     finally { setExporting(false); }
   };
 
-  // ── Drive 자동 저장 (1시간마다 백그라운드 실행) ─────────────
-  // records 와 selectedDate 를 Drive elspa/비용 폴더에 자동 저장합니다.
-  // 401(인증 없음) 오류는 조용히 무시하고, 성공 시 lastAutoSave에 HH:MM 저장.
+  // ── Supabase + Excel 자동 저장 (1시간마다 백그라운드 실행) ──
+  // records 와 selectedDate 를 Supabase에 저장하고 Excel로 내보냅니다.
+  // 성공 시 lastAutoSave를 true로 설정하여 💾 아이콘만 표시합니다.
   const autoExport = useCallback(async () => {
     if (!records.length) return;
-    const header = ['Vendor', 'Category', 'Amount', 'Description', 'Date'];
-    const dataRows = records.map(r => [
-      r.vendor || '',
-      CAT[r.category_name as CatValue]?.label ?? r.category_name,
-      r.amount ?? 0,
-      r.description || '',
-      r.expense_date || r.report_date || selectedDate,
-    ]);
     try {
-      // 🔵 Google Drive 자동 저장
-      const expenseData = records.map((r, idx) => ({
-        id: idx + 1,
-        category: r.category_name,
-        amount: r.amount,
-        description: r.note || '',
-        date: selectedDate,
+      // Supabase에 저장
+      const supabase = getSupabase();
+      if (!supabase) return;
+
+      // 기존 데이터 삭제 (같은 날짜)
+      const { error: deleteError } = await supabase
+        .from('expense_records')
+        .delete()
+        .eq('report_date', selectedDate);
+
+      if (deleteError) throw deleteError;
+
+      // 새로운 데이터 삽입
+      const expenseData = records.map(r => ({
+        report_date: selectedDate,
         vendor: r.vendor || '',
+        expense_date: r.expense_date || selectedDate,
+        amount: r.amount || 0,
+        currency: r.currency || 'PHP',
+        category_name: r.category_name,
+        items: r.items || [],
+        description: r.description || '',
         created_at: new Date().toISOString(),
       }));
 
-      // Google Drive 저장 (백엔드 API)
-      const res = await fetch(`${API_BASE}/api/drive/save-expense`, {
+      const { error: insertError } = await supabase
+        .from('expense_records')
+        .insert(expenseData);
+
+      if (insertError) throw insertError;
+
+      // Excel 내보내기
+      const res = await fetch(`${API_BASE}/api/expense/export`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(expenseData),
+        body: JSON.stringify({ report_date: selectedDate }),
       });
 
       if (res.ok) {
-        const d = window.Date ? window.Date : Date;
-        const timeStr = new d().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-        setLastAutoSave(timeStr);
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const cd = res.headers.get('Content-Disposition') ?? '';
+        const name = cd.match(/filename="?([^"]+)"?/)?.[1] ?? `Expense_${selectedDate}.xlsx`;
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = name;
+        a.click();
+        URL.revokeObjectURL(url);
       }
+
+      // 저장 표시
+      setLastAutoSave('saved');
     } catch {
       // 네트워크 오류 등은 무시 (자동 저장이므로 사용자에게 표시 안 함)
     }
@@ -402,11 +424,11 @@ export default function ExpensePage() {
                     className="text-xs border border-emerald-300 text-emerald-700 hover:bg-emerald-50 px-3 py-2 rounded-lg font-semibold transition-colors">
                     + Add Row
                   </button>
-                  {/* 자동 저장 상태 표시 */}
+                  {/* 데이터 저장 아이콘 */}
                   {lastAutoSave && (
-                    <span className="text-xs text-emerald-400 font-semibold">
-                      ✅ 저장됨 {lastAutoSave}
-                    </span>
+                    <button className="text-xl hover:scale-110 transition-transform" title="Data saved to Supabase + Excel">
+                      💾
+                    </button>
                   )}
                   <button onClick={handleExport}
                     disabled={!records.length || exporting}
