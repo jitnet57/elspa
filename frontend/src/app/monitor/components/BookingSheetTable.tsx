@@ -501,18 +501,6 @@ export default function BookingSheetTable() {
           />
         );
       })()}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setEditingRowIndex(null);
-          }}
-          onSaved={() => {
-            setIsEditModalOpen(false);
-            setEditingRowIndex(null);
-            // 데이터 새로고침
-            fetchBookings();
-          }}
-        />
-      )}
 
       <div className="flex-1 overflow-auto bg-slate-900 text-white">
       {/* 헤더 */}
