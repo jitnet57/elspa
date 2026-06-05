@@ -132,9 +132,16 @@ export default function BookingSheetTable() {
     supabaseApiAdapter.getTherapists()
       .then((r) => {
         const sorted = (r as UiTherapist[]).sort(sortByAttendance);
+        console.log('👥 테라피스트 로드:', sorted.map(t => ({ id: t.id, name: t.name })));
         setTherapists(sorted);
       })
       .catch(() => setTherapists([]));
+
+    // 테라피스트 로드 완료 후 datalist 확인
+    setTimeout(() => {
+      const options = document.querySelectorAll('#bk-therapist-options option');
+      console.log('📋 datalist options:', Array.from(options).map(o => o.value));
+    }, 500);
 
     // 침대 정보 로드
     supabaseApiAdapter.getBeds().then((r) => setBeds((r as any[]).map((b) => ({ bed_number: b.bed_number, room_zone: b.room_zone, status: b.status })))).catch(() => setBeds([]));
