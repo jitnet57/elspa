@@ -460,20 +460,47 @@ export default function BookingSheetTable() {
       )}
 
       {/* Edit Modal - NewMassagePanel */}
-      {editingRowIndex !== null && isEditModalOpen && (
-        <NewMassagePanel
-          date={date}
-          prefillTherapist={rows[editingRowIndex]?.therapistName}
-          prefillRoom={rows[editingRowIndex]?.roomNumber}
-          prefillTreatment={rows[editingRowIndex]?.treatment}
-          prefillStartTime={rows[editingRowIndex]?.startTime}
-          prefillEndTime={rows[editingRowIndex]?.endTime}
-          prefillGuestName={rows[editingRowIndex]?.guestName}
-          prefillPayAmount={rows[editingRowIndex]?.payAmount}
-          prefillTip={rows[editingRowIndex]?.tip}
-          prefillPayMethod={rows[editingRowIndex]?.payMethod}
-          prefillNote={rows[editingRowIndex]?.note}
-          title={`✏️ Edit Booking · ${rows[editingRowIndex]?.guestName}`}
+      {editingRowIndex !== null && isEditModalOpen && (() => {
+        const editRow = rows[editingRowIndex];
+        console.log('📝 Edit 모달 열림:', {
+          index: editingRowIndex,
+          therapistName: editRow?.therapistName,
+          treatment: editRow?.treatment,
+          startTime: editRow?.startTime,
+          guestName: editRow?.guestName,
+          payAmount: editRow?.payAmount,
+          tip: editRow?.tip,
+          roomNumber: editRow?.roomNumber,
+          payMethod: editRow?.payMethod,
+          note: editRow?.note,
+        });
+        return (
+          <NewMassagePanel
+            date={date}
+            prefillTherapist={editRow?.therapistName}
+            prefillRoom={editRow?.roomNumber}
+            prefillTreatment={editRow?.treatment}
+            prefillStartTime={editRow?.startTime}
+            prefillEndTime={editRow?.endTime}
+            prefillGuestName={editRow?.guestName}
+            prefillPayAmount={editRow?.payAmount}
+            prefillTip={editRow?.tip}
+            prefillPayMethod={editRow?.payMethod}
+            prefillNote={editRow?.note}
+            title={`✏️ Edit Booking · ${editRow?.guestName}`}
+            onClose={() => {
+              setIsEditModalOpen(false);
+              setEditingRowIndex(null);
+            }}
+            onSaved={() => {
+              setIsEditModalOpen(false);
+              setEditingRowIndex(null);
+              // 데이터 새로고침
+              fetchBookings();
+            }}
+          />
+        );
+      })()}
           onClose={() => {
             setIsEditModalOpen(false);
             setEditingRowIndex(null);

@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 22:13:50",
-  "buildTimeShort": "2026-06-06 AM 06:13",
+  "buildTimeHMS": "2026-06-05 22:16:21",
+  "buildTimeShort": "2026-06-06 AM 06:16",
   "timestamp": "2026-06-0522",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "fdfa3922",
-    "shortHash": "fdfa392",
-    "message": "🔍 Debug: 상세한 console.log 추가 (데이터 흐름 추적)",
+    "hash": "67506f39",
+    "shortHash": "67506f3",
+    "message": "✨ Feat: Edit 시 기존 정보 프리필 (therapist, treatment, guest, amount, tip, etc)",
     "author": "jitnet57",
-    "date": "2026-06-06 06:02:03 +0800"
+    "date": "2026-06-06 06:14:02 +0800"
   }
 }
