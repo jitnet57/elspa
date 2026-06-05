@@ -45,16 +45,16 @@ export function useRealtimeCompanies() {
     try {
       setLoading(true);
 
-      // 📋 모든 회사/업체 조회
+      // 📋 모든 회사/업체 조회 (companies 테이블)
       const { data: companiesData } = await supabase
-        .from('guides')
-        .select('id, name, referral_fee_percentage, status')
+        .from('companies')
+        .select('id, name, commission_rate, status')
         .order('id', { ascending: true });
 
       const companiesList: Company[] = (companiesData || []).map(c => ({
         id: c.id,
         name: c.name,
-        referralFeePercentage: c.referral_fee_percentage || 0,
+        referralFeePercentage: c.commission_rate || 0,
         status: c.status || 'active',
       }));
 
@@ -91,15 +91,15 @@ export function useRealtimeCompanies() {
     const supabase = getSupabase();
     if (!supabase) return;
 
-    // guides(회사/업체) 변경 감지
-    const guideSubscription = supabase
-      .channel('guides:all')
+    // companies(회사/업체) 변경 감지
+    const companySubscription = supabase
+      .channel('companies:all')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'guides',
+          table: 'companies',
         },
         () => {
           console.log('🏢 회사 정보 변경 감지, 재계산...');
@@ -109,7 +109,7 @@ export function useRealtimeCompanies() {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(guideSubscription);
+      supabase.removeChannel(companySubscription);
     };
   }, [calculateCompaniesData]);
 

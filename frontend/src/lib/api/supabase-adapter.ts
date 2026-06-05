@@ -139,35 +139,37 @@ export const supabaseApiAdapter = {
     }
   },
 
-  /** 테라피스트 목록 조회 (Supabase therapists 테이블 → 스냅샷 → Mock) */
+  /** 테라피스트 목록 조회 (Supabase employees 테이블 → 스냅샷 → Mock) */
   async getTherapists(): Promise<Therapist[]> {
     const sb = getSupabase();
     if (!sb) return mockApiAdapter.getTherapists();
     try {
-      // therapists 테이블에서 모든 테라피스트 조회
+      // employees 테이블에서 테라피스트(therapist) 조회
       const { data, error } = await sb
-        .from('therapists')
+        .from('employees')
         .select('id, name')
+        .or('employee_type.eq.therapist,employment_type.eq.therapist')
+        .eq('is_active', true)
         .order('name', { ascending: true });
 
       if (error) {
-        console.error('❌ Supabase therapists 상세 에러:', error);
+        console.error('❌ Supabase employees 조회 실패:', error);
         throw error;
       }
 
-      console.log('✅ Supabase therapists 로드 성공:', data?.length, 'items');
+      console.log('✅ Supabase employees(therapist) 로드 성공:', data?.length, 'items');
 
-      // therapists 형식을 Therapist 형식으로 변환
-      const rows = (data ?? []).map((t: any) => ({
-        id: t.id,
-        name: t.name,
+      // employees 형식을 Therapist 형식으로 변환
+      const rows = (data ?? []).map((emp: any) => ({
+        id: emp.id,
+        name: emp.name,
         status: 'idle' as const,
       })) as Therapist[];
 
       saveSnapshot(CACHE_THERAPISTS, rows); // ✅ 우선 저장
       return rows;
     } catch (err) {
-      console.error('❌ Supabase therapists 조회 실패:', err instanceof Error ? err.message : err);
+      console.error('❌ Supabase employees 조회 실패:', err instanceof Error ? err.message : err);
       const snap = loadSnapshot<Therapist>(CACHE_THERAPISTS); // ✅ 다시 불러옴
       return snap ?? mockApiAdapter.getTherapists();
     }

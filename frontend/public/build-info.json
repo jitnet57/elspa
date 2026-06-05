@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 20:51:16",
-  "buildTimeShort": "2026-06-06 AM 04:51",
+  "buildTimeHMS": "2026-06-05 20:56:39",
+  "buildTimeShort": "2026-06-06 AM 04:56",
   "timestamp": "2026-06-0520",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "95d026a6",
-    "shortHash": "95d026a",
-    "message": "🔧 Fix: useUnsavedChanges.ts 파일 완전 삭제",
+    "hash": "6c0af6f7",
+    "shortHash": "6c0af6f",
+    "message": "🔍 Debug: console.log 추가 (데이터 동기화 추적)",
     "author": "jitnet57",
-    "date": "2026-06-06 04:46:51 +0800"
+    "date": "2026-06-06 04:51:29 +0800"
   }
 }

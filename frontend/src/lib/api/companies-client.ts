@@ -74,26 +74,55 @@ export async function deleteCompany(id: number): Promise<void> {
   if (error) throw new Error('업체 삭제 실패');
 }
 
-// ---------- Guides ----------
+// ---------- Guides (companies 테이블에서 관리) ----------
 export async function getGuides(companyId?: number): Promise<Guide[]> {
-  let q = sb().from('guides').select('*').order('id', { ascending: true });
-  if (companyId) q = q.eq('company_id', companyId);
+  // guides는 폐기됨, companies에서 가이드 역할 수행
+  let q = sb().from('companies').select('id, name, id as company_id, commission_rate, status').order('id', { ascending: true });
   const { data, error } = await q;
   if (error) throw error;
-  return (data ?? []) as Guide[];
+  return (data ?? []).map((c: any) => ({
+    id: c.id,
+    name: c.name,
+    company_id: c.company_id,
+    commission_rate: c.commission_rate,
+    status: c.status,
+  })) as Guide[];
 }
 export async function createGuide(data: Partial<Guide>): Promise<Guide> {
-  const { data: row, error } = await sb().from('guides').insert(data).select().single();
+  // guides는 companies로 저장
+  const { data: row, error } = await sb().from('companies').insert({
+    name: data.name,
+    commission_rate: data.commission_rate,
+    status: data.status,
+  }).select().single();
   if (error) throw error;
-  return row as Guide;
+  return {
+    id: row.id,
+    name: row.name,
+    company_id: row.id,
+    commission_rate: row.commission_rate,
+    status: row.status,
+  } as Guide;
 }
 export async function updateGuide(id: number, data: Partial<Guide>): Promise<Guide> {
-  const { data: row, error } = await sb().from('guides').update(data).eq('id', id).select().single();
+  // guides는 companies에서 업데이트
+  const { data: row, error } = await sb().from('companies').update({
+    name: data.name,
+    commission_rate: data.commission_rate,
+    status: data.status,
+  }).eq('id', id).select().single();
   if (error) throw error;
-  return row as Guide;
+  return {
+    id: row.id,
+    name: row.name,
+    company_id: row.id,
+    commission_rate: row.commission_rate,
+    status: row.status,
+  } as Guide;
 }
 export async function deleteGuide(id: number): Promise<void> {
-  const { error } = await sb().from('guides').delete().eq('id', id);
+  // guides는 companies에서 삭제
+  const { error } = await sb().from('companies').delete().eq('id', id);
   if (error) throw new Error('가이드 삭제 실패');
 }
 
