@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 20:21:03",
-  "buildTimeShort": "2026-06-06 AM 04:21",
+  "buildTimeHMS": "2026-06-05 20:28:01",
+  "buildTimeShort": "2026-06-06 AM 04:28",
   "timestamp": "2026-06-0520",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "080428c6",
-    "shortHash": "080428c",
-    "message": "✨ Feat: Supabase 서버 관리자 클라이언트 추가 (admin.ts)",
+    "hash": "6cb41409",
+    "shortHash": "6cb4140",
+    "message": "🚀 Deploy: 파일저장 대화 제거 & Supabase Admin 클라이언트 추가",
     "author": "jitnet57",
-    "date": "2026-06-06 04:20:59 +0800"
+    "date": "2026-06-06 04:21:16 +0800"
   }
 }

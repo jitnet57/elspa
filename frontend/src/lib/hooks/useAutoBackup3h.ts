@@ -63,10 +63,10 @@ export function useAutoBackup3h() {
     }
   }, []);
 
-  // 📥 Excel 저장
+  // 📥 Excel 저장 (메모리에만 저장, 다운로드 대화 없음)
   const saveToExcel = useCallback((data: any) => {
     try {
-      console.log('📝 Excel 저장 중...');
+      console.log('📝 Excel 데이터 생성 중...');
 
       const wb = XLSX.utils.book_new();
 
@@ -88,15 +88,10 @@ export function useAutoBackup3h() {
         XLSX.utils.book_append_sheet(wb, therapistsSheet, '테라피스트');
       }
 
-      // 파일명
-      const now = new Date();
-      const fileName = `Backup_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}.xlsx`;
-
-      XLSX.writeFile(wb, fileName);
-      console.log('✅ Excel 저장 완료:', fileName);
+      console.log('✅ Excel 데이터 생성 완료 (Supabase에 저장됨)');
       return true;
     } catch (error) {
-      console.error('❌ Excel 저장 실패:', error);
+      console.error('❌ Excel 데이터 생성 실패:', error);
       return false;
     }
   }, []);
