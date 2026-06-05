@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 21:54:30",
-  "buildTimeShort": "2026-06-06 AM 05:54",
+  "buildTimeHMS": "2026-06-05 21:57:48",
+  "buildTimeShort": "2026-06-06 AM 05:57",
   "timestamp": "2026-06-0521",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "33a9aa86",
-    "shortHash": "33a9aa8",
-    "message": "🔄 Refactor: therapist_name → therapist_id로 변경 (안정적인 ID 매칭)",
+    "hash": "3e736933",
+    "shortHash": "3e73693",
+    "message": "🔧 Fix: therapist_id NULL일 때 therapist_name으로 폴백 (기존 데이터 호환)",
     "author": "jitnet57",
-    "date": "2026-06-06 05:48:09 +0800"
+    "date": "2026-06-06 05:54:42 +0800"
   }
 }
