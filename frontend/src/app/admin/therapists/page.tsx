@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Therapist {
   id: number;
@@ -41,38 +41,31 @@ const SPECIALTIES = [
   'Aromatherapy', 'Deep Tissue Massage', 'Sports Massage', 'Shiatsu',
 ];
 
-// Generate 60 therapists with realistic data
-const generateMockTherapists = (): Therapist[] => {
-  return THERAPIST_NAMES.map((name, index) => {
-    const id = index + 1;
-    const specialty = SPECIALTIES[id % SPECIALTIES.length];
-    const isCheckedIn = true; // All 60 therapists checked in for testing
-    const totalClients = 30 + Math.floor(Math.random() * 30);
-    const rating = 4.5 + Math.random() * 0.5;
-    const totalRevenue = `₱${(totalClients * (2000 + Math.random() * 1500)).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-    const areaCode = '+63' + (900 + Math.floor(Math.random() * 100));
-    const phone = `${areaCode}-${Math.floor(Math.random() * 9000 + 1000)}-${Math.floor(Math.random() * 9000 + 1000)}`;
-
-    return {
-      id,
-      name,
-      specialty,
-      status: 'checked_in', // All therapists checked in
-      rating: Math.round(rating * 10) / 10,
-      totalClients,
-      totalRevenue,
-      commissionRate: 30 + Math.floor(Math.random() * 12),
-      checkedInAt: `${8 + Math.floor(Math.random() * 3)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')} AM`,
-      phone,
-      email: `${name.toLowerCase().replace(' ', '.')}@elspa.com`,
-    };
-  });
-};
-
-const mockTherapists: Therapist[] = generateMockTherapists();
-
 export default function TherapistsPage() {
-  const [therapists, setTherapists] = useState<Therapist[]>(mockTherapists);
+  const [therapists, setTherapists] = useState<Therapist[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Supabase에서 실시간 테라피스트 데이터 로드
+  useEffect(() => {
+    const loadTherapists = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/therapists');
+        if (response.ok) {
+          const data = await response.json();
+          setTherapists(data.therapists || []);
+        } else {
+          console.warn('❌ Supabase 로드 실패');
+        }
+      } catch (error) {
+        console.error('❌ 테라피스트 로드 오류:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTherapists();
+  }, []);
   const [selectedTherapist, setSelectedTherapist] = useState<Therapist | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [filterStatus, setFilterStatus] = useState<'all' | 'checked_in' | 'checked_out'>('all');
