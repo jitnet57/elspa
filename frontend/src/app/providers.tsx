@@ -4,6 +4,8 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useSettlementScheduler } from '@/hooks/useSettlementScheduler';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
+import { useCacheClear } from '@/lib/hooks/useCacheClear';
+import { useAutoBackup3h } from '@/lib/hooks/useAutoBackup3h';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { InAppBrowserBanner } from '@/components/InAppBrowserBanner';
 import { LanguageProvider } from '@/lib/LanguageContext';
@@ -46,6 +48,22 @@ function ExchangeRateMount() {
 }
 
 /**
+ * Cache clear on route change
+ */
+function CacheClearMount() {
+    useCacheClear();
+    return null;
+}
+
+/**
+ * Auto backup every 3 hours
+ */
+function AutoBackupMount() {
+    useAutoBackup3h();
+    return null;
+}
+
+/**
  * Automatically open external links in new tab
  */
 function ExternalLinkHandler() {
@@ -83,6 +101,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 <SettlementSchedulerMount />
                 <ExchangeRateMount />
                 <ExternalLinkHandler />
+                <CacheClearMount />
+                <AutoBackupMount />
                 {children}
             </QueryClientProvider>
         </LanguageProvider>
