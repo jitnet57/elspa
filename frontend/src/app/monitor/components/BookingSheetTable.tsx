@@ -122,8 +122,13 @@ export default function BookingSheetTable() {
   // DISABLED: driveLoading, lastAutoSave, useAutoSaveSettings
 
   useEffect(() => {
-    // 테라피스트 로드
-    supabaseApiAdapter.getTherapists().then((r) => setTherapists(r as UiTherapist[])).catch(() => setTherapists([]));
+    // 테라피스트 로드 + 정렬 (출근순서, 마사지중은 맨뒤)
+    supabaseApiAdapter.getTherapists()
+      .then((r) => {
+        const sorted = (r as UiTherapist[]).sort(sortByAttendance);
+        setTherapists(sorted);
+      })
+      .catch(() => setTherapists([]));
 
     // 침대 정보 로드
     supabaseApiAdapter.getBeds().then((r) => setBeds((r as any[]).map((b) => ({ bed_number: b.bed_number, room_zone: b.room_zone, status: b.status })))).catch(() => setBeds([]));
