@@ -79,14 +79,18 @@ export default function NewMassagePanel({
     Promise.all([getCompanies().catch(() => []), getGuides().catch(() => [])]).then(([cs, gs]) => {
       setReferrals([...cs.map((c: any) => `${c.name} (업체)`), ...gs.map((g: any) => `${g.name} (가이드)`)]);
     });
-    // API에서 마사지 서비스 로드
-    massageTypesApi
-      .list(true) // 활성 서비스만
+    // Supabase에서 마사지 서비스 로드
+    supabaseApiAdapter.getMassageServices?.()
       .then((services) => {
-        setMassageServices(services);
-        // 첫 번째 서비스 기본값으로 설정
-        if (services.length > 0) {
-          setService(services[0].name);
+        console.log('✅ Supabase 마사지 서비스 로드:', services?.length);
+        if (services && services.length > 0) {
+          setMassageServices(services);
+          // 첫 번째 서비스 기본값으로 설정
+          if (services.length > 0) {
+            setService(services[0].name);
+          }
+        } else {
+          throw new Error('No services');
         }
       })
       .catch((err) => {

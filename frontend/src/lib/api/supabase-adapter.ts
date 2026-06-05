@@ -260,6 +260,29 @@ export const supabaseApiAdapter = {
     const { error } = await sb.from('bookings').update({ status: 'deleted' }).eq('id', id);
     if (error) throw error;
   },
+
+  /** 마사지 서비스 목록 조회 */
+  async getMassageServices(): Promise<any[]> {
+    const sb = getSupabase();
+    if (!sb) return [];
+    try {
+      const { data, error } = await sb
+        .from('massage_services')
+        .select('id, name, duration_minutes')
+        .eq('is_active', true)
+        .order('name', { ascending: true });
+      if (error) throw error;
+      // API 형식으로 변환
+      return (data ?? []).map((s: any) => ({
+        id: s.id,
+        name: s.name,
+        baseDurationMinutes: s.duration_minutes || 90,
+      }));
+    } catch (err) {
+      console.error('마사지 서비스 로드 실패:', err);
+      return [];
+    }
+  },
 };
 
 export type SupabaseApiAdapter = typeof supabaseApiAdapter;

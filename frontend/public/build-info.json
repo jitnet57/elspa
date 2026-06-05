@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 22:34:27",
-  "buildTimeShort": "2026-06-06 AM 06:34",
+  "buildTimeHMS": "2026-06-05 22:40:37",
+  "buildTimeShort": "2026-06-06 AM 06:40",
   "timestamp": "2026-06-0522",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "e0b8eaf7",
-    "shortHash": "e0b8eaf",
-    "message": "🔧 Fix: prefillPayAmount → prefillPay, treatment → service 필드명 수정",
+    "hash": "5f67fb9e",
+    "shortHash": "5f67fb9",
+    "message": "🔍 Debug: NewMassagePanel props 직접 확인",
     "author": "jitnet57",
-    "date": "2026-06-06 06:32:09 +0800"
+    "date": "2026-06-06 06:34:40 +0800"
   }
 }
