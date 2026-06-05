@@ -1,15 +1,15 @@
 {
   "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 20:28:01",
-  "buildTimeShort": "2026-06-06 AM 04:28",
+  "buildTimeHMS": "2026-06-05 20:32:13",
+  "buildTimeShort": "2026-06-06 AM 04:32",
   "timestamp": "2026-06-0520",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "6cb41409",
-    "shortHash": "6cb4140",
-    "message": "🚀 Deploy: 파일저장 대화 제거 & Supabase Admin 클라이언트 추가",
+    "hash": "a2efeec2",
+    "shortHash": "a2efeec",
+    "message": "🔧 Fix: 자동 백업 파일 저장 대화 제거 (XLSX.writeFile() 비활성화)",
     "author": "jitnet57",
-    "date": "2026-06-06 04:21:16 +0800"
+    "date": "2026-06-06 04:28:17 +0800"
   }
 }

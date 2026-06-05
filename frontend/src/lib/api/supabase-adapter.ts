@@ -139,16 +139,15 @@ export const supabaseApiAdapter = {
     }
   },
 
-  /** 테라피스트 목록 조회 (Supabase → 스냅샷 → Mock) */
+  /** 테라피스트 목록 조회 (Supabase therapists 테이블 → 스냅샷 → Mock) */
   async getTherapists(): Promise<Therapist[]> {
     const sb = getSupabase();
     if (!sb) return mockApiAdapter.getTherapists();
     try {
-      // employees 테이블에서 employment_type='therapist'인 직원만 조회
+      // therapists 테이블에서 모든 테라피스트 조회
       const { data, error } = await sb
-        .from('employees')
+        .from('therapists')
         .select('id, name')
-        .eq('employment_type', 'therapist')
         .order('name', { ascending: true });
 
       if (error) {
@@ -158,10 +157,10 @@ export const supabaseApiAdapter = {
 
       console.log('✅ Supabase therapists 로드 성공:', data?.length, 'items');
 
-      // employees 형식을 Therapist 형식으로 변환
-      const rows = (data ?? []).map((emp: any) => ({
-        id: emp.id,
-        name: emp.name,
+      // therapists 형식을 Therapist 형식으로 변환
+      const rows = (data ?? []).map((t: any) => ({
+        id: t.id,
+        name: t.name,
         status: 'idle' as const,
       })) as Therapist[];
 
