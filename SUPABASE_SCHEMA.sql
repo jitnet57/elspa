@@ -416,6 +416,7 @@ alter table public.bookings add column if not exists end_time        text;
 alter table public.bookings add column if not exists room_num        text;
 alter table public.bookings add column if not exists guest_name      text;
 alter table public.bookings add column if not exists therapist_name  text;
+alter table public.bookings add column if not exists therapist_id    bigint;  -- 예약현황 매칭(=employees.id). migration 008
 alter table public.bookings add column if not exists note            text;
 alter table public.bookings add column if not exists pay             numeric;
 alter table public.bookings add column if not exists tip             numeric;
