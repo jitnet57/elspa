@@ -88,7 +88,20 @@
       "Bash(sqlite3 /Users/kwangseobpark/elspa/test.db \"SELECT COUNT\\(*\\) as 총개수 FROM beds;\")",
       "Bash(sqlite3 /Users/kwangseobpark/elspa/test.db \"SELECT * FROM beds LIMIT 5;\")",
       "Bash(sqlite3 /Users/kwangseobpark/elspa/test.db \"SELECT COUNT\\(*\\) as 총개수 FROM employees;\")",
-      "Bash(vercel projects *)"
+      "Bash(vercel projects *)",
+      "Bash(npx tsc *)",
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(tee /tmp/tsc.out)",
+      "Bash(node ./node_modules/typescript/bin/tsc --noEmit)",
+      "Bash(tee /tmp/tsc2.out)",
+      "Bash(grep -E \"^typescript$|^next$|^\\\\.bin$\")",
+      "Bash(cd \"/Volumes/무제 - 데이터/elspa/elspa/frontend\" && echo \"=== next.config typescript 설정 ===\" && cat next.config.* 2>/dev/null | grep -A3 -i \"typescript\\\\|eslint\\\\|ignoreBuild\"; echo; echo \"=== bookings 테이블 컬럼 \\(SQL/마이그레이션\\) ===\" && grep -rln \"create table\\\\|CREATE TABLE\\\\|payment_method\\\\|payment_methods\" ../*.sql ../**/*.sql src/**/*.sql 2>/dev/null | head; echo \"--- search payment_method column in repo SQL ---\"; grep -rn \"payment_method\" ../ --include=\"*.sql\" 2>/dev/null | head)",
+      "Read(//Volumes/무제 - 데이터/elspa/**)",
+      "Bash(awk '/create table.*bookings|CREATE TABLE.*bookings/,/;/' SUPABASE_SCHEMA.sql)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ],
     "additionalDirectories": [
       "/Users/kwangseobpark/elspa/.git/refs",

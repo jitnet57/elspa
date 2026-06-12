@@ -1,15 +1,15 @@
 {
-  "buildTime": "2026-06-05",
-  "buildTimeHMS": "2026-06-05 22:48:58",
-  "buildTimeShort": "2026-06-06 AM 06:48",
-  "timestamp": "2026-06-0522",
+  "buildTime": "2026-06-12",
+  "buildTimeHMS": "2026-06-12 23:20:18",
+  "buildTimeShort": "2026-06-13 AM 07:20",
+  "timestamp": "2026-06-1223",
   "version": "0.1.0",
   "environment": "production",
   "commit": {
-    "hash": "303b2648",
-    "shortHash": "303b264",
-    "message": "🗑️ Remove: Mock data 폴백 제거 (Supabase 데이터만 사용)",
+    "hash": "e957fd66",
+    "shortHash": "e957fd6",
+    "message": "🔍 Debug: Payment Methods 저장 확인 console.log 추가",
     "author": "jitnet57",
-    "date": "2026-06-06 06:46:04 +0800"
+    "date": "2026-06-06 06:49:22 +0800"
   }
 }
