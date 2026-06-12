@@ -20,6 +20,7 @@ import { massageTypesApi, type MassageType } from '@/lib/api/massage-types-clien
 
 export default function NewMassagePanel({
   date,
+  bookingId,
   prefillTherapist,
   prefillRoom,
   prefillTreatment,
@@ -35,6 +36,7 @@ export default function NewMassagePanel({
   onSaved,
 }: {
   date: string;
+  bookingId?: number;          // 있으면 수정(update), 없으면 신규(insert) — 편집 시 중복 생성 방지
   prefillTherapist?: string;
   prefillRoom?: string;
   prefillTreatment?: string;
@@ -52,9 +54,6 @@ export default function NewMassagePanel({
   const t = useT();
   const [therapists, setTherapists] = useState<UiTherapist[]>([]);
   const [search, setSearch] = useState('');
-  console.log('🎨 NewMassagePanel props:', {
-    prefillTherapist, prefillGuestName, prefillPayAmount, prefillTip, prefillTreatment,
-  });
 
   const [therapistName, setTherapistName] = useState<string>(prefillTherapist ?? '');
   const [therapistId, setTherapistId] = useState<number | null>(null);
@@ -71,6 +70,10 @@ export default function NewMassagePanel({
   const [msg, setMsg] = useState('');
 
   const payMethods = ['Card', 'Cash', 'GCash', 'Bank A', 'Bank B'];
+  // 표시용 라벨 → bookings.payment_methods(jsonb)의 method enum 매핑
+  const PAY_METHOD_ENUM: Record<string, 'card' | 'cash' | 'gcash' | 'bank_a' | 'bank_b'> = {
+    Card: 'card', Cash: 'cash', GCash: 'gcash', 'Bank A': 'bank_a', 'Bank B': 'bank_b',
+  };
 
   const [referrals, setReferrals] = useState<string[]>([]);
 
@@ -82,7 +85,6 @@ export default function NewMassagePanel({
     // Supabase에서 마사지 서비스 로드
     supabaseApiAdapter.getMassageServices?.()
       .then((services) => {
-        console.log('✅ Supabase 마사지 서비스 로드:', services?.length);
         if (services && services.length > 0) {
           setMassageServices(services);
           // 첫 번째 서비스 기본값으로 설정
@@ -99,6 +101,15 @@ export default function NewMassagePanel({
         setMassageServices([]);
       });
   }, []);
+
+  // 🔗 이름만 있고 id 가 없을 때(드래그드롭/프리필) 테라피스트 목록에서 id 복원
+  //    → therapist_id 가 NULL 로 저장돼 예약현황 타임라인에서 사라지는 문제 방지
+  useEffect(() => {
+    if (therapistName && therapistId == null && therapists.length > 0) {
+      const found = therapists.find((tp) => tp.name === therapistName);
+      if (found) setTherapistId(found.id);
+    }
+  }, [therapists, therapistName, therapistId]);
 
   // Supabase 서비스에서 선택된 서비스의 duration 찾기
   const selectedServiceDuration = massageServices.find((s) => s.name === service)?.baseDurationMinutes ?? 60;
@@ -127,27 +138,33 @@ export default function NewMassagePanel({
     setMsg('');
 
     let dbOk = false;
+    // 결제수단을 스키마에 존재하는 payment_methods(jsonb 배열)로 저장.
+    // (단수 payment_method 컬럼은 bookings 스키마에 없음 → 쓰지 않는다)
+    // ⚠️ 단일 입력 패널이라, 다중 결제수단으로 저장된 예약을 여기서 편집·저장하면
+    //    단일 항목으로 덮어쓴다. 다중 결제 편집은 BookingSheetTable(PaymentMethodModal) 사용.
+    const payment_methods = payAmount > 0
+      ? [{ id: `pm_${Date.now()}`, method: PAY_METHOD_ENUM[payMethod] ?? 'cash', amount: payAmount, reference: '', notes: '' }]
+      : [];
+    const payload = {
+      booking_date: date, treatment: service, start_time: startTime, end_time: endTime,
+      guest_name: guestName, therapist_id: therapistId || undefined, therapist_name: therapistName, room_num: roomNumber,
+      note, pay: payAmount, tip, payment_methods, status: 'normal' as const,
+    };
     try {
-      console.log('💾 예약 저장:', {
-        therapist_name: therapistName,
-        booking_date: date,
-        guest_name: guestName,
-        treatment: service,
-        start_time: startTime,
-      });
-      await supabaseApiAdapter.createBooking({
-        booking_date: date, treatment: service, start_time: startTime, end_time: endTime,
-        guest_name: guestName, therapist_id: therapistId || undefined, therapist_name: therapistName, room_num: roomNumber,
-        note, pay: payAmount, payment_method: payMethod, tip, status: 'normal',
-      });
+      if (bookingId) {
+        // ✏️ 편집: 기존 예약 수정 (새 행을 만들지 않는다)
+        await supabaseApiAdapter.updateBooking(bookingId, payload);
+      } else {
+        // ➕ 신규: 새 예약 등록
+        await supabaseApiAdapter.createBooking(payload);
+      }
       dbOk = true;
-      console.log('✅ 예약 저장 완료');
     } catch (err) {
       console.warn('DB 저장 실패(Supabase 미설정?):', err);
     }
     const sheetOk = await saveBookingToSheet({
       therapist: therapistName, service, date, time: startTime, endTime, guestName, roomNumber,
-      notes: `${note}${pay ? ` | pay:${pay}` : ''}${tip ? ` | tip:${tip}` : ''}`,
+      notes: `${note}${payAmount ? ` | pay:${payAmount}` : ''}${tip ? ` | tip:${tip}` : ''}`,
     });
 
     setSaving(false);
@@ -175,7 +192,6 @@ export default function NewMassagePanel({
                   draggable
                   onDragStart={(e) => e.dataTransfer.setData('text/therapist', t.name)}
                   onClick={() => {
-                    console.log('🧑‍⚕️ 테라피스트 선택:', { id: t.id, name: t.name, code: t.code });
                     setTherapistName(t.name);
                     setTherapistId(t.id);
                   }}
@@ -192,7 +208,7 @@ export default function NewMassagePanel({
             </div>
             <div
               onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => { e.preventDefault(); const name = e.dataTransfer.getData('text/therapist'); if (name) setTherapistName(name); }}
+              onDrop={(e) => { e.preventDefault(); const name = e.dataTransfer.getData('text/therapist'); if (name) { setTherapistName(name); const found = therapists.find((tp) => tp.name === name); if (found) setTherapistId(found.id); } }}
               className={`mt-3 h-16 rounded-xl border-2 border-dashed flex items-center justify-center text-sm ${
                 selectedOk ? 'border-blue-400 bg-blue-50 text-blue-700 font-bold' : 'border-gray-300 text-gray-400'
               }`}

@@ -44,7 +44,6 @@ export default function DailyTherapistSchedule({ openNewOnMount = false }: { ope
     supabaseApiAdapter
       .getTherapists()
       .then((rows) => {
-        console.log('👥 테라피스트 로드:', rows.map(t => ({ id: t.id, name: t.name, code: t.code })));
         setTherapists(rows as UiTherapist[]);
       })
       .catch(() => setTherapists([]));
@@ -55,7 +54,6 @@ export default function DailyTherapistSchedule({ openNewOnMount = false }: { ope
     setLoading(true);
     try {
       const rows = await supabaseApiAdapter.getBookings(selectedDate);
-      console.log(`📅 ${selectedDate} 예약 로드:`, rows.map(r => ({ id: r.id, therapist_id: r.therapist_id, therapist_name: r.therapist_name, treatment: r.treatment })));
       setBookings(rows);
     } catch (err) {
       console.error('예약 로드 실패:', err);
@@ -76,16 +74,15 @@ export default function DailyTherapistSchedule({ openNewOnMount = false }: { ope
 
     try {
       const subscription = sb
-        .channel(`massage_bookings:schedule`)
+        .channel(`bookings:schedule`)
         .on(
           'postgres_changes',
           {
             event: '*',
             schema: 'public',
-            table: 'massage_bookings',
+            table: 'bookings',
           },
           () => {
-            console.log('📅 예약 데이터 변경 감지, 스케줄 새로고침...');
             loadBookings();
           }
         )
@@ -156,10 +153,6 @@ export default function DailyTherapistSchedule({ openNewOnMount = false }: { ope
               const st = therapistStatusMeta[(t.status as DbTherapistStatus) ?? 'idle'] ?? therapistStatusMeta.idle;
               // therapist_id로만 매칭 (가장 안정적)
               const rows = bookings.filter((b) => b.therapist_id === t.id);
-              console.log(`🧑‍⚕️ ${t.name} (id=${t.id}): therapist_id=${t.id} 매칭 결과 = ${rows.length}개`);
-              if (rows.length > 0) {
-                console.log(`  ✅ 매칭된 bookings:`, rows.map(r => ({ therapist_id: r.therapist_id, therapist_name: r.therapist_name })));
-              }
               return (
                 <div key={t.id} className={`flex border-b border-gray-100 ${idx % 2 ? 'bg-gray-50/40' : 'bg-white'}`}>
                   {/* 이름/상태 */}

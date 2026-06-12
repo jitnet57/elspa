@@ -132,7 +132,6 @@ export default function BookingSheetTable() {
     supabaseApiAdapter.getTherapists()
       .then((r) => {
         const sorted = (r as UiTherapist[]).sort(sortByAttendance);
-        console.log('👥 테라피스트 로드:', sorted.map(t => ({ id: t.id, name: t.name })));
         setTherapists(sorted);
       })
       .catch(() => setTherapists([]));
@@ -140,7 +139,6 @@ export default function BookingSheetTable() {
     // 테라피스트 로드 완료 후 datalist 확인
     setTimeout(() => {
       const options = document.querySelectorAll('#bk-therapist-options option');
-      console.log('📋 datalist options:', Array.from(options).map(o => o.value));
     }, 500);
 
     // 침대 정보 로드
@@ -160,8 +158,6 @@ export default function BookingSheetTable() {
               duration: Number(d.base_duration_minutes),
             }));
             setMassageServices(services);
-            console.log('✅ 마사지 서비스 Supabase 로드:', services.length, 'items');
-            console.log('   샘플:', services.slice(0, 3));
           } else {
             console.warn('⚠️ 마사지 서비스 로드 실패 (데이터 없음 또는 에러):', error);
             console.warn('   data:', data, 'error:', error);
@@ -222,16 +218,6 @@ export default function BookingSheetTable() {
           saving: false,
         };
       });
-      console.log('📊 Bookings 로드됨:', filled.map(r => ({
-        bookingId: r.bookingId,
-        therapist: r.therapistName,
-        guest: r.guestName,
-        service: r.service,
-        startTime: r.startTime,
-        pay: r.pay,
-        tip: r.tip,
-        saved: r.saved,
-      })));
       setRows(padToRowCount(filled, rowCount));
     } catch (err) {
       console.error('❌ Bookings 로드 실패:', err);
@@ -305,12 +291,6 @@ export default function BookingSheetTable() {
       ...(r.sssOption && { sss_option: r.sssOption }),
       ...(r.paymentFrom && { payment_from: r.paymentFrom }),
     } as any;
-
-    console.log('💾 예약 저장:', {
-      bookingId: r.bookingId,
-      paymentMethods: r.paymentMethods,
-      totalAmount: r.totalAmount,
-    });
 
     // 1) Supabase DB 저장 (신규=create / 기존=update)
     let dbOk = false;
@@ -479,21 +459,10 @@ export default function BookingSheetTable() {
       {/* Edit Modal - NewMassagePanel */}
       {editingRowIndex !== null && isEditModalOpen && (() => {
         const editRow = rows[editingRowIndex];
-        console.log('📝 Edit 모달 열림:', {
-          index: editingRowIndex,
-          therapistName: editRow?.therapistName,
-          treatment: editRow?.treatment,
-          startTime: editRow?.startTime,
-          guestName: editRow?.guestName,
-          payAmount: editRow?.payAmount,
-          tip: editRow?.tip,
-          roomNumber: editRow?.roomNumber,
-          payMethod: editRow?.payMethod,
-          note: editRow?.note,
-        });
         return (
           <NewMassagePanel
             date={date}
+            bookingId={editRow?.bookingId}
             prefillTherapist={editRow?.therapistName}
             prefillRoom={editRow?.roomNumber}
             prefillTreatment={editRow?.service}

@@ -7763,3 +7763,36 @@ b7c1ea3c 🔧 Fix: asyncpg 의존성 제거 - 동기 데이터베이스로 변�
 - [ ] Frontend-Backend 통합 테스트 (대기 중...)
 
 ---
+
+## [2026-06-13 07:14] Order: 067 - 베드 모니터·예약현황 데이터 신뢰도 통일
+
+**주제:** 베드 모니터와 테라피스트 예약현황을 단일 소스(bookings)로 통일해 매칭 신뢰도 정상화
+
+### Plan
+✅ 베드 모니터를 bookings 투영(projection)으로 전환 (mock 테라피스트 제거)
+✅ Realtime 구독 테이블 불일치(massage_bookings→bookings) 수정
+✅ 드래그드롭/프리필 시 therapist_id 유실 방지
+✅ 편집 시 중복 INSERT → update 분기로 수정
+
+### Task 수행 내용
+
+#### 섹션 1: 단일 소스 통일
+1. BedLayoutView.tsx — 점유/테라피스트/시술을 bookings에서 파생(room_num↔bed_number+현재시각), mock therapistById 제거, Realtime(bookings)+1분 갱신 추가
+2. DailyTherapistSchedule.tsx — Realtime 구독 massage_bookings→bookings
+
+#### 섹션 2: 저장 경로 버그 수정
+1. NewMassagePanel.tsx — 이름으로 therapist_id 자동 복원(드래그드롭/프리필), pay 미선언 변수→payAmount, bookingId prop으로 update/insert 분기
+2. BedLayoutView.tsx / BookingSheetTable.tsx — 편집 시 bookingId 전달(중복 생성 방지)
+
+### Result
+✅ **4개 파일 수정 완료**
+- 두 화면이 동일 bookings 테이블 사용 → 실시간 동반 갱신 ✓
+- therapist_id 유실로 타임라인에서 사라지던 예약 복구 ✓
+- 편집이 새 행 대신 기존 행 수정 ✓
+- 저장 시 ReferenceError(pay)로 모달 멈춤 해소 ✓
+
+### 검증 필요(라이브 DB)
+- public.bookings 에 therapist_id / payment_method(단수) 컬럼 실제 존재 여부 (스키마 파일엔 없음 → payment_methods jsonb만 존재)
+- 편집 시 구글시트는 여전히 새 행 append (시트측 별도 수정 필요)
+
+---
