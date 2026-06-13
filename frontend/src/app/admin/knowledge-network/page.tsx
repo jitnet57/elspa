@@ -12,7 +12,7 @@ import { useState, useEffect } from 'react';
 import KnowledgeNetwork3D, { NetworkNode } from '@/components/20250529-1435-knowledge-network-3d';
 import KnowledgeNetworkOptimized from '@/components/20250529-1545-knowledge-network-optimized';
 import { getKnowledgeNetworkNodes, getKnowledgeNetworkNodeById } from '@/lib/api-client';
-import { DEMO_KNOWLEDGE_NODES } from '@/lib/data/knowledge-network-demo';
+import { DEMO_KNOWLEDGE_NODES, DEMO_KNOWLEDGE_EDGES } from '@/lib/data/knowledge-network-demo';
 
 /**
  * 지식 네트워크 3D 페이지 (API 통합)
@@ -113,6 +113,7 @@ export default function KnowledgeNetworkPage() {
             // 표준 버전: 100개 미만 노드
             <KnowledgeNetwork3D
               nodes={nodes}
+              edges={DEMO_KNOWLEDGE_EDGES}
               onNodeClick={handleNodeClick}
             />
           ) : (

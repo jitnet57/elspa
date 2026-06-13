@@ -24,8 +24,16 @@ export interface NetworkNode {
   position?: { x: number; y: number; z: number }; // 3D 좌표
 }
 
+// 노드 간 연결(엣지)
+export interface NetworkEdge {
+  source: string; // 출발 노드 id
+  target: string; // 도착 노드 id
+  label?: string;
+}
+
 interface KnowledgeNetwork3DProps {
   nodes: NetworkNode[];
+  edges?: NetworkEdge[];
   onNodeClick?: (node: NetworkNode) => void;
 }
 
@@ -37,6 +45,7 @@ interface KnowledgeNetwork3DProps {
  */
 export default function KnowledgeNetwork3D({
   nodes,
+  edges = [],
   onNodeClick,
 }: KnowledgeNetwork3DProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -149,6 +158,26 @@ export default function KnowledgeNetwork3D({
 
     meshesRef.current = meshes;
 
+    // 5️⃣-b 엣지(연결선) 렌더링 — 노드 위치를 잇는 선
+    const edgeMaterial = new THREE.LineBasicMaterial({
+      color: 0x94a3b8,
+      transparent: true,
+      opacity: 0.35,
+    });
+    const edgeObjects: THREE.Line[] = [];
+    edges.forEach((edge) => {
+      const a = meshes.get(edge.source);
+      const b = meshes.get(edge.target);
+      if (!a || !b) return;
+      const geom = new THREE.BufferGeometry().setFromPoints([
+        a.position.clone(),
+        b.position.clone(),
+      ]);
+      const line = new THREE.Line(geom, edgeMaterial);
+      scene.add(line); // scene 회전에 함께 따라감
+      edgeObjects.push(line);
+    });
+
     // 6️⃣ 마우스 클릭 이벤트 처리
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
@@ -235,11 +264,13 @@ export default function KnowledgeNetwork3D({
         mesh.geometry.dispose();
         (mesh.material as THREE.Material).dispose();
       });
+      edgeObjects.forEach((line) => line.geometry.dispose());
+      edgeMaterial.dispose();
 
       renderer.dispose();
       containerRef.current?.removeChild(renderer.domElement);
     };
-  }, [nodes, onNodeClick, highlightedNodeIds]);
+  }, [nodes, edges, onNodeClick, highlightedNodeIds]);
 
   return (
     <div className="relative w-full h-screen bg-slate-900">

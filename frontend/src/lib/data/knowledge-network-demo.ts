@@ -6,7 +6,7 @@
 // 📅 작성일: 2026-06-13
 // ============================================================
 
-import type { NetworkNode } from '@/components/20250529-1435-knowledge-network-3d';
+import type { NetworkNode, NetworkEdge } from '@/components/20250529-1435-knowledge-network-3d';
 
 export const DEMO_KNOWLEDGE_NODES: NetworkNode[] = [
   // 서비스 (파랑)
@@ -29,4 +29,28 @@ export const DEMO_KNOWLEDGE_NODES: NetworkNode[] = [
   { id: 'business-revenue', label: '매출', description: '월간 총 매출 - 치료사 성과와 고객 만족도에 의존', category: 'KPI', color: '#ef4444' },
   { id: 'customer-retention', label: '고객 유지율', description: '반복 이용 고객 비율 - 서비스 품질의 핵심 지표', category: 'KPI', color: '#ef4444' },
   { id: 'service-quality', label: '서비스 품질', description: '고객 만족도 및 치료 효과 - 치료사 역량 반영', category: 'KPI', color: '#ef4444' },
+];
+
+// 노드 간 관계(엣지) — 설명문에 근거 (서비스→치료사→고객→조직, KPI 연결)
+export const DEMO_KNOWLEDGE_EDGES: NetworkEdge[] = [
+  { source: 'massage-thai', target: 'therapist-john' },
+  { source: 'massage-aromatherapy', target: 'therapist-maria' },
+  { source: 'massage-sports', target: 'therapist-alex' },
+  { source: 'therapist-john', target: 'business-customer' },
+  { source: 'therapist-maria', target: 'elderly-customer' },
+  { source: 'therapist-alex', target: 'personal-customer' },
+  { source: 'business-customer', target: 'business-spa' },
+  { source: 'elderly-customer', target: 'elderly-facility' },
+  { source: 'personal-customer', target: 'franchise-network' },
+  { source: 'business-spa', target: 'massage-thai' },
+  { source: 'business-spa', target: 'massage-aromatherapy' },
+  { source: 'franchise-network', target: 'massage-sports' },
+  { source: 'business-revenue', target: 'service-quality' },
+  { source: 'business-revenue', target: 'customer-retention' },
+  { source: 'customer-retention', target: 'service-quality' },
+  { source: 'service-quality', target: 'therapist-john' },
+  { source: 'service-quality', target: 'therapist-maria' },
+  { source: 'service-quality', target: 'therapist-alex' },
+  { source: 'customer-retention', target: 'business-customer' },
+  { source: 'business-revenue', target: 'business-spa' },
 ];
