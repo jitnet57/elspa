@@ -24,11 +24,22 @@ import NewMassagePanel from './NewMassagePanel';
 const EDIT_PASSWORD = '1234'; // 임시 편집 비밀번호
 const today = () => new Date().toISOString().split('T')[0];
 
-// 베드 매칭 키 = bookings.room_num 과 동일한 규칙 (NewMassagePanel prefillRoom 과 일치)
-const bedKey = (bed: TherapyBed) => String(bed.bed_number ?? bed.roomNumber ?? bed.id);
+// 로드된 베드 (원본 한글 room_zone 포함 — room_num 매칭/저장의 핵심)
+type LoadedBed = TherapyBed & { zoneKo?: string };
+
+// bookings.room_num 파싱: "마사지룸1 7" → {zone:"마사지룸1", num:"7"} / "7" → {zone:"", num:"7"}
+// ⚠️ bed_number 는 zone마다 1~30 반복(전역 유일 아님) → zone 까지 비교해야 정확.
+const parseRoomNum = (s: unknown) => {
+  const str = String(s ?? '').trim();
+  const m = str.match(/^(.*?)\s*(\d+)\s*$/); // 끝의 숫자 + 앞의 zone 라벨
+  return { zone: (m?.[1] ?? '').trim(), num: m?.[2] ?? '' };
+};
+const bedNumStr = (bed: LoadedBed) => String(bed.bed_number ?? bed.roomNumber ?? bed.id);
+// 베드 → 예약 저장용 표준 room_num ("마사지룸1 7"). zone 없으면 번호만.
+const bedRoomNum = (bed: LoadedBed) => (bed.zoneKo ? `${bed.zoneKo} ${bedNumStr(bed)}` : bedNumStr(bed));
 
 // 베드에 표시할 파생 정보 (오직 bookings 기준)
-interface BedView extends TherapyBed {
+interface BedView extends LoadedBed {
   derivedStatus: 'available' | 'occupied' | 'cleaning' | 'maintenance';
   therapistName?: string;
   service?: string;
@@ -43,7 +54,7 @@ export default function BedLayoutView() {
   const [pwOpen, setPwOpen] = useState(false);          // 비밀번호 모달
   const [pw, setPw] = useState('');
   const [pwErr, setPwErr] = useState('');
-  const [beds, setBeds] = useState<TherapyBed[]>([]);
+  const [beds, setBeds] = useState<LoadedBed[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [nowDec, setNowDec] = useState(() => {
@@ -75,13 +86,14 @@ export default function BedLayoutView() {
           '커플룸': 'Couple Room',
         };
 
-        const converted: TherapyBed[] = data.map((bed: any) => {
+        const converted: LoadedBed[] = data.map((bed: any) => {
           const englishZone = roomZoneToEnglish[bed.room_zone] || bed.room_zone;
           return {
             id: String(bed.id),
             name: `${englishZone}-${bed.bed_number}`,
             roomNumber: String(bed.bed_number),
-            room_zone: englishZone,
+            room_zone: englishZone,     // 표시/그룹핑용(영문)
+            zoneKo: bed.room_zone,      // 원본 한글 zone(매칭/저장용)
             bed_number: bed.bed_number,
             // beds 테이블의 status 는 물리 상태(정리/점검)만 신뢰. 점유는 bookings 에서 파생.
             status: bed.status === 'cleaning' || bed.status === 'maintenance' ? bed.status : 'available',
@@ -138,9 +150,12 @@ export default function BedLayoutView() {
 
   // 베드별 "현재 진행중인 예약" 찾기 (room_num 매칭 + 현재시각이 시간대 안)
   const activeBookingFor = useCallback(
-    (bed: TherapyBed): Booking | undefined =>
+    (bed: LoadedBed): Booking | undefined =>
       bookings.find((b) => {
-        if (String(b.room_num) !== bedKey(bed)) return false;
+        const { zone, num } = parseRoomNum(b.room_num);
+        if (!num || num !== bedNumStr(bed)) return false;
+        // zone 라벨이 있으면 한글/영문 zone 과 일치해야 함 (번호 중복 베드 오매칭 방지)
+        if (zone && zone !== bed.zoneKo && zone !== bed.room_zone) return false;
         if (!b.start_time || !b.end_time) return false;
         return toDecimal(b.start_time) <= nowDec && nowDec < toDecimal(b.end_time);
       }),
@@ -183,7 +198,7 @@ export default function BedLayoutView() {
     maintenance: bedViews.filter((b) => b.derivedStatus === 'maintenance').length,
   };
 
-  const bedNo = (bed: TherapyBed) => bedKey(bed);
+  const bedNo = (bed: LoadedBed) => bedNumStr(bed); // 표시용 번호
 
   const clickBed = (bed: BedView) => {
     setSelectedBed(bed);
@@ -296,7 +311,7 @@ export default function BedLayoutView() {
         <NewMassagePanel
           date={active?.booking_date ?? today()}
           bookingId={active?.id}
-          prefillRoom={bedNo(selectedBed)}
+          prefillRoom={bedRoomNum(selectedBed)}
           prefillTherapist={selectedBed.therapistName}
           prefillTreatment={active?.treatment}
           prefillStartTime={active?.start_time}
