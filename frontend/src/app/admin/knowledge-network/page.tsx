@@ -12,6 +12,7 @@ import { useState, useEffect } from 'react';
 import KnowledgeNetwork3D, { NetworkNode } from '@/components/20250529-1435-knowledge-network-3d';
 import KnowledgeNetworkOptimized from '@/components/20250529-1545-knowledge-network-optimized';
 import { getKnowledgeNetworkNodes, getKnowledgeNetworkNodeById } from '@/lib/api-client';
+import { DEMO_KNOWLEDGE_NODES } from '@/lib/data/knowledge-network-demo';
 
 /**
  * 지식 네트워크 3D 페이지 (API 통합)
@@ -35,13 +36,17 @@ export default function KnowledgeNetworkPage() {
         setError(null);
 
         const response = await getKnowledgeNetworkNodes({ limit: 100 });
-        console.log('✅ 노드 로드 완료:', response.nodes.length, '개');
 
-        setNodes(response.nodes);
+        // API가 비어있으면(미배포 등) 데모 노드로 폴백 → 빈 화면 방지
+        if (response?.nodes?.length) {
+          setNodes(response.nodes);
+        } else {
+          setNodes(DEMO_KNOWLEDGE_NODES);
+        }
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : '노드를 로드할 수 없습니다';
-        console.error('❌ 노드 로드 실패:', errorMessage);
-        setError(errorMessage);
+        // API 오류(404 등) 시에도 데모 노드로 폴백해 그래프를 보여준다
+        console.warn('⚠️ 지식 네트워크 API 사용 불가 → 데모 데이터 표시:', err instanceof Error ? err.message : err);
+        setNodes(DEMO_KNOWLEDGE_NODES);
       } finally {
         setIsLoading(false);
       }

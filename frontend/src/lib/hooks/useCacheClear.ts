@@ -51,8 +51,8 @@ export function useCacheClear() {
         await db.expenseRecords.clear();
         console.log('  ✅ IndexedDB expense_records 삭제');
 
-        await db.therapistCheckIn.clear();
-        console.log('  ✅ IndexedDB therapist_check_in 삭제');
+        await db.attendanceLogs.clear(); // 출근(체크인) 로그 테이블 (therapistCheckIn 은 존재하지 않음)
+        console.log('  ✅ IndexedDB attendance_logs 삭제');
       } catch (error) {
         console.warn('  ⚠️ IndexedDB 삭제 실패:', error);
       }
